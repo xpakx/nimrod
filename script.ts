@@ -27,7 +27,17 @@ function isoToScreen(pos: Position): Position {
     return { x: screenX, y: screenY };
 }
 
+function screenToIso(pos: Position): Position {
+    const x = pos.x - (canvasWidth / 2);
+    const y = pos.y - (canvasHeight / 2 - (tileHeight/2)*5);
+    const isoX = x/tileWidth + y/tileHeight;
+    const isoY = y/tileHeight - x/tileWidth;
+    return { x: Math.floor(isoX), y: Math.floor(isoY) };
+}
+
 function drawIsometricMap(ctx: CanvasRenderingContext2D) {
+    ctx.save();
+    ctx.translate(canvasWidth / 2, canvasHeight / 2 - (tileHeight/2)*5);
     for (let y = 0; y < map.length; y++) {
         for (let x = 0; x < map[y].length; x++) {
             const color = map[y][x];
@@ -35,11 +45,10 @@ function drawIsometricMap(ctx: CanvasRenderingContext2D) {
             drawTile(ctx, screenPos.x, screenPos.y, color);
         }
     }
+    ctx.restore();
 }
 
 function drawTile(ctx: CanvasRenderingContext2D, x: number, y: number, color: string) {
-    ctx.save();
-    ctx.translate(canvasWidth / 2, canvasHeight / 2 - (tileHeight/2)*5);
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(x + tileWidth / 2, y + tileHeight / 2);
@@ -48,7 +57,6 @@ function drawTile(ctx: CanvasRenderingContext2D, x: number, y: number, color: st
     ctx.closePath();
     ctx.fillStyle = color;
     ctx.fill();
-    ctx.restore();
 }
 
 async function loadImage(url: string): Promise<any> {
@@ -83,6 +91,7 @@ class Building {
 }
 
 function renderGame(context: CanvasRenderingContext2D, deltaTime: number, sprites: any) {
+	context.clearRect(0, 0, canvasWidth, canvasHeight);
 	drawIsometricMap(context);
 
         context.save();
@@ -94,7 +103,28 @@ function renderGame(context: CanvasRenderingContext2D, deltaTime: number, sprite
 	putBuilding(context, {x: 4, y: 4}, sprites.house);
 	putBuilding(context, {x: 4, y: 0}, sprites.tower);
 	context.restore();
-	renderFPS(context, deltaTime);
+	renderDebugInfo(context, deltaTime);
+}
+
+let playerMouse: Position = {x: 0, y: 0};
+let isoPlayerMouse: Position = {x: 0, y: 0};
+
+const dts: number[] = [];
+
+function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
+    ctx.font = "26px normal"
+    ctx.fillStyle = "white"
+
+    dts.push(deltaTime);
+    if (dts.length > 60) {
+        dts.shift();
+    }
+
+    const dtAvg = dts.reduce((a, b) => a + b, 0)/dts.length;
+
+    ctx.fillText(`${Math.floor(1/dtAvg)} FPS`, 20, 50);
+    ctx.fillText(`(${playerMouse.x}, ${playerMouse.y})`, 20, 75);
+    ctx.fillText(`(${isoPlayerMouse.x}, ${isoPlayerMouse.y})`, 20, 100);
 }
 
 window.onload = async () => {
@@ -119,6 +149,15 @@ window.onload = async () => {
 		house: home,
 		tower: tower,
 	};
+
+	canvas.addEventListener('mousemove', function(event) {
+		const rect = canvas.getBoundingClientRect();
+
+		const mouseX = event.clientX - rect.left;
+		const mouseY = event.clientY - rect.top;
+		playerMouse = {x: mouseX, y: mouseY};
+		isoPlayerMouse = screenToIso(playerMouse);
+	});
 
 	let prevTimestamp = 0;
 
