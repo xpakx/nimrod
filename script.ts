@@ -66,9 +66,20 @@ function getSize(img: HTMLImageElement, widthNorm: number): Size {
 	return { width: width, height: height };
 }
 
-function putImage(ctx: CanvasRenderingContext2D, img: HTMLImageElement, position: Position, size: Size) {
+function putBuilding(ctx: CanvasRenderingContext2D, position: Position, building: Building) {
 	let pos = isoToScreen(position);
-	ctx.drawImage(img, pos.x-size.width/2, pos.y-size.height+tileHeight, size.width, size.height);
+	ctx.drawImage(building.image, pos.x-building.size.width/2, pos.y-building.size.height+tileHeight, building.size.width, building.size.height);
+}
+
+class Building {
+	size: Size;
+	image: HTMLImageElement;
+
+	constructor(image: HTMLImageElement, size: number) {
+		this.image = image;
+		this.size = getSize(image, size)
+	}
+
 }
 
 window.onload = async () => {
@@ -86,24 +97,17 @@ window.onload = async () => {
 	canvas.height = canvasHeight;
 	drawIsometricMap(context);
 
-	const zigguratPos = {x: 1, y: 1};
-	const ziggurat = await loadImage("./img/ziggurat.svg");
-	const zigguratSize = getSize(ziggurat, 2);
-
-	const homePos = {x: 3, y: 3};
-	const home2Pos = {x: 4, y: 4};
-	const home = await loadImage("./img/house.svg");
-	const homeSize = getSize(home, 1);
-
-	const towerPos = {x: 4, y: 0};
-	const tower = await loadImage("./img/tower.svg");
-	const towerSize = getSize(tower, 1);
+	const ziggurat = new Building(await loadImage("./img/ziggurat.svg"), 2);
+	const home = new Building(await loadImage("./img/house.svg"), 1);
+	const tower = new Building(await loadImage("./img/tower.svg"), 1);
 
         context.save();
         context.translate(canvasWidth / 2, canvasHeight / 2 - (tileHeight/2)*5);
-	putImage(context, ziggurat, zigguratPos, zigguratSize);
-	putImage(context, home, homePos, homeSize);
-	putImage(context, home, home2Pos, homeSize);
-	putImage(context, tower, towerPos, towerSize);
+	putBuilding(context, {x: 1, y: 1}, ziggurat);
+	putBuilding(context, {x: 3, y: 3}, home);
+	putBuilding(context, {x: 3, y: 4}, home);
+	putBuilding(context, {x: 4, y: 3}, home);
+	putBuilding(context, {x: 4, y: 4}, home);
+	putBuilding(context, {x: 4, y: 0}, tower);
 	context.restore();
 }
