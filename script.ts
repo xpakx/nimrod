@@ -82,6 +82,21 @@ class Building {
 
 }
 
+function renderGame(context: CanvasRenderingContext2D, deltaTime: number, sprites: any) {
+	drawIsometricMap(context);
+
+        context.save();
+        context.translate(canvasWidth / 2, canvasHeight / 2 - (tileHeight/2)*5);
+	putBuilding(context, {x: 1, y: 1}, sprites.ziggurat);
+	putBuilding(context, {x: 3, y: 3}, sprites.house);
+	putBuilding(context, {x: 3, y: 4}, sprites.house);
+	putBuilding(context, {x: 4, y: 3}, sprites.house);
+	putBuilding(context, {x: 4, y: 4}, sprites.house);
+	putBuilding(context, {x: 4, y: 0}, sprites.tower);
+	context.restore();
+	renderFPS(context, deltaTime);
+}
+
 window.onload = async () => {
 	const canvas = document.getElementById('gameCanvas') as (HTMLCanvasElement | null);
 	if (!canvas) {
@@ -95,19 +110,26 @@ window.onload = async () => {
 	}
 	canvas.width = canvasWidth;
 	canvas.height = canvasHeight;
-	drawIsometricMap(context);
 
 	const ziggurat = new Building(await loadImage("./img/ziggurat.svg"), 2);
 	const home = new Building(await loadImage("./img/house.svg"), 1);
 	const tower = new Building(await loadImage("./img/tower.svg"), 1);
+	const sprites = {
+		ziggurat: ziggurat,
+		house: home,
+		tower: tower,
+	};
 
-        context.save();
-        context.translate(canvasWidth / 2, canvasHeight / 2 - (tileHeight/2)*5);
-	putBuilding(context, {x: 1, y: 1}, ziggurat);
-	putBuilding(context, {x: 3, y: 3}, home);
-	putBuilding(context, {x: 3, y: 4}, home);
-	putBuilding(context, {x: 4, y: 3}, home);
-	putBuilding(context, {x: 4, y: 4}, home);
-	putBuilding(context, {x: 4, y: 0}, tower);
-	context.restore();
+	let prevTimestamp = 0;
+
+	const frame = (timestamp: number) => {
+		const deltaTime = (timestamp - prevTimestamp) / 1000;
+		prevTimestamp = timestamp;
+		renderGame(context, deltaTime, sprites);
+		window.requestAnimationFrame(frame);
+	};
+	window.requestAnimationFrame((timestamp) => {
+		prevTimestamp = timestamp;
+		window.requestAnimationFrame(frame);
+	});
 }
