@@ -3,12 +3,21 @@ const tileHeight = 64;
 const canvasWidth = 800;
 const canvasHeight = 600;
 
+let positionOffset = {x: 0, y: 0}
+
 const map = [
-    ['#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD'],
-    ['#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD'],
-    ['#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD'],
-    ['#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD'],
-    ['#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD']
+    ['#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD', '#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD'],
+    ['#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD', '#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD'],
+    ['#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD', '#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD'],
+    ['#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD', '#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD'],
+    ['#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD', '#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD'],
+    ['#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD', '#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD'],
+    ['#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD', '#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD'],
+    ['#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD', '#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD'],
+    ['#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD', '#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD'],
+    ['#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD', '#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD'],
+    ['#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD', '#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD'],
+    ['#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD', '#FF5733', '#FFBD33', '#75FF33', '#33FF57', '#33FFBD'],
 ];
 
 interface Size {
@@ -22,14 +31,14 @@ interface Position {
 }
 
 function isoToScreen(pos: Position): Position {
-    const screenX = (pos.x - pos.y) * (tileWidth / 2);
-    const screenY = (pos.x + pos.y) * (tileHeight / 2);
+    const screenX = (pos.x - pos.y) * (tileWidth / 2) + positionOffset.x;
+    const screenY = (pos.x + pos.y) * (tileHeight / 2) + positionOffset.y;
     return { x: screenX, y: screenY };
 }
 
 function screenToIso(pos: Position): Position {
-    const x = pos.x - (canvasWidth / 2);
-    const y = pos.y - (canvasHeight / 2 - (tileHeight/2)*5);
+    const x = pos.x - (canvasWidth / 2) - positionOffset.x;
+    const y = pos.y - (canvasHeight / 2 - (tileHeight/2)) - positionOffset.y;
     const isoX = x/tileWidth + y/tileHeight;
     const isoY = y/tileHeight - x/tileWidth;
     return { x: Math.floor(isoX), y: Math.floor(isoY) };
@@ -37,10 +46,13 @@ function screenToIso(pos: Position): Position {
 
 function drawIsometricMap(ctx: CanvasRenderingContext2D) {
     ctx.save();
-    ctx.translate(canvasWidth / 2, canvasHeight / 2 - (tileHeight/2)*5);
+    ctx.translate(canvasWidth / 2, canvasHeight / 2 - (tileHeight/2));
     for (let y = 0; y < map.length; y++) {
         for (let x = 0; x < map[y].length; x++) {
-            const color = map[y][x];
+            let color = map[y][x];
+	    if(x == isoPlayerMouse.x && y == isoPlayerMouse.y) {
+		    color = "black";
+	    }
             const screenPos = isoToScreen({x: x, y: y});
             drawTile(ctx, screenPos.x, screenPos.y, color);
         }
@@ -95,7 +107,7 @@ function renderGame(context: CanvasRenderingContext2D, deltaTime: number, sprite
 	drawIsometricMap(context);
 
         context.save();
-        context.translate(canvasWidth / 2, canvasHeight / 2 - (tileHeight/2)*5);
+        context.translate(canvasWidth / 2, canvasHeight / 2 - (tileHeight/2));
 	putBuilding(context, {x: 1, y: 1}, sprites.ziggurat);
 	putBuilding(context, {x: 3, y: 3}, sprites.house);
 	putBuilding(context, {x: 3, y: 4}, sprites.house);
@@ -158,6 +170,23 @@ window.onload = async () => {
 		playerMouse = {x: mouseX, y: mouseY};
 		isoPlayerMouse = screenToIso(playerMouse);
 	});
+
+	document.addEventListener('keydown', function(event) {
+            switch (event.key) {
+                case 'ArrowUp':
+		    positionOffset = {x: positionOffset.x, y: positionOffset.y + 10};
+                    break;
+                case 'ArrowDown':
+		    positionOffset = {x: positionOffset.x, y: positionOffset.y - 10};
+                    break;
+                case 'ArrowLeft':
+		    positionOffset = {x: positionOffset.x + 10, y: positionOffset.y};
+                    break;
+                case 'ArrowRight':
+		    positionOffset = {x: positionOffset.x - 10, y: positionOffset.y};
+                    break;
+            }
+        });
 
 	let prevTimestamp = 0;
 
