@@ -121,6 +121,9 @@ function renderGame(context: CanvasRenderingContext2D, deltaTime: number, sprite
 let playerMouse: Position = {x: 0, y: 0};
 let isoPlayerMouse: Position = {x: 0, y: 0};
 
+let isDragging = false;
+let dragStart: Position = {x: 0, y: 0};
+
 const dts: number[] = [];
 
 function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
@@ -169,6 +172,23 @@ window.onload = async () => {
 		const mouseY = event.clientY - rect.top;
 		playerMouse = {x: mouseX, y: mouseY};
 		isoPlayerMouse = screenToIso(playerMouse);
+
+		if (isDragging) {
+			positionOffset.x = dragStart.x - event.clientX;
+			positionOffset.y = dragStart.y - event.clientY;
+		}
+	});
+
+	canvas.addEventListener('mousedown', (event) => {
+		if(event.button == 1) {
+			isDragging = true;
+			dragStart.x = event.clientX + positionOffset.x;
+			dragStart.y = event.clientY + positionOffset.y;
+		}
+	});
+
+	canvas.addEventListener('mouseup', (_event) => {
+		isDragging = false;
 	});
 
 	document.addEventListener('keydown', function(event) {
