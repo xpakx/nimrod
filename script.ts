@@ -1,5 +1,8 @@
-const tileWidth = 64;
-const tileHeight = 32;
+const defTileWidth = 64;
+const defTileHeight = 32;
+let scale = 1.0;
+let tileWidth = defTileWidth*scale;
+let tileHeight = defTileHeight*scale;
 const canvasWidth = 800;
 const canvasHeight = 600;
 
@@ -106,10 +109,16 @@ function putBuilding(ctx: CanvasRenderingContext2D, position: Position, building
 class Building {
 	size: Size;
 	image: HTMLImageElement;
+	baseSize: number;
 
 	constructor(image: HTMLImageElement, size: number) {
 		this.image = image;
 		this.size = getSize(image, size)
+		this.baseSize = size;
+	}
+
+	refreshSize() {
+		this.size = getSize(this.image, this.baseSize);
 	}
 
 }
@@ -183,6 +192,21 @@ window.onload = async () => {
 		inspector: inspector,
 	};
 
+	function correctOffset() {
+		if(positionOffset.y < 0) {
+			positionOffset.y = 0;
+		}
+		if(positionOffset.y > maxYOffset) {
+			positionOffset.y = maxYOffset;
+		}
+		if(positionOffset.x < minXOffset) {
+			positionOffset.x = minXOffset;
+		}
+		if(positionOffset.x > maxXOffset) {
+			positionOffset.x = maxXOffset;
+		}
+	}
+
 	canvas.addEventListener('mousemove', function(event) {
 		const rect = canvas.getBoundingClientRect();
 
@@ -194,24 +218,22 @@ window.onload = async () => {
 		if (isDragging) {
 			positionOffset.x = dragStart.x - event.clientX;
 			positionOffset.y = dragStart.y - event.clientY;
-			if(positionOffset.y < 0) {
-			    positionOffset.y = 0;
-			}
-			if(positionOffset.y > maxYOffset) {
-				positionOffset.y = maxYOffset;
-			}
-			if(positionOffset.x < minXOffset) {
-				positionOffset.x = minXOffset;
-			}
-			if(positionOffset.x > maxXOffset) {
-				positionOffset.x = maxXOffset;
-			}
+			correctOffset();
 		}
 	});
 
-	const maxYOffset = isoToScreen({x: map[0].length - 1, y: map.length - 1}).y + (tileHeight/2);
-	const minXOffset = isoToScreen({x: 0, y: map.length - 1}).x  - (tileWidth/2);
-	const maxXOffset = isoToScreen({x: map[0].length - 1, y: 0}).x  + (tileWidth/2);
+	let maxYOffset = isoToScreen({x: map[0].length - 1, y: map.length - 1}).y + (tileHeight/2);
+	let minXOffset = isoToScreen({x: 0, y: map.length - 1}).x  - (tileWidth/2);
+	let maxXOffset = isoToScreen({x: map[0].length - 1, y: 0}).x  + (tileWidth/2);
+
+	function rescaleOffsets(oldScale: number) {
+		positionOffset.x = scale*positionOffset.x/oldScale;
+		positionOffset.y = scale*positionOffset.y/oldScale;
+		maxYOffset = isoToScreen({x: map[0].length - 1, y: map.length - 1}).y + (tileHeight/2) + positionOffset.y; // + offset to calculate from 0,0
+		minXOffset = isoToScreen({x: 0, y: map.length - 1}).x  - (tileWidth/2) + positionOffset.x;
+		maxXOffset = isoToScreen({x: map[0].length - 1, y: 0}).x  + (tileWidth/2) + positionOffset.x;
+		correctOffset();
+	}
 
 	canvas.addEventListener('mousedown', (event) => {
 		if(event.button == 1) {
@@ -223,6 +245,36 @@ window.onload = async () => {
 
 	canvas.addEventListener('mouseup', (_event) => {
 		isDragging = false;
+	});
+	canvas.addEventListener('wheel', function(event) {
+		if(isDragging) {
+			return;
+		}
+		if (event.deltaY < 0) {
+			let oldScale = scale;
+			scale += 0.2;
+			if(scale > 2.0) {
+				scale = 2.0;
+			}
+			tileWidth = scale*defTileWidth;
+			tileHeight = scale*defTileHeight;
+			rescaleOffsets(oldScale);
+			for (const [_, building] of Object.entries(sprites)) {
+				building.refreshSize();
+			}
+		} else {
+			let oldScale = scale;
+			scale -= 0.2;
+			if(scale < 0.5) {
+				scale = 0.5;
+			}
+			tileWidth = scale*defTileWidth;
+			tileHeight = scale*defTileHeight;
+			rescaleOffsets(oldScale);
+			for (const [_, building] of Object.entries(sprites)) {
+				building.refreshSize();
+			}
+		}
 	});
 
 	let [moveLeft, moveRight, moveUp, moveDown] = [false, false, false, false];
@@ -240,6 +292,34 @@ window.onload = async () => {
 			break;
 			case 'ArrowRight': case 'l':
 				moveRight = true;
+			break;
+			case '+': {
+				let oldScale = scale;
+				scale += 0.2;
+			        if(scale > 2.0) {
+					scale = 2.0;
+				}
+				tileWidth = scale*defTileWidth;
+				tileHeight = scale*defTileHeight;
+				rescaleOffsets(oldScale);
+				for (const [_, building] of Object.entries(sprites)) {
+					building.refreshSize();
+				}
+			}
+			break;
+			case '-': {
+				let oldScale = scale;
+				scale -= 0.2;
+			        if(scale < 0.5) {
+					scale = 0.5;
+				}
+				tileWidth = scale*defTileWidth;
+				tileHeight = scale*defTileHeight;
+				rescaleOffsets(oldScale);
+				for (const [_, building] of Object.entries(sprites)) {
+					building.refreshSize();
+				}
+			}
 			break;
 		}
 
