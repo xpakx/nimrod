@@ -198,15 +198,19 @@ window.onload = async () => {
 			break;
 		    }
 		    positionOffset = {x: positionOffset.x, y: positionOffset.y - 10};
+		    isoPlayerMouse = screenToIso(playerMouse);
                     break;
                 case 'ArrowDown': case 'j':
 		    positionOffset = {x: positionOffset.x, y: positionOffset.y + 10};
+		    isoPlayerMouse = screenToIso(playerMouse);
                     break;
                 case 'ArrowLeft': case 'h':
 		    positionOffset = {x: positionOffset.x - 10, y: positionOffset.y};
+		    isoPlayerMouse = screenToIso(playerMouse);
                     break;
                 case 'ArrowRight': case 'l':
 		    positionOffset = {x: positionOffset.x + 10, y: positionOffset.y};
+		    isoPlayerMouse = screenToIso(playerMouse);
                     break;
             }
         });
