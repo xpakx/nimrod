@@ -194,8 +194,24 @@ window.onload = async () => {
 		if (isDragging) {
 			positionOffset.x = dragStart.x - event.clientX;
 			positionOffset.y = dragStart.y - event.clientY;
+			if(positionOffset.y < 0) {
+			    positionOffset.y = 0;
+			}
+			if(positionOffset.y > maxYOffset) {
+				positionOffset.y = maxYOffset;
+			}
+			if(positionOffset.x < minXOffset) {
+				positionOffset.x = minXOffset;
+			}
+			if(positionOffset.x > maxXOffset) {
+				positionOffset.x = maxXOffset;
+			}
 		}
 	});
+
+	const maxYOffset = isoToScreen({x: map[0].length - 1, y: map.length - 1}).y + (tileHeight/2);
+	const minXOffset = isoToScreen({x: 0, y: map.length - 1}).x  - (tileWidth/2);
+	const maxXOffset = isoToScreen({x: map[0].length - 1, y: 0}).x  + (tileWidth/2);
 
 	canvas.addEventListener('mousedown', (event) => {
 		if(event.button == 1) {
@@ -209,29 +225,71 @@ window.onload = async () => {
 		isDragging = false;
 	});
 
+	let [moveLeft, moveRight, moveUp, moveDown] = [false, false, false, false];
+
 	document.addEventListener('keydown', function(event) {
-            switch (event.key) {
-                case 'ArrowUp': case 'k':
-		    if(positionOffset.y <= 0) {
+		switch (event.key) {
+			case 'ArrowUp': case 'k':
+				moveUp = true;
 			break;
-		    }
-		    positionOffset = {x: positionOffset.x, y: positionOffset.y - 10};
-		    isoPlayerMouse = screenToIso(playerMouse);
-                    break;
-                case 'ArrowDown': case 'j':
-		    positionOffset = {x: positionOffset.x, y: positionOffset.y + 10};
-		    isoPlayerMouse = screenToIso(playerMouse);
-                    break;
-                case 'ArrowLeft': case 'h':
-		    positionOffset = {x: positionOffset.x - 10, y: positionOffset.y};
-		    isoPlayerMouse = screenToIso(playerMouse);
-                    break;
-                case 'ArrowRight': case 'l':
-		    positionOffset = {x: positionOffset.x + 10, y: positionOffset.y};
-		    isoPlayerMouse = screenToIso(playerMouse);
-                    break;
-            }
-        });
+			case 'ArrowDown': case 'j':
+				moveDown = true;
+			break;
+			case 'ArrowLeft': case 'h':
+				moveLeft = true;
+			break;
+			case 'ArrowRight': case 'l':
+				moveRight = true;
+			break;
+		}
+
+		if(moveUp) {
+			positionOffset.y = positionOffset.y - 10;
+			if(positionOffset.y < 0) {
+				positionOffset.y = 0;
+			}
+			isoPlayerMouse = screenToIso(playerMouse);
+		}
+		if(moveDown) {
+			positionOffset.y = positionOffset.y + 10;
+			if(positionOffset.y > maxYOffset) {
+				positionOffset.y = maxYOffset;
+			}
+			isoPlayerMouse = screenToIso(playerMouse);
+		}
+		if(moveLeft) {
+			positionOffset.x = positionOffset.x - 10;
+			if(positionOffset.x < minXOffset) {
+				positionOffset.x = minXOffset;
+			}
+			isoPlayerMouse = screenToIso(playerMouse);
+		}
+		if(moveRight) {
+			positionOffset.x = positionOffset.x + 10;
+			if(positionOffset.x > maxXOffset) {
+				positionOffset.x = maxXOffset;
+			}
+			isoPlayerMouse = screenToIso(playerMouse);
+		}
+
+	});
+
+	document.addEventListener('keyup', function(event) {
+		switch (event.key) {
+			case 'ArrowUp': case 'k':
+				moveUp = false;
+			break;
+			case 'ArrowDown': case 'j':
+				moveDown = false;
+			break;
+			case 'ArrowLeft': case 'h':
+				moveLeft = false;
+			break;
+			case 'ArrowRight': case 'l':
+				moveRight = false;
+			break;
+		}
+	});
 
 	let prevTimestamp = 0;
 
