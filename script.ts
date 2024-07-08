@@ -31,14 +31,14 @@ interface Position {
 }
 
 function isoToScreen(pos: Position): Position {
-    const screenX = (pos.x - pos.y) * (tileWidth / 2) + positionOffset.x;
-    const screenY = (pos.x + pos.y) * (tileHeight / 2) + positionOffset.y;
+    const screenX = (pos.x - pos.y) * (tileWidth / 2) - positionOffset.x;
+    const screenY = (pos.x + pos.y) * (tileHeight / 2) - positionOffset.y;
     return { x: screenX, y: screenY };
 }
 
 function screenToIso(pos: Position): Position {
-    const x = pos.x - (canvasWidth / 2) - positionOffset.x;
-    const y = pos.y - (canvasHeight / 2 - (tileHeight/2)) - positionOffset.y;
+    const x = pos.x - (canvasWidth / 2) + positionOffset.x;
+    const y = pos.y - (canvasHeight / 2 - (tileHeight/2)) + positionOffset.y;
     const isoX = x/tileWidth + y/tileHeight;
     const isoY = y/tileHeight - x/tileWidth;
     return { x: Math.floor(isoX), y: Math.floor(isoY) };
@@ -173,17 +173,20 @@ window.onload = async () => {
 
 	document.addEventListener('keydown', function(event) {
             switch (event.key) {
-                case 'ArrowUp':
-		    positionOffset = {x: positionOffset.x, y: positionOffset.y + 10};
-                    break;
-                case 'ArrowDown':
+                case 'ArrowUp': case 'k':
+		    if(positionOffset.y <= 0) {
+			break;
+		    }
 		    positionOffset = {x: positionOffset.x, y: positionOffset.y - 10};
                     break;
-                case 'ArrowLeft':
-		    positionOffset = {x: positionOffset.x + 10, y: positionOffset.y};
+                case 'ArrowDown': case 'j':
+		    positionOffset = {x: positionOffset.x, y: positionOffset.y + 10};
                     break;
-                case 'ArrowRight':
+                case 'ArrowLeft': case 'h':
 		    positionOffset = {x: positionOffset.x - 10, y: positionOffset.y};
+                    break;
+                case 'ArrowRight': case 'l':
+		    positionOffset = {x: positionOffset.x + 10, y: positionOffset.y};
                     break;
             }
         });
