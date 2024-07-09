@@ -101,12 +101,44 @@ function getSize(img: HTMLImageElement, widthNorm: number): Size {
 	return { width: width, height: height };
 }
 
-function putBuilding(ctx: CanvasRenderingContext2D, position: Position, building: Building) {
+function drawBuilding(ctx: CanvasRenderingContext2D, position: Position, building: BuildingSprite) {
 	let pos = isoToScreen(position);
 	ctx.drawImage(building.image, pos.x-building.size.width/2, pos.y-building.size.height+tileHeight, building.size.width, building.size.height);
 }
 
-class Building {
+
+let buildings: (Building | undefined)[][] = map.map(row => row.map(() => undefined));
+let buildingList: Building[] = []; // for quicker resizing
+
+function putBuilding(position: Position, sprite: BuildingSprite) {
+	if(canBePlaced(position)) {
+		const newBuilding = new Building(sprite, position);
+		buildings[position.x][position.y] = newBuilding;
+		buildingList.push(newBuilding);
+	}
+}
+
+function canBePlaced(position: Position): boolean {
+	return true; // TODO
+}
+
+function renderBuildings(ctx: CanvasRenderingContext2D) {
+	ctx.save();
+	ctx.translate(canvasWidth / 2, canvasHeight / 2 - (tileHeight/2));
+	for (let y = 0; y < buildings.length; y++) {
+		for (let x = 0; x < buildings[y].length; x++) {
+			let building = buildings[y][x];
+			if (!building) {
+				continue;
+			}
+			drawBuilding(ctx, building.position, building.sprite);
+		}
+	}
+	ctx.restore();
+
+}
+
+class BuildingSprite {
 	size: Size;
 	image: HTMLImageElement;
 	baseSize: number;
@@ -123,21 +155,21 @@ class Building {
 
 }
 
-function renderGame(context: CanvasRenderingContext2D, deltaTime: number, sprites: any) {
+class Building {
+	sprite: BuildingSprite;
+	position: Position;
+
+	constructor(sprite: BuildingSprite, position: Position) {
+		this.sprite =  sprite;
+		this.position = position;
+	}
+}
+
+function renderGame(context: CanvasRenderingContext2D, deltaTime: number) {
 	context.clearRect(0, 0, canvasWidth, canvasHeight);
 	drawIsometricMap(context);
 
-        context.save();
-        context.translate(canvasWidth / 2, canvasHeight / 2 - (tileHeight/2));
-	putBuilding(context, {x: 3, y: 3}, sprites.ziggurat);
-	putBuilding(context, {x: 7, y: 7}, sprites.house);
-	putBuilding(context, {x: 7, y: 9}, sprites.house);
-	putBuilding(context, {x: 9, y: 7}, sprites.house);
-	putBuilding(context, {x: 9, y: 9}, sprites.house);
-	putBuilding(context, {x: 9, y: 1}, sprites.tower);
-	putBuilding(context, {x: 8, y: 12}, sprites.inspector);
-	putBuilding(context, {x: 10, y: 12}, sprites.well);
-	context.restore();
+	renderBuildings(context);
 	renderDebugInfo(context, deltaTime);
 }
 
@@ -148,6 +180,9 @@ let isDragging = false;
 let dragStart: Position = {x: 0, y: 0};
 
 const dts: number[] = [];
+
+let mode = 0;
+
 
 function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
     ctx.font = "26px normal"
@@ -179,18 +214,20 @@ window.onload = async () => {
 	canvas.width = canvasWidth;
 	canvas.height = canvasHeight;
 
-	const ziggurat = new Building(await loadImage("./img/ziggurat.svg"), 4);
-	const home = new Building(await loadImage("./img/house.svg"), 2);
-	const tower = new Building(await loadImage("./img/tower.svg"), 2);
-	const well = new Building(await loadImage("./img/well.svg"), 2);
-	const inspector = new Building(await loadImage("./img/inspector.svg"), 2);
-	const sprites = {
-		ziggurat: ziggurat,
-		house: home,
-		tower: tower,
-		well: well,
-		inspector: inspector,
-	};
+	const ziggurat = new BuildingSprite(await loadImage("./img/ziggurat.svg"), 4);
+	const home = new BuildingSprite(await loadImage("./img/house.svg"), 2);
+	const tower = new BuildingSprite(await loadImage("./img/tower.svg"), 2);
+	const well = new BuildingSprite(await loadImage("./img/well.svg"), 2);
+	const inspector = new BuildingSprite(await loadImage("./img/inspector.svg"), 2);
+	putBuilding({x: 3, y: 3}, ziggurat);
+	putBuilding({x: 7, y: 7}, home);
+	putBuilding({x: 7, y: 9}, home);
+	putBuilding({x: 9, y: 7}, home);
+	putBuilding({x: 9, y: 9}, home);
+	putBuilding({x: 9, y: 1}, tower);
+	putBuilding({x: 8, y: 12}, inspector);
+	putBuilding({x: 10, y: 12}, well);
+
 
 	function correctOffset() {
 		if(positionOffset.y < 0) {
@@ -241,6 +278,13 @@ window.onload = async () => {
 			dragStart.x = event.clientX + positionOffset.x;
 			dragStart.y = event.clientY + positionOffset.y;
 		}
+
+		console.log(event.button)
+		if(event.button == 0) {
+			if(mode == 1) {
+				putBuilding(isoPlayerMouse, home);
+			}
+		}
 	});
 
 	canvas.addEventListener('mouseup', (_event) => {
@@ -259,8 +303,8 @@ window.onload = async () => {
 			tileWidth = scale*defTileWidth;
 			tileHeight = scale*defTileHeight;
 			rescaleOffsets(oldScale);
-			for (const [_, building] of Object.entries(sprites)) {
-				building.refreshSize();
+			for (const building of buildingList) {
+				building.sprite.refreshSize();
 			}
 		} else {
 			let oldScale = scale;
@@ -271,8 +315,8 @@ window.onload = async () => {
 			tileWidth = scale*defTileWidth;
 			tileHeight = scale*defTileHeight;
 			rescaleOffsets(oldScale);
-			for (const [_, building] of Object.entries(sprites)) {
-				building.refreshSize();
+			for (const building of buildingList) {
+				building.sprite.refreshSize();
 			}
 		}
 	});
@@ -302,8 +346,8 @@ window.onload = async () => {
 				tileWidth = scale*defTileWidth;
 				tileHeight = scale*defTileHeight;
 				rescaleOffsets(oldScale);
-				for (const [_, building] of Object.entries(sprites)) {
-					building.refreshSize();
+				for (const building of buildingList) {
+					building.sprite.refreshSize();
 				}
 			}
 			break;
@@ -316,11 +360,21 @@ window.onload = async () => {
 				tileWidth = scale*defTileWidth;
 				tileHeight = scale*defTileHeight;
 				rescaleOffsets(oldScale);
-				for (const [_, building] of Object.entries(sprites)) {
-					building.refreshSize();
+				for (const building of buildingList) {
+					building.sprite.refreshSize();
 				}
 			}
 			break;
+			case '0': mode = 0; break;
+			case '1': mode = 1; break;
+			case '2': mode = 2; break;
+			case '3': mode = 3; break;
+			case '4': mode = 4; break;
+			case '5': mode = 5; break;
+			case '6': mode = 6; break;
+			case '7': mode = 7; break;
+			case '8': mode = 8; break;
+			case '9': mode = 9; break;
 		}
 
 		if(moveUp) {
@@ -376,7 +430,7 @@ window.onload = async () => {
 	const frame = (timestamp: number) => {
 		const deltaTime = (timestamp - prevTimestamp) / 1000;
 		prevTimestamp = timestamp;
-		renderGame(context, deltaTime, sprites);
+		renderGame(context, deltaTime);
 		window.requestAnimationFrame(frame);
 	};
 	window.requestAnimationFrame((timestamp) => {
