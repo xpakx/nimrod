@@ -107,14 +107,16 @@ function drawBuilding(ctx: CanvasRenderingContext2D, position: Position, buildin
 }
 
 
-let buildings: (Building | undefined)[][] = map.map(row => row.map(() => undefined));
-let buildingList: Building[] = []; // for quicker resizing
+let buildingMap: (Building | undefined)[][] = map.map(row => row.map(() => undefined)); // for quicker lookup
+let buildings: Building[] = [];
 
 function putBuilding(position: Position, sprite: BuildingSprite) {
 	if(canBePlaced(position)) {
 		const newBuilding = new Building(sprite, position);
-		buildings[position.x][position.y] = newBuilding;
-		buildingList.push(newBuilding);
+		buildingMap[position.x][position.y] = newBuilding;
+		buildings.push(newBuilding);
+		sortBuildings();
+		buildings.forEach((a) => console.log(a.position));
 	}
 }
 
@@ -122,17 +124,29 @@ function canBePlaced(position: Position): boolean {
 	return true; // TODO
 }
 
+function sortBuildings() {
+	buildings.sort((a, b) => {
+		// sort by diagonal
+		const sum = a.position.x + a.position.y - (b.position.x + b.position.y);
+		if (sum !== 0) {
+			return sum;
+		}
+
+		// on same diagonal
+		const xDistance = b.position.x - a.position.x;
+		if(Math.abs(xDistance) < Math.max(a.sprite.baseSize, b.sprite.baseSize)) {
+			return b.sprite.baseSize - a.sprite.baseSize;
+
+		}
+		return xDistance;
+	});
+}
+
 function renderBuildings(ctx: CanvasRenderingContext2D) {
 	ctx.save();
 	ctx.translate(canvasWidth / 2, canvasHeight / 2 - (tileHeight/2));
-	for (let y = 0; y < buildings.length; y++) {
-		for (let x = 0; x < buildings[y].length; x++) {
-			let building = buildings[y][x];
-			if (!building) {
-				continue;
-			}
-			drawBuilding(ctx, building.position, building.sprite);
-		}
+	for (const building of buildings) {
+		drawBuilding(ctx, building.position, building.sprite);
 	}
 	ctx.restore();
 
@@ -220,13 +234,13 @@ window.onload = async () => {
 	const well = new BuildingSprite(await loadImage("./img/well.svg"), 2);
 	const inspector = new BuildingSprite(await loadImage("./img/inspector.svg"), 2);
 	putBuilding({x: 3, y: 3}, ziggurat);
-	putBuilding({x: 7, y: 7}, home);
-	putBuilding({x: 7, y: 9}, home);
-	putBuilding({x: 9, y: 7}, home);
-	putBuilding({x: 9, y: 9}, home);
-	putBuilding({x: 9, y: 1}, tower);
-	putBuilding({x: 8, y: 12}, inspector);
-	putBuilding({x: 10, y: 12}, well);
+	// putBuilding({x: 7, y: 7}, home);
+	// putBuilding({x: 7, y: 9}, home);
+	// putBuilding({x: 9, y: 7}, home);
+	// putBuilding({x: 9, y: 9}, home);
+	// putBuilding({x: 9, y: 1}, tower);
+	// putBuilding({x: 8, y: 12}, inspector);
+	// putBuilding({x: 10, y: 12}, well);
 
 
 	function correctOffset() {
@@ -303,7 +317,7 @@ window.onload = async () => {
 			tileWidth = scale*defTileWidth;
 			tileHeight = scale*defTileHeight;
 			rescaleOffsets(oldScale);
-			for (const building of buildingList) {
+			for (const building of buildings) {
 				building.sprite.refreshSize();
 			}
 		} else {
@@ -315,7 +329,7 @@ window.onload = async () => {
 			tileWidth = scale*defTileWidth;
 			tileHeight = scale*defTileHeight;
 			rescaleOffsets(oldScale);
-			for (const building of buildingList) {
+			for (const building of buildings) {
 				building.sprite.refreshSize();
 			}
 		}
@@ -346,7 +360,7 @@ window.onload = async () => {
 				tileWidth = scale*defTileWidth;
 				tileHeight = scale*defTileHeight;
 				rescaleOffsets(oldScale);
-				for (const building of buildingList) {
+				for (const building of buildings) {
 					building.sprite.refreshSize();
 				}
 			}
@@ -360,7 +374,7 @@ window.onload = async () => {
 				tileWidth = scale*defTileWidth;
 				tileHeight = scale*defTileHeight;
 				rescaleOffsets(oldScale);
-				for (const building of buildingList) {
+				for (const building of buildings) {
 					building.sprite.refreshSize();
 				}
 			}
