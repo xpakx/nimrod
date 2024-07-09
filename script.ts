@@ -182,6 +182,20 @@ function ghostDiff(b: Building) {
 	return xDistance;
 }
 
+function deleteBuilding(position: Position) {
+	const building = buildingMap[position.y][position.x];
+	if(!building) {
+		return;
+	}
+	for(let i = building.position.x; i > building.position.x-building.sprite.baseSize; i--) {
+		for(let j = building.position.y; j > building.position.y-building.sprite.baseSize; j--) {
+			blocked[j][i] = false;
+			buildingMap[j][i] = undefined;
+		}
+	}
+	buildings = buildings.filter((b) => b.position.x != building.position.x || b.position.y != building.position.y);
+}
+
 function renderBuildings(ctx: CanvasRenderingContext2D) {
 	const ghostCanBePlaced = mode ? canBePlaced(isoPlayerMouse, mode) : false;
 	ctx.save();
@@ -368,6 +382,8 @@ window.onload = async () => {
 		correctOffset();
 	}
 
+	let deleteMode = false;
+
 	canvas.addEventListener('mousedown', (event) => {
 		if(event.button == 1) {
 			isDragging = true;
@@ -380,6 +396,8 @@ window.onload = async () => {
 			if(mode) {
 				putBuilding(isoPlayerMouse, mode, false);
 				finalizeBuildingPlacement(isoPlayerMouse);
+			} else if(deleteMode) {
+				deleteBuilding(isoPlayerMouse);
 			}
 		}
 	});
@@ -454,12 +472,13 @@ window.onload = async () => {
 				rescaleSprites();
 			}
 			break;
-			case '0': mode = undefined; break;
+			case '0': mode = undefined; deleteMode = false; break;
 			case '1': mode = home; break;
 			case '2': mode = ziggurat; break;
 			case '3': mode = tower; break;
 			case '4': mode = well; break;
 			case '5': mode = inspector; break;
+			case '9': mode = undefined; deleteMode = true; break;
 		}
 
 		if(moveUp) {
