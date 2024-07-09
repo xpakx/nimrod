@@ -47,7 +47,7 @@ function drawIsometricMap(ctx: CanvasRenderingContext2D) {
     for (let y = 0; y < map.length; y++) {
         for (let x = 0; x < map[y].length; x++) {
             let color = map[y][x];
-	    if(x == isoPlayerMouse.x && y == isoPlayerMouse.y) {
+	    if(!mode && x == isoPlayerMouse.x && y == isoPlayerMouse.y) {
 		    color = "black";
 	    }
             const screenPos = isoToScreen({x: x, y: y});
@@ -93,9 +93,9 @@ let buildingMap: (Building | undefined)[][] = map.map(row => row.map(() => undef
 let buildings: Building[] = [];
 let blocked: boolean[][] = map.map(row => row.map(() => false));
 
-function putBuilding(position: Position, sprite: BuildingSprite) {
+function putBuilding(position: Position, sprite: BuildingSprite, accepted: boolean = true) {
 	if(canBePlaced(position, sprite)) {
-		const newBuilding = new Building(sprite, position);
+		const newBuilding = new Building(sprite, position, accepted);
 		buildings.push(newBuilding);
 		sortBuildings();
 		buildings.forEach((a) => console.log(a.position));
@@ -105,6 +105,13 @@ function putBuilding(position: Position, sprite: BuildingSprite) {
 				buildingMap[i][j] = newBuilding;
 			}
 		}
+	}
+}
+
+function finalizeBuildingPlacement(position: Position) {
+	let created = buildingMap[position.x][position.y];
+	if(created) {
+		created.accepted = true;
 	}
 }
 
@@ -150,15 +157,61 @@ function sortBuildings() {
 	});
 }
 
+function ghostDiff(b: Building) {
+	if (!mode) {
+		return -1;
+	}
+	const sum = isoPlayerMouse.x + isoPlayerMouse.y - (b.position.x + b.position.y);
+	if (sum !== 0) {
+		return sum;
+	}
+
+	// on same diagonal
+	const xDistance = b.position.x - isoPlayerMouse.x;
+	if(Math.abs(xDistance) < Math.max(mode.baseSize, b.sprite.baseSize)) {
+		return b.sprite.baseSize - mode.baseSize;
+
+	}
+	return xDistance;
+}
+
 function renderBuildings(ctx: CanvasRenderingContext2D) {
+	const ghostCanBePlaced = mode ? canBePlaced(isoPlayerMouse, mode) : false;
 	ctx.save();
 	ctx.translate(canvasWidth / 2, canvasHeight / 2 - (tileHeight/2));
+	let ghostDrawn = false;
 	for (const building of buildings) {
-		drawBuilding(ctx, building.position, building.sprite);
+		if(ghostCanBePlaced && ghostDiff(building) <= 0) {
+			drawGhost(ctx);
+			ghostDrawn = true;
+		}
+		if(building.accepted) {
+			drawBuilding(ctx, building.position, building.sprite);
+		} else {
+			ctx.save();
+			ctx.filter = "grayscale(80%)"; 
+			drawBuilding(ctx, building.position, building.sprite);
+			ctx.restore();
+		}
+	}
+	if(mode && !ghostDrawn) {
+		drawGhost(ctx, !ghostCanBePlaced);
 	}
 	ctx.restore();
-
 }
+
+function drawGhost(ctx: CanvasRenderingContext2D, red: boolean = false) {
+	if (!mode) {
+		return;
+	}
+	ctx.save();
+	ctx.filter = red ? "grayscale(90%) blur(2px)" : "grayscale(90%)"; // TODO
+	ctx.globalAlpha = 0.75;
+	let pos = isoToScreen(isoPlayerMouse);
+	ctx.drawImage(mode.image, pos.x-mode.size.width/2, pos.y-mode.size.height+tileHeight, mode.size.width, mode.size.height);
+	ctx.restore();
+}
+
 
 class BuildingSprite {
 	size: Size;
@@ -180,17 +233,18 @@ class BuildingSprite {
 class Building {
 	sprite: BuildingSprite;
 	position: Position;
+	accepted: boolean;
 
-	constructor(sprite: BuildingSprite, position: Position) {
+	constructor(sprite: BuildingSprite, position: Position, accepted: boolean = true) {
 		this.sprite =  sprite;
 		this.position = position;
+		this.accepted = accepted;
 	}
 }
 
 function renderGame(context: CanvasRenderingContext2D, deltaTime: number) {
 	context.clearRect(0, 0, canvasWidth, canvasHeight);
 	drawIsometricMap(context);
-
 	renderBuildings(context);
 	renderDebugInfo(context, deltaTime);
 }
@@ -317,7 +371,8 @@ window.onload = async () => {
 		console.log(event.button)
 		if(event.button == 0) {
 			if(mode) {
-				putBuilding(isoPlayerMouse, mode);
+				putBuilding(isoPlayerMouse, mode, false);
+				finalizeBuildingPlacement(isoPlayerMouse);
 			}
 		}
 	});
