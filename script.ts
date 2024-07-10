@@ -55,7 +55,7 @@ function drawIsometricMap(ctx: CanvasRenderingContext2D) {
         for (let x = 0; x < map[y].length; x++) {
             let color = map[y][x];
 	    if(!mode && x == isoPlayerMouse.x && y == isoPlayerMouse.y) {
-		    color = "black";
+		    color = deleteMode ? '#FF5733' : "black";
 	    }
             const screenPos = isoToScreen({x: x, y: y});
             drawTile(ctx, screenPos.x, screenPos.y, color);
@@ -297,6 +297,8 @@ function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
     ctx.fillText(`(${isoPlayerMouse.x}, ${isoPlayerMouse.y})`, 20, 100);
 }
 
+let deleteMode = false;
+
 window.onload = async () => {
 	const canvas = document.getElementById('gameCanvas') as (HTMLCanvasElement | null);
 	if (!canvas) {
@@ -382,7 +384,6 @@ window.onload = async () => {
 		correctOffset();
 	}
 
-	let deleteMode = false;
 
 	canvas.addEventListener('mousedown', (event) => {
 		if(event.button == 1) {
