@@ -100,6 +100,16 @@ let buildingMap: (Building | undefined)[][] = map.map(row => row.map(() => undef
 let buildings: Building[] = [];
 let blocked: boolean[][] = map.map(row => row.map(() => false));
 
+function onMap(position: Position): boolean {
+	if(position.x < 0 || position.y < 0) {
+		return false;
+	}
+	if(position.x >= map[0].length || position.y >= map.length) {
+		return false;
+	}
+	return true;
+}
+
 function putBuilding(position: Position, sprite: BuildingSprite, accepted: boolean = true) {
 	if(canBePlaced(position, sprite)) {
 		const newBuilding = new Building(sprite, position, accepted);
@@ -197,6 +207,10 @@ function deleteBuilding(position: Position) {
 }
 
 function renderBuildings(ctx: CanvasRenderingContext2D) {
+	let buildingUnderCuror = undefined;
+	if(onMap(isoPlayerMouse)) {
+		buildingUnderCuror = buildingMap[isoPlayerMouse.y][isoPlayerMouse.x];
+	}
 	const ghostCanBePlaced = mode ? canBePlaced(isoPlayerMouse, mode) : false;
 	ctx.save();
 	ctx.translate(canvasWidth / 2, canvasHeight / 2 - (tileHeight/2));
@@ -206,7 +220,12 @@ function renderBuildings(ctx: CanvasRenderingContext2D) {
 			drawGhost(ctx);
 			ghostDrawn = true;
 		}
-		if(building.accepted) {
+		if(mode == undefined && buildingUnderCuror?.position.x == building.position.x && buildingUnderCuror.position.y == building.position.y) {
+			ctx.save();
+			ctx.filter = deleteMode ? "blur(2px)" : "grayscale(40%)";  // TODO
+			drawBuilding(ctx, building.position, building.sprite);
+			ctx.restore();
+		} else if(building.accepted) {
 			drawBuilding(ctx, building.position, building.sprite);
 		} else {
 			ctx.save();
