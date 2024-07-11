@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="1444.8882"
+   height="722.44409"
+   version="1.1"
+   id="svg45"
+   sodipodi:docname="road0100.svg"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs45" />
+  <sodipodi:namedview
+     id="namedview45"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.0268876"
+     inkscape:cx="510.2798"
+     inkscape:cy="320.87251"
+     inkscape:window-width="1920"
+     inkscape:window-height="1011"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg45" />
+  <rect
+     style="fill:#96b006;stroke-width:9.48831;stroke-linecap:round"
+     id="rect6"
+     width="807.71704"
+     height="807.71704"
+     x="-403.85852"
+     y="403.85852"
+     transform="matrix(0.89442719,-0.4472136,0.89442719,0.4472136,0,0)" />
+  <path
+     id="rect1"
+     style="fill:#f8c25e;fill-opacity:1;stroke-width:8.4866;stroke-linecap:round"
+     d="m 721.44141,270.17996 -181.08406,90.54293 0.99999,0.5 -0.99813,0.49996 181.08595,90.54298 1,-0.5 L 993.12468,587.1038 1174.2077,496.56229 942.44202,380.67945 903.52987,361.22249 722.44018,270.67943 Z" />
+</svg>

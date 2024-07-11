@@ -99,6 +99,7 @@ function drawBuilding(ctx: CanvasRenderingContext2D, position: Position, buildin
 let buildingMap: (Building | undefined)[][] = map.map(row => row.map(() => undefined)); // for quicker lookup
 let buildings: Building[] = [];
 let blocked: boolean[][] = map.map(row => row.map(() => false));
+let roads: (Road | undefined)[][] = map.map(row => row.map(() => undefined)); // for quicker lookup
 
 function onMap(position: Position): boolean {
 	if(position.x < 0 || position.y < 0) {
@@ -124,6 +125,49 @@ function putBuilding(position: Position, sprite: BuildingSprite, accepted: boole
 		}
 	}
 }
+
+function putRoad(position: Position, sprite: TilingSprite, accepted: boolean = true) {
+	let direction = 0b0000;
+	blocked[position.y][position.x] = true;
+	if(position.y - 1 >=0 && roads[position.y-1][position.x]) {
+		roads[position.y-1][position.x]!.xorDir(0b0010);
+		direction ^= 0b1000;
+	}
+	if(position.y + 1 < roads.length && roads[position.y+1][position.x]) {
+		roads[position.y+1][position.x]!.xorDir(0b1000);
+		direction ^= 0b0010;
+	}
+	if(position.x - 1 >=0 && roads[position.y][position.x-1]) {
+		roads[position.y][position.x-1]!.xorDir(0b0100);
+		direction ^= 0b0001;
+	}
+	if(position.x + 1 < roads[0].length && roads[position.y][position.x+1]) {
+		roads[position.y][position.x+1]!.xorDir(0b0001);
+		direction ^= 0b0100;
+	}
+	console.log(direction);
+	roads[position.y][position.x] = new Road(sprite, position, direction);
+}
+
+function renderRoads(ctx: CanvasRenderingContext2D) {
+    ctx.save();
+    ctx.translate(canvasWidth / 2, canvasHeight / 2 - (tileHeight/2));
+    for (let y = 0; y < roads.length; y++) {
+        for (let x = 0; x < roads[y].length; x++) {
+	    const road = roads[y][x];
+	    if(road) {
+		    drawRoad(ctx, {x: x, y: y}, road);
+	    }
+        }
+    }
+    ctx.restore();
+}
+
+function drawRoad(ctx: CanvasRenderingContext2D, position: Position, road: Road) {
+	let pos = isoToScreen(position);
+	ctx.drawImage(road.sprite, pos.x-road.sprites.size.width/2, pos.y-road.sprites.size.height+tileHeight, road.sprites.size.width, road.sprites.size.height);
+}
+
 
 function finalizeBuildingPlacement(position: Position) {
 	let created = buildingMap[position.y][position.x];
@@ -282,9 +326,49 @@ class Building {
 	}
 }
 
+class Road {
+	sprites: TilingSprite;
+	sprite: HTMLImageElement;
+	position: Position;
+	accepted: boolean;
+	direction: number;
+
+	constructor(sprite: TilingSprite, position: Position, direction: number, accepted: boolean = true) {
+		this.direction = direction;
+		this.sprites = sprite;
+		this.sprite =  sprite.sprites[this.direction];
+		this.position = position;
+		this.accepted = accepted;
+	}
+	
+	xorDir(dir: number) {
+		this.direction ^= dir;
+		this.sprite = this.sprites.sprites[this.direction];
+	}
+}
+
+
+class TilingSprite {
+	size: Size;
+	sprites: HTMLImageElement[];
+	baseSize: number;
+
+	constructor(sprites: HTMLImageElement[]) {
+		this.sprites = sprites;
+		this.size = getSize(this.sprites[0], 1)
+		this.baseSize = 1;
+	}
+
+	refreshSize() {
+		this.size = getSize(this.sprites[0], this.baseSize);
+	}
+
+}
+
 function renderGame(context: CanvasRenderingContext2D, deltaTime: number) {
 	context.clearRect(0, 0, canvasWidth, canvasHeight);
 	drawIsometricMap(context);
+	renderRoads(context);
 	renderBuildings(context);
 	renderDebugInfo(context, deltaTime);
 }
@@ -349,6 +433,25 @@ window.onload = async () => {
 			sprites[key].refreshSize();
 		}
 	}
+	const roads = [
+		await loadImage("./img/road0000.svg"), 
+		await loadImage("./img/road0001.svg"), 
+		await loadImage("./img/road0010.svg"), 
+		await loadImage("./img/road0011.svg"), 
+		await loadImage("./img/road0100.svg"), 
+		await loadImage("./img/road0101.svg"), 
+		await loadImage("./img/road0110.svg"), 
+		await loadImage("./img/road0111.svg"), 
+		await loadImage("./img/road1000.svg"), 
+		await loadImage("./img/road1001.svg"), 
+		await loadImage("./img/road1010.svg"), 
+		await loadImage("./img/road1011.svg"), 
+		await loadImage("./img/road1100.svg"), 
+		await loadImage("./img/road1101.svg"), 
+		await loadImage("./img/road1110.svg"), 
+		await loadImage("./img/road1111.svg"), 
+	];
+	const road = new TilingSprite(roads);
 
 	putBuilding({x: 3, y: 3}, sprites["ziggurat"]);
 	// putBuilding({x: 7, y: 7}, home);
@@ -358,6 +461,9 @@ window.onload = async () => {
 	// putBuilding({x: 9, y: 1}, tower);
 	// putBuilding({x: 8, y: 12}, inspector);
 	// putBuilding({x: 10, y: 12}, well);
+	putRoad({x: 5, y: 5}, road, true);
+	putRoad({x: 5, y: 6}, road, true);
+	putRoad({x: 6, y: 5}, road, true);
 
 
 	function correctOffset() {
@@ -418,6 +524,8 @@ window.onload = async () => {
 				finalizeBuildingPlacement(isoPlayerMouse);
 			} else if(deleteMode) {
 				deleteBuilding(isoPlayerMouse);
+			} else if(roadMode) {
+				putRoad(isoPlayerMouse, road);
 			}
 		}
 	});
@@ -453,6 +561,7 @@ window.onload = async () => {
 	});
 
 	let [moveLeft, moveRight, moveUp, moveDown] = [false, false, false, false];
+	let roadMode = false;
 
 	document.addEventListener('keydown', function(event) {
 		switch (event.key) {
@@ -492,12 +601,13 @@ window.onload = async () => {
 				rescaleSprites();
 			}
 			break;
-			case '0': mode = undefined; deleteMode = false; break;
+			case '0': mode = undefined; deleteMode = false; roadMode = true; break;
 			case '1': mode = home; break;
 			case '2': mode = ziggurat; break;
 			case '3': mode = tower; break;
 			case '4': mode = well; break;
 			case '5': mode = inspector; break;
+			case '6': mode = undefined; deleteMode = false; roadMode = true; break;
 			case '9': mode = undefined; deleteMode = true; break;
 		}
 
