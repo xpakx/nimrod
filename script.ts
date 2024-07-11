@@ -245,7 +245,7 @@ function drawGhost(ctx: CanvasRenderingContext2D, red: boolean = false) {
 		return;
 	}
 	ctx.save();
-	ctx.filter = red ? "url('./img//red-filter.svg#red')" : "grayscale(90%)"; // FIXME: opacity with filter
+	ctx.filter = red ? "url('./img//red-filter.svg#red') opacity(0.75)" : "grayscale(90%)";
 	ctx.globalAlpha = 0.75;
 	let pos = isoToScreen(isoPlayerMouse);
 	ctx.drawImage(mode.image, pos.x-mode.size.width/2, pos.y-mode.size.height+tileHeight, mode.size.width, mode.size.height);
