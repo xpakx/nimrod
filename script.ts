@@ -244,19 +244,11 @@ function roadCanBePlaced(position: Position): boolean {
 
 function sortBuildings() {
 	buildings.sort((a, b) => {
-		// sort by diagonal
-		const sum = a.position.x + a.position.y - (b.position.x + b.position.y);
-		if (sum !== 0) {
-			return sum;
-		}
-
-		// on same diagonal
-		const xDistance = b.position.x - a.position.x;
-		if(Math.abs(xDistance) < Math.max(a.sprite.baseSize, b.sprite.baseSize)) {
-			return b.sprite.baseSize - a.sprite.baseSize;
-
-		}
-		return xDistance;
+		// sort by diagonal of a center
+		const centerA = [Math.floor((a.position.x + a.position.x - a.sprite.baseSize + 1)/2), Math.floor((a.position.y + a.position.y - a.sprite.baseSize + 1)/2)]
+		const centerB = [Math.floor((b.position.x + b.position.x - b.sprite.baseSize + 1)/2), Math.floor((b.position.y + b.position.y - b.sprite.baseSize + 1)/2)]
+		const sum =  (centerA[0] + centerA[1]) - (centerB[0] + centerB[1]);
+		return sum;
 	});
 }
 
@@ -264,18 +256,11 @@ function ghostDiff(b: Building) {
 	if (!mode) {
 		return -1;
 	}
-	const sum = isoPlayerMouse.x + isoPlayerMouse.y - (b.position.x + b.position.y);
-	if (sum !== 0) {
-		return sum;
-	}
 
-	// on same diagonal
-	const xDistance = b.position.x - isoPlayerMouse.x;
-	if(Math.abs(xDistance) < Math.max(mode.baseSize, b.sprite.baseSize)) {
-		return b.sprite.baseSize - mode.baseSize;
-
-	}
-	return xDistance;
+	const centerA = [Math.floor((isoPlayerMouse.x + isoPlayerMouse.x - mode.baseSize + 1)/2), Math.floor((isoPlayerMouse.y + isoPlayerMouse.y - mode.baseSize + 1)/2)]
+	const centerB = [Math.floor((b.position.x + b.position.x - b.sprite.baseSize + 1)/2), Math.floor((b.position.y + b.position.y - b.sprite.baseSize + 1)/2)]
+	const sum =  (centerA[0] + centerA[1]) - (centerB[0] + centerB[1]);
+	return sum;
 }
 
 function deleteBuilding(position: Position) {
