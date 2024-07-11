@@ -290,7 +290,7 @@ function renderGame(context: CanvasRenderingContext2D, deltaTime: number) {
 }
 
 let playerMouse: Position = {x: 0, y: 0};
-let isoPlayerMouse: Position = {x: 0, y: 0};
+let isoPlayerMouse: Position = {x: -1, y: -1};
 
 let isDragging = false;
 let dragStart: Position = {x: 0, y: 0};
