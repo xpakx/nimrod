@@ -126,7 +126,7 @@ function putBuilding(position: Position, sprite: BuildingSprite, accepted: boole
 	}
 }
 
-function putRoad(position: Position, sprite: TilingSprite, accepted: boolean = true) {
+function putRoad(position: Position, sprite: TilingSprite, _accepted: boolean = true) {
 	let direction = 0b0000;
 	blocked[position.y][position.x] = true;
 	if(position.y - 1 >=0 && roads[position.y-1][position.x]) {
@@ -401,6 +401,31 @@ function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
 }
 
 let deleteMode = false;
+let roadMode = false;
+
+function switchToDeleteMode() {
+	deleteMode = true;
+	roadMode = false;
+	mode = undefined;
+}
+
+function switchToNormalMode() {
+	deleteMode = false;
+	roadMode = false;
+	mode = undefined;
+}
+
+function switchToRoadMode() {
+	deleteMode = false;
+	roadMode = true;
+	mode = undefined;
+}
+
+function switchToBuildMode(sprite: BuildingSprite) {
+	deleteMode = false;
+	roadMode = false;
+	mode = sprite;
+}
 
 window.onload = async () => {
 	const canvas = document.getElementById('gameCanvas') as (HTMLCanvasElement | null);
@@ -561,7 +586,6 @@ window.onload = async () => {
 	});
 
 	let [moveLeft, moveRight, moveUp, moveDown] = [false, false, false, false];
-	let roadMode = false;
 
 	document.addEventListener('keydown', function(event) {
 		switch (event.key) {
@@ -601,14 +625,14 @@ window.onload = async () => {
 				rescaleSprites();
 			}
 			break;
-			case '0': mode = undefined; deleteMode = false; roadMode = true; break;
-			case '1': mode = home; break;
-			case '2': mode = ziggurat; break;
-			case '3': mode = tower; break;
-			case '4': mode = well; break;
-			case '5': mode = inspector; break;
-			case '6': mode = undefined; deleteMode = false; roadMode = true; break;
-			case '9': mode = undefined; deleteMode = true; break;
+			case '0': switchToNormalMode(); break;
+			case '1': switchToBuildMode(home); break;
+			case '2': switchToBuildMode(ziggurat); break;
+			case '3': switchToBuildMode(tower); break;
+			case '4': switchToBuildMode(well); break;
+			case '5': switchToBuildMode(inspector); break;
+			case '6': switchToRoadMode(); break;
+			case '9': switchToDeleteMode(); break;
 		}
 
 		if(moveUp) {
