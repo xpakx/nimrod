@@ -277,6 +277,28 @@ function deleteBuilding(position: Position) {
 	buildings = buildings.filter((b) => b.position.x != building.position.x || b.position.y != building.position.y);
 }
 
+function deleteRoad(position: Position) {
+	const road = roads[position.y][position.x];
+	if(!road) {
+		return;
+	}
+	blocked[position.y][position.x] = false;
+	roads[position.y][position.x] = undefined;
+	if(position.y - 1 >=0 && roads[position.y-1][position.x]) {
+		roads[position.y-1][position.x]!.xorDir(0b0010);
+	}
+	if(position.y + 1 < roads.length && roads[position.y+1][position.x]) {
+		roads[position.y+1][position.x]!.xorDir(0b1000);
+	}
+	if(position.x - 1 >=0 && roads[position.y][position.x-1]) {
+		roads[position.y][position.x-1]!.xorDir(0b0100);
+	}
+	if(position.x + 1 < roads[0].length && roads[position.y][position.x+1]) {
+		roads[position.y][position.x+1]!.xorDir(0b0001);
+	}
+}
+
+
 function renderBuildings(ctx: CanvasRenderingContext2D) {
 	let buildingUnderCuror = undefined;
 	if(onMap(isoPlayerMouse)) {
@@ -585,6 +607,7 @@ window.onload = async () => {
 				finalizeBuildingPlacement(isoPlayerMouse);
 			} else if(deleteMode) {
 				deleteBuilding(isoPlayerMouse);
+				deleteRoad(isoPlayerMouse);
 			} else if(roadMode) {
 				putRoad(isoPlayerMouse, road);
 			}
