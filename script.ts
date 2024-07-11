@@ -511,11 +511,6 @@ window.onload = async () => {
 	sprites["well"] = well;
 	sprites["inspector"] = inspector;
 
-	function rescaleSprites() {
-		for (const key in sprites) {
-			sprites[key].refreshSize();
-		}
-	}
 	const roads = [
 		await loadImage("./img/road0000.svg"), 
 		await loadImage("./img/road0001.svg"), 
@@ -535,6 +530,12 @@ window.onload = async () => {
 		await loadImage("./img/road1111.svg"), 
 	];
 	const road = new TilingSprite(roads);
+	function rescaleSprites() {
+		for (const key in sprites) {
+			sprites[key].refreshSize();
+		}
+		road.refreshSize();
+	}
 
 	putBuilding({x: 3, y: 3}, sprites["ziggurat"]);
 	// putBuilding({x: 7, y: 7}, home);
