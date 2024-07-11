@@ -153,7 +153,7 @@ function canBePlaced(position: Position, sprite: BuildingSprite): boolean {
 			}
 		}
 	}
-	return true; // TODO
+	return true;
 }
 
 function sortBuildings() {
@@ -222,7 +222,7 @@ function renderBuildings(ctx: CanvasRenderingContext2D) {
 		}
 		if(mode == undefined && buildingUnderCuror?.position.x == building.position.x && buildingUnderCuror.position.y == building.position.y) {
 			ctx.save();
-			ctx.filter = deleteMode ? "blur(2px)" : "grayscale(40%)";  // TODO
+			ctx.filter = deleteMode ? "url('./img//red-filter.svg#red')" : "grayscale(40%)";
 			drawBuilding(ctx, building.position, building.sprite);
 			ctx.restore();
 		} else if(building.accepted) {
@@ -245,7 +245,7 @@ function drawGhost(ctx: CanvasRenderingContext2D, red: boolean = false) {
 		return;
 	}
 	ctx.save();
-	ctx.filter = red ? "grayscale(90%) blur(2px)" : "grayscale(90%)"; // TODO
+	ctx.filter = red ? "url('./img//red-filter.svg#red')" : "grayscale(90%)"; // FIXME: opacity with filter
 	ctx.globalAlpha = 0.75;
 	let pos = isoToScreen(isoPlayerMouse);
 	ctx.drawImage(mode.image, pos.x-mode.size.width/2, pos.y-mode.size.height+tileHeight, mode.size.width, mode.size.height);
