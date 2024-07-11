@@ -127,6 +127,9 @@ function putBuilding(position: Position, sprite: BuildingSprite, accepted: boole
 }
 
 function putRoad(position: Position, sprite: TilingSprite, _accepted: boolean = true) {
+	if(!roadCanBePlaced(position)) {
+		return;
+	}
 	let direction = 0b0000;
 	blocked[position.y][position.x] = true;
 	if(position.y - 1 >=0 && roads[position.y-1][position.x]) {
@@ -149,6 +152,26 @@ function putRoad(position: Position, sprite: TilingSprite, _accepted: boolean = 
 	roads[position.y][position.x] = new Road(sprite, position, direction);
 }
 
+function calculateRoadConnections(position: Position, sprite: TilingSprite, canBePlaced: boolean): Road {
+	let direction = 0b0000;
+	if(!canBePlaced) {
+		return new Road(sprite, position, direction);
+	}
+	if(position.y - 1 >=0 && roads[position.y-1][position.x]) {
+		direction ^= 0b1000;
+	}
+	if(position.y + 1 < roads.length && roads[position.y+1][position.x]) {
+		direction ^= 0b0010;
+	}
+	if(position.x - 1 >=0 && roads[position.y][position.x-1]) {
+		direction ^= 0b0001;
+	}
+	if(position.x + 1 < roads[0].length && roads[position.y][position.x+1]) {
+		direction ^= 0b0100;
+	}
+	return new Road(sprite, position, direction);
+}
+
 function renderRoads(ctx: CanvasRenderingContext2D) {
     ctx.save();
     ctx.translate(canvasWidth / 2, canvasHeight / 2 - (tileHeight/2));
@@ -156,7 +179,14 @@ function renderRoads(ctx: CanvasRenderingContext2D) {
         for (let x = 0; x < roads[y].length; x++) {
 	    const road = roads[y][x];
 	    if(road) {
-		    drawRoad(ctx, {x: x, y: y}, road);
+		    if(deleteMode && y == isoPlayerMouse.y && x == isoPlayerMouse.x) {
+			ctx.save();
+			ctx.filter = "url('./img//red-filter.svg#red')";
+			drawRoad(ctx, {x: x, y: y}, road);
+			ctx.restore();
+		    } else {
+			    drawRoad(ctx, {x: x, y: y}, road);
+		    }
 	    }
         }
     }
@@ -198,6 +228,18 @@ function canBePlaced(position: Position, sprite: BuildingSprite): boolean {
 		}
 	}
 	return true;
+}
+
+function roadCanBePlaced(position: Position): boolean {
+	const x = position.x;
+	const y = position.y;
+	if(x >= blocked[0].length || y >= blocked.length) {
+		return false;
+	}
+	if(x < 0 || y < 0) {
+		return false;
+	}
+	return !blocked[y][x];
 }
 
 function sortBuildings() {
@@ -280,6 +322,15 @@ function renderBuildings(ctx: CanvasRenderingContext2D) {
 	}
 	if(mode && !ghostDrawn) {
 		drawGhost(ctx, !ghostCanBePlaced);
+	}
+	
+	const roadGhostCanBePlaced = roadMode ? roadCanBePlaced(isoPlayerMouse) : false; 
+	if(roadMode) {
+		ctx.save();
+		ctx.filter = roadGhostCanBePlaced ? "grayscale(90%)" : "url('./img//red-filter.svg#red') opacity(0.75)";
+		ctx.globalAlpha = 0.75;
+		drawRoad(ctx, isoPlayerMouse, calculateRoadConnections(isoPlayerMouse, roadMode, roadGhostCanBePlaced));
+		ctx.restore();
 	}
 	ctx.restore();
 }
@@ -401,29 +452,29 @@ function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
 }
 
 let deleteMode = false;
-let roadMode = false;
+let roadMode: TilingSprite | undefined = undefined;
 
 function switchToDeleteMode() {
 	deleteMode = true;
-	roadMode = false;
+	roadMode = undefined;
 	mode = undefined;
 }
 
 function switchToNormalMode() {
 	deleteMode = false;
-	roadMode = false;
+	roadMode = undefined;
 	mode = undefined;
 }
 
-function switchToRoadMode() {
+function switchToRoadMode(sprite: TilingSprite) {
 	deleteMode = false;
-	roadMode = true;
+	roadMode = sprite;
 	mode = undefined;
 }
 
 function switchToBuildMode(sprite: BuildingSprite) {
 	deleteMode = false;
-	roadMode = false;
+	roadMode = undefined;
 	mode = sprite;
 }
 
@@ -631,7 +682,7 @@ window.onload = async () => {
 			case '3': switchToBuildMode(tower); break;
 			case '4': switchToBuildMode(well); break;
 			case '5': switchToBuildMode(inspector); break;
-			case '6': switchToRoadMode(); break;
+			case '6': switchToRoadMode(road); break;
 			case '9': switchToDeleteMode(); break;
 		}
 
