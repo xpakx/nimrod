@@ -51,30 +51,6 @@ function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
 }
 
 
-function switchToDeleteMode() {
-	map.deleteMode = true;
-	map.roadMode = undefined;
-	map.mode = undefined;
-}
-
-function switchToNormalMode() {
-	map.deleteMode = false;
-	map.roadMode = undefined;
-	map.mode = undefined;
-}
-
-function switchToRoadMode(sprite: TilingSprite) {
-	map.deleteMode = false;
-	map.roadMode = sprite;
-	map.mode = undefined;
-}
-
-function switchToBuildMode(sprite: BuildingSprite) {
-	map.deleteMode = false;
-	map.roadMode = undefined;
-	map.mode = sprite;
-}
-
 window.onload = async () => {
 	const canvas = document.getElementById('gameCanvas') as (HTMLCanvasElement | null);
 	if (!canvas) {
@@ -128,13 +104,13 @@ window.onload = async () => {
 	}
 
 	map.putBuilding({x: 3, y: 3}, sprites["ziggurat"]);
-	// putBuilding({x: 7, y: 7}, home);
-	// putBuilding({x: 7, y: 9}, home);
-	// putBuilding({x: 9, y: 7}, home);
-	// putBuilding({x: 9, y: 9}, home);
-	// putBuilding({x: 9, y: 1}, tower);
-	// putBuilding({x: 8, y: 12}, inspector);
-	// putBuilding({x: 10, y: 12}, well);
+	map.putBuilding({x: 7, y: 7}, sprites["home"]);
+	map.putBuilding({x: 7, y: 9}, sprites["home"]);
+	map.putBuilding({x: 9, y: 7}, sprites["home"]);
+	map.putBuilding({x: 9, y: 9}, sprites["home"]);
+	map.putBuilding({x: 9, y: 1}, sprites["tower"]);
+	map.putBuilding({x: 8, y: 12}, sprites["inspector"]);
+	map.putBuilding({x: 10, y: 12}, sprites["well"]);
 	map.putRoad({x: 5, y: 5}, road, true);
 	map.putRoad({x: 5, y: 6}, road, true);
 	map.putRoad({x: 6, y: 5}, road, true);
@@ -275,14 +251,14 @@ window.onload = async () => {
 				rescaleSprites();
 			}
 			break;
-			case '0': switchToNormalMode(); break;
-			case '1': switchToBuildMode(home); break;
-			case '2': switchToBuildMode(ziggurat); break;
-			case '3': switchToBuildMode(tower); break;
-			case '4': switchToBuildMode(well); break;
-			case '5': switchToBuildMode(inspector); break;
-			case '6': switchToRoadMode(road); break;
-			case '9': switchToDeleteMode(); break;
+			case '0': map.switchToNormalMode(); break;
+			case '1': map.switchToBuildMode(home); break;
+			case '2': map.switchToBuildMode(ziggurat); break;
+			case '3': map.switchToBuildMode(tower); break;
+			case '4': map.switchToBuildMode(well); break;
+			case '5': map.switchToBuildMode(inspector); break;
+			case '6': map.switchToRoadMode(road); break;
+			case '9': map.switchToDeleteMode(); break;
 		}
 
 		if(moveUp) {

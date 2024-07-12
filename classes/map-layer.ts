@@ -340,6 +340,30 @@ export class MapLayer {
 		ctx.restore();
 	}
 
+	switchToDeleteMode() {
+		this.deleteMode = true;
+		this.roadMode = undefined;
+		this.mode = undefined;
+	}
+
+	switchToNormalMode() {
+		this.deleteMode = false;
+		this.roadMode = undefined;
+		this.mode = undefined;
+	}
+
+	switchToRoadMode(sprite: TilingSprite) {
+		this.deleteMode = false;
+		this.roadMode = sprite;
+		this.mode = undefined;
+	}
+
+	switchToBuildMode(sprite: BuildingSprite) {
+		this.deleteMode = false;
+		this.roadMode = undefined;
+		this.mode = sprite;
+	}
+
 }
 
 export interface Size {
