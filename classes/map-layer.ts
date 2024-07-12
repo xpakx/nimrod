@@ -93,262 +93,252 @@ export class MapLayer {
 
 
 	buildingMap: (Building | undefined)[][] = this.map.map(row => row.map(() => undefined)); // for quicker lookup
-		buildings: Building[] = [];
+	buildings: Building[] = [];
 	blocked: boolean[][] = this.map.map(row => row.map(() => false));
 	roads: (Road | undefined)[][] = this.map.map(row => row.map(() => undefined)); // for quicker lookup
 
-		onMap(position: Position): boolean {
-			if(position.x < 0 || position.y < 0) {
-				return false;
-			}
-			if(position.x >= this.map[0].length || position.y >= this.map.length) {
-				return false;
-			}
-			return true;
+	onMap(position: Position): boolean {
+		if(position.x < 0 || position.y < 0) {
+			return false;
 		}
+		if(position.x >= this.map[0].length || position.y >= this.map.length) {
+			return false;
+		}
+		return true;
+	}
 
-		putBuilding(position: Position, sprite: BuildingSprite, accepted: boolean = true) {
-			if(this.canBePlaced(position, sprite)) {
-				const newBuilding = new Building(sprite, position, accepted);
-				this.buildings.push(newBuilding);
-				this.sortBuildings();
-				this.buildings.forEach((a) => console.log(a.position));
-				for(let i = position.x; i > position.x-sprite.baseSize; i--) {
-					for(let j = position.y; j > position.y-sprite.baseSize; j--) {
-						this.blocked[j][i] = true;
-						this.buildingMap[j][i] = newBuilding;
+	putBuilding(position: Position, sprite: BuildingSprite, accepted: boolean = true) {
+		if(this.canBePlaced(position, sprite)) {
+			const newBuilding = new Building(sprite, position, accepted);
+			this.buildings.push(newBuilding);
+			this.sortBuildings();
+			this.buildings.forEach((a) => console.log(a.position));
+			for(let i = position.x; i > position.x-sprite.baseSize; i--) {
+				for(let j = position.y; j > position.y-sprite.baseSize; j--) {
+					this.blocked[j][i] = true;
+					this.buildingMap[j][i] = newBuilding;
+				}
+			}
+		}
+	}
+
+	putRoad(position: Position, sprite: TilingSprite, _accepted: boolean = true) {
+		if(!this.roadCanBePlaced(position)) {
+			return;
+		}
+		let direction = this.calculateRoadConnections(position, true);
+		this.blocked[position.y][position.x] = true;
+		this.updateRoadsDirection(position);
+		this.roads[position.y][position.x] = new Road(sprite, position, direction);
+	}
+
+	calculateRoadConnections(position: Position, canBePlaced: boolean): number {
+		let direction = 0b0000;
+		if(!canBePlaced) {
+			return direction
+		}
+		if(position.y - 1 >=0 && this.roads[position.y-1][position.x]) {
+			direction ^= 0b1000;
+		}
+		if(position.y + 1 < this.roads.length && this.roads[position.y+1][position.x]) {
+			direction ^= 0b0010;
+		}
+		if(position.x - 1 >=0 && this.roads[position.y][position.x-1]) {
+			direction ^= 0b0001;
+		}
+		if(position.x + 1 < this.roads[0].length && this.roads[position.y][position.x+1]) {
+			direction ^= 0b0100;
+		}
+		return direction;
+	}
+
+	renderRoads(ctx: CanvasRenderingContext2D) {
+		ctx.save();
+		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileHeight/2));
+		for (let y = 0; y < this.roads.length; y++) {
+			for (let x = 0; x < this.roads[y].length; x++) {
+				const road = this.roads[y][x];
+				if(road) {
+					if(this.deleteMode && y == this.isoPlayerMouse.y && x == this.isoPlayerMouse.x) {
+						ctx.save();
+						ctx.filter = "url('./img//red-filter.svg#red')";
+						this.drawRoad(ctx, {x: x, y: y}, road);
+						ctx.restore();
+					} else {
+						this.drawRoad(ctx, {x: x, y: y}, road);
 					}
 				}
 			}
 		}
+		ctx.restore();
+	}
 
-		putRoad(position: Position, sprite: TilingSprite, _accepted: boolean = true) {
-			if(!this.roadCanBePlaced(position)) {
-				return;
-			}
-			let direction = 0b0000;
-			this.blocked[position.y][position.x] = true;
-			if(position.y - 1 >=0 && this.roads[position.y-1][position.x]) {
-				this.roads[position.y-1][position.x]!.xorDir(0b0010);
-				direction ^= 0b1000;
-			}
-			if(position.y + 1 < this.roads.length && this.roads[position.y+1][position.x]) {
-				this.roads[position.y+1][position.x]!.xorDir(0b1000);
-				direction ^= 0b0010;
-			}
-			if(position.x - 1 >=0 && this.roads[position.y][position.x-1]) {
-				this.roads[position.y][position.x-1]!.xorDir(0b0100);
-				direction ^= 0b0001;
-			}
-			if(position.x + 1 < this.roads[0].length && this.roads[position.y][position.x+1]) {
-				this.roads[position.y][position.x+1]!.xorDir(0b0001);
-				direction ^= 0b0100;
-			}
-			console.log(direction);
-			this.roads[position.y][position.x] = new Road(sprite, position, direction);
+	drawRoad(ctx: CanvasRenderingContext2D, position: Position, road: Road) {
+		let pos = this.isoToScreen(position);
+		ctx.drawImage(road.sprite, pos.x-road.sprites.size.width/2, pos.y-road.sprites.size.height+this.tileHeight, road.sprites.size.width, road.sprites.size.height);
+	}
+
+
+	finalizeBuildingPlacement(position: Position) {
+		let created = this.buildingMap[position.y][position.x];
+		if(created) {
+			created.accepted = true;
 		}
+	}
 
-		calculateRoadConnections(position: Position, sprite: TilingSprite, canBePlaced: boolean): Road {
-			let direction = 0b0000;
-			if(!canBePlaced) {
-				return new Road(sprite, position, direction);
-			}
-			if(position.y - 1 >=0 && this.roads[position.y-1][position.x]) {
-				direction ^= 0b1000;
-			}
-			if(position.y + 1 < this.roads.length && this.roads[position.y+1][position.x]) {
-				direction ^= 0b0010;
-			}
-			if(position.x - 1 >=0 && this.roads[position.y][position.x-1]) {
-				direction ^= 0b0001;
-			}
-			if(position.x + 1 < this.roads[0].length && this.roads[position.y][position.x+1]) {
-				direction ^= 0b0100;
-			}
-			return new Road(sprite, position, direction);
+	canBePlaced(position: Position, sprite: BuildingSprite): boolean {
+		const x = position.x;
+		const lowX = x - sprite.baseSize;
+		const y = position.y;
+		const lowY = y - sprite.baseSize;
+		if(lowY+1 < 0 || lowX+1 < 0) {
+			console.log("Cannot build");
+			return false;
 		}
-
-		renderRoads(ctx: CanvasRenderingContext2D) {
-			ctx.save();
-			ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileHeight/2));
-			for (let y = 0; y < this.roads.length; y++) {
-				for (let x = 0; x < this.roads[y].length; x++) {
-					const road = this.roads[y][x];
-					if(road) {
-						if(this.deleteMode && y == this.isoPlayerMouse.y && x == this.isoPlayerMouse.x) {
-							ctx.save();
-							ctx.filter = "url('./img//red-filter.svg#red')";
-							this.drawRoad(ctx, {x: x, y: y}, road);
-							ctx.restore();
-						} else {
-							this.drawRoad(ctx, {x: x, y: y}, road);
-						}
-					}
+		if(x >= this.blocked[0].length || y >= this.blocked.length) {
+			console.log("Cannot build");
+			return false;
+		}
+		for(let i = x; i > lowX; i--) {
+			for(let j = y; j > lowY; j--) {
+				if(this.blocked[j][i]) {
+					console.log("Cannot build");
+					return false;
 				}
 			}
-			ctx.restore();
 		}
+		return true;
+	}
 
-		drawRoad(ctx: CanvasRenderingContext2D, position: Position, road: Road) {
-			let pos = this.isoToScreen(position);
-			ctx.drawImage(road.sprite, pos.x-road.sprites.size.width/2, pos.y-road.sprites.size.height+this.tileHeight, road.sprites.size.width, road.sprites.size.height);
+	roadCanBePlaced(position: Position): boolean {
+		const x = position.x;
+		const y = position.y;
+		if(x >= this.blocked[0].length || y >= this.blocked.length) {
+			return false;
 		}
-
-
-		finalizeBuildingPlacement(position: Position) {
-			let created = this.buildingMap[position.y][position.x];
-			if(created) {
-				created.accepted = true;
-			}
+		if(x < 0 || y < 0) {
+			return false;
 		}
+		return !this.blocked[y][x];
+	}
 
-		canBePlaced(position: Position, sprite: BuildingSprite): boolean {
-			const x = position.x;
-			const lowX = x - sprite.baseSize;
-			const y = position.y;
-			const lowY = y - sprite.baseSize;
-			if(lowY+1 < 0 || lowX+1 < 0) {
-				console.log("Cannot build");
-				return false;
-			}
-			if(x >= this.blocked[0].length || y >= this.blocked.length) {
-				console.log("Cannot build");
-				return false;
-			}
-			for(let i = x; i > lowX; i--) {
-				for(let j = y; j > lowY; j--) {
-					if(this.blocked[j][i]) {
-						console.log("Cannot build");
-						return false;
-					}
-				}
-			}
-			return true;
-		}
-
-		roadCanBePlaced(position: Position): boolean {
-			const x = position.x;
-			const y = position.y;
-			if(x >= this.blocked[0].length || y >= this.blocked.length) {
-				return false;
-			}
-			if(x < 0 || y < 0) {
-				return false;
-			}
-			return !this.blocked[y][x];
-		}
-
-		sortBuildings() {
-			this.buildings.sort((a, b) => {
-				// sort by diagonal of a center
-				const centerA = [Math.floor((a.position.x + a.position.x - a.sprite.baseSize + 1)/2), Math.floor((a.position.y + a.position.y - a.sprite.baseSize + 1)/2)]
-				const centerB = [Math.floor((b.position.x + b.position.x - b.sprite.baseSize + 1)/2), Math.floor((b.position.y + b.position.y - b.sprite.baseSize + 1)/2)]
-				const sum =  (centerA[0] + centerA[1]) - (centerB[0] + centerB[1]);
-				return sum;
-			});
-		}
-
-		ghostDiff(b: Building) {
-			if (!this.mode) {
-				return -1;
-			}
-
-			const centerA = [Math.floor((this.isoPlayerMouse.x + this.isoPlayerMouse.x - this.mode.baseSize + 1)/2), Math.floor((this.isoPlayerMouse.y + this.isoPlayerMouse.y - this.mode.baseSize + 1)/2)]
+	sortBuildings() {
+		this.buildings.sort((a, b) => {
+			// sort by diagonal of a center
+			const centerA = [Math.floor((a.position.x + a.position.x - a.sprite.baseSize + 1)/2), Math.floor((a.position.y + a.position.y - a.sprite.baseSize + 1)/2)]
 			const centerB = [Math.floor((b.position.x + b.position.x - b.sprite.baseSize + 1)/2), Math.floor((b.position.y + b.position.y - b.sprite.baseSize + 1)/2)]
 			const sum =  (centerA[0] + centerA[1]) - (centerB[0] + centerB[1]);
 			return sum;
+		});
+	}
+
+	ghostDiff(b: Building) {
+		if (!this.mode) {
+			return -1;
 		}
 
-		deleteBuilding(position: Position) {
-			const building = this.buildingMap[position.y][position.x];
-			if(!building) {
-				return;
-			}
-			for(let i = building.position.x; i > building.position.x-building.sprite.baseSize; i--) {
-				for(let j = building.position.y; j > building.position.y-building.sprite.baseSize; j--) {
-					this.blocked[j][i] = false;
-					this.buildingMap[j][i] = undefined;
-				}
-			}
-			this.buildings = this.buildings.filter((b) => b.position.x != building.position.x || b.position.y != building.position.y);
-		}
+		const centerA = [Math.floor((this.isoPlayerMouse.x + this.isoPlayerMouse.x - this.mode.baseSize + 1)/2), Math.floor((this.isoPlayerMouse.y + this.isoPlayerMouse.y - this.mode.baseSize + 1)/2)]
+		const centerB = [Math.floor((b.position.x + b.position.x - b.sprite.baseSize + 1)/2), Math.floor((b.position.y + b.position.y - b.sprite.baseSize + 1)/2)]
+		const sum =  (centerA[0] + centerA[1]) - (centerB[0] + centerB[1]);
+		return sum;
+	}
 
-		deleteRoad(position: Position) {
-			const road = this.roads[position.y][position.x];
-			if(!road) {
-				return;
-			}
-			this.blocked[position.y][position.x] = false;
-			this.roads[position.y][position.x] = undefined;
-			if(position.y - 1 >=0 && this.roads[position.y-1][position.x]) {
-				this.roads[position.y-1][position.x]!.xorDir(0b0010);
-			}
-			if(position.y + 1 < this.roads.length && this.roads[position.y+1][position.x]) {
-				this.roads[position.y+1][position.x]!.xorDir(0b1000);
-			}
-			if(position.x - 1 >=0 && this.roads[position.y][position.x-1]) {
-				this.roads[position.y][position.x-1]!.xorDir(0b0100);
-			}
-			if(position.x + 1 < this.roads[0].length && this.roads[position.y][position.x+1]) {
-				this.roads[position.y][position.x+1]!.xorDir(0b0001);
+	deleteBuilding(position: Position) {
+		const building = this.buildingMap[position.y][position.x];
+		if(!building) {
+			return;
+		}
+		for(let i = building.position.x; i > building.position.x-building.sprite.baseSize; i--) {
+			for(let j = building.position.y; j > building.position.y-building.sprite.baseSize; j--) {
+				this.blocked[j][i] = false;
+				this.buildingMap[j][i] = undefined;
 			}
 		}
+		this.buildings = this.buildings.filter((b) => b.position.x != building.position.x || b.position.y != building.position.y);
+	}
+
+	deleteRoad(position: Position) {
+		const road = this.roads[position.y][position.x];
+		if(!road) {
+			return;
+		}
+		this.blocked[position.y][position.x] = false;
+		this.roads[position.y][position.x] = undefined;
+		this.updateRoadsDirection(position);
+	}
+
+	updateRoadsDirection(position: Position) {
+		if(position.y - 1 >=0 && this.roads[position.y-1][position.x]) {
+			this.roads[position.y-1][position.x]!.xorDir(0b0010);
+		}
+		if(position.y + 1 < this.roads.length && this.roads[position.y+1][position.x]) {
+			this.roads[position.y+1][position.x]!.xorDir(0b1000);
+		}
+		if(position.x - 1 >=0 && this.roads[position.y][position.x-1]) {
+			this.roads[position.y][position.x-1]!.xorDir(0b0100);
+		}
+		if(position.x + 1 < this.roads[0].length && this.roads[position.y][position.x+1]) {
+			this.roads[position.y][position.x+1]!.xorDir(0b0001);
+		}
+	}
 
 
-		renderBuildings(ctx: CanvasRenderingContext2D) {
-			let buildingUnderCuror = undefined;
-			if(this.onMap(this.isoPlayerMouse)) {
-				buildingUnderCuror = this.buildingMap[this.isoPlayerMouse.y][this.isoPlayerMouse.x];
+	renderBuildings(ctx: CanvasRenderingContext2D) {
+		let buildingUnderCuror = undefined;
+		if(this.onMap(this.isoPlayerMouse)) {
+			buildingUnderCuror = this.buildingMap[this.isoPlayerMouse.y][this.isoPlayerMouse.x];
+		}
+		const ghostCanBePlaced = this.mode ? this.canBePlaced(this.isoPlayerMouse, this.mode) : false;
+		ctx.save();
+		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileHeight/2));
+		let ghostDrawn = false;
+		for (const building of this.buildings) {
+			if(ghostCanBePlaced && this.ghostDiff(building) <= 0) {
+				this.drawGhost(ctx);
+				ghostDrawn = true;
 			}
-			const ghostCanBePlaced = this.mode ? this.canBePlaced(this.isoPlayerMouse, this.mode) : false;
-			ctx.save();
-			ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileHeight/2));
-			let ghostDrawn = false;
-			for (const building of this.buildings) {
-				if(ghostCanBePlaced && this.ghostDiff(building) <= 0) {
-					this.drawGhost(ctx);
-					ghostDrawn = true;
-				}
-				if(this.mode == undefined && buildingUnderCuror?.position.x == building.position.x && buildingUnderCuror.position.y == building.position.y) {
-					ctx.save();
-					ctx.filter = this.deleteMode ? "url('./img//red-filter.svg#red')" : "grayscale(40%)";
-					this.drawBuilding(ctx, building.position, building.sprite);
-					ctx.restore();
-				} else if(building.accepted) {
-					this.drawBuilding(ctx, building.position, building.sprite);
-				} else {
-					ctx.save();
-					ctx.filter = "grayscale(80%)"; 
-					this.drawBuilding(ctx, building.position, building.sprite);
-					ctx.restore();
-				}
-			}
-			if(this.mode && !ghostDrawn) {
-				this.drawGhost(ctx, !ghostCanBePlaced);
-			}
-
-			const roadGhostCanBePlaced = this.roadMode ? this.roadCanBePlaced(this.isoPlayerMouse) : false; 
-			if(this.roadMode) {
+			if(this.mode == undefined && buildingUnderCuror?.position.x == building.position.x && buildingUnderCuror.position.y == building.position.y) {
 				ctx.save();
-				ctx.filter = roadGhostCanBePlaced ? "grayscale(90%)" : "url('./img//red-filter.svg#red') opacity(0.75)";
-				ctx.globalAlpha = 0.75;
-				this.drawRoad(ctx, this.isoPlayerMouse, this.calculateRoadConnections(this.isoPlayerMouse, this.roadMode, roadGhostCanBePlaced));
+				ctx.filter = this.deleteMode ? "url('./img//red-filter.svg#red')" : "grayscale(40%)";
+				this.drawBuilding(ctx, building.position, building.sprite);
+				ctx.restore();
+			} else if(building.accepted) {
+				this.drawBuilding(ctx, building.position, building.sprite);
+			} else {
+				ctx.save();
+				ctx.filter = "grayscale(80%)"; 
+				this.drawBuilding(ctx, building.position, building.sprite);
 				ctx.restore();
 			}
-			ctx.restore();
+		}
+		if(this.mode && !ghostDrawn) {
+			this.drawGhost(ctx, !ghostCanBePlaced);
 		}
 
-		drawGhost(ctx: CanvasRenderingContext2D, red: boolean = false) {
-			if (!this.mode) {
-				return;
-			}
+		const roadGhostCanBePlaced = this.roadMode ? this.roadCanBePlaced(this.isoPlayerMouse) : false; 
+		if(this.roadMode) {
 			ctx.save();
-			ctx.filter = red ? "url('./img//red-filter.svg#red') opacity(0.75)" : "grayscale(90%)";
+			ctx.filter = roadGhostCanBePlaced ? "grayscale(90%)" : "url('./img//red-filter.svg#red') opacity(0.75)";
 			ctx.globalAlpha = 0.75;
-			let pos = this.isoToScreen(this.isoPlayerMouse);
-			ctx.drawImage(this.mode.image, pos.x-this.mode.size.width/2, pos.y-this.mode.size.height+this.tileHeight, this.mode.size.width, this.mode.size.height);
+			const dir = this.calculateRoadConnections(this.isoPlayerMouse, roadGhostCanBePlaced);
+			const ghost = new Road(this.roadMode, this.isoPlayerMouse, dir);
+			this.drawRoad(ctx, this.isoPlayerMouse, ghost);
 			ctx.restore();
 		}
+		ctx.restore();
+	}
+
+	drawGhost(ctx: CanvasRenderingContext2D, red: boolean = false) {
+		if (!this.mode) {
+			return;
+		}
+		ctx.save();
+		ctx.filter = red ? "url('./img//red-filter.svg#red') opacity(0.75)" : "grayscale(90%)";
+		ctx.globalAlpha = 0.75;
+		let pos = this.isoToScreen(this.isoPlayerMouse);
+		ctx.drawImage(this.mode.image, pos.x-this.mode.size.width/2, pos.y-this.mode.size.height+this.tileHeight, this.mode.size.width, this.mode.size.height);
+		ctx.restore();
+	}
 
 }
 
