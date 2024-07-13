@@ -2,8 +2,8 @@ import { BuildingSprite, TilingSprite } from "./classes/buildings.js";
 import { InterfaceLayer } from "./classes/interface.js";
 import { MapLayer, Position, Size } from "./classes/map-layer.js";
 
-const canvasWidth = 800;
-const canvasHeight = 600;
+const canvasWidth = 1200;
+const canvasHeight = 800;
 
 
 let map = new MapLayer({width: canvasWidth, height: canvasHeight});
