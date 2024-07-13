@@ -102,6 +102,10 @@ export class InterfaceLayer {
 		const text = this.wrapText(context, dialogue.text, dialogueY + 30, dialogueWidth - 20, 20);
 		this.dialogue = {text: text, portrait: dialogue.portrait};
 	}
+
+	closeDialogue() {
+		this.dialogue = undefined;
+	}
 }
 
 export interface Dialogue {

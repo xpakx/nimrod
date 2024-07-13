@@ -326,4 +326,7 @@ window.onload = async () => {
 	});
 
 	interf.setDialogue(context, {text: "Welcome to the game!", portrait: undefined});
+	setTimeout(() => {
+		interf.closeDialogue();
+	}, 3000);
 }
