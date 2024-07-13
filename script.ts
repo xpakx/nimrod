@@ -31,7 +31,6 @@ function renderGame(context: CanvasRenderingContext2D, deltaTime: number) {
 	map.renderMap(context, deltaTime);
 	interf.renderInterface(context, deltaTime);
 	renderDebugInfo(context, deltaTime);
-
 }
 
 let playerMouse: Position = {x: 0, y: 0};
@@ -325,4 +324,6 @@ window.onload = async () => {
 		prevTimestamp = timestamp;
 		window.requestAnimationFrame(frame);
 	});
+
+	interf.setDialogue(context, {text: "Welcome to the game!", portrait: undefined});
 }

@@ -3,6 +3,7 @@ import { Size } from "./map-layer.js";
 export class InterfaceLayer {
 	canvasSize: Size = {width: 0, height: 0};
 	menuWidth = 200;
+	dialogue: DialogueParsed | undefined = undefined;
 
 	constructor(canvasSize: Size) {
 		this.canvasSize.height = canvasSize.height;
@@ -13,6 +14,7 @@ export class InterfaceLayer {
 		this.drawTopPanel(context);
 		this.drawMenu(context);
 		this.drawButtons(context);
+		this.renderDialogueBox(context);
 	}
 
 	drawTopPanel(context: CanvasRenderingContext2D) {
@@ -43,4 +45,71 @@ export class InterfaceLayer {
 		context.fillText('Button 1', this.canvasSize.width - 170, 80);
 		context.fillText('Button 2', this.canvasSize.width - 170, 120);
 	}
+
+	renderDialogueBox(context: CanvasRenderingContext2D) {
+		if(!this.dialogue) {
+			return;
+		}
+		const dialogueWidth = this.canvasSize.width - 20 - this.menuWidth;
+		const dialogueHeight = 100;
+		const dialogueX = 10;
+		const dialogueY = this.canvasSize.height - dialogueHeight - 10;
+
+		context.fillStyle = '#444';
+		context.fillRect(dialogueX, dialogueY, dialogueWidth, dialogueHeight);
+
+		context.strokeStyle = '#fff';
+		context.strokeRect(dialogueX, dialogueY, dialogueWidth, dialogueHeight);
+
+		context.fillStyle = '#fff';
+		context.font = '16px Arial';
+		let y = dialogueY + 30;
+		for (let line of this.dialogue.text) {
+			context.fillText(line, dialogueX + 10, y);
+			y += 20;
+		}
+	}
+
+	wrapText(context: CanvasRenderingContext2D, text: string, y: number, maxWidth: number, lineHeight: number): string[] {
+		const words = text.split(' ');
+		let line = '';
+		let testLine;
+		let metrics;
+		let testWidth;
+		let lines = [];
+
+		context.font = '16px Arial';
+		for (let n = 0; n < words.length; n++) {
+			testLine = line + words[n] + ' ';
+			metrics = context.measureText(testLine);
+			testWidth = metrics.width;
+			if (testWidth > maxWidth && n > 0) {
+				lines.push(line);
+				line = words[n] + ' ';
+				y += lineHeight;
+			} else {
+				line = testLine;
+			}
+		}
+				lines.push(line);
+				return lines;
+	}
+
+	setDialogue(context: CanvasRenderingContext2D, dialogue: Dialogue) {
+		const dialogueWidth = this.canvasSize.width - 20 - this.menuWidth;
+		const dialogueHeight = 100;
+		const dialogueY = this.canvasSize.height - dialogueHeight - 10;
+		const text = this.wrapText(context, dialogue.text, dialogueY + 30, dialogueWidth - 20, 20);
+		this.dialogue = {text: text, portrait: dialogue.portrait};
+	}
+}
+
+export interface Dialogue {
+	text: string,
+	portrait: HTMLImageElement | undefined,
+}
+
+export interface DialogueParsed {
+	text: string[],
+	portrait: HTMLImageElement | undefined,
 }
