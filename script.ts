@@ -1,4 +1,5 @@
 import { BuildingSprite, TilingSprite } from "./classes/buildings.js";
+import { InterfaceLayer } from "./classes/interface.js";
 import { MapLayer, Position, Size } from "./classes/map-layer.js";
 
 const canvasWidth = 800;
@@ -6,6 +7,7 @@ const canvasHeight = 600;
 
 
 let map = new MapLayer({width: canvasWidth, height: canvasHeight});
+let interf = new InterfaceLayer({width: canvasWidth, height: canvasHeight});
 
 async function loadImage(url: string): Promise<any> {
     const image = new Image();
@@ -27,7 +29,9 @@ export function getSize(img: HTMLImageElement, widthNorm: number): Size {
 function renderGame(context: CanvasRenderingContext2D, deltaTime: number) {
 	context.clearRect(0, 0, canvasWidth, canvasHeight);
 	map.renderMap(context, deltaTime);
+	interf.renderInterface(context, deltaTime);
 	renderDebugInfo(context, deltaTime);
+
 }
 
 let playerMouse: Position = {x: 0, y: 0};
@@ -45,9 +49,9 @@ function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
 
     const dtAvg = dts.reduce((a, b) => a + b, 0)/dts.length;
 
-    ctx.fillText(`${Math.floor(1/dtAvg)} FPS`, 20, 50);
-    ctx.fillText(`(${playerMouse.x}, ${playerMouse.y})`, 20, 75);
-    ctx.fillText(`(${map.isoPlayerMouse.x}, ${map.isoPlayerMouse.y})`, 20, 100);
+    ctx.fillText(`${Math.floor(1/dtAvg)} FPS`, 20, 75);
+    ctx.fillText(`(${playerMouse.x}, ${playerMouse.y})`, 20, 100);
+    ctx.fillText(`(${map.isoPlayerMouse.x}, ${map.isoPlayerMouse.y})`, 20, 125);
 }
 
 
