@@ -1,3 +1,4 @@
+import { BuildingSprite } from "./buildings.js";
 import { Size } from "./map-layer.js";
 
 export class InterfaceLayer {
@@ -106,6 +107,10 @@ export class InterfaceLayer {
 	closeDialogue() {
 		this.dialogue = undefined;
 	}
+
+	hasDialogue(): boolean {
+		return this.dialogue == undefined;
+	}
 }
 
 export interface Dialogue {
@@ -116,4 +121,20 @@ export interface Dialogue {
 export interface DialogueParsed {
 	text: string[],
 	portrait: HTMLImageElement | undefined,
+}
+
+export interface BuildingButton {
+	image: BuildingSprite,
+	name: string,
+	hover: boolean,
+}
+
+export class BuildingTab {
+	name: string;
+	buildings: BuildingButton[];
+
+	constructor(name: string, buildings: BuildingButton[]) {
+		this.name = name;
+		this.buildings = buildings;
+	}
 }
