@@ -140,7 +140,7 @@ window.onload = async () => {
 		const mouseX = event.clientX - rect.left;
 		const mouseY = event.clientY - rect.top;
 		playerMouse = {x: mouseX, y: mouseY};
-		map.isoPlayerMouse = map.screenToIso(playerMouse);
+		map.updateMousePosition(playerMouse);
 
 		if (map.isDragging) {
 			map.positionOffset.x = map.dragStart.x - event.clientX;
@@ -269,28 +269,28 @@ window.onload = async () => {
 			if(map.positionOffset.y < 0) {
 				map.positionOffset.y = 0;
 			}
-			map.isoPlayerMouse = map.screenToIso(playerMouse);
+			map.updateMousePosition(playerMouse);
 		}
 		if(moveDown) {
 			map.positionOffset.y = map.positionOffset.y + 10;
 			if(map.positionOffset.y > maxYOffset) {
 				map.positionOffset.y = maxYOffset;
 			}
-			map.isoPlayerMouse = map.screenToIso(playerMouse);
+			map.updateMousePosition(playerMouse);
 		}
 		if(moveLeft) {
 			map.positionOffset.x = map.positionOffset.x - 10;
 			if(map.positionOffset.x < minXOffset) {
 				map.positionOffset.x = minXOffset;
 			}
-			map.isoPlayerMouse = map.screenToIso(playerMouse);
+			map.updateMousePosition(playerMouse);
 		}
 		if(moveRight) {
 			map.positionOffset.x = map.positionOffset.x + 10;
 			if(map.positionOffset.x > maxXOffset) {
 				map.positionOffset.x = maxXOffset;
 			}
-			map.isoPlayerMouse = map.screenToIso(playerMouse);
+			map.updateMousePosition(playerMouse);
 		}
 
 	});

@@ -22,11 +22,13 @@ export class Building {
 	sprite: BuildingSprite;
 	position: Position;
 	accepted: boolean;
+	underCursor: boolean;
 
 	constructor(sprite: BuildingSprite, position: Position, accepted: boolean = true) {
 		this.sprite =  sprite;
 		this.position = position;
 		this.accepted = accepted;
+		this.underCursor = false;
 	}
 }
 

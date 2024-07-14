@@ -106,6 +106,16 @@ export class MapLayer {
 		}
 		return true;
 	}
+	
+	getBuilding(position: Position): Building | undefined {
+		if(position.x < 0 || position.y < 0) {
+			return undefined;
+		}
+		if(position.x >= this.buildingMap[0].length || position.y >= this.buildingMap.length) {
+			return undefined;
+		}
+		return this.buildingMap[position.y][position.x];
+	}
 
 	putBuilding(position: Position, sprite: BuildingSprite, accepted: boolean = true) {
 		if(this.canBePlaced(position, sprite)) {
@@ -284,10 +294,6 @@ export class MapLayer {
 
 
 	renderBuildings(ctx: CanvasRenderingContext2D) {
-		let buildingUnderCuror = undefined;
-		if(this.onMap(this.isoPlayerMouse)) {
-			buildingUnderCuror = this.buildingMap[this.isoPlayerMouse.y][this.isoPlayerMouse.x];
-		}
 		const ghostCanBePlaced = this.mode ? this.canBePlaced(this.isoPlayerMouse, this.mode) : false;
 		ctx.save();
 		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileHeight/2));
@@ -297,7 +303,7 @@ export class MapLayer {
 				this.drawGhost(ctx);
 				ghostDrawn = true;
 			}
-			if(this.mode == undefined && buildingUnderCuror?.position.x == building.position.x && buildingUnderCuror.position.y == building.position.y) {
+			if(this.mode == undefined && building.underCursor) {
 				ctx.save();
 				ctx.filter = this.deleteMode ? "url('./img//red-filter.svg#red')" : "grayscale(40%)";
 				this.drawBuilding(ctx, building.position, building.sprite);
@@ -364,6 +370,18 @@ export class MapLayer {
 		this.mode = sprite;
 	}
 
+	updateMousePosition(position: Position) {
+		let oldBuilding = this.getBuilding(this.isoPlayerMouse);
+		if (oldBuilding) {
+			oldBuilding.underCursor = false;
+		}
+
+		this.isoPlayerMouse = this.screenToIso(position);
+		let newBuilding = this.getBuilding(this.isoPlayerMouse);
+		if(newBuilding) {
+			newBuilding.underCursor = true;
+		}
+	}
 }
 
 export interface Size {
