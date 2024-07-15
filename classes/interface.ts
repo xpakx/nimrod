@@ -3,7 +3,7 @@ import { Size } from "./map-layer.js";
 
 export class InterfaceLayer {
 	canvasSize: Size = {width: 0, height: 0};
-	menuWidth = 200;
+	menuWidth = 400;
 	dialogue: DialogueParsed | undefined = undefined;
 	tab: number | undefined = undefined;
 	tabs: BuildingTab[] = [];
@@ -129,6 +129,7 @@ export class BuildingTab {
 	buildings: BuildingButton[];
 	icon: HTMLImageElement;
 	active: boolean = false;
+	itemOffset: number = 0;
 
 	constructor(name: string, buildings: BuildingButton[], icon: HTMLImageElement) {
 		this.name = name;
@@ -136,15 +137,31 @@ export class BuildingTab {
 		this.icon = icon;
 	}
 
-	draw(context: CanvasRenderingContext2D, canvasSize: Size, _menuWidth: number) {
+	draw(context: CanvasRenderingContext2D, canvasSize: Size, menuWidth: number) {
+		const menuPadding = 20;
 		const buttonSize = 150;
 		const buttonPadding = 20;
 		const buttonMargin = 10;
 		const buildingSize = buttonSize - 2 * buttonPadding;
+		const tabEnd = canvasSize.height
 
-		for(let i = 0; i<this.buildings.length; i++) {
+		let yStart = canvasSize.width - menuWidth + menuPadding;
+		let yMax = canvasSize.width - menuPadding;
+		let currentYOffet = 0;
+		let currentXOffet = 0;
+
+		for(let i = this.itemOffset; i<this.buildings.length; i++) {
+			let currentY = yStart + currentYOffet * (buttonSize + buttonMargin);
+			let currentX = 60 + currentXOffet * (buttonSize + buttonMargin);
+			if(currentY + buttonSize >= yMax) {
+				currentYOffet = 0;
+				currentXOffet += 1;
+				currentY = yStart + currentYOffet * (buttonSize + buttonMargin);
+				currentX = 60 + currentXOffet * (buttonSize + buttonMargin);
+			}
+
 			context.fillStyle = '#1a1a1a';
-			context.fillRect(canvasSize.width - 180, 60 + i * (buttonSize + buttonMargin), buttonSize, buttonSize);
+			context.fillRect(currentY, currentX, buttonSize, buttonSize);
 
 			let buildingWidth = this.buildings[i].image.size.width;
 			let buildingHeight = this.buildings[i].image.size.height;
@@ -161,8 +178,13 @@ export class BuildingTab {
 			
 			context.save();
 			context.filter = "grayscale(40%)";
-			context.drawImage(this.buildings[i].image.image, canvasSize.width - 180 + buttonPadding + paddingWidth, 80 + i * (buttonSize + buttonMargin) + paddingHeight, buildingWidth, buildingHeight);
+			context.drawImage(this.buildings[i].image.image, currentY + paddingWidth + buttonPadding, buttonPadding + currentX + paddingHeight, buildingWidth, buildingHeight);
 			context.restore();
+
+			currentYOffet += 1;
+			if (60 + (1 + currentXOffet) * (buttonSize + buttonMargin) >= tabEnd) {
+				return;
+			}
 		}
 	}
 }
