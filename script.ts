@@ -1,5 +1,5 @@
 import { BuildingSprite, TilingSprite } from "./classes/buildings.js";
-import { BuildingTab, InterfaceLayer } from "./classes/interface.js";
+import { BuildingButton, BuildingTab, InterfaceLayer } from "./classes/interface.js";
 import { MapLayer, Position, Size } from "./classes/map-layer.js";
 
 const canvasWidth = 1200;
@@ -85,15 +85,16 @@ window.onload = async () => {
 	interf.tabs = [
 		new BuildingTab(
 			"housing", [
-				{image: home, name: "home", hover: false},
-				{image: ziggurat, name: "ziggurat", hover: false},
-				{image: tower, name: "tower", hover: false},
-				{image: well, name: "well", hover: false},
-				{image: inspector, name: "inspector", hover: false},
+				new BuildingButton(home, "home"),
+				new BuildingButton(ziggurat, "ziggurat"),
+				new BuildingButton(tower, "tower"),
+				new BuildingButton(well, "well"),
+				new BuildingButton(inspector, "inspector"),
 			], 
 			home.image),
 	];
 	interf.tab = 0;
+	interf.recalculateTabSize();
 	
 	const coinsIcon = await loadImage("./img/coins.svg");
 	const populationIcon = await loadImage("./img/people.svg");

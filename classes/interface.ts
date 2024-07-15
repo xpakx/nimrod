@@ -1,5 +1,5 @@
 import { BuildingSprite } from "./buildings.js";
-import { Size } from "./map-layer.js";
+import { Position, Size } from "./map-layer.js";
 
 export class InterfaceLayer {
 	canvasSize: Size = {width: 0, height: 0};
@@ -21,7 +21,13 @@ export class InterfaceLayer {
 		this.drawTabButtons(context);
 		this.renderDialogueBox(context);
 		if (this.tab  != undefined) {
-			this.tabs[this.tab].draw(context, this.canvasSize, this.menuWidth);
+			this.tabs[this.tab].draw(context);
+		}
+	}
+
+	recalculateTabSize() {
+		if (this.tab  != undefined) {
+			this.tabs[this.tab].prepareButtons(this.canvasSize, this.menuWidth);
 		}
 	}
 
@@ -130,11 +136,20 @@ export interface DialogueParsed {
 	portrait: HTMLImageElement | undefined,
 }
 
-export interface BuildingButton {
-	image: BuildingSprite,
-	name: string,
-	hover: boolean,
+export class BuildingButton {
+	image: BuildingSprite;
+	name: string;
+	hover: boolean = false;
+	positon: Position = {x: 0, y: 0};
+	imgPosition: Position = {x: 0, y: 0};
+	imgSize: Size = {width: 0, height: 0};
+
+	constructor(image: BuildingSprite, name: string) {
+		this.image = image;
+		this.name = name;
+	}
 }
+
 
 export class BuildingTab {
 	name: string;
@@ -142,6 +157,7 @@ export class BuildingTab {
 	icon: HTMLImageElement;
 	active: boolean = false;
 	itemOffset: number = 0;
+	activeButtons: BuildingButton[] = [];
 
 	constructor(name: string, buildings: BuildingButton[], icon: HTMLImageElement) {
 		this.name = name;
@@ -149,7 +165,8 @@ export class BuildingTab {
 		this.icon = icon;
 	}
 
-	draw(context: CanvasRenderingContext2D, canvasSize: Size, menuWidth: number) {
+	prepareButtons(canvasSize: Size, menuWidth: number) {
+		this.activeButtons = [];
 		const menuPadding = 20;
 		const buttonSize = 150;
 		const buttonPadding = 20;
@@ -172,8 +189,6 @@ export class BuildingTab {
 				currentX = 60 + currentXOffet * (buttonSize + buttonMargin);
 			}
 
-			context.fillStyle = '#1a1a1a';
-			context.fillRect(currentY, currentX, buttonSize, buttonSize);
 
 			let buildingWidth = this.buildings[i].image.size.width;
 			let buildingHeight = this.buildings[i].image.size.height;
@@ -187,16 +202,33 @@ export class BuildingTab {
 
 			const paddingWidth = (buildingSize - buildingWidth) / 2
 			const paddingHeight = (buildingSize - buildingHeight) / 2
+			this.buildings[i].positon.x = currentX;
+			this.buildings[i].positon.y = currentY;
+			this.buildings[i].imgPosition.x = currentX + buttonPadding + paddingHeight;
+			this.buildings[i].imgPosition.y = currentY + paddingWidth + buttonPadding;
+			this.buildings[i].imgSize.width = buildingWidth;
+			this.buildings[i].imgSize.height = buildingHeight;
 			
-			context.save();
-			context.filter = "grayscale(40%)";
-			context.drawImage(this.buildings[i].image.image, currentY + paddingWidth + buttonPadding, buttonPadding + currentX + paddingHeight, buildingWidth, buildingHeight);
-			context.restore();
+			this.activeButtons.push(this.buildings[i]);
 
 			currentYOffet += 1;
 			if (60 + (1 + currentXOffet) * (buttonSize + buttonMargin) >= tabEnd) {
 				return;
 			}
+		}
+	}
+
+	draw(context: CanvasRenderingContext2D) {
+		const buttonSize = 150;
+
+		for(let button of this.activeButtons) {
+			context.fillStyle = '#1a1a1a';
+			context.fillRect(button.positon.y, button.positon.x, buttonSize, buttonSize);
+
+			context.save();
+			context.filter = "grayscale(40%)";
+			context.drawImage(button.image.image, button.imgPosition.y, button.imgPosition.x, button.imgSize.width, button.imgSize.height);
+			context.restore();
 		}
 	}
 }
