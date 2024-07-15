@@ -5,6 +5,8 @@ export class InterfaceLayer {
 	canvasSize: Size = {width: 0, height: 0};
 	menuWidth = 200;
 	dialogue: DialogueParsed | undefined = undefined;
+	tab: number | undefined = undefined;
+	tabs: BuildingTab[] = [];
 
 	constructor(canvasSize: Size) {
 		this.canvasSize.height = canvasSize.height;
@@ -14,8 +16,11 @@ export class InterfaceLayer {
 	renderInterface(context: CanvasRenderingContext2D, _deltaTime: number) {
 		this.drawTopPanel(context);
 		this.drawMenu(context);
-		this.drawButtons(context);
+		this.drawTabButtons(context);
 		this.renderDialogueBox(context);
+		if (this.tab  != undefined) {
+			this.tabs[this.tab].draw(context, this.canvasSize, this.menuWidth);
+		}
 	}
 
 	drawTopPanel(context: CanvasRenderingContext2D) {
@@ -33,18 +38,8 @@ export class InterfaceLayer {
 		context.fillRect(this.canvasSize.width - this.menuWidth, 0, this.menuWidth, this.canvasSize.height);
 	}
 
-	drawButtons(context: CanvasRenderingContext2D) {
-		const buttonWidth = 150;
-		const buttonHeight = 30;
-
-		context.fillStyle = '#1a1a1a';
-		context.fillRect(this.canvasSize.width - 180, 60, buttonWidth, buttonHeight);
-		context.fillRect(this.canvasSize.width - 180, 100, buttonWidth, buttonHeight);
-
-		context.fillStyle = 'white';
-		context.font = '16px Arial';
-		context.fillText('Button 1', this.canvasSize.width - 170, 80);
-		context.fillText('Button 2', this.canvasSize.width - 170, 120);
+	drawTabButtons(context: CanvasRenderingContext2D) {
+		// TODO
 	}
 
 	renderDialogueBox(context: CanvasRenderingContext2D) {
@@ -132,9 +127,42 @@ export interface BuildingButton {
 export class BuildingTab {
 	name: string;
 	buildings: BuildingButton[];
+	icon: HTMLImageElement;
+	active: boolean = false;
 
-	constructor(name: string, buildings: BuildingButton[]) {
+	constructor(name: string, buildings: BuildingButton[], icon: HTMLImageElement) {
 		this.name = name;
 		this.buildings = buildings;
+		this.icon = icon;
+	}
+
+	draw(context: CanvasRenderingContext2D, canvasSize: Size, _menuWidth: number) {
+		const buttonSize = 150;
+		const buttonPadding = 20;
+		const buttonMargin = 10;
+		const buildingSize = buttonSize - 2 * buttonPadding;
+
+		for(let i = 0; i<this.buildings.length; i++) {
+			context.fillStyle = '#1a1a1a';
+			context.fillRect(canvasSize.width - 180, 60 + i * (buttonSize + buttonMargin), buttonSize, buttonSize);
+
+			let buildingWidth = this.buildings[i].image.size.width;
+			let buildingHeight = this.buildings[i].image.size.height;
+			if(buildingWidth > buildingHeight) {
+				buildingHeight = buildingHeight*(buildingSize/buildingWidth);
+				buildingWidth = buildingSize;
+			} else {
+				buildingWidth = buildingWidth*(buildingSize/buildingHeight);
+				buildingHeight = buildingSize;
+			}
+
+			const paddingWidth = (buildingSize - buildingWidth) / 2
+			const paddingHeight = (buildingSize - buildingHeight) / 2
+			
+			context.save();
+			context.filter = "grayscale(40%)";
+			context.drawImage(this.buildings[i].image.image, canvasSize.width - 180 + buttonPadding + paddingWidth, 80 + i * (buttonSize + buttonMargin) + paddingHeight, buildingWidth, buildingHeight);
+			context.restore();
+		}
 	}
 }

@@ -1,5 +1,5 @@
 import { BuildingSprite, TilingSprite } from "./classes/buildings.js";
-import { InterfaceLayer } from "./classes/interface.js";
+import { BuildingTab, InterfaceLayer } from "./classes/interface.js";
 import { MapLayer, Position, Size } from "./classes/map-layer.js";
 
 const canvasWidth = 1200;
@@ -8,6 +8,7 @@ const canvasHeight = 800;
 
 let map = new MapLayer({width: canvasWidth, height: canvasHeight});
 let interf = new InterfaceLayer({width: canvasWidth, height: canvasHeight});
+
 
 async function loadImage(url: string): Promise<any> {
     const image = new Image();
@@ -80,6 +81,19 @@ window.onload = async () => {
 	sprites["well"] = well;
 	sprites["inspector"] = inspector;
 
+
+	interf.tabs = [
+		new BuildingTab(
+			"housing", [
+				{image: home, name: "home", hover: false},
+				{image: ziggurat, name: "ziggurat", hover: false},
+				{image: tower, name: "tower", hover: false},
+				{image: well, name: "well", hover: false},
+				{image: inspector, name: "inspector", hover: false},
+			], 
+			home.image),
+	];
+	interf.tab = 0;
 	const roads = [
 		await loadImage("./img/road0000.svg"), 
 		await loadImage("./img/road0001.svg"), 
