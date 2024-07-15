@@ -7,6 +7,8 @@ export class InterfaceLayer {
 	dialogue: DialogueParsed | undefined = undefined;
 	tab: number | undefined = undefined;
 	tabs: BuildingTab[] = [];
+	populationIcon: HTMLImageElement | undefined = undefined;
+	coinsIcon: HTMLImageElement | undefined = undefined;
 
 	constructor(canvasSize: Size) {
 		this.canvasSize.height = canvasSize.height;
@@ -29,8 +31,18 @@ export class InterfaceLayer {
 
 		context.fillStyle = 'white';
 		context.font = '16px Arial';
-		context.fillText('Gold: 1000', 50, 30);
-		context.fillText('Population: 1000', 200, 30);
+		if(this.coinsIcon) {
+			context.drawImage(this.coinsIcon, 50, 30 - 15, 20, 20);
+			context.fillText('1000', 75, 30);
+		} else {
+			context.fillText('Gold: 1000', 50, 30);
+		}
+		if(this.populationIcon) {
+			context.drawImage(this.populationIcon, 200, 30 - 15, 20, 20);
+			context.fillText('1000', 225, 30);
+		} else {
+			context.fillText('Population: 1000', 200, 30);
+		}
 	}
 
 	drawMenu(context: CanvasRenderingContext2D) {

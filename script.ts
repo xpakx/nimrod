@@ -94,6 +94,12 @@ window.onload = async () => {
 			home.image),
 	];
 	interf.tab = 0;
+	
+	const coinsIcon = await loadImage("./img/coins.svg");
+	const populationIcon = await loadImage("./img/people.svg");
+	interf.coinsIcon = coinsIcon;
+	interf.populationIcon = populationIcon;
+
 	const roads = [
 		await loadImage("./img/road0000.svg"), 
 		await loadImage("./img/road0001.svg"), 
