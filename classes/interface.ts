@@ -10,10 +10,24 @@ export class InterfaceLayer {
 	tabs: BuildingTab[] = [];
 	populationIcon: HTMLImageElement | undefined = undefined;
 	coinsIcon: HTMLImageElement | undefined = undefined;
+	coinsIconSize: Size = {width: 0, height: 0};
+	populationIconSize: Size = {width: 0, height: 0};
 
 	constructor(canvasSize: Size) {
 		this.canvasSize.height = canvasSize.height;
 		this.canvasSize.width = canvasSize.width;
+	}
+
+	calculateIconsSize() {
+		const height = 20;
+		if(this.coinsIcon) {
+			this.coinsIconSize.height = height;
+			this.coinsIconSize.width = this.coinsIcon.width*(height/this.coinsIcon.height);
+		}
+		if(this.populationIcon) {
+			this.populationIconSize.height = height;
+			this.populationIconSize.width = this.populationIcon.width*(height/this.populationIcon.height);
+		}
 	}
 
 	renderInterface(context: CanvasRenderingContext2D, _deltaTime: number) {
@@ -46,13 +60,13 @@ export class InterfaceLayer {
 		context.fillStyle = 'white';
 		context.font = '16px Arial';
 		if(this.coinsIcon) {
-			context.drawImage(this.coinsIcon, 50, 30 - 15, 20, 20);
+			context.drawImage(this.coinsIcon, 50, 30 - 15, this.coinsIconSize.width, this.coinsIconSize.height);
 			context.fillText('1000', 75, 30);
 		} else {
 			context.fillText('Gold: 1000', 50, 30);
 		}
 		if(this.populationIcon) {
-			context.drawImage(this.populationIcon, 200, 30 - 15, 20, 20);
+			context.drawImage(this.populationIcon, 200, 30 - 15, this.populationIconSize.width, this.populationIconSize.height);
 			context.fillText('1000', 225, 30);
 		} else {
 			context.fillText('Population: 1000', 200, 30);

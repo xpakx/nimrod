@@ -100,6 +100,7 @@ window.onload = async () => {
 	const populationIcon = await loadImage("./img/people.svg");
 	interf.coinsIcon = coinsIcon;
 	interf.populationIcon = populationIcon;
+	interf.calculateIconsSize();
 
 	const roads = [
 		await loadImage("./img/road0000.svg"), 
