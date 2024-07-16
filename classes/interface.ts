@@ -20,6 +20,12 @@ export class InterfaceLayer {
 		this.canvasSize.width = canvasSize.width;
 	}
 
+	onMouse(position: Position) {
+		if(this.tab != undefined) {
+			this.tabs[this.tab].onMouse(position);
+		}
+	}
+
 	calculateIconsSize() {
 		const height = 20;
 		if(this.coinsIcon) {
@@ -208,6 +214,7 @@ export class BuildingTab {
 	activeButtons: BuildingButton[] = [];
 	defaultButtonSize = 125;
 	buttonSize = this.defaultButtonSize;
+	mousePosition: Position = {x: -1, y: -1};
 
 	constructor(name: string, buildings: BuildingButton[], icon: HTMLImageElement) {
 		this.name = name;
@@ -270,13 +277,32 @@ export class BuildingTab {
 
 	draw(context: CanvasRenderingContext2D) {
 		for(let button of this.activeButtons) {
-			context.fillStyle = '#1a1a1a';
-			context.fillRect(button.positon.y, button.positon.x, this.buttonSize, this.buttonSize);
+			let hover = this.inButton(this.mousePosition, button);
+			context.fillStyle = hover ? '#3a3a3a' : '#1a1a1a';
+			context.fillRect(button.position.x, button.position.y, this.buttonSize, this.buttonSize);
 
-			context.save();
-			context.filter = "grayscale(40%)";
-			context.drawImage(button.image.image, button.imgPosition.y, button.imgPosition.x, button.imgSize.width, button.imgSize.height);
-			context.restore();
+			if(!hover) {
+				context.save();
+				context.filter = "grayscale(40%)";
+			}
+			context.drawImage(button.image.image, button.imgPosition.x, button.imgPosition.y, button.imgSize.width, button.imgSize.height);
+			if(!hover) {
+				context.restore();
+			}
 		}
+	}
+
+	onMouse(position: Position) {
+		this.mousePosition = position;
+	}
+
+	inButton(position: Position, button: BuildingButton): boolean {
+		if(positon.x < button.position.x || position.x > button.position.x + this.buttonSize) {
+			return false;
+		}
+		if(position.y < button.position.y || position.y > button.position.y + this.buttonSize) {
+			return false;
+		}
+		return true;
 	}
 }

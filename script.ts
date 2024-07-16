@@ -177,7 +177,8 @@ window.onload = async () => {
 		playerMouse = {x: mouseX, y: mouseY};
 		if(!interf.mouseInsideInterface(playerMouse)) {
 			map.updateMousePosition(playerMouse);
-		}
+		} 
+		interf.onMouse(playerMouse);
 
 		if (map.isDragging) {
 			map.positionOffset.x = map.dragStart.x - event.clientX;
