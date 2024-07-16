@@ -194,7 +194,7 @@ export class BuildingButton {
 	image: BuildingSprite;
 	name: string;
 	hover: boolean = false;
-	positon: Position = {x: 0, y: 0};
+	position: Position = {x: 0, y: 0};
 	imgPosition: Position = {x: 0, y: 0};
 	imgSize: Size = {width: 0, height: 0};
 
@@ -231,21 +231,20 @@ export class BuildingTab {
 		const buildingSize = this.buttonSize - 2 * buttonPadding;
 		const tabEnd = canvasSize.height
 
-		let yStart = canvasSize.width - menuWidth + menuPadding;
-		let yMax = canvasSize.width - menuPadding;
-		let currentYOffet = 0;
-		let currentXOffet = 0;
+		let xStart = canvasSize.width - menuWidth + menuPadding;
+		let xMax = canvasSize.width - menuPadding;
+		let currentYOffset = 0;
+		let currentXOffset = 0;
 
 		for(let i = this.itemOffset; i<this.buildings.length; i++) {
-			let currentY = yStart + currentYOffet * (this.buttonSize + buttonMargin);
-			let currentX = 60 + currentXOffet * (this.buttonSize + buttonMargin);
-			if(currentY + this.buttonSize >= yMax) {
-				currentYOffet = 0;
-				currentXOffet += 1;
-				currentY = yStart + currentYOffet * (this.buttonSize + buttonMargin);
-				currentX = 60 + currentXOffet * (this.buttonSize + buttonMargin);
+			let currentX = xStart + currentXOffset * (this.buttonSize + buttonMargin);
+			let currentY = 60 + currentYOffset * (this.buttonSize + buttonMargin);
+			if(currentX + this.buttonSize >= xMax) {
+				currentXOffset = 0;
+				currentYOffset += 1;
+				currentX = xStart;
+				currentY = 60 + currentYOffset * (this.buttonSize + buttonMargin);
 			}
-
 
 			let buildingWidth = this.buildings[i].image.size.width;
 			let buildingHeight = this.buildings[i].image.size.height;
@@ -259,17 +258,17 @@ export class BuildingTab {
 
 			const paddingWidth = (buildingSize - buildingWidth) / 2
 			const paddingHeight = (buildingSize - buildingHeight) / 2
-			this.buildings[i].positon.x = currentX;
-			this.buildings[i].positon.y = currentY;
-			this.buildings[i].imgPosition.x = currentX + buttonPadding + paddingHeight;
-			this.buildings[i].imgPosition.y = currentY + paddingWidth + buttonPadding;
+			this.buildings[i].position.x = currentX;
+			this.buildings[i].position.y = currentY;
+			this.buildings[i].imgPosition.x = currentX + buttonPadding + paddingWidth;
+			this.buildings[i].imgPosition.y = currentY + paddingHeight + buttonPadding;
 			this.buildings[i].imgSize.width = buildingWidth;
 			this.buildings[i].imgSize.height = buildingHeight;
 			
 			this.activeButtons.push(this.buildings[i]);
 
-			currentYOffet += 1;
-			if (60 + (1 + currentXOffet) * (this.buttonSize + buttonMargin) >= tabEnd) {
+			currentXOffset += 1;
+			if (60 + (1 + currentYOffset) * (this.buttonSize + buttonMargin) >= tabEnd) {
 				return;
 			}
 		}
@@ -297,7 +296,7 @@ export class BuildingTab {
 	}
 
 	inButton(position: Position, button: BuildingButton): boolean {
-		if(positon.x < button.position.x || position.x > button.position.x + this.buttonSize) {
+		if(position.x < button.position.x || position.x > button.position.x + this.buttonSize) {
 			return false;
 		}
 		if(position.y < button.position.y || position.y > button.position.y + this.buttonSize) {
