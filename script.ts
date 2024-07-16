@@ -161,7 +161,9 @@ window.onload = async () => {
 		const mouseX = event.clientX - rect.left;
 		const mouseY = event.clientY - rect.top;
 		playerMouse = {x: mouseX, y: mouseY};
-		map.updateMousePosition(playerMouse);
+		if(!interf.mouseInsideInterface(playerMouse)) {
+			map.updateMousePosition(playerMouse);
+		}
 
 		if (map.isDragging) {
 			map.positionOffset.x = map.dragStart.x - event.clientX;
@@ -193,6 +195,9 @@ window.onload = async () => {
 
 		console.log(event.button)
 		if(event.button == 0) {
+			if(interf.mouseInsideInterface(playerMouse)) {
+				return;
+			}
 			if(map.mode) {
 				map.putBuilding(map.isoPlayerMouse, map.mode, false);
 				map.finalizeBuildingPlacement(map.isoPlayerMouse);

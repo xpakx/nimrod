@@ -4,6 +4,7 @@ import { Position, Size } from "./map-layer.js";
 export class InterfaceLayer {
 	canvasSize: Size = {width: 0, height: 0};
 	menuWidth = 400;
+	topPanelHeight = 50;
 	dialogue: DialogueParsed | undefined = undefined;
 	tab: number | undefined = undefined;
 	tabs: BuildingTab[] = [];
@@ -31,9 +32,16 @@ export class InterfaceLayer {
 		}
 	}
 
+	mouseInsideInterface(position: Position): boolean {
+		if (position.y <= this.topPanelHeight || position.x >= this.canvasSize.width - this.menuWidth) {
+			return true;
+		}
+		return false;
+	}
+
 	drawTopPanel(context: CanvasRenderingContext2D) {
 		context.fillStyle = '#1f1f1f';
-		context.fillRect(0, 0, this.canvasSize.width - this.menuWidth, 50);
+		context.fillRect(0, 0, this.canvasSize.width - this.menuWidth, this.topPanelHeight);
 
 		context.fillStyle = 'white';
 		context.font = '16px Arial';
