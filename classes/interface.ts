@@ -190,7 +190,7 @@ export class BuildingTab {
 	prepareButtons(canvasSize: Size, menuWidth: number) {
 		this.activeButtons = [];
 		const menuPadding = 20;
-		const buttonSize = 150;
+		const buttonSize = 150 < menuWidth - menuPadding ? 150 : menuWidth - menuPadding;
 		const buttonPadding = 20;
 		const buttonMargin = 10;
 		const buildingSize = buttonSize - 2 * buttonPadding;
