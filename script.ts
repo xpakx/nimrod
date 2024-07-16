@@ -211,6 +211,12 @@ window.onload = async () => {
 		console.log(event.button)
 		if(event.button == 0) {
 			if(interf.mouseInsideInterface(playerMouse)) {
+				const clickResult = interf.click(playerMouse);
+				if (clickResult != undefined) {
+					const clickedBuilding = sprites[clickResult];
+					if (clickedBuilding) 
+					 map.switchToBuildMode(clickedBuilding);
+				}
 				return;
 			}
 			if(map.mode) {

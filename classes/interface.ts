@@ -14,6 +14,7 @@ export class InterfaceLayer {
 	coinsIcon: HTMLImageElement | undefined = undefined;
 	coinsIconSize: Size = {width: 0, height: 0};
 	populationIconSize: Size = {width: 0, height: 0};
+	mousePosition = {x: -1, y: -1};
 
 	constructor(canvasSize: Size) {
 		this.canvasSize.height = canvasSize.height;
@@ -24,6 +25,7 @@ export class InterfaceLayer {
 		if(this.tab != undefined) {
 			this.tabs[this.tab].onMouse(position);
 		}
+		this.mousePosition = position;
 	}
 
 	calculateIconsSize() {
@@ -41,7 +43,6 @@ export class InterfaceLayer {
 	renderInterface(context: CanvasRenderingContext2D, _deltaTime: number) {
 		this.drawTopPanel(context);
 		this.drawMenu(context);
-		this.drawTabButtons(context);
 		this.drawTabs(context);
 		this.renderDialogueBox(context);
 		if (this.tab  != undefined) {
@@ -85,10 +86,6 @@ export class InterfaceLayer {
 	drawMenu(context: CanvasRenderingContext2D) {
 		context.fillStyle = '#1f1f1f';
 		context.fillRect(this.canvasSize.width - this.menuWidth, 0, this.menuWidth, this.canvasSize.height);
-	}
-
-	drawTabButtons(context: CanvasRenderingContext2D) {
-		// TODO
 	}
 
 	renderDialogueBox(context: CanvasRenderingContext2D) {
@@ -160,16 +157,23 @@ export class InterfaceLayer {
 		const start = 60;
 		const tabSize = this.tabWidth;
 		for(let i = 0; i<this.tabs.length; i++) {
+			const hover = this.inTab(this.mousePosition, i);
 			if(this.tabImg) {
 				context.drawImage(this.tabImg, this.canvasSize.width - this.menuWidth, start + i*tabSize, tabSize, tabSize);
 			}
-			if(i != this.tab) {
+			if(i != this.tab || hover) {
 				context.save()
+			}
+			if(hover) {
+				context.filter = i == this.tab ? "brightness(140%)" : "grayscale(80%) brightness(140%)";
+			} else if(i != this.tab) {
 				context.filter = "grayscale(80%)";
 			}
 			context.drawImage(this.tabs[i].icon, this.canvasSize.width - this.menuWidth + 5, start + i*tabSize + 5, tabSize - 10, tabSize - 10);
+			if(i != this.tab || hover) {
+				context.restore()
+			}
 			if (i != this.tab) {
-				context.restore();
 				context.strokeStyle = "#343434";
 				context.beginPath();
 				context.moveTo(this.canvasSize.width - this.menuWidth + this.tabWidth, start + i*tabSize);
@@ -177,6 +181,44 @@ export class InterfaceLayer {
 				context.stroke();
 			}
 		}
+	}
+
+	getTabUnderCursor(position: Position): number | undefined {
+		for(let i = 0; i<this.tabs.length; i++) {
+			if(this.inTab(position, i)) {
+				return i;
+			}
+		}
+		return undefined;
+	}
+
+	inTab(position: Position, tab: number): boolean {
+		const start = 60;
+		const x = this.canvasSize.width - this.menuWidth;
+		const y = start + tab*this.tabWidth;
+		const x2 = x + this.tabWidth;
+		const y2 = y + this.tabWidth;
+		if(position.x < x || position.x > x2) {
+			return false;
+		}
+		if(position.y < y || position.y > y2) {
+			return false;
+		}
+		return true;
+	}
+
+	click(position: Position): string | undefined { // TODO
+		const tab = this.getTabUnderCursor(position);
+		if (tab != undefined) {
+			this.tab = tab;
+			this.recalculateTabSize();
+			return undefined;
+		}
+		if(this.tab != undefined) {
+			return this.tabs[this.tab].click(position);
+		}
+
+		return undefined;
 	}
 }
 
@@ -303,5 +345,14 @@ export class BuildingTab {
 			return false;
 		}
 		return true;
+	}
+
+	click(position: Position): string | undefined { // TODO
+		for(let button of this.activeButtons) {
+			if(this.inButton(position, button)) {
+				return button.name;
+			}
+		}
+		return undefined;
 	}
 }
