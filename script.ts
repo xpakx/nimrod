@@ -81,35 +81,28 @@ window.onload = async () => {
 	sprites["well"] = well;
 	sprites["inspector"] = inspector;
 
+	const housing = await loadImage("./img/housing.svg");
+	const religion = await loadImage("./img/religion.svg");
+	const military = await loadImage("./img/military.svg");
 
 	interf.tabs = [
 		new BuildingTab(
 			"housing", [
 				new BuildingButton(home, "home"),
-				new BuildingButton(ziggurat, "ziggurat"),
-				new BuildingButton(tower, "tower"),
 				new BuildingButton(well, "well"),
 				new BuildingButton(inspector, "inspector"),
 			], 
-			home.image),
+			housing),
 		new BuildingTab(
-			"housing", [
-				new BuildingButton(home, "home"),
+			"religion", [
 				new BuildingButton(ziggurat, "ziggurat"),
-				new BuildingButton(tower, "tower"),
-				new BuildingButton(well, "well"),
-				new BuildingButton(inspector, "inspector"),
 			], 
-			home.image),
+			religion),
 		new BuildingTab(
-			"housing", [
-				new BuildingButton(home, "home"),
-				new BuildingButton(ziggurat, "ziggurat"),
+			"military", [
 				new BuildingButton(tower, "tower"),
-				new BuildingButton(well, "well"),
-				new BuildingButton(inspector, "inspector"),
 			], 
-			home.image),
+			military),
 	];
 	interf.tab = 0;
 	interf.recalculateTabSize();
