@@ -3,10 +3,12 @@ import { Position, Size } from "./map-layer.js";
 
 export class InterfaceLayer {
 	canvasSize: Size = {width: 0, height: 0};
-	menuWidth = 400;
+	menuWidth = 420;
+	tabWidth = 65;
 	topPanelHeight = 50;
 	dialogue: DialogueParsed | undefined = undefined;
 	tab: number | undefined = undefined;
+	tabImg: HTMLImageElement | undefined = undefined;
 	tabs: BuildingTab[] = [];
 	populationIcon: HTMLImageElement | undefined = undefined;
 	coinsIcon: HTMLImageElement | undefined = undefined;
@@ -34,6 +36,7 @@ export class InterfaceLayer {
 		this.drawTopPanel(context);
 		this.drawMenu(context);
 		this.drawTabButtons(context);
+		this.drawTabs(context);
 		this.renderDialogueBox(context);
 		if (this.tab  != undefined) {
 			this.tabs[this.tab].draw(context);
@@ -42,7 +45,7 @@ export class InterfaceLayer {
 
 	recalculateTabSize() {
 		if (this.tab  != undefined) {
-			this.tabs[this.tab].prepareButtons(this.canvasSize, this.menuWidth);
+			this.tabs[this.tab].prepareButtons(this.canvasSize, this.menuWidth - this.tabWidth);
 		}
 	}
 
@@ -146,6 +149,29 @@ export class InterfaceLayer {
 	hasDialogue(): boolean {
 		return this.dialogue == undefined;
 	}
+
+	drawTabs(context: CanvasRenderingContext2D) {
+		const start = 60;
+		const tabSize = this.tabWidth;
+		for(let i = 0; i<this.tabs.length; i++) {
+			if(this.tabImg) {
+				context.drawImage(this.tabImg, this.canvasSize.width - this.menuWidth, start + i*tabSize, tabSize, tabSize);
+			}
+			if(i != this.tab) {
+				context.save()
+				context.filter = "grayscale(80%)";
+			}
+			context.drawImage(this.tabs[i].icon, this.canvasSize.width - this.menuWidth + 5, start + i*tabSize + 5, tabSize - 10, tabSize - 10);
+			if (i != this.tab) {
+				context.restore();
+				context.strokeStyle = "#343434";
+				context.beginPath();
+				context.moveTo(this.canvasSize.width - this.menuWidth + this.tabWidth, start + i*tabSize);
+				context.lineTo(this.canvasSize.width - this.menuWidth + this.tabWidth, start + (i+1)*tabSize);
+				context.stroke();
+			}
+		}
+	}
 }
 
 export interface Dialogue {
@@ -180,6 +206,8 @@ export class BuildingTab {
 	active: boolean = false;
 	itemOffset: number = 0;
 	activeButtons: BuildingButton[] = [];
+	defaultButtonSize = 125;
+	buttonSize = this.defaultButtonSize;
 
 	constructor(name: string, buildings: BuildingButton[], icon: HTMLImageElement) {
 		this.name = name;
@@ -190,10 +218,10 @@ export class BuildingTab {
 	prepareButtons(canvasSize: Size, menuWidth: number) {
 		this.activeButtons = [];
 		const menuPadding = 20;
-		const buttonSize = 150 < menuWidth - menuPadding ? 150 : menuWidth - menuPadding;
+		this.buttonSize = this.defaultButtonSize < menuWidth - menuPadding ? this.defaultButtonSize : menuWidth - menuPadding;
 		const buttonPadding = 20;
 		const buttonMargin = 10;
-		const buildingSize = buttonSize - 2 * buttonPadding;
+		const buildingSize = this.buttonSize - 2 * buttonPadding;
 		const tabEnd = canvasSize.height
 
 		let yStart = canvasSize.width - menuWidth + menuPadding;
@@ -202,13 +230,13 @@ export class BuildingTab {
 		let currentXOffet = 0;
 
 		for(let i = this.itemOffset; i<this.buildings.length; i++) {
-			let currentY = yStart + currentYOffet * (buttonSize + buttonMargin);
-			let currentX = 60 + currentXOffet * (buttonSize + buttonMargin);
-			if(currentY + buttonSize >= yMax) {
+			let currentY = yStart + currentYOffet * (this.buttonSize + buttonMargin);
+			let currentX = 60 + currentXOffet * (this.buttonSize + buttonMargin);
+			if(currentY + this.buttonSize >= yMax) {
 				currentYOffet = 0;
 				currentXOffet += 1;
-				currentY = yStart + currentYOffet * (buttonSize + buttonMargin);
-				currentX = 60 + currentXOffet * (buttonSize + buttonMargin);
+				currentY = yStart + currentYOffet * (this.buttonSize + buttonMargin);
+				currentX = 60 + currentXOffet * (this.buttonSize + buttonMargin);
 			}
 
 
@@ -234,18 +262,16 @@ export class BuildingTab {
 			this.activeButtons.push(this.buildings[i]);
 
 			currentYOffet += 1;
-			if (60 + (1 + currentXOffet) * (buttonSize + buttonMargin) >= tabEnd) {
+			if (60 + (1 + currentXOffet) * (this.buttonSize + buttonMargin) >= tabEnd) {
 				return;
 			}
 		}
 	}
 
 	draw(context: CanvasRenderingContext2D) {
-		const buttonSize = 150;
-
 		for(let button of this.activeButtons) {
 			context.fillStyle = '#1a1a1a';
-			context.fillRect(button.positon.y, button.positon.x, buttonSize, buttonSize);
+			context.fillRect(button.positon.y, button.positon.x, this.buttonSize, this.buttonSize);
 
 			context.save();
 			context.filter = "grayscale(40%)";

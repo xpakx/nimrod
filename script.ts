@@ -92,15 +92,35 @@ window.onload = async () => {
 				new BuildingButton(inspector, "inspector"),
 			], 
 			home.image),
+		new BuildingTab(
+			"housing", [
+				new BuildingButton(home, "home"),
+				new BuildingButton(ziggurat, "ziggurat"),
+				new BuildingButton(tower, "tower"),
+				new BuildingButton(well, "well"),
+				new BuildingButton(inspector, "inspector"),
+			], 
+			home.image),
+		new BuildingTab(
+			"housing", [
+				new BuildingButton(home, "home"),
+				new BuildingButton(ziggurat, "ziggurat"),
+				new BuildingButton(tower, "tower"),
+				new BuildingButton(well, "well"),
+				new BuildingButton(inspector, "inspector"),
+			], 
+			home.image),
 	];
 	interf.tab = 0;
 	interf.recalculateTabSize();
 	
 	const coinsIcon = await loadImage("./img/coins.svg");
 	const populationIcon = await loadImage("./img/people.svg");
+	const tab = await loadImage("./img/tab.svg");
 	interf.coinsIcon = coinsIcon;
 	interf.populationIcon = populationIcon;
 	interf.calculateIconsSize();
+	interf.tabImg = tab;
 
 	const roads = [
 		await loadImage("./img/road0000.svg"), 
