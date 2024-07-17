@@ -288,6 +288,9 @@ export class BuildingTab {
 				currentYOffset += 1;
 				currentX = xStart;
 				currentY = 60 + currentYOffset * (this.buttonSize + buttonMargin);
+				if (currentY >= tabEnd) {
+					return;
+				}
 			}
 
 			let buildingWidth = this.buildings[i].image.size.width;
@@ -312,9 +315,6 @@ export class BuildingTab {
 			this.activeButtons.push(this.buildings[i]);
 
 			currentXOffset += 1;
-			if (60 + (1 + currentYOffset) * (this.buttonSize + buttonMargin) >= tabEnd) {
-				return;
-			}
 		}
 	}
 
