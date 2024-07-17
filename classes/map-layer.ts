@@ -299,7 +299,7 @@ export class MapLayer {
 		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileHeight/2));
 		let ghostDrawn = false;
 		for (const building of this.buildings) {
-			if(ghostCanBePlaced && this.ghostDiff(building) <= 0) {
+			if(!ghostDrawn && ghostCanBePlaced && this.ghostDiff(building) <= 0) {
 				this.drawGhost(ctx);
 				ghostDrawn = true;
 			}
