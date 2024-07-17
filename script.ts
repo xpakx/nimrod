@@ -84,6 +84,9 @@ window.onload = async () => {
 	const housing = await loadImage("./img/housing.svg");
 	const religion = await loadImage("./img/religion.svg");
 	const military = await loadImage("./img/military.svg");
+	const agriculture = await loadImage("./img/agriculture.svg");
+	const science = await loadImage("./img/science.svg");
+	const industry = await loadImage("./img/industry.svg");
 
 	interf.tabs = [
 		new BuildingTab(
@@ -91,6 +94,15 @@ window.onload = async () => {
 				new BuildingButton(home, "home"),
 				new BuildingButton(well, "well"),
 				new BuildingButton(inspector, "inspector"),
+				new BuildingButton(home, "home"),
+				new BuildingButton(home, "home"),
+				new BuildingButton(home, "home"),
+				new BuildingButton(home, "home"),
+				new BuildingButton(home, "home"),
+				new BuildingButton(home, "home"),
+				new BuildingButton(home, "home"),
+				new BuildingButton(home, "home"),
+				new BuildingButton(home, "home"),
 			], 
 			housing),
 		new BuildingTab(
@@ -103,6 +115,9 @@ window.onload = async () => {
 				new BuildingButton(tower, "tower"),
 			], 
 			military),
+		new BuildingTab("agriculture", [], agriculture),
+		new BuildingTab("science", [], science),
+		new BuildingTab("industry", [], industry),
 	];
 	interf.tab = 0;
 	interf.recalculateTabSize();
