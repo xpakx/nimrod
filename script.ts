@@ -1,5 +1,5 @@
 import { BuildingSprite, TilingSprite } from "./classes/buildings.js";
-import { BuildingButton, BuildingTab, InterfaceLayer } from "./classes/interface.js";
+import { ActionButton, BuildingButton, BuildingTab, ButtonRow, InterfaceLayer } from "./classes/interface.js";
 import { MapLayer, Position, Size } from "./classes/map-layer.js";
 
 const canvasWidth = 1200;
@@ -129,6 +129,31 @@ window.onload = async () => {
 	interf.populationIcon = populationIcon;
 	interf.calculateIconsSize();
 	interf.tabImg = tab;
+
+	const roadButton = await loadImage("./img/road-button.svg");
+	const deleteButton = await loadImage("./img/delete-button.svg");
+	const menuRow: ButtonRow = {
+		y: interf.buildingMenuHeight + 50,	
+		buttons: [
+			new ActionButton(roadButton, "road", {width: 40, height: 40}),
+			new ActionButton(deleteButton, "delete", {width: 40, height: 40}),
+		]
+	};
+	interf.addButtonRow(menuRow);
+
+	const world = await loadImage("./img/world.svg");
+	const city = await loadImage("./img/city.svg");
+	const kingdom = await loadImage("./img/kingdom.svg");
+	const mapRow: ButtonRow = {
+		y: canvas.height - 80,	
+		buttons: [
+			new ActionButton(city, "toCity", {width: 50, height: 50}),
+			new ActionButton(kingdom, "toKingdom", {width: 50, height: 50}),
+			new ActionButton(world, "toMap", {width: 50, height: 50}),
+		]
+	};
+	interf.addButtonRow(mapRow);
+
 
 	const roads = [
 		await loadImage("./img/road0000.svg"), 

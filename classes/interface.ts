@@ -18,6 +18,8 @@ export class InterfaceLayer {
 
 	buildingMenuHeight = 300;
 
+	buttons: ButtonRow[] = [];
+
 	constructor(canvasSize: Size) {
 		this.canvasSize.height = canvasSize.height;
 		this.canvasSize.width = canvasSize.width;
@@ -28,6 +30,11 @@ export class InterfaceLayer {
 			this.tabs[this.tab].onMouse(position);
 		}
 		this.mousePosition = position;
+	}
+
+	addButtonRow(row: ButtonRow) {
+		this.buttons.push(row);
+		this.calculateButtonRow(row);
 	}
 
 	calculateIconsSize() {
@@ -42,6 +49,22 @@ export class InterfaceLayer {
 		}
 	}
 
+	calculateButtonRow(row: ButtonRow) {
+		const gap = 20;
+		let size = 0;
+		for(let button of row.buttons) {
+			size += button.size.width;
+		}
+		size += (row.buttons.length - 1) * gap;
+		const padding = Math.floor((this.menuWidth - size)/2)
+		let x = padding + this.canvasSize.width - this.menuWidth;
+		for(let button of row.buttons) {
+			button.position.x = x;
+			button.position.y = row.y;
+			x += button.size.width + gap;
+		}
+	}
+
 	renderInterface(context: CanvasRenderingContext2D, _deltaTime: number) {
 		this.drawTopPanel(context);
 		this.drawMenu(context);
@@ -50,6 +73,33 @@ export class InterfaceLayer {
 		if (this.tab  != undefined) {
 			this.tabs[this.tab].draw(context);
 		}
+		this.renderButtons(context);
+	}
+
+	renderButtons(context: CanvasRenderingContext2D) {
+		for(let row of this.buttons) {
+			for(let button of row.buttons) {
+				const hover = this.inButton(this.mousePosition, button);
+				if(hover) {
+					context.save();
+					context.filter = "brightness(140%)";
+				} 
+				context.drawImage(button.image, button.position.x, button.position.y, button.size.width, button.size.height);
+				if(hover) {
+					context.restore()
+				}
+			}
+		}
+	}
+
+	inButton(position: Position, button: ActionButton): boolean {
+		if(position.x < button.position.x || position.x > button.position.x + button.size.width) {
+			return false;
+		}
+		if(position.y < button.position.y || position.y > button.position.y + button.size.height) {
+			return false;
+		}
+		return true;
 	}
 
 	recalculateTabSize() {
@@ -357,4 +407,23 @@ export class BuildingTab {
 		}
 		return undefined;
 	}
+}
+
+export class ActionButton {
+	image: HTMLImageElement;
+	action: string;
+	hover: boolean = false;
+	position: Position = {x: 0, y: 0};
+	size: Size;
+
+	constructor(image: HTMLImageElement, name: string, size: Size) {
+		this.image = image;
+		this.action = name;
+		this.size = size;
+	}
+}
+
+export interface ButtonRow {
+	buttons: ActionButton[];
+	y: number;
 }
