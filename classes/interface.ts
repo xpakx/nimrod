@@ -16,6 +16,8 @@ export class InterfaceLayer {
 	populationIconSize: Size = {width: 0, height: 0};
 	mousePosition = {x: -1, y: -1};
 
+	buildingMenuHeight = 300;
+
 	constructor(canvasSize: Size) {
 		this.canvasSize.height = canvasSize.height;
 		this.canvasSize.width = canvasSize.width;
@@ -51,8 +53,9 @@ export class InterfaceLayer {
 	}
 
 	recalculateTabSize() {
+		this.buildingMenuHeight = 60 + Math.max(300, this.tabWidth * this.tabs.length);
 		if (this.tab  != undefined) {
-			this.tabs[this.tab].prepareButtons(this.canvasSize, this.menuWidth - this.tabWidth);
+			this.tabs[this.tab].prepareButtons(this.canvasSize, this.menuWidth - this.tabWidth, this.buildingMenuHeight);
 		}
 	}
 
@@ -264,14 +267,13 @@ export class BuildingTab {
 		this.icon = icon;
 	}
 
-	prepareButtons(canvasSize: Size, menuWidth: number) {
+	prepareButtons(canvasSize: Size, menuWidth: number, tabEnd: number) {
 		this.activeButtons = [];
 		const menuPadding = 20;
 		this.buttonSize = this.defaultButtonSize < menuWidth - menuPadding ? this.defaultButtonSize : menuWidth - menuPadding;
 		const buttonPadding = 20;
 		const buttonMargin = 10;
 		const buildingSize = this.buttonSize - 2 * buttonPadding;
-		const tabEnd = canvasSize.height
 
 		let xStart = canvasSize.width - menuWidth + menuPadding;
 		let xMax = canvasSize.width - menuPadding;
