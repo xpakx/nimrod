@@ -292,6 +292,31 @@ export class MapLayer {
 		}
 	}
 
+	isBuildingInView(building: Building): boolean {
+		const screenPosition = this.isoToScreen(building.position);
+		const left = screenPosition.x - building.sprite.size.width/2; 
+		const rightScreenEnd = (this.canvasSize.width / 2);
+		if(left >= rightScreenEnd) {
+			return false;
+		}
+		const leftScreenEnd = -(this.canvasSize.width / 2);
+		const right = screenPosition.x + building.sprite.size.width/2; 
+		if(right <= leftScreenEnd) {
+			return false
+		}
+		const bottomScreenEnd = this.canvasSize.height / 2 + (this.tileHeight/2);
+		const top = screenPosition.y - building.sprite.size.height + this.tileHeight; 
+		if(top >= bottomScreenEnd) {
+			return false;
+		}
+		const topScreenEnd = -(this.canvasSize.height / 2) + (this.tileHeight/2) + 50 + this.tileHeight;
+		const bottom = screenPosition.y + this.tileHeight; 
+		if(bottom <= topScreenEnd) {
+			return false;
+		}
+		return true;
+	}
+
 
 	renderBuildings(ctx: CanvasRenderingContext2D) {
 		const ghostCanBePlaced = this.mode ? this.canBePlaced(this.isoPlayerMouse, this.mode) : false;
@@ -299,6 +324,11 @@ export class MapLayer {
 		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileHeight/2));
 		let ghostDrawn = false;
 		for (const building of this.buildings) {
+			const inView = this.isBuildingInView(building); // TODO: reduce position transformations
+			if (!inView) {
+				continue;
+			};
+
 			if(!ghostDrawn && ghostCanBePlaced && this.ghostDiff(building) <= 0) {
 				this.drawGhost(ctx);
 				ghostDrawn = true;
