@@ -135,8 +135,8 @@ window.onload = async () => {
 	const menuRow: ButtonRow = {
 		y: interf.buildingMenuHeight + 50,	
 		buttons: [
-			new ActionButton(roadButton, "road", {width: 40, height: 40}),
-			new ActionButton(deleteButton, "delete", {width: 40, height: 40}),
+			new ActionButton(roadButton, {action: "buildRoad", argument: undefined}, {width: 40, height: 40}),
+			new ActionButton(deleteButton, {action: "delete", argument: undefined}, {width: 40, height: 40}),
 		]
 	};
 	interf.addButtonRow(menuRow);
@@ -147,9 +147,9 @@ window.onload = async () => {
 	const mapRow: ButtonRow = {
 		y: canvas.height - 80,	
 		buttons: [
-			new ActionButton(city, "toCity", {width: 50, height: 50}),
-			new ActionButton(kingdom, "toKingdom", {width: 50, height: 50}),
-			new ActionButton(world, "toMap", {width: 50, height: 50}),
+			new ActionButton(city, {action: "goTo", argument: "city"}, {width: 50, height: 50}),
+			new ActionButton(kingdom,{action: "goTo", argument: "kingdom"}, {width: 50, height: 50}),
+			new ActionButton(world,{action: "goTo", argument: "map"}, {width: 50, height: 50}),
 		]
 	};
 	interf.addButtonRow(mapRow);
@@ -253,9 +253,14 @@ window.onload = async () => {
 			if(interf.mouseInsideInterface(playerMouse)) {
 				const clickResult = interf.click(playerMouse);
 				if (clickResult != undefined) {
-					const clickedBuilding = sprites[clickResult];
-					if (clickedBuilding) 
-					 map.switchToBuildMode(clickedBuilding);
+					if(clickResult.action == "build" && clickResult.argument != undefined) {
+						const clickedBuilding = sprites[clickResult.argument];
+						if (clickedBuilding) map.switchToBuildMode(clickedBuilding);
+					} else if(clickResult.action == "buildRoad") {
+						map.switchToRoadMode(road);
+					} else if(clickResult.action == "delete") {
+						map.switchToDeleteMode();
+					}
 				}
 				return;
 			}
@@ -341,7 +346,7 @@ window.onload = async () => {
 				rescaleSprites();
 			}
 			break;
-			case '0': map.switchToNormalMode(); break;
+			case '0': case 'Escape': map.switchToNormalMode(); break;
 			case '1': map.switchToBuildMode(home); break;
 			case '2': map.switchToBuildMode(ziggurat); break;
 			case '3': map.switchToBuildMode(tower); break;

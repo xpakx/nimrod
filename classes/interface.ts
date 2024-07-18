@@ -260,7 +260,7 @@ export class InterfaceLayer {
 		return true;
 	}
 
-	click(position: Position): string | undefined { // TODO
+	click(position: Position): Action | undefined { // TODO
 		const tab = this.getTabUnderCursor(position);
 		if (tab != undefined) {
 			this.tab = tab;
@@ -268,7 +268,17 @@ export class InterfaceLayer {
 			return undefined;
 		}
 		if(this.tab != undefined) {
-			return this.tabs[this.tab].click(position);
+			let result = this.tabs[this.tab].click(position);
+			if(result != undefined) {
+				return result;
+			}
+		}
+		for(let row of this.buttons) {
+			for(let button of row.buttons) {
+				if(this.inButton(position, button)) {
+					return button.action;
+				}
+			}
 		}
 
 		return undefined;
@@ -399,10 +409,10 @@ export class BuildingTab {
 		return true;
 	}
 
-	click(position: Position): string | undefined { // TODO
+	click(position: Position): Action | undefined { // TODO
 		for(let button of this.activeButtons) {
 			if(this.inButton(position, button)) {
-				return button.name;
+				return {action: "build", argument: button.name};
 			}
 		}
 		return undefined;
@@ -411,14 +421,14 @@ export class BuildingTab {
 
 export class ActionButton {
 	image: HTMLImageElement;
-	action: string;
+	action: Action;
 	hover: boolean = false;
 	position: Position = {x: 0, y: 0};
 	size: Size;
 
-	constructor(image: HTMLImageElement, name: string, size: Size) {
+	constructor(image: HTMLImageElement, action: Action, size: Size) {
 		this.image = image;
-		this.action = name;
+		this.action = action;
 		this.size = size;
 	}
 }
@@ -426,4 +436,9 @@ export class ActionButton {
 export interface ButtonRow {
 	buttons: ActionButton[];
 	y: number;
+}
+
+export interface Action {
+	action: "build" | "buildRoad" | "delete" | "goTo";
+	argument: string | undefined;
 }
