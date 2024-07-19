@@ -285,22 +285,12 @@ window.onload = async () => {
 		}
 		if (event.deltaY < 0) {
 			let oldScale = map.scale;
-			map.scale += 0.2;
-			if(map.scale > 2.0) {
-				map.scale = 2.0;
-			}
-			map.tileWidth = map.scale*map.defTileWidth;
-			map.tileHeight = map.scale*map.defTileHeight;
+			map.rescale(0.2);
 			rescaleOffsets(oldScale);
 			rescaleSprites();
 		} else {
 			let oldScale = map.scale;
-			map.scale -= 0.2;
-			if(map.scale < 0.5) {
-				map.scale = 0.5;
-			}
-			map.tileWidth = map.scale*map.defTileWidth;
-			map.tileHeight = map.scale*map.defTileHeight;
+			map.rescale(-0.2);
 			rescaleOffsets(oldScale);
 			rescaleSprites();
 		}
@@ -324,27 +314,16 @@ window.onload = async () => {
 			break;
 			case '+': {
 				let oldScale = map.scale;
-				map.scale += 0.2;
-			        if(map.scale > 2.0) {
-					map.scale = 2.0;
-				}
-				map.tileWidth = map.scale*map.defTileWidth;
-				map.tileHeight = map.scale*map.defTileHeight;
+				map.rescale(0.2);
 				rescaleOffsets(oldScale);
 				rescaleSprites();
 			}
 			break;
 			case '-': {
 				let oldScale = map.scale;
-				map.scale -= 0.2;
-			        if(map.scale < 0.5) {
-					map.scale = 0.5;
-				}
-				map.tileWidth = map.scale*map.defTileWidth;
-				map.tileHeight = map.scale*map.defTileHeight;
+				map.rescale(-0.2);
 				rescaleOffsets(oldScale);
 				rescaleSprites();
-				map.rescale();
 			}
 			break;
 			case '0': case 'Escape': map.switchToNormalMode(); break;

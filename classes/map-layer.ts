@@ -38,11 +38,16 @@ export class MapLayer {
 		this.canvasSize.width = canvasSize.width;
 	}
 
-	rescale() {
-		for(let building of this.buildings) {
-			const screenPosition = this.isoToScreen(building.position);
-			building.calculateBorders(screenPosition, this.tileHeight);
+	rescale(delta: number) {
+		this.scale += delta;
+		if(this.scale < 0.5) {
+			this.scale = 0.5;
 		}
+		if(this.scale > 2.0) {
+			this.scale = 2.0;
+		}
+		this.tileWidth = this.scale * this.defTileWidth;
+		this.tileHeight = this.scale * this.defTileHeight;
 	}
 
 	renderMap(context: CanvasRenderingContext2D, _deltaTime: number) {
