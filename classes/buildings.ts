@@ -23,12 +23,16 @@ export class Building {
 	position: Position;
 	accepted: boolean;
 	underCursor: boolean;
+	diagonal: number;
 
 	constructor(sprite: BuildingSprite, position: Position, accepted: boolean = true) {
 		this.sprite =  sprite;
 		this.position = position;
 		this.accepted = accepted;
 		this.underCursor = false;
+
+		const centerA = [Math.floor((position.x + position.x - sprite.baseSize + 1)/2), Math.floor((position.y + position.y - sprite.baseSize + 1)/2)]
+		this.diagonal = (centerA[0] + centerA[1]);
 	}
 }
 

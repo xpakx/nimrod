@@ -253,15 +253,13 @@ export class MapLayer {
 		});
 	}
 
-	ghostDiff(b: Building) {
-		if (!this.mode) {
+	getDiagonal(position: Position, sprite?: BuildingSprite): number {
+		if (!sprite) {
 			return -1;
 		}
 
-		const centerA = [Math.floor((this.isoPlayerMouse.x + this.isoPlayerMouse.x - this.mode.baseSize + 1)/2), Math.floor((this.isoPlayerMouse.y + this.isoPlayerMouse.y - this.mode.baseSize + 1)/2)]
-		const centerB = [Math.floor((b.position.x + b.position.x - b.sprite.baseSize + 1)/2), Math.floor((b.position.y + b.position.y - b.sprite.baseSize + 1)/2)]
-		const sum =  (centerA[0] + centerA[1]) - (centerB[0] + centerB[1]);
-		return sum;
+		const centerA = [Math.floor((position.x + position.x - sprite.baseSize + 1)/2), Math.floor((position.y + position.y - sprite.baseSize + 1)/2)]
+		return (centerA[0] + centerA[1]);
 	}
 
 	deleteBuilding(position: Position) {
@@ -327,12 +325,12 @@ export class MapLayer {
 		return true;
 	}
 
-
 	renderBuildings(ctx: CanvasRenderingContext2D) {
 		const ghostCanBePlaced = this.mode ? this.canBePlaced(this.isoPlayerMouse, this.mode) : false;
 		ctx.save();
 		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileHeight/2));
 		let ghostDrawn = false;
+		const ghostDiagonal = this.getDiagonal(this.isoPlayerMouse, this.mode);
 		for (const building of this.buildings) {
 			const screenPosition = this.isoToScreen(building.position);
 			const inView = this.isBuildingInView(building, screenPosition);
@@ -340,7 +338,7 @@ export class MapLayer {
 				continue;
 			};
 
-			if(!ghostDrawn && ghostCanBePlaced && this.ghostDiff(building) <= 0) {
+			if(!ghostDrawn && ghostCanBePlaced && ghostDiagonal <= building.diagonal) {
 				this.drawGhost(ctx);
 				ghostDrawn = true;
 			}
