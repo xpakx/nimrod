@@ -344,6 +344,7 @@ window.onload = async () => {
 				map.tileHeight = map.scale*map.defTileHeight;
 				rescaleOffsets(oldScale);
 				rescaleSprites();
+				map.rescale();
 			}
 			break;
 			case '0': case 'Escape': map.switchToNormalMode(); break;

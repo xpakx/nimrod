@@ -38,6 +38,13 @@ export class MapLayer {
 		this.canvasSize.width = canvasSize.width;
 	}
 
+	rescale() {
+		for(let building of this.buildings) {
+			const screenPosition = this.isoToScreen(building.position);
+			building.calculateBorders(screenPosition, this.tileHeight);
+		}
+	}
+
 	renderMap(context: CanvasRenderingContext2D, _deltaTime: number) {
 		this.drawIsometricMap(context);
 		this.renderRoads(context);
@@ -120,9 +127,10 @@ export class MapLayer {
 	putBuilding(position: Position, sprite: BuildingSprite, accepted: boolean = true) {
 		if(this.canBePlaced(position, sprite)) {
 			const newBuilding = new Building(sprite, position, accepted);
+			const screenPosition = this.isoToScreen(position);
+			newBuilding.calculateBorders(screenPosition, this.tileHeight);
 			this.buildings.push(newBuilding);
 			this.sortBuildings();
-			this.buildings.forEach((a) => console.log(a.position));
 			for(let i = position.x; i > position.x-sprite.baseSize; i--) {
 				for(let j = position.y; j > position.y-sprite.baseSize; j--) {
 					this.blocked[j][i] = true;
@@ -293,25 +301,20 @@ export class MapLayer {
 	}
 
 	isBuildingInView(building: Building): boolean {
-		const screenPosition = this.isoToScreen(building.position);
-		const left = screenPosition.x - building.sprite.size.width/2; 
 		const rightScreenEnd = (this.canvasSize.width / 2);
-		if(left >= rightScreenEnd) {
+		if(building.left >= rightScreenEnd) {
 			return false;
 		}
 		const leftScreenEnd = -(this.canvasSize.width / 2);
-		const right = screenPosition.x + building.sprite.size.width/2; 
-		if(right <= leftScreenEnd) {
+		if(building.right <= leftScreenEnd) {
 			return false
 		}
 		const bottomScreenEnd = this.canvasSize.height / 2 + (this.tileHeight/2);
-		const top = screenPosition.y - building.sprite.size.height + this.tileHeight; 
-		if(top >= bottomScreenEnd) {
+		if(building.top >= bottomScreenEnd) {
 			return false;
 		}
 		const topScreenEnd = -(this.canvasSize.height / 2) + (this.tileHeight/2) + 50 + this.tileHeight;
-		const bottom = screenPosition.y + this.tileHeight; 
-		if(bottom <= topScreenEnd) {
+		if(building.bottom <= topScreenEnd) {
 			return false;
 		}
 		return true;
@@ -324,7 +327,7 @@ export class MapLayer {
 		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileHeight/2));
 		let ghostDrawn = false;
 		for (const building of this.buildings) {
-			const inView = this.isBuildingInView(building); // TODO: reduce position transformations
+			const inView = this.isBuildingInView(building);
 			if (!inView) {
 				continue;
 			};
