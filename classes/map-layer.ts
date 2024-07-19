@@ -132,8 +132,6 @@ export class MapLayer {
 	putBuilding(position: Position, sprite: BuildingSprite, accepted: boolean = true) {
 		if(this.canBePlaced(position, sprite)) {
 			const newBuilding = new Building(sprite, position, accepted);
-			const screenPosition = this.isoToScreen(position);
-			newBuilding.calculateBorders(screenPosition, this.tileHeight);
 			this.buildings.push(newBuilding);
 			this.sortBuildings();
 			for(let i = position.x; i > position.x-sprite.baseSize; i--) {
@@ -305,21 +303,25 @@ export class MapLayer {
 		}
 	}
 
-	isBuildingInView(building: Building): boolean {
+	isBuildingInView(building: Building, screenPosition: Position): boolean {
+		const left = screenPosition.x - building.sprite.size.width/2; 
 		const rightScreenEnd = (this.canvasSize.width / 2);
-		if(building.left >= rightScreenEnd) {
+		if(left >= rightScreenEnd) {
 			return false;
 		}
+		const right = screenPosition.x + building.sprite.size.width/2; 
 		const leftScreenEnd = -(this.canvasSize.width / 2);
-		if(building.right <= leftScreenEnd) {
+		if(right <= leftScreenEnd) {
 			return false
 		}
+		const top = screenPosition.y - building.sprite.size.height + this.tileHeight; 
 		const bottomScreenEnd = this.canvasSize.height / 2 + (this.tileHeight/2);
-		if(building.top >= bottomScreenEnd) {
+		if(top >= bottomScreenEnd) {
 			return false;
 		}
+		const bottom = screenPosition.y + this.tileHeight; 
 		const topScreenEnd = -(this.canvasSize.height / 2) + (this.tileHeight/2) + 50 + this.tileHeight;
-		if(building.bottom <= topScreenEnd) {
+		if(bottom <= topScreenEnd) {
 			return false;
 		}
 		return true;
@@ -332,7 +334,8 @@ export class MapLayer {
 		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileHeight/2));
 		let ghostDrawn = false;
 		for (const building of this.buildings) {
-			const inView = this.isBuildingInView(building);
+			const screenPosition = this.isoToScreen(building.position);
+			const inView = this.isBuildingInView(building, screenPosition);
 			if (!inView) {
 				continue;
 			};

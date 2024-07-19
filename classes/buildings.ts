@@ -24,23 +24,11 @@ export class Building {
 	accepted: boolean;
 	underCursor: boolean;
 
-	left: number = 0;
-	right: number = 0;
-	top: number = 0;
-	bottom: number = 0;
-
 	constructor(sprite: BuildingSprite, position: Position, accepted: boolean = true) {
 		this.sprite =  sprite;
 		this.position = position;
 		this.accepted = accepted;
 		this.underCursor = false;
-	}
-
-	calculateBorders(screenPosition: Position, tileHeight: number) {
-		this.left = screenPosition.x - this.sprite.size.width/2; 
-		this.right = screenPosition.x + this.sprite.size.width/2; 
-		this.top = screenPosition.y - this.sprite.size.height + tileHeight; 
-		this.bottom = screenPosition.y + tileHeight; 
 	}
 }
 
