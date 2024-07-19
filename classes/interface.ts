@@ -65,11 +65,11 @@ export class InterfaceLayer {
 		}
 	}
 
-	renderInterface(context: CanvasRenderingContext2D, _deltaTime: number) {
+	renderInterface(context: CanvasRenderingContext2D, deltaTime: number) {
 		this.drawTopPanel(context);
 		this.drawMenu(context);
 		this.drawTabs(context);
-		this.renderDialogueBox(context);
+		this.renderDialogueBox(context, deltaTime);
 		if (this.tab  != undefined) {
 			this.tabs[this.tab].draw(context);
 		}
@@ -141,7 +141,7 @@ export class InterfaceLayer {
 		context.fillRect(this.canvasSize.width - this.menuWidth, 0, this.menuWidth, this.canvasSize.height);
 	}
 
-	renderDialogueBox(context: CanvasRenderingContext2D) {
+	renderDialogueBox(context: CanvasRenderingContext2D, deltaTime: number) {
 		if(!this.dialogue) {
 			return;
 		}
@@ -159,7 +159,7 @@ export class InterfaceLayer {
 		context.fillStyle = '#fff';
 		context.font = '16px Arial';
 		let y = dialogueY + 30;
-		for (let line of this.dialogue.text) {
+		for (let line of this.dialogue.toPrint) {
 			if (this.dialogue.portrait && y <= dialogueY + 50) {
 				context.fillText(line, dialogueX + 110, y);
 			} else {
@@ -174,6 +174,7 @@ export class InterfaceLayer {
 			context.arc(dialogueX + 50, dialogueY, 50, 0, 2 * Math.PI);
 			context.stroke();
 		}
+		this.dialogue.updateTime(deltaTime);
 	}
 
 	wrapText(context: CanvasRenderingContext2D, text: string, maxWidth: number, lineHeight: number, portrait: boolean): string[] {
@@ -207,7 +208,7 @@ export class InterfaceLayer {
 	setDialogue(context: CanvasRenderingContext2D, dialogue: Dialogue) {
 		const dialogueWidth = this.canvasSize.width - 20 - this.menuWidth;
 		const text = this.wrapText(context, dialogue.text, dialogueWidth - 20, 20, dialogue.portrait != undefined);
-		this.dialogue = {text: text, portrait: dialogue.portrait};
+		this.dialogue = new DialogueParsed(text, dialogue.portrait);
 	}
 
 	closeDialogue() {
@@ -302,9 +303,42 @@ export interface Dialogue {
 	portrait: HTMLImageElement | undefined,
 }
 
-export interface DialogueParsed {
-	text: string[],
-	portrait: HTMLImageElement | undefined,
+export class DialogueParsed {
+	text: string[];
+	portrait: HTMLImageElement | undefined;
+	line: number = 0;
+	letter: number = 0;
+	counter: number = 0;
+	printed: boolean = false;
+	toPrint: string[] = [""];
+	
+	constructor(text: string[], portrait: HTMLImageElement | undefined) {
+		this.text = text;
+		this.portrait = portrait;
+	}
+
+	updateTime(deltaTime: number) {
+		if(this.printed) {
+			return;
+		}
+
+		this.counter += deltaTime;
+		if (this.counter >= 0.05) {
+			this.counter = 0;
+			if(this.letter < this.text[this.line].length) {
+				this.toPrint[this.line] += this.text[this.line][this.letter];
+				this.letter += 1;
+			} else {
+				if(this.line + 1 < this.text.length) {
+					this.letter = 0;
+					this.line += 1;
+					this.toPrint[this.line] += this.text[this.line][this.letter];
+				} else {
+					this.printed = true;
+				}
+			}
+		}
+	}
 }
 
 export class BuildingButton {

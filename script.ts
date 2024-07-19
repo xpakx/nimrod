@@ -421,6 +421,6 @@ window.onload = async () => {
 	const av = await loadImage("./img/portraits/ratman.svg");
 	interf.setDialogue(context, {text: "Welcome to the game!", portrait: av});
 	setTimeout(() => {
-		interf.closeDialogue();
+		// interf.closeDialogue();
 	}, 3000);
 }
