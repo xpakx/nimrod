@@ -354,6 +354,7 @@ window.onload = async () => {
 			case '5': map.switchToBuildMode(inspector); break;
 			case '6': map.switchToRoadMode(road); break;
 			case '9': map.switchToDeleteMode(); break;
+			case 'Enter': interf.dialogueAction(); break;
 		}
 
 		if(moveUp) {

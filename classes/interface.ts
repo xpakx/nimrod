@@ -215,6 +215,17 @@ export class InterfaceLayer {
 		this.dialogue = undefined;
 	}
 
+	dialogueAction() {
+		if(!this.dialogue) {
+			return;
+		}
+		if(this.dialogue.printed) {
+			this.closeDialogue();
+		} else {
+			this.dialogue.skipAnimation();
+		}
+	}
+
 	hasDialogue(): boolean {
 		return this.dialogue == undefined;
 	}
@@ -338,6 +349,11 @@ export class DialogueParsed {
 				}
 			}
 		}
+	}
+
+	skipAnimation() {
+		this.toPrint = this.text;
+		this.printed = true;
 	}
 }
 
