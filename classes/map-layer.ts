@@ -181,6 +181,10 @@ export class MapLayer {
 		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileHeight/2));
 		for (let y = 0; y < this.roads.length; y++) {
 			for (let x = 0; x < this.roads[y].length; x++) {
+				const screenPos = this.isoToScreen({x: x, y: y});
+				if(!this.isTileInView(screenPos)) {
+					continue;
+				}
 				const road = this.roads[y][x];
 				if(road) {
 					if(this.deleteMode && y == this.isoPlayerMouse.y && x == this.isoPlayerMouse.x) {
