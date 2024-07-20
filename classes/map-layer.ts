@@ -75,11 +75,14 @@ export class MapLayer {
 		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileHeight/2));
 		for (let y = 0; y < this.map.length; y++) {
 			for (let x = 0; x < this.map[y].length; x++) {
+				const screenPos = this.isoToScreen({x: x, y: y});
+				if(!this.isTileInView(screenPos)) {
+					continue;
+				}
 				let color = this.map[y][x];
 				if(!this.mode && x == this.isoPlayerMouse.x && y == this.isoPlayerMouse.y) {
 					color = this.deleteMode ? '#FF5733' : "black";
 				}
-				const screenPos = this.isoToScreen({x: x, y: y});
 				this.drawTile(ctx, screenPos.x, screenPos.y, color);
 			}
 		}
@@ -318,6 +321,30 @@ export class MapLayer {
 			return false;
 		}
 		const bottom = screenPosition.y + this.tileHeight; 
+		const topScreenEnd = -(this.canvasSize.height / 2) + (this.tileHeight/2);
+		if(bottom <= topScreenEnd) {
+			return false;
+		}
+		return true;
+	}
+
+	isTileInView(screenPosition: Position): boolean {
+		const left = screenPosition.x - this.tileWidth/2; 
+		const rightScreenEnd = (this.canvasSize.width / 2);
+		if(left >= rightScreenEnd) {
+			return false;
+		}
+		const right = screenPosition.x + this.tileWidth/2; 
+		const leftScreenEnd = -(this.canvasSize.width / 2);
+		if(right <= leftScreenEnd) {
+			return false
+		}
+		const top = screenPosition.y - this.tileHeight; 
+		const bottomScreenEnd = this.canvasSize.height / 2 + (this.tileHeight/2);
+		if(top >= bottomScreenEnd) {
+			return false;
+		}
+		const bottom = screenPosition.y; 
 		const topScreenEnd = -(this.canvasSize.height / 2) + (this.tileHeight/2);
 		if(bottom <= topScreenEnd) {
 			return false;
