@@ -318,7 +318,7 @@ export class MapLayer {
 			return false;
 		}
 		const bottom = screenPosition.y + this.tileHeight; 
-		const topScreenEnd = -(this.canvasSize.height / 2) + (this.tileHeight/2) + 50 + this.tileHeight;
+		const topScreenEnd = -(this.canvasSize.height / 2) + (this.tileHeight/2);
 		if(bottom <= topScreenEnd) {
 			return false;
 		}
