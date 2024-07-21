@@ -1,3 +1,4 @@
+import { Actor } from "./classes/actor.js";
 import { BuildingSprite, TilingSprite } from "./classes/buildings.js";
 import { ActionButton, BuildingButton, BuildingTab, ButtonRow, InterfaceLayer } from "./classes/interface.js";
 import { MapLayer, Position, Size } from "./classes/map-layer.js";
@@ -9,6 +10,7 @@ const canvasHeight = 800;
 let map = new MapLayer({width: canvasWidth, height: canvasHeight});
 let interf = new InterfaceLayer({width: canvasWidth, height: canvasHeight});
 
+let pedestrians: Actor[] = [];
 
 async function loadImage(url: string): Promise<any> {
     const image = new Image();
@@ -29,7 +31,7 @@ export function getSize(img: HTMLImageElement, widthNorm: number): Size {
 
 function renderGame(context: CanvasRenderingContext2D, deltaTime: number) {
 	context.clearRect(0, 0, canvasWidth, canvasHeight);
-	map.renderMap(context, deltaTime);
+	map.renderMap(context, pedestrians, deltaTime);
 	interf.renderInterface(context, deltaTime);
 	renderDebugInfo(context, deltaTime);
 }
@@ -181,17 +183,19 @@ window.onload = async () => {
 		road.refreshSize();
 	}
 
-	map.putBuilding({x: 3, y: 3}, sprites["ziggurat"]);
-	map.putBuilding({x: 7, y: 7}, sprites["home"]);
-	map.putBuilding({x: 7, y: 9}, sprites["home"]);
-	map.putBuilding({x: 9, y: 7}, sprites["home"]);
-	map.putBuilding({x: 9, y: 9}, sprites["home"]);
-	map.putBuilding({x: 9, y: 1}, sprites["tower"]);
-	map.putBuilding({x: 8, y: 12}, sprites["inspector"]);
-	map.putBuilding({x: 10, y: 12}, sprites["well"]);
-	map.putRoad({x: 5, y: 5}, road, true);
-	map.putRoad({x: 5, y: 6}, road, true);
-	map.putRoad({x: 6, y: 5}, road, true);
+	map.putBuilding({x: 1, y: 8}, sprites["home"]);
+	map.putBuilding({x: 3, y: 8}, sprites["home"]);
+	map.putBuilding({x: 1, y: 11}, sprites["home"]);
+	map.putBuilding({x: 3, y: 11}, sprites["home"]);
+	map.putRoad({x: 0, y: 9}, road, true);
+	map.putRoad({x: 1, y: 9}, road, true);
+	map.putRoad({x: 2, y: 9}, road, true);
+	map.putRoad({x: 3, y: 9}, road, true);
+	map.putRoad({x: 4, y: 9}, road, true);
+
+	pedestrians.push(new Actor(home, {x: 1, y: 9}));
+	pedestrians.push(new Actor(home, {x: 11, y: 5}));
+	pedestrians.push(new Actor(home, {x: 17, y: 12}));
 
 
 	function correctOffset() {

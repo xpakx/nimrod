@@ -1,3 +1,4 @@
+import { Actor } from "./actor.js";
 import { Building, BuildingSprite, Road, TilingSprite } from "./buildings.js";
 
 export class MapLayer {
@@ -50,10 +51,10 @@ export class MapLayer {
 		this.tileHeight = this.scale * this.defTileHeight;
 	}
 
-	renderMap(context: CanvasRenderingContext2D, _deltaTime: number) {
+	renderMap(context: CanvasRenderingContext2D, pedestrians: Actor[], _deltaTime: number) {
 		this.drawIsometricMap(context);
 		this.renderRoads(context);
-		this.renderBuildings(context);
+		this.renderBuildings(context, pedestrians);
 	}
 
 	isoToScreen(pos: Position): Position {
@@ -356,13 +357,22 @@ export class MapLayer {
 		return true;
 	}
 
-	renderBuildings(ctx: CanvasRenderingContext2D) {
+	renderBuildings(ctx: CanvasRenderingContext2D, pedestrians: Actor[]) {
 		const ghostCanBePlaced = this.mode ? this.canBePlaced(this.isoPlayerMouse, this.mode) : false;
 		ctx.save();
 		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileHeight/2));
 		let ghostDrawn = false;
 		const ghostDiagonal = this.getDiagonal(this.isoPlayerMouse, this.mode);
+		let currentDiagonal = 0;
+		let pedestrianIndex = 0;
 		for (const building of this.buildings) {
+			if(currentDiagonal != building.diagonal) {
+				currentDiagonal = building.diagonal;
+				for(let i = pedestrianIndex; i<pedestrians.length && pedestrians[i].diagonal < currentDiagonal; i++) {
+					this.drawPedestrian(ctx, pedestrians[i]);
+					pedestrianIndex++;
+				}
+			}
 			const screenPosition = this.isoToScreen(building.position);
 			const inView = this.isBuildingInView(building, screenPosition);
 			if (!inView) {
@@ -387,6 +397,11 @@ export class MapLayer {
 				ctx.restore();
 			}
 		}
+
+		for(let i = pedestrianIndex; i<pedestrians.length; i++) {
+			this.drawPedestrian(ctx, pedestrians[i]);
+		}
+
 		if(this.mode && !ghostDrawn) {
 			this.drawGhost(ctx, !ghostCanBePlaced);
 		}
@@ -451,6 +466,14 @@ export class MapLayer {
 		if(newBuilding) {
 			newBuilding.underCursor = true;
 		}
+	}
+
+	drawPedestrian(context: CanvasRenderingContext2D, actor: Actor) {
+		const position = this.isoToScreen(actor.position);
+		context.fillStyle = "red";
+		context.beginPath();
+		context.ellipse(position.x, position.y, 10, 15, 0, 0, 2 * Math.PI);
+		context.fill();
 	}
 }
 
