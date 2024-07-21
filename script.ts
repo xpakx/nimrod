@@ -187,6 +187,7 @@ window.onload = async () => {
 	map.putBuilding({x: 3, y: 8}, sprites["home"]);
 	map.putBuilding({x: 1, y: 11}, sprites["home"]);
 	map.putBuilding({x: 3, y: 11}, sprites["home"]);
+	map.getBuilding({x: 3, y: 11})!.setWorker(home);;
 	map.putRoad({x: 0, y: 9}, road, true);
 	map.putRoad({x: 1, y: 9}, road, true);
 	map.putRoad({x: 2, y: 9}, road, true);
@@ -394,6 +395,12 @@ window.onload = async () => {
 	const frame = (timestamp: number) => {
 		const deltaTime = (timestamp - prevTimestamp) / 1000;
 		prevTimestamp = timestamp;
+		for(let building of map.buildings) {
+			const newPedestrian = building.tick(deltaTime);
+			if(newPedestrian && building.workerSpawn) {
+				pedestrians.push(new Actor(home, building.workerSpawn));
+			}
+		}
 		renderGame(context, deltaTime);
 		window.requestAnimationFrame(frame);
 	};

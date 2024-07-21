@@ -144,6 +144,7 @@ export class MapLayer {
 					this.buildingMap[j][i] = newBuilding;
 				}
 			}
+			newBuilding.calculateSpawn(this.roads);
 		}
 	}
 
@@ -155,6 +156,7 @@ export class MapLayer {
 		this.blocked[position.y][position.x] = true;
 		this.updateRoadsDirection(position);
 		this.roads[position.y][position.x] = new Road(sprite, position, direction);
+		this.calculateSpawn(position);
 	}
 
 	calculateRoadConnections(position: Position, canBePlaced: boolean): number {
@@ -175,6 +177,21 @@ export class MapLayer {
 			direction ^= 0b0100;
 		}
 		return direction;
+	}
+
+	calculateSpawn(position: Position){
+		if(position.y - 1 >=0 && this.buildingMap[position.y-1][position.x]) {
+			this.buildingMap[position.y-1][position.x]?.calculateSpawn(this.roads);
+		}
+		if(position.y + 1 < this.buildingMap.length && this.buildingMap[position.y+1][position.x]) {
+			this.buildingMap[position.y+1][position.x]?.calculateSpawn(this.roads);
+		}
+		if(position.x - 1 >=0 && this.buildingMap[position.y][position.x-1]) {
+			this.buildingMap[position.y][position.x-1]?.calculateSpawn(this.roads);
+		}
+		if(position.x + 1 < this.buildingMap[0].length && this.buildingMap[position.y][position.x+1]) {
+			this.buildingMap[position.y][position.x+1]?.calculateSpawn(this.roads);
+		}
 	}
 
 	renderRoads(ctx: CanvasRenderingContext2D) {
@@ -292,6 +309,7 @@ export class MapLayer {
 		this.blocked[position.y][position.x] = false;
 		this.roads[position.y][position.x] = undefined;
 		this.updateRoadsDirection(position);
+		this.calculateSpawn(position);
 	}
 
 	updateRoadsDirection(position: Position) {
