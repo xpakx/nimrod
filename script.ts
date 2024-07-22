@@ -40,6 +40,13 @@ let playerMouse: Position = {x: 0, y: 0};
 
 const dts: number[] = [];
 
+
+function sortPedestrians(pedestrians: Actor[]) {
+	pedestrians.sort((a, b) => {
+		return a.diagonal - b.diagonal;
+	});
+}
+
 function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
     ctx.font = "26px normal"
     ctx.fillStyle = "white"
@@ -404,6 +411,7 @@ window.onload = async () => {
 		for(let pedestrian of pedestrians) {
 			pedestrian.tick(deltaTime, map.roads);
 		}
+		sortPedestrians(pedestrians); // TODO: more efficient way?
 		renderGame(context, deltaTime);
 		window.requestAnimationFrame(frame);
 	};
