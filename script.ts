@@ -401,6 +401,9 @@ window.onload = async () => {
 				pedestrians.push(new Actor(home, building.workerSpawn));
 			}
 		}
+		for(let pedestrian of pedestrians) {
+			pedestrian.tick(deltaTime, map.roads);
+		}
 		renderGame(context, deltaTime);
 		window.requestAnimationFrame(frame);
 	};
