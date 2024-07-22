@@ -37,7 +37,7 @@ export class Actor {
 		this.position = position;
 		this.positionSquare = {x: Math.floor(position.x), y: Math.floor(position.y)};
 
-		this.diagonal = position.x + position.y;
+		this.diagonal = this.positionSquare.x + this.positionSquare.y;
 		this.directionMask = 0b0000;
 		this.direction = {x: 0, y: 0};
 	}
@@ -74,7 +74,7 @@ export class Actor {
 				console.log(this.directionMask);
 				console.log(this.direction);
 			}
-
+			this.diagonal = newX + newY;
 		} 
 		this.position.x = newX;
 		this.position.y = newY;
