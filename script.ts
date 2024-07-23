@@ -408,8 +408,9 @@ window.onload = async () => {
 				pedestrians.push(new Actor(home, building.workerSpawn));
 			}
 		}
+		const dTime = deltaTime > 1 ? 1 : deltaTime;
 		for(let pedestrian of pedestrians) {
-			pedestrian.tick(deltaTime, map.roads);
+			pedestrian.tick(dTime, map.roads);
 		}
 		sortPedestrians(pedestrians); // TODO: more efficient way?
 		renderGame(context, deltaTime);
