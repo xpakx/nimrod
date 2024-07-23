@@ -50,15 +50,11 @@ export class Actor {
 		let newY = this.position.y + this.direction.y*deltaTime;
 		let x = Math.floor(newX);
 		let y = Math.floor(newY);
-		if(this.directionMask == 0 || x != this.positionSquare.x || y != this.positionSquare.y) {
-			this.traveledSquares += 1;
-			if(this.traveledSquares == this.maxTravel) {
-				this.traveledSquares = 0;
-				this.travelFinished = true;
-			}
-			const road = roads[y][x];
-			this.positionSquare.x = x;
-			this.positionSquare.y = y;
+		if(this.directionMask == 0 || hasStepOverHalf(this.direction, this.positionSquare, this.position, newX, newY)) {
+			console.log("inside");
+			newX = this.positionSquare.x + 0.5; // TODO
+			newY = this.positionSquare.y + 0.5; // TODO
+			const road = roads[y][x]
 			if(road) {
 				const newDirection = road.direction ^ this.directionMask;
 				if(newDirection == 0) {
@@ -71,14 +67,43 @@ export class Actor {
 				}
 				this.direction.x = maskToDirectionX(this.directionMask);
 				this.direction.y = maskToDirectionY(this.directionMask);
-				console.log(this.directionMask);
-				console.log(this.direction);
 			}
-			this.diagonal = newX + newY;
+		}
+		if(x != this.positionSquare.x || y != this.positionSquare.y) {
+			this.positionSquare.x = x;
+			this.positionSquare.y = y;
+			this.diagonal = x + y;
+			this.traveledSquares += 1;
+			if(this.traveledSquares == this.maxTravel) {
+				this.traveledSquares = 0;
+				this.travelFinished = true;
+			}
 		} 
 		this.position.x = newX;
 		this.position.y = newY;
 	}
+}
+
+function hasStepOverHalf(direction: Position, square: Position, pre: Position, postX: number, postY: number): boolean {
+	if(direction.x > 0) {
+		const x = square.x + 0.5;
+		console.log(x)
+		return pre.x < x && postX >= x;
+	}
+	if(direction.x < 0) {
+		const x = square.x + 0.5;
+		console.log(x)
+		return pre.x > x && postX <= x;
+	}
+	if(direction.y > 0) {
+		const y = square.y + 0.5;
+		return pre.y < y && postY >= y;
+	}
+	if(direction.y < 0) {
+		const y = square.y + 0.5;
+		return pre.y > y && postY <= y;
+	}
+	return false;
 }
 
 function maskToDirectionX(mask: number): number {
