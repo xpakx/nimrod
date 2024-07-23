@@ -51,7 +51,6 @@ export class Actor {
 		let x = Math.floor(newX);
 		let y = Math.floor(newY);
 		if(this.directionMask == 0 || hasStepOverHalf(this.direction, this.positionSquare, this.position, newX, newY)) {
-			console.log("inside");
 			newX = this.positionSquare.x + 0.5; // TODO
 			newY = this.positionSquare.y + 0.5; // TODO
 			const road = roads[y][x]
@@ -87,12 +86,10 @@ export class Actor {
 function hasStepOverHalf(direction: Position, square: Position, pre: Position, postX: number, postY: number): boolean {
 	if(direction.x > 0) {
 		const x = square.x + 0.5;
-		console.log(x)
 		return pre.x < x && postX >= x;
 	}
 	if(direction.x < 0) {
 		const x = square.x + 0.5;
-		console.log(x)
 		return pre.x > x && postX <= x;
 	}
 	if(direction.y > 0) {
@@ -117,10 +114,10 @@ function maskToDirectionX(mask: number): number {
 }
 
 function maskToDirectionY(mask: number): number {
-	if(mask == 0b0010) {
+	if(mask == 0b1000) {
 		return 1;
 	}
-	if(mask == 0b1000) {
+	if(mask == 0b0010) {
 		return -1;
 	}
 	return 0;
