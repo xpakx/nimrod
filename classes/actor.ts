@@ -42,17 +42,25 @@ export class Actor {
 		this.direction = {x: 0, y: 0};
 	}
 
-	tick(deltaTime: number, roads: (Road | undefined)[][]) {
+	tick(deltaTime: number, roads: (Road | undefined)[][]): boolean {
 		if(this.travelFinished) {
-			return;
+			return false;
 		}
 		let newX = this.position.x + this.direction.x*deltaTime;
 		let newY = this.position.y + this.direction.y*deltaTime;
 		let x = Math.floor(newX);
 		let y = Math.floor(newY);
+		let diagonalChanged = false;
 		if(this.directionMask == 0 || hasStepOverHalf(this.direction, this.positionSquare, this.position, newX, newY)) {
-			newX = this.positionSquare.x + 0.5; // TODO
-			newY = this.positionSquare.y + 0.5; // TODO
+			let correctionX = 0
+			let correctionY = 0
+			if(this.direction.x != 0) {
+				newX = this.positionSquare.x + 0.5; // TODO
+				correctionX = (this.position.x - newX);
+			} else {
+				newY = this.positionSquare.y + 0.5; // TODO
+				correctionY = (this.position.y - newY);
+			}
 			const road = roads[y][x]
 			if(road) {
 				const newDirection = road.direction ^ this.directionMask;
@@ -67,11 +75,14 @@ export class Actor {
 				this.direction.x = maskToDirectionX(this.directionMask);
 				this.direction.y = maskToDirectionY(this.directionMask);
 			}
+			this.position.x += correctionX*this.direction.x;
+			this.position.y += correctionY*this.direction.y;
 		}
 		if(x != this.positionSquare.x || y != this.positionSquare.y) {
 			this.positionSquare.x = x;
 			this.positionSquare.y = y;
 			this.diagonal = x + y;
+			diagonalChanged = true;
 			this.traveledSquares += 1;
 			if(this.traveledSquares == this.maxTravel) {
 				this.traveledSquares = 0;
@@ -80,6 +91,7 @@ export class Actor {
 		} 
 		this.position.x = newX;
 		this.position.y = newY;
+		return diagonalChanged;
 	}
 }
 

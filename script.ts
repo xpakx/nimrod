@@ -194,7 +194,7 @@ window.onload = async () => {
 	map.putBuilding({x: 3, y: 8}, sprites["home"]);
 	map.putBuilding({x: 1, y: 11}, sprites["home"]);
 	map.putBuilding({x: 3, y: 11}, sprites["home"]);
-	map.getBuilding({x: 3, y: 11})!.setWorker(home);;
+	// map.getBuilding({x: 3, y: 11})!.setWorker(home);;
 	map.putRoad({x: 0, y: 9}, road, true);
 	map.putRoad({x: 1, y: 9}, road, true);
 	map.putRoad({x: 2, y: 9}, road, true);
@@ -202,8 +202,6 @@ window.onload = async () => {
 	map.putRoad({x: 4, y: 9}, road, true);
 
 	pedestrians.push(new Actor(home, {x: 1, y: 9}));
-	pedestrians.push(new Actor(home, {x: 11, y: 5}));
-	pedestrians.push(new Actor(home, {x: 17, y: 12}));
 
 
 	function correctOffset() {
@@ -409,10 +407,13 @@ window.onload = async () => {
 			}
 		}
 		const dTime = deltaTime > 1 ? 1 : deltaTime;
+		let diagonalChanged = false;
 		for(let pedestrian of pedestrians) {
-			pedestrian.tick(dTime, map.roads);
+			diagonalChanged ||= pedestrian.tick(dTime, map.roads);
 		}
-		sortPedestrians(pedestrians); // TODO: more efficient way?
+		if(diagonalChanged) {
+			sortPedestrians(pedestrians); // TODO: more efficient way?
+		}
 		renderGame(context, deltaTime);
 		window.requestAnimationFrame(frame);
 	};
