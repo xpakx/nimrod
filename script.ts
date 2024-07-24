@@ -187,8 +187,147 @@ window.onload = async () => {
 	map.putRoad({x: 2, y: 9}, road, true);
 	map.putRoad({x: 3, y: 9}, road, true);
 	map.putRoad({x: 4, y: 9}, road, true);
+	map.putRoad({x: 5, y: 9}, road, true);
+	map.putRoad({x: 6, y: 9}, road, true);
+	map.putRoad({x: 7, y: 9}, road, true);
+	map.putRoad({x: 8, y: 9}, road, true);
+	map.putRoad({x: 9, y: 9}, road, true);
+	map.putRoad({x: 10, y: 9}, road, true);
+	map.putRoad({x: 11, y: 9}, road, true);
+	map.putRoad({x: 12, y: 9}, road, true);
+	map.putRoad({x: 13, y: 9}, road, true);
+	map.putRoad({x: 14, y: 9}, road, true);
+	map.putRoad({x: 15, y: 9}, road, true);
+	map.putRoad({x: 16, y: 9}, road, true);
+	map.putRoad({x: 17, y: 9}, road, true);
+	map.putRoad({x: 18, y: 9}, road, true);
+	map.putRoad({x: 19, y: 9}, road, true);
+	map.putRoad({x: 20, y: 9}, road, true);
+	map.putRoad({x: 21, y: 9}, road, true);
+	map.putRoad({x: 22, y: 9}, road, true);
+	map.putRoad({x: 23, y: 9}, road, true);
+	map.putRoad({x: 24, y: 9}, road, true);
+	map.putRoad({x: 25, y: 9}, road, true);
+	map.putRoad({x: 26, y: 9}, road, true);
+	map.putRoad({x: 27, y: 9}, road, true);
+	map.putRoad({x: 28, y: 9}, road, true);
+	map.putRoad({x: 29, y: 9}, road, true);
+	map.putRoad({x: 30, y: 9}, road, true);
+	map.putRoad({x: 31, y: 9}, road, true);
+	map.putRoad({x: 32, y: 9}, road, true);
+	map.putRoad({x: 33, y: 9}, road, true);
+	map.putRoad({x: 34, y: 9}, road, true);
+	map.putRoad({x: 35, y: 9}, road, true);
+	map.putRoad({x: 36, y: 9}, road, true);
+	map.putRoad({x: 37, y: 9}, road, true);
+	map.putRoad({x: 38, y: 9}, road, true);
+	map.putRoad({x: 39, y: 9}, road, true);
+	map.putRoad({x: 40, y: 9}, road, true);
+	map.putRoad({x: 41, y: 9}, road, true);
+	map.putRoad({x: 42, y: 9}, road, true);
+	map.putRoad({x: 43, y: 9}, road, true);
+	map.putRoad({x: 44, y: 9}, road, true);
+	map.putRoad({x: 45, y: 9}, road, true);
+	map.putRoad({x: 46, y: 9}, road, true);
+	map.putRoad({x: 47, y: 9}, road, true);
+	map.putRoad({x: 48, y: 9}, road, true);
+	map.putRoad({x: 49, y: 9}, road, true);
+
+	map.putRoad({x: 5, y: 8}, road, true);
+	map.putRoad({x: 6, y: 8}, road, true);
+	map.putRoad({x: 7, y: 8}, road, true);
+	map.putRoad({x: 8, y: 8}, road, true);
+	map.putRoad({x: 9, y: 8}, road, true);
+	map.putRoad({x: 10, y: 8}, road, true);
+	map.putRoad({x: 11, y: 8}, road, true);
+	map.putRoad({x: 12, y: 8}, road, true);
+	map.putRoad({x: 13, y: 8}, road, true);
+	map.putRoad({x: 14, y: 8}, road, true);
+	map.putRoad({x: 15, y: 8}, road, true);
+	map.putRoad({x: 16, y: 8}, road, true);
+	map.putRoad({x: 17, y: 8}, road, true);
+	map.putRoad({x: 18, y: 8}, road, true);
+	map.putRoad({x: 19, y: 8}, road, true);
+	map.putRoad({x: 20, y: 8}, road, true);
+	map.putRoad({x: 21, y: 8}, road, true);
+	map.putRoad({x: 22, y: 8}, road, true);
+	map.putRoad({x: 23, y: 8}, road, true);
+	map.putRoad({x: 24, y: 8}, road, true);
+	map.putRoad({x: 25, y: 8}, road, true);
+	map.putRoad({x: 26, y: 8}, road, true);
+	map.putRoad({x: 27, y: 8}, road, true);
+	map.putRoad({x: 28, y: 8}, road, true);
+	map.putRoad({x: 29, y: 8}, road, true);
+	map.putRoad({x: 30, y: 8}, road, true);
+	map.putRoad({x: 31, y: 8}, road, true);
+	map.putRoad({x: 32, y: 8}, road, true);
+	map.putRoad({x: 33, y: 8}, road, true);
+	map.putRoad({x: 34, y: 8}, road, true);
+	map.putRoad({x: 35, y: 8}, road, true);
+	map.putRoad({x: 36, y: 8}, road, true);
+	map.putRoad({x: 37, y: 8}, road, true);
+	map.putRoad({x: 38, y: 8}, road, true);
+	map.putRoad({x: 39, y: 8}, road, true);
+	map.putRoad({x: 40, y: 8}, road, true);
+	map.putRoad({x: 41, y: 8}, road, true);
+	map.putRoad({x: 42, y: 8}, road, true);
+	map.putRoad({x: 43, y: 8}, road, true);
+	map.putRoad({x: 44, y: 8}, road, true);
+	map.putRoad({x: 45, y: 8}, road, true);
+	map.putRoad({x: 46, y: 8}, road, true);
+	map.putRoad({x: 47, y: 8}, road, true);
+	map.putRoad({x: 48, y: 8}, road, true);
+	map.putRoad({x: 49, y: 8}, road, true);
 
 	pedestrians.push(new Actor(home, {x: 1, y: 9}));
+	pedestrians.push(new Actor(home, {x: 2, y: 9}));
+	pedestrians.push(new Actor(home, {x: 3, y: 9}));
+	pedestrians.push(new Actor(home, {x: 4, y: 9}));
+	pedestrians.push(new Actor(home, {x: 5, y: 9}));
+	pedestrians.push(new Actor(home, {x: 6, y: 9}));
+	pedestrians.push(new Actor(home, {x: 7, y: 9}));
+	pedestrians.push(new Actor(home, {x: 8, y: 9}));
+	pedestrians.push(new Actor(home, {x: 9, y: 9}));
+	pedestrians.push(new Actor(home, {x: 10, y: 9}));
+	pedestrians.push(new Actor(home, {x: 11, y: 9}));
+	pedestrians.push(new Actor(home, {x: 12, y: 9}));
+	pedestrians.push(new Actor(home, {x: 13, y: 9}));
+	pedestrians.push(new Actor(home, {x: 14, y: 9}));
+	pedestrians.push(new Actor(home, {x: 15, y: 9}));
+	pedestrians.push(new Actor(home, {x: 16, y: 9}));
+	pedestrians.push(new Actor(home, {x: 17, y: 9}));
+	pedestrians.push(new Actor(home, {x: 18, y: 9}));
+	pedestrians.push(new Actor(home, {x: 19, y: 9}));
+	pedestrians.push(new Actor(home, {x: 20, y: 9}));
+	pedestrians.push(new Actor(home, {x: 21, y: 9}));
+	pedestrians.push(new Actor(home, {x: 22, y: 9}));
+	pedestrians.push(new Actor(home, {x: 23, y: 9}));
+	pedestrians.push(new Actor(home, {x: 24, y: 9}));
+	pedestrians.push(new Actor(home, {x: 25, y: 9}));
+	pedestrians.push(new Actor(home, {x: 26, y: 9}));
+	pedestrians.push(new Actor(home, {x: 27, y: 9}));
+	pedestrians.push(new Actor(home, {x: 28, y: 9}));
+	pedestrians.push(new Actor(home, {x: 29, y: 9}));
+	pedestrians.push(new Actor(home, {x: 30, y: 9}));
+	pedestrians.push(new Actor(home, {x: 31, y: 9}));
+	pedestrians.push(new Actor(home, {x: 32, y: 9}));
+	pedestrians.push(new Actor(home, {x: 33, y: 9}));
+	pedestrians.push(new Actor(home, {x: 34, y: 9}));
+	pedestrians.push(new Actor(home, {x: 35, y: 9}));
+	pedestrians.push(new Actor(home, {x: 36, y: 9}));
+	pedestrians.push(new Actor(home, {x: 37, y: 9}));
+	pedestrians.push(new Actor(home, {x: 38, y: 9}));
+	pedestrians.push(new Actor(home, {x: 39, y: 9}));
+	pedestrians.push(new Actor(home, {x: 40, y: 9}));
+	pedestrians.push(new Actor(home, {x: 41, y: 9}));
+	pedestrians.push(new Actor(home, {x: 42, y: 9}));
+	pedestrians.push(new Actor(home, {x: 43, y: 9}));
+	pedestrians.push(new Actor(home, {x: 44, y: 9}));
+	pedestrians.push(new Actor(home, {x: 45, y: 9}));
+	pedestrians.push(new Actor(home, {x: 46, y: 9}));
+	pedestrians.push(new Actor(home, {x: 47, y: 9}));
+	pedestrians.push(new Actor(home, {x: 48, y: 9}));
+	pedestrians.push(new Actor(home, {x: 49, y: 9}));
 
 
 	function correctOffset() {
@@ -245,7 +384,6 @@ window.onload = async () => {
 			map.dragStart.y = event.clientY + map.positionOffset.y;
 		}
 
-		console.log(event.button)
 		if(event.button == 0) {
 			if(interf.mouseInsideInterface(playerMouse)) {
 				const clickResult = interf.click(playerMouse);
@@ -384,8 +522,14 @@ window.onload = async () => {
 		}
 		const dTime = deltaTime > 1 ? 1 : deltaTime;
 		let diagonalChanged = false;
+
+		let randMap = [
+			Math.floor(Math.random() * 2),
+			Math.floor(Math.random() * 3),
+			Math.floor(Math.random() * 4),
+		]
 		for(let pedestrian of pedestrians) {
-			diagonalChanged ||= pedestrian.tick(dTime, map.roads);
+			diagonalChanged ||= pedestrian.tick(dTime, map.roads, randMap);
 		}
 		if(diagonalChanged) {
 			sortPedestrians(pedestrians); // TODO: more efficient way?

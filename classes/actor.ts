@@ -42,7 +42,7 @@ export class Actor {
 		this.direction = {x: 0, y: 0};
 	}
 
-	tick(deltaTime: number, roads: (Road | undefined)[][]): boolean {
+	tick(deltaTime: number, roads: (Road | undefined)[][], randMap: number[]): boolean {
 		if(this.travelFinished) {
 			return false;
 		}
@@ -69,8 +69,7 @@ export class Actor {
 				} else if (oneBit(newDirection)) {
 					this.directionMask = reverseMask(newDirection);
 				} else {
-					// todo: randomize if more than one option
-					this.directionMask = reverseMask(simpifyDir(newDirection));
+					this.directionMask = reverseMask(simpifyDir(newDirection, randMap));
 				}
 				this.direction.x = maskToDirectionX(this.directionMask);
 				this.direction.y = maskToDirectionY(this.directionMask);
@@ -83,10 +82,12 @@ export class Actor {
 			this.positionSquare.y = y;
 			this.diagonal = x + y;
 			diagonalChanged = true;
-			this.traveledSquares += 1;
-			if(this.traveledSquares == this.maxTravel) {
-				this.traveledSquares = 0;
-				this.travelFinished = true;
+			if(!this.travelFinished) {
+				this.traveledSquares += 1;
+				if(this.traveledSquares == this.maxTravel) {
+					this.traveledSquares = 0;
+					this.travelFinished = true;
+				}
 			}
 		} 
 		this.position.x = newX;
@@ -155,15 +156,25 @@ function oneBit(mask: number): boolean {
 	return (mask & (mask-1)) == 0;
 }
 
-function simpifyDir(mask: number): number {
-	if((mask & 0b0001) != 0) {
-		return 0b0001;
-	}
-	if((mask & 0b0010) != 0) {
-		return 0b0010;
-	}
-	if((mask & 0b0100) != 0) {
-		return 0b0100;
-	}
-	return 0b1000;
+const randomizationMap: { [key: number]: number[] } = {
+	0b0001: [0b0001],
+	0b0010: [0b0010],
+	0b0011: [0b0001, 0b0010],
+	0b0100: [0b0100],
+	0b0101: [0b0001, 0b0100],
+	0b0110: [0b0010, 0b0100],
+	0b0111: [0b0001, 0b0010, 0b0100],
+	0b1000: [0b1000],
+	0b1001: [0b1000, 0b0001],
+	0b1010: [0b1000, 0b0010],
+	0b1011: [0b1000, 0b0001, 0b0010],
+	0b1100: [0b1000, 0b0100],
+	0b1101: [0b1000, 0b0001, 0b0100],
+	0b1110: [0b1000, 0b0010, 0b0100],
+	0b1111: [0b1000, 0b0001, 0b0010, 0b0100],
+}
+
+function simpifyDir(mask: number, randomMap: number[]): number {
+	const toRandomize = randomizationMap[mask];
+	return toRandomize[randomMap[toRandomize.length - 2]];
 }
