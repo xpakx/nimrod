@@ -6,11 +6,12 @@ import { MapLayer, Position, Size } from "./classes/map-layer.js";
 const canvasWidth = 1200;
 const canvasHeight = 800;
 
-
 let map = new MapLayer({width: canvasWidth, height: canvasHeight});
 let interf = new InterfaceLayer({width: canvasWidth, height: canvasHeight});
 
 let pedestrians: Actor[] = [];
+let playerMouse: Position = {x: 0, y: 0};
+const dts: number[] = [];
 
 async function loadImage(url: string): Promise<any> {
     const image = new Image();
@@ -21,25 +22,12 @@ async function loadImage(url: string): Promise<any> {
     });
 }
 
-
-export function getSize(img: HTMLImageElement, widthNorm: number): Size {
-	const width = map.tileWidth * widthNorm;
-	const height = img.height*(width/img.width);
-	return { width: width, height: height };
-}
-
-
 function renderGame(context: CanvasRenderingContext2D, deltaTime: number) {
 	context.clearRect(0, 0, canvasWidth, canvasHeight);
 	map.renderMap(context, pedestrians, deltaTime);
 	interf.renderInterface(context, deltaTime);
 	renderDebugInfo(context, deltaTime);
 }
-
-let playerMouse: Position = {x: 0, y: 0};
-
-const dts: number[] = [];
-
 
 function sortPedestrians(pedestrians: Actor[]) {
 	pedestrians.sort((a, b) => {
@@ -78,12 +66,12 @@ window.onload = async () => {
 	canvas.width = canvasWidth;
 	canvas.height = canvasHeight;
 
-	const ziggurat = new BuildingSprite(await loadImage("./img/ziggurat.svg"), 4);
-	const home = new BuildingSprite(await loadImage("./img/house.svg"), 2);
-	const tower = new BuildingSprite(await loadImage("./img/tower.svg"), 2);
-	const well = new BuildingSprite(await loadImage("./img/well.svg"), 2);
-	const inspector = new BuildingSprite(await loadImage("./img/inspector.svg"), 2);
-	let sprites: any = {}; // TODO
+	const ziggurat = new BuildingSprite(await loadImage("./img/ziggurat.svg"), 4, map.tileSize);
+	const home = new BuildingSprite(await loadImage("./img/house.svg"), 2, map.tileSize);
+	const tower = new BuildingSprite(await loadImage("./img/tower.svg"), 2, map.tileSize);
+	const well = new BuildingSprite(await loadImage("./img/well.svg"), 2, map.tileSize);
+	const inspector = new BuildingSprite(await loadImage("./img/inspector.svg"), 2, map.tileSize);
+	let sprites: { [key: string]: BuildingSprite } = {}; // TODO
 	sprites["ziggurat"] = ziggurat;
 	sprites["home"] = home;
 	sprites["tower"] = tower;
@@ -182,12 +170,12 @@ window.onload = async () => {
 		await loadImage("./img/road1110.svg"), 
 		await loadImage("./img/road1111.svg"), 
 	];
-	const road = new TilingSprite(roads);
+	const road = new TilingSprite(roads, map.tileSize);
 	function rescaleSprites() {
 		for (const key in sprites) {
-			sprites[key].refreshSize();
+			sprites[key].refreshSize(map.tileSize);
 		}
-		road.refreshSize();
+		road.refreshSize(map.tileSize);
 	}
 
 	map.putBuilding({x: 1, y: 8}, sprites["home"]);
@@ -237,16 +225,16 @@ window.onload = async () => {
 		}
 	});
 
-	let maxYOffset = map.isoToScreen({x: map.map[0].length - 1, y: map.map.length - 1}).y + (map.tileHeight/2);
-	let minXOffset = map.isoToScreen({x: 0, y: map.map.length - 1}).x  - (map.tileWidth/2);
-	let maxXOffset = map.isoToScreen({x: map.map[0].length - 1, y: 0}).x  + (map.tileWidth/2);
+	let maxYOffset = map.isoToScreen({x: map.map[0].length - 1, y: map.map.length - 1}).y + (map.tileSize.height/2);
+	let minXOffset = map.isoToScreen({x: 0, y: map.map.length - 1}).x  - (map.tileSize.width/2);
+	let maxXOffset = map.isoToScreen({x: map.map[0].length - 1, y: 0}).x  + (map.tileSize.width/2);
 
 	function rescaleOffsets(oldScale: number) {
 		map.positionOffset.x = map.scale*map.positionOffset.x/oldScale;
 		map.positionOffset.y = map.scale*map.positionOffset.y/oldScale;
-		maxYOffset = map.isoToScreen({x: map.map[0].length - 1, y: map.map.length - 1}).y + (map.tileHeight/2) + map.positionOffset.y; // + offset to calculate from 0,0
-		minXOffset = map.isoToScreen({x: 0, y: map.map.length - 1}).x  - (map.tileWidth/2) + map.positionOffset.x;
-		maxXOffset = map.isoToScreen({x: map.map[0].length - 1, y: 0}).x  + (map.tileWidth/2) + map.positionOffset.x;
+		maxYOffset = map.isoToScreen({x: map.map[0].length - 1, y: map.map.length - 1}).y + (map.tileSize.height/2) + map.positionOffset.y; // + offset to calculate from 0,0
+		minXOffset = map.isoToScreen({x: 0, y: map.map.length - 1}).x  - (map.tileSize.width/2) + map.positionOffset.x;
+		maxXOffset = map.isoToScreen({x: map.map[0].length - 1, y: 0}).x  + (map.tileSize.width/2) + map.positionOffset.x;
 		correctOffset();
 	}
 

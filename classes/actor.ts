@@ -1,20 +1,20 @@
-import { getSize } from "../script.js";
 import { Road } from "./buildings.js";
 import { Position, Size } from "./map-layer.js";
 
 export class ActorSprite {
-	size: Size;
+	size: Size = {height: 0, width: 0};
 	image: HTMLImageElement;
 	baseSize: number;
 
-	constructor(image: HTMLImageElement, size: number) {
+	constructor(image: HTMLImageElement, size: number, tileSize: Size) {
 		this.image = image;
-		this.size = getSize(image, size)
 		this.baseSize = size;
+		this.refreshSize(tileSize);
 	}
 
-	refreshSize() {
-		this.size = getSize(this.image, this.baseSize);
+	refreshSize(tileSize: Size) {
+		this.size.width = tileSize.width * this.baseSize;
+		this.size.height = this.image.height*(this.size.width/this.image.width);
 	}
 
 }

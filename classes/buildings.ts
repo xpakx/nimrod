@@ -1,20 +1,20 @@
-import { getSize } from "../script.js";
 import { ActorSprite } from "./actor.js";
 import { Position, Size } from "./map-layer.js";
 
 export class BuildingSprite {
-	size: Size;
+	size: Size = {height: 0, width: 0};
 	image: HTMLImageElement;
 	baseSize: number;
 
-	constructor(image: HTMLImageElement, size: number) {
+	constructor(image: HTMLImageElement, size: number, tileSize: Size) {
 		this.image = image;
-		this.size = getSize(image, size)
 		this.baseSize = size;
+		this.refreshSize(tileSize);
 	}
 
-	refreshSize() {
-		this.size = getSize(this.image, this.baseSize);
+	refreshSize(tileSize: Size) {
+		this.size.width = tileSize.width * this.baseSize;
+		this.size.height = this.image.height*(this.size.width/this.image.width);
 	}
 
 }
@@ -124,18 +124,19 @@ export class Road {
 
 
 export class TilingSprite {
-	size: Size;
+	size: Size = {height: 0, width: 0};
 	sprites: HTMLImageElement[];
 	baseSize: number;
 
-	constructor(sprites: HTMLImageElement[]) {
+	constructor(sprites: HTMLImageElement[], tileSize: Size) {
 		this.sprites = sprites;
-		this.size = getSize(this.sprites[0], 1)
 		this.baseSize = 1;
+		this.refreshSize(tileSize);
 	}
 
-	refreshSize() {
-		this.size = getSize(this.sprites[0], this.baseSize);
+	refreshSize(tileSize: Size) {
+		this.size.width = tileSize.width * this.baseSize;
+		this.size.height = this.sprites[0].height*(this.size.width/this.sprites[0].width);
 	}
 
 }

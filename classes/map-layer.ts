@@ -5,8 +5,7 @@ export class MapLayer {
 	defTileWidth: number = 64;
 	defTileHeight: number = 32;
 	scale: number = 1.0;
-	tileWidth: number = this.defTileWidth*this.scale;
-	tileHeight: number = this.defTileHeight*this.scale;
+	tileSize: Size = {width: this.defTileWidth*this.scale, height: this.defTileHeight*this.scale}
 
 	positionOffset: Position = {x: 0, y: 0}
 	canvasSize: Size = {width: 0, height: 0};
@@ -47,8 +46,8 @@ export class MapLayer {
 		if(this.scale > 2.0) {
 			this.scale = 2.0;
 		}
-		this.tileWidth = this.scale * this.defTileWidth;
-		this.tileHeight = this.scale * this.defTileHeight;
+		this.tileSize.width = this.scale * this.defTileWidth;
+		this.tileSize.height = this.scale * this.defTileHeight;
 	}
 
 	renderMap(context: CanvasRenderingContext2D, pedestrians: Actor[], _deltaTime: number) {
@@ -58,22 +57,22 @@ export class MapLayer {
 	}
 
 	isoToScreen(pos: Position): Position {
-		const screenX = (pos.x - pos.y) * (this.tileWidth / 2) - this.positionOffset.x;
-		const screenY = (pos.x + pos.y) * (this.tileHeight / 2) - this.positionOffset.y;
+		const screenX = (pos.x - pos.y) * (this.tileSize.width / 2) - this.positionOffset.x;
+		const screenY = (pos.x + pos.y) * (this.tileSize.height / 2) - this.positionOffset.y;
 		return { x: screenX, y: screenY };
 	}
 
 	screenToIso(pos: Position): Position {
 		const x = pos.x - (this.canvasSize.width / 2) + this.positionOffset.x;
-		const y = pos.y - (this.canvasSize.height / 2 - (this.tileHeight/2)) + this.positionOffset.y;
-		const isoX = x/this.tileWidth + y/this.tileHeight;
-		const isoY = y/this.tileHeight - x/this.tileWidth;
+		const y = pos.y - (this.canvasSize.height / 2 - (this.tileSize.height/2)) + this.positionOffset.y;
+		const isoX = x/this.tileSize.width + y/this.tileSize.height;
+		const isoY = y/this.tileSize.height - x/this.tileSize.width;
 		return { x: Math.floor(isoX), y: Math.floor(isoY) };
 	}
 
 	drawIsometricMap(ctx: CanvasRenderingContext2D) {
 		ctx.save();
-		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileHeight/2));
+		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileSize.height/2));
 		for (let y = 0; y < this.map.length; y++) {
 			for (let x = 0; x < this.map[y].length; x++) {
 				const screenPos = this.isoToScreen({x: x, y: y});
@@ -93,9 +92,9 @@ export class MapLayer {
 	drawTile(ctx: CanvasRenderingContext2D, x: number, y: number, color: string) {
 		ctx.beginPath();
 		ctx.moveTo(x, y);
-		ctx.lineTo(x + this.tileWidth / 2, y + this.tileHeight / 2);
-		ctx.lineTo(x, y + this.tileHeight);
-		ctx.lineTo(x - this.tileWidth / 2, y + this.tileHeight / 2);
+		ctx.lineTo(x + this.tileSize.width / 2, y + this.tileSize.height / 2);
+		ctx.lineTo(x, y + this.tileSize.height);
+		ctx.lineTo(x - this.tileSize.width / 2, y + this.tileSize.height / 2);
 		ctx.closePath();
 		ctx.fillStyle = color;
 		ctx.fill();
@@ -104,7 +103,7 @@ export class MapLayer {
 
 	drawBuilding(ctx: CanvasRenderingContext2D, position: Position, building: BuildingSprite) {
 		let pos = this.isoToScreen(position);
-		ctx.drawImage(building.image, pos.x-building.size.width/2, pos.y-building.size.height+this.tileHeight, building.size.width, building.size.height);
+		ctx.drawImage(building.image, pos.x-building.size.width/2, pos.y-building.size.height+this.tileSize.height, building.size.width, building.size.height);
 	}
 
 
@@ -196,7 +195,7 @@ export class MapLayer {
 
 	renderRoads(ctx: CanvasRenderingContext2D) {
 		ctx.save();
-		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileHeight/2));
+		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileSize.height/2));
 		for (let y = 0; y < this.roads.length; y++) {
 			for (let x = 0; x < this.roads[y].length; x++) {
 				const screenPos = this.isoToScreen({x: x, y: y});
@@ -221,7 +220,7 @@ export class MapLayer {
 
 	drawRoad(ctx: CanvasRenderingContext2D, position: Position, road: Road) {
 		let pos = this.isoToScreen(position);
-		ctx.drawImage(road.sprite, pos.x-road.sprites.size.width/2, pos.y-road.sprites.size.height+this.tileHeight, road.sprites.size.width, road.sprites.size.height);
+		ctx.drawImage(road.sprite, pos.x-road.sprites.size.width/2, pos.y-road.sprites.size.height+this.tileSize.height, road.sprites.size.width, road.sprites.size.height);
 	}
 
 
@@ -338,13 +337,13 @@ export class MapLayer {
 		if(right <= leftScreenEnd) {
 			return false
 		}
-		const top = screenPosition.y - building.sprite.size.height + this.tileHeight; 
-		const bottomScreenEnd = this.canvasSize.height / 2 + (this.tileHeight/2);
+		const top = screenPosition.y - building.sprite.size.height + this.tileSize.height; 
+		const bottomScreenEnd = this.canvasSize.height / 2 + (this.tileSize.height/2);
 		if(top >= bottomScreenEnd) {
 			return false;
 		}
-		const bottom = screenPosition.y + this.tileHeight; 
-		const topScreenEnd = -(this.canvasSize.height / 2) + (this.tileHeight/2);
+		const bottom = screenPosition.y + this.tileSize.height; 
+		const topScreenEnd = -(this.canvasSize.height / 2) + (this.tileSize.height/2);
 		if(bottom <= topScreenEnd) {
 			return false;
 		}
@@ -352,23 +351,23 @@ export class MapLayer {
 	}
 
 	isTileInView(screenPosition: Position): boolean {
-		const left = screenPosition.x - this.tileWidth/2; 
+		const left = screenPosition.x - this.tileSize.width/2; 
 		const rightScreenEnd = (this.canvasSize.width / 2);
 		if(left >= rightScreenEnd) {
 			return false;
 		}
-		const right = screenPosition.x + this.tileWidth/2; 
+		const right = screenPosition.x + this.tileSize.width/2; 
 		const leftScreenEnd = -(this.canvasSize.width / 2);
 		if(right <= leftScreenEnd) {
 			return false
 		}
-		const top = screenPosition.y - this.tileHeight; 
-		const bottomScreenEnd = this.canvasSize.height / 2 + (this.tileHeight/2);
+		const top = screenPosition.y - this.tileSize.height; 
+		const bottomScreenEnd = this.canvasSize.height / 2 + (this.tileSize.height/2);
 		if(top >= bottomScreenEnd) {
 			return false;
 		}
 		const bottom = screenPosition.y; 
-		const topScreenEnd = -(this.canvasSize.height / 2) + (this.tileHeight/2);
+		const topScreenEnd = -(this.canvasSize.height / 2) + (this.tileSize.height/2);
 		if(bottom <= topScreenEnd) {
 			return false;
 		}
@@ -378,7 +377,7 @@ export class MapLayer {
 	renderBuildings(ctx: CanvasRenderingContext2D, pedestrians: Actor[]) {
 		const ghostCanBePlaced = this.mode ? this.canBePlaced(this.isoPlayerMouse, this.mode) : false;
 		ctx.save();
-		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileHeight/2));
+		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileSize.height/2));
 		let ghostDrawn = false;
 		const ghostDiagonal = this.getDiagonal(this.isoPlayerMouse, this.mode);
 		let currentDiagonal = 0;
@@ -445,7 +444,7 @@ export class MapLayer {
 		ctx.filter = red ? "url('./img//red-filter.svg#red') opacity(0.75)" : "grayscale(90%)";
 		ctx.globalAlpha = 0.75;
 		let pos = this.isoToScreen(this.isoPlayerMouse);
-		ctx.drawImage(this.mode.image, pos.x-this.mode.size.width/2, pos.y-this.mode.size.height+this.tileHeight, this.mode.size.width, this.mode.size.height);
+		ctx.drawImage(this.mode.image, pos.x-this.mode.size.width/2, pos.y-this.mode.size.height+this.tileSize.height, this.mode.size.width, this.mode.size.height);
 		ctx.restore();
 	}
 
