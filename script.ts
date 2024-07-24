@@ -51,7 +51,6 @@ function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
     ctx.fillText(`(${map.isoPlayerMouse.x}, ${map.isoPlayerMouse.y})`, 20, 125);
 }
 
-
 window.onload = async () => {
 	const canvas = document.getElementById('gameCanvas') as (HTMLCanvasElement | null);
 	if (!canvas) {
@@ -182,7 +181,7 @@ window.onload = async () => {
 	map.putBuilding({x: 3, y: 8}, sprites["home"]);
 	map.putBuilding({x: 1, y: 11}, sprites["home"]);
 	map.putBuilding({x: 3, y: 11}, sprites["home"]);
-	// map.getBuilding({x: 3, y: 11})!.setWorker(home);;
+	map.getBuilding({x: 3, y: 11})!.setWorker(home);;
 	map.putRoad({x: 0, y: 9}, road, true);
 	map.putRoad({x: 1, y: 9}, road, true);
 	map.putRoad({x: 2, y: 9}, road, true);
@@ -274,6 +273,13 @@ window.onload = async () => {
 		}
 	});
 
+	function rescale(dScale: number) {
+		let oldScale = map.scale;
+		map.rescale(dScale);
+		rescaleOffsets(oldScale);
+		rescaleSprites();
+	}
+
 	canvas.addEventListener('mouseup', (_event) => {
 		map.isDragging = false;
 	});
@@ -282,15 +288,9 @@ window.onload = async () => {
 			return;
 		}
 		if (event.deltaY < 0) {
-			let oldScale = map.scale;
-			map.rescale(0.2);
-			rescaleOffsets(oldScale);
-			rescaleSprites();
+			rescale(0.2);
 		} else {
-			let oldScale = map.scale;
-			map.rescale(-0.2);
-			rescaleOffsets(oldScale);
-			rescaleSprites();
+			rescale(-0.2);
 		}
 	});
 
@@ -311,26 +311,14 @@ window.onload = async () => {
 				moveRight = true;
 			break;
 			case '+': {
-				let oldScale = map.scale;
-				map.rescale(0.2);
-				rescaleOffsets(oldScale);
-				rescaleSprites();
+				rescale(0.2);
 			}
 			break;
 			case '-': {
-				let oldScale = map.scale;
-				map.rescale(-0.2);
-				rescaleOffsets(oldScale);
-				rescaleSprites();
+				rescale(-0.2);
 			}
 			break;
 			case '0': case 'Escape': map.switchToNormalMode(); break;
-			case '1': map.switchToBuildMode(home); break;
-			case '2': map.switchToBuildMode(ziggurat); break;
-			case '3': map.switchToBuildMode(tower); break;
-			case '4': map.switchToBuildMode(well); break;
-			case '5': map.switchToBuildMode(inspector); break;
-			case '6': map.switchToRoadMode(road); break;
 			case '9': map.switchToDeleteMode(); break;
 			case 'Enter': interf.dialogueAction(); break;
 		}
@@ -414,6 +402,6 @@ window.onload = async () => {
 	const av = await loadImage("./img/portraits/ratman.svg");
 	interf.setDialogue(context, {text: "Welcome to the game!", portrait: av});
 	setTimeout(() => {
-		// interf.closeDialogue();
+		interf.closeDialogue();
 	}, 3000);
 }
