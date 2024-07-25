@@ -350,7 +350,7 @@ export class MapLayer {
 			return false;
 		}
 		const bottom = screenPosition.y; 
-		const topScreenEnd = -(this.canvasSize.height / 2) + (this.tileSize.height/2);
+		const topScreenEnd = -(this.canvasSize.height / 2);
 		if(bottom <= topScreenEnd) {
 			return false;
 		}
