@@ -42,35 +42,27 @@ export class Actor {
 		this.direction = {x: 0, y: 0};
 	}
 
-	getNewDir(roads: (Road | undefined)[][], randMap: number[], newX: number, newY: number, x: number, y: number) {
-		if(this.directionMask == 0 || hasStepOverHalf(this.direction, this.positionSquare, this.position, newX, newY)) {
-			let correctionX = 0
-			let correctionY = 0
-			if(this.direction.x != 0) {
-				newX = this.positionSquare.x + 0.5; // TODO
-				correctionX = (this.position.x - newX);
+	// change only direction and directionMask, return true if direction changed
+	getNewDir(roads: (Road | undefined)[][], randMap: number[], x: number, y: number) {
+		const road = roads[y][x]
+		if(road) {
+			const oldDirection = this.directionMask;
+			const newDirection = road.direction ^ this.directionMask;
+			if(newDirection == 0) {
+				this.directionMask = reverseMask(this.directionMask);
+			} else if (oneBit(newDirection)) {
+				this.directionMask = reverseMask(newDirection);
 			} else {
-				newY = this.positionSquare.y + 0.5; // TODO
-				correctionY = (this.position.y - newY);
+				this.directionMask = reverseMask(simpifyDir(newDirection, randMap));
 			}
-			const road = roads[y][x]
-			if(road) {
-				const newDirection = road.direction ^ this.directionMask;
-				if(newDirection == 0) {
-					this.directionMask = reverseMask(this.directionMask);
-				} else if (oneBit(newDirection)) {
-					this.directionMask = reverseMask(newDirection);
-				} else {
-					this.directionMask = reverseMask(simpifyDir(newDirection, randMap));
-				}
-				this.direction.x = maskToDirectionX(this.directionMask);
-				this.direction.y = maskToDirectionY(this.directionMask);
-			}
-			this.position.x += correctionX*this.direction.x;
-			this.position.y += correctionY*this.direction.y;
+			this.direction.x = maskToDirectionX(this.directionMask);
+			this.direction.y = maskToDirectionY(this.directionMask);
+			return oldDirection != this.directionMask;
 		}
+		return false;
 	}
 
+	// change only square info, not real position
 	enterSquare(x: number, y: number) {
 			this.positionSquare.x = x;
 			this.positionSquare.y = y;
@@ -88,16 +80,36 @@ export class Actor {
 		if(this.travelFinished) {
 			return false;
 		}
-		let newX = this.position.x + this.direction.x*deltaTime;
-		let newY = this.position.y + this.direction.y*deltaTime;
-		let x = Math.floor(newX);
-		let y = Math.floor(newY);
+
+		// (newX, newY) here is only a potential (x, y), shouldn't be really used later on if direction changed
+		const newX = this.position.x + this.direction.x*deltaTime;
+		const newY = this.position.y + this.direction.y*deltaTime;
+		const x = Math.floor(newX);
+		const y = Math.floor(newY);
 		let diagonalChanged = false;
 
-		if(this.directionMask == 0 || beforeHalf(this.direction, this.positionSquare, this.position.x, this.position.y)) {
-			this.getNewDir(roads, randMap, newX, newY, x, y);
-			if(x != this.positionSquare.x || y != this.positionSquare.y) {
-				this.enterSquare(x, y)
+		if(this.directionMask == 0) {
+			this.getNewDir(roads, randMap, x, y);
+		}
+
+		if(beforeHalf(this.direction, this.positionSquare, this.position.x, this.position.y)) {
+			let dirChanged = false;
+			if(hasStepOverHalf(this.direction, this.positionSquare, this.position, newX, newY)) {
+				dirChanged = this.getNewDir(roads, randMap, x, y);
+			} 
+
+			if(dirChanged) {
+				this.position.x = this.positionSquare.x + 0.5; // TODO
+				this.position.y = this.positionSquare.y + 0.5; // TODO
+			} else {
+				this.position.x = newX;
+				this.position.y = newY;
+			}
+
+			const currX = Math.floor(this.position.x);
+			const currY = Math.floor(this.position.y);
+			if(currX != this.positionSquare.x || currY != this.positionSquare.y) {
+				this.enterSquare(currX, currY)
 				diagonalChanged = true;
 			} 
 		} else if(afterHalf(this.direction, this.positionSquare, this.position.x, this.position.y)) {
@@ -105,10 +117,12 @@ export class Actor {
 				this.enterSquare(x, y)
 				diagonalChanged = true;
 			} 
-			this.getNewDir(roads, randMap, newX, newY, x, y); // this should only be problem while lagging
+			if(hasStepOverHalf(this.direction, this.positionSquare, this.position, newX, newY)) {
+				this.getNewDir(roads, randMap, x, y);
+			}
+			this.position.x = newX;
+			this.position.y = newY;
 		}
-		this.position.x = newX;
-		this.position.y = newY;
 		return diagonalChanged;
 	}
 }
