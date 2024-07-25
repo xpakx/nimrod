@@ -42,15 +42,7 @@ export class Actor {
 		this.direction = {x: 0, y: 0};
 	}
 
-	tick(deltaTime: number, roads: (Road | undefined)[][], randMap: number[]): boolean {
-		if(this.travelFinished) {
-			return false;
-		}
-		let newX = this.position.x + this.direction.x*deltaTime;
-		let newY = this.position.y + this.direction.y*deltaTime;
-		let x = Math.floor(newX);
-		let y = Math.floor(newY);
-		let diagonalChanged = false;
+	getNewDir(roads: (Road | undefined)[][], randMap: number[], newX: number, newY: number, x: number, y: number) {
 		if(this.directionMask == 0 || hasStepOverHalf(this.direction, this.positionSquare, this.position, newX, newY)) {
 			let correctionX = 0
 			let correctionY = 0
@@ -77,11 +69,12 @@ export class Actor {
 			this.position.x += correctionX*this.direction.x;
 			this.position.y += correctionY*this.direction.y;
 		}
-		if(x != this.positionSquare.x || y != this.positionSquare.y) {
+	}
+
+	enterSquare(x: number, y: number) {
 			this.positionSquare.x = x;
 			this.positionSquare.y = y;
 			this.diagonal = x + y;
-			diagonalChanged = true;
 			if(!this.travelFinished) {
 				this.traveledSquares += 1;
 				if(this.traveledSquares == this.maxTravel) {
@@ -89,12 +82,77 @@ export class Actor {
 					this.travelFinished = true;
 				}
 			}
-		} 
+	}
+
+	tick(deltaTime: number, roads: (Road | undefined)[][], randMap: number[]): boolean {
+		if(this.travelFinished) {
+			return false;
+		}
+		let newX = this.position.x + this.direction.x*deltaTime;
+		let newY = this.position.y + this.direction.y*deltaTime;
+		let x = Math.floor(newX);
+		let y = Math.floor(newY);
+		let diagonalChanged = false;
+
+		if(this.directionMask == 0 || beforeHalf(this.direction, this.positionSquare, this.position.x, this.position.y)) {
+			this.getNewDir(roads, randMap, newX, newY, x, y);
+			if(x != this.positionSquare.x || y != this.positionSquare.y) {
+				this.enterSquare(x, y)
+				diagonalChanged = true;
+			} 
+		} else if(afterHalf(this.direction, this.positionSquare, this.position.x, this.position.y)) {
+			if(x != this.positionSquare.x || y != this.positionSquare.y) {
+				this.enterSquare(x, y)
+				diagonalChanged = true;
+			} 
+			this.getNewDir(roads, randMap, newX, newY, x, y); // this should only be problem while lagging
+		}
 		this.position.x = newX;
 		this.position.y = newY;
 		return diagonalChanged;
 	}
 }
+
+function beforeHalf(direction: Position, square: Position, x: number, y: number): boolean {
+	if(direction.x > 0) {
+		const half = square.x + 0.5;
+		return x < half;
+	}
+	if(direction.x < 0) {
+		const half = square.x + 0.5;
+		return x >= half;
+	}
+	if(direction.y > 0) {
+		const half = square.y + 0.5;
+		return y < half;
+	}
+	if(direction.y < 0) {
+		const half = square.y + 0.5;
+		return y >= half;
+	}
+	return false;
+}
+
+function afterHalf(direction: Position, square: Position, x: number, y: number): boolean {
+	if(direction.x > 0) {
+		const half = square.x + 0.5;
+		return x >= half;
+	}
+	if(direction.x < 0) {
+		const half = square.x + 0.5;
+		return x < half;
+	}
+	if(direction.y > 0) {
+		const half = square.y + 0.5;
+		return y >= half;
+	}
+	if(direction.y < 0) {
+		const half = square.y + 0.5;
+		return y < half;
+	}
+	return false;
+}
+
 
 function hasStepOverHalf(direction: Position, square: Position, pre: Position, postX: number, postY: number): boolean {
 	if(direction.x > 0) {

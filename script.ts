@@ -520,7 +520,7 @@ window.onload = async () => {
 				pedestrians.push(new Actor(home, building.workerSpawn));
 			}
 		}
-		const dTime = deltaTime > 1 ? 1 : deltaTime;
+		const dTime = deltaTime > 0.5 ? 0.5 : deltaTime;
 		let diagonalChanged = false;
 
 		let randMap = [
