@@ -34,8 +34,8 @@ export class Actor {
 
 	constructor(sprite: ActorSprite, position: Position) {
 		this.sprite =  sprite;
-		this.position = position;
 		this.positionSquare = {x: Math.floor(position.x), y: Math.floor(position.y)};
+		this.position = {x: this.positionSquare.x + 0.5, y: this.positionSquare.y + 0.5};
 
 		this.diagonal = this.positionSquare.x + this.positionSquare.y;
 		this.directionMask = 0b0000;
