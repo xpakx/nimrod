@@ -3,7 +3,7 @@ run-name: ci pipeline
 on: 
   push:
     branches:
-      - master
+      - main
 jobs:
   Build-Game:
     runs-on: ubuntu-latest
