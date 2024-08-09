@@ -531,6 +531,7 @@ window.onload = async () => {
 		for(let pedestrian of pedestrians) {
 			diagonalChanged ||= pedestrian.tick(dTime, map.roads, randMap);
 		}
+		pedestrians = pedestrians.filter((p) => !p.dead);
 		if(diagonalChanged) {
 			sortPedestrians(pedestrians); // TODO: more efficient way?
 		}

@@ -24,6 +24,7 @@ export class Actor {
 	position: Position;
 	positionSquare: Position;
 	diagonal: number;
+	dead: boolean = false;
 
 	directionMask: number;
 	direction: Position;
@@ -79,6 +80,11 @@ export class Actor {
 	tick(deltaTime: number, roads: (Road | undefined)[][], randMap: number[]): boolean {
 		if(this.travelFinished) {
 			return false;
+		}
+		if(!roads[this.positionSquare.y][this.positionSquare.x]) {
+			this.dead = true;
+			this.direction.x = 0;
+			this.direction.y = 0;
 		}
 
 		// (newX, newY) here is only a potential (x, y), shouldn't be really used later on if direction changed
