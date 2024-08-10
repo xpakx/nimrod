@@ -19,3 +19,34 @@ test('Actor is correctly initialized', () => {
     expect(actor.position.x).toBe(position.x + 0.5);
     expect(actor.position.y).toBe(position.y + 0.5);
 });
+
+describe('ActorSprite', () => {
+    let imageMock: HTMLImageElement;
+
+    beforeEach(() => {
+        imageMock = { width: 100, height: 200 } as HTMLImageElement;
+    });
+
+    test('should initialize with correct properties', () => {
+        const size = 2;
+        const tileSize: Size = { width: 50, height: 50 };
+        const actorSprite = new ActorSprite(imageMock, size, tileSize);
+
+        expect(actorSprite.image).toBe(imageMock);
+        expect(actorSprite.baseSize).toBe(size);
+        expect(actorSprite.size.width).toBe(100);
+        expect(actorSprite.size.height).toBe(200);
+    });
+
+    test('refreshSize should calculate size correctly', () => {
+        const size = 2;
+        const tileSize: Size = { width: 50, height: 50 };
+        const actorSprite = new ActorSprite(imageMock, size, tileSize);
+
+        tileSize.width = 60;
+        actorSprite.refreshSize(tileSize);
+
+        expect(actorSprite.size.width).toBe(120); // 60 * 2
+        expect(actorSprite.size.height).toBe(240); // (200/100) * 120
+    });
+});
