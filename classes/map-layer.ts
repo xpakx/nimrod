@@ -89,7 +89,11 @@ export class MapLayer {
 
 	drawBuilding(ctx: CanvasRenderingContext2D, position: Position, building: BuildingSprite) {
 		let pos = this.isoToScreen(position);
-		ctx.drawImage(building.image, pos.x-building.size.width/2, pos.y-building.size.height+this.tileSize.height, building.size.width, building.size.height);
+		ctx.drawImage(
+			building.offscreen, 
+			pos.x - building.size.width / 2, 
+			pos.y - building.size.height + this.tileSize.height
+		);
 	}
 
 
@@ -470,10 +474,11 @@ export class MapLayer {
 
 	drawPedestrian(context: CanvasRenderingContext2D, actor: Actor) {
 		const position = this.isoToScreen(actor.position);
-		context.fillStyle = "red";
-		context.beginPath();
-		context.ellipse(position.x - 10, position.y - 15, 10, 15, 0, 0, 2 * Math.PI);
-		context.fill();
+		context.drawImage(
+			actor.sprite.offscreen, 
+			position.x - 10,
+			position.y - 15
+		);
 	}
 }
 

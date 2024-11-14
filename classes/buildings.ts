@@ -5,16 +5,26 @@ export class BuildingSprite {
 	size: Size = {height: 0, width: 0};
 	image: HTMLImageElement;
 	baseSize: number;
+	offscreen: OffscreenCanvas;
 
 	constructor(image: HTMLImageElement, size: number, tileSize: Size) {
 		this.image = image;
 		this.baseSize = size;
+		this.offscreen =  new OffscreenCanvas(100, 100);
 		this.refreshSize(tileSize);
 	}
 
 	refreshSize(tileSize: Size) {
 		this.size.width = tileSize.width * this.baseSize;
 		this.size.height = this.image.height*(this.size.width/this.image.width);
+
+		this.offscreen.width = this.size.width;
+		this.offscreen.height = this.size.height;
+		const offscreenCtx = this.offscreen.getContext('2d');
+		if (offscreenCtx) {
+			offscreenCtx.clearRect(0, 0, this.size.width, this.size.height);
+			offscreenCtx.drawImage(this.image, 0, 0, this.size.width, this.size.height);
+		}
 	}
 
 }
