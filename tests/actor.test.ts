@@ -2,12 +2,31 @@ import { Actor, ActorSprite } from "../classes/actor";
 import { Road, TilingSprite } from "../classes/buildings";
 import { Position, Size } from "../classes/map-layer";
 
+let OffscreenCanvasMock = jest.fn().mockImplementation((width: number, height: number) => {
+	return {
+		height,
+		width,
+		oncontextlost: jest.fn(),
+		oncontextrestored: jest.fn(),
+		getContext: jest.fn(() => undefined),
+			convertToBlob: jest.fn(),
+		transferToImageBitmap: jest.fn(),
+		addEventListener: jest.fn(),
+		removeEventListener: jest.fn(),
+		dispatchEvent: jest.fn()
+	} as unknown as OffscreenCanvas;
+});
+
+
+
 describe('ActorSprite', () => {
 	let imageMock: HTMLImageElement;
 
 	beforeEach(() => {
 		imageMock = { width: 100, height: 200 } as HTMLImageElement;
+		OffscreenCanvas =  OffscreenCanvasMock
 	});
+
 
 	test('should initialize with correct properties', () => {
 		const size = 2;
@@ -40,6 +59,7 @@ describe('Actor', () => {
 	beforeEach(() => {
 		spriteMock = new ActorSprite({ width: 100, height: 200 } as HTMLImageElement, 2, { width: 50, height: 50 });
 		position = { x: 1, y: 1 };
+		OffscreenCanvas =  OffscreenCanvasMock
 	});
 
 	test('Actor is correctly initialized', () => {

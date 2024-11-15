@@ -1,7 +1,7 @@
 import { Actor, ActorSprite } from "./classes/actor.js";
 import { BuildingSprite, TilingSprite } from "./classes/buildings.js";
 import { ActionButton, BuildingButton, BuildingTab, ButtonRow, InterfaceLayer } from "./classes/interface.js";
-import { MapLayer, Position, Size } from "./classes/map-layer.js";
+import { MapLayer, Position } from "./classes/map-layer.js";
 
 const canvasWidth = 1200;
 const canvasHeight = 800;
