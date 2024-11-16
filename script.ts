@@ -1,7 +1,8 @@
 import { Actor, ActorSprite } from "./classes/actor.js";
 import { BuildingSprite, TilingSprite } from "./classes/buildings.js";
-import { ActionButton, BuildingButton, BuildingTab, ButtonRow, InterfaceLayer } from "./classes/interface.js";
+import { ActionButton, ButtonRow, InterfaceLayer } from "./classes/interface.js";
 import { MapLayer, Position } from "./classes/map-layer.js";
+import { prepareTabs } from "./classes/sidebar.js";
 
 const canvasWidth = 1200;
 const canvasHeight = 800;
@@ -51,6 +52,7 @@ function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
     ctx.fillText(`(${map.isoPlayerMouse.x}, ${map.isoPlayerMouse.y})`, 20, 125);
 }
 
+
 window.onload = async () => {
 	const canvas = document.getElementById('gameCanvas') as (HTMLCanvasElement | null);
 	if (!canvas) {
@@ -77,44 +79,8 @@ window.onload = async () => {
 	sprites["well"] = well;
 	sprites["inspector"] = inspector;
 
-	const housing = await loadImage("./img/housing.svg");
-	const religion = await loadImage("./img/religion.svg");
-	const military = await loadImage("./img/military.svg");
-	const agriculture = await loadImage("./img/agriculture.svg");
-	const science = await loadImage("./img/science.svg");
-	const industry = await loadImage("./img/industry.svg");
 
-	interf.tabs = [
-		new BuildingTab(
-			"housing", [
-				new BuildingButton(home, "home"),
-				new BuildingButton(well, "well"),
-				new BuildingButton(inspector, "inspector"),
-				new BuildingButton(home, "home"),
-				new BuildingButton(home, "home"),
-				new BuildingButton(home, "home"),
-				new BuildingButton(home, "home"),
-				new BuildingButton(home, "home"),
-				new BuildingButton(home, "home"),
-				new BuildingButton(home, "home"),
-				new BuildingButton(home, "home"),
-				new BuildingButton(home, "home"),
-			], 
-			housing),
-		new BuildingTab(
-			"religion", [
-				new BuildingButton(ziggurat, "ziggurat"),
-			], 
-			religion),
-		new BuildingTab(
-			"military", [
-				new BuildingButton(tower, "tower"),
-			], 
-			military),
-		new BuildingTab("agriculture", [], agriculture),
-		new BuildingTab("science", [], science),
-		new BuildingTab("industry", [], industry),
-	];
+	interf.tabs = await prepareTabs(sprites);
 	interf.tab = 0;
 	interf.recalculateTabSize();
 	
