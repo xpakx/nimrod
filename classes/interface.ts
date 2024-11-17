@@ -396,47 +396,48 @@ export class BuildingTab {
 	prepareIcon(tabSize: number) {
 		this.icon.width = tabSize;
 		this.icon.height = tabSize;
-		const tabImg = this.tabImg;
 
 		const offscreenCtx = this.icon.getContext('2d');
 		if (offscreenCtx) {
-			offscreenCtx.clearRect(0, 0, this.icon.width, this.icon.height);
-			offscreenCtx.drawImage(tabImg, 0, 0, this.icon.width, this.icon.height);
-			offscreenCtx.drawImage(this._icon, 5, 5, this.icon.width - 10, this.icon.height - 10);
+			this.drawIcon(offscreenCtx);
 		}
 		const inactiveCtx = this.inactiveIcon.getContext('2d');
 		if (inactiveCtx) {
-			inactiveCtx.clearRect(0, 0, this.icon.width, this.icon.height);
-			inactiveCtx.drawImage(tabImg, 0, 0, this.icon.width, this.icon.height);
-			inactiveCtx.filter = "grayscale(80%)";
-			inactiveCtx.drawImage(this._icon, 5, 5, this.icon.width - 10, this.icon.height - 10);
-			inactiveCtx.strokeStyle = "#343434";
-			inactiveCtx.beginPath();
-			inactiveCtx.moveTo(this.icon.width, 0);
-			inactiveCtx.lineTo(this.icon.width, this.icon.height);
-			inactiveCtx.stroke();
-			inactiveCtx.closePath();
+			this.drawIcon(inactiveCtx, false);
 		}
 		const hoverCtx = this.hoverIcon.getContext('2d');
 		if (hoverCtx) {
-			hoverCtx.clearRect(0, 0, this.icon.width, this.icon.height);
-			hoverCtx.drawImage(tabImg, 0, 0, this.icon.width, this.icon.height);
-			hoverCtx.filter = "brightness(140%)";
-			hoverCtx.drawImage(this._icon, 5, 5, this.icon.width - 10, this.icon.height - 10);
+			this.drawIcon(hoverCtx, true, true);
 		}
 		const inactiveHoverCtx = this.inactiveHoverIcon.getContext('2d');
 		if (inactiveHoverCtx) {
-			inactiveHoverCtx.clearRect(0, 0, this.icon.width, this.icon.height);
-			inactiveHoverCtx.drawImage(tabImg, 0, 0, this.icon.width, this.icon.height);
-			inactiveHoverCtx.filter = "grayscale(80%) brightness(140%)";
-			inactiveHoverCtx.drawImage(this._icon, 5, 5, this.icon.width - 10, this.icon.height - 10);
-			inactiveHoverCtx.strokeStyle = "#343434";
-			inactiveHoverCtx.beginPath();
-			inactiveHoverCtx.moveTo(this.icon.width, 0);
-			inactiveHoverCtx.lineTo(this.icon.width, this.icon.height);
-			inactiveHoverCtx.stroke();
-			inactiveHoverCtx.closePath();
+			this.drawIcon(inactiveHoverCtx, false, true);
 		}
+	}
+
+	drawIcon(ctx: OffscreenCanvasRenderingContext2D, active: boolean = true, hover: boolean = false) {
+		ctx.clearRect(0, 0, this.icon.width, this.icon.height);
+		ctx.drawImage(this.tabImg, 0, 0, this.icon.width, this.icon.height);
+		if (!active) {
+			ctx.strokeStyle = "#343434";
+			ctx.beginPath();
+			ctx.moveTo(this.icon.width, 0);
+			ctx.lineTo(this.icon.width, this.icon.height);
+			ctx.stroke();
+			ctx.closePath();
+		}
+		if (!active) {
+			ctx.filter = "grayscale(80%)";
+		}
+		if (hover) {
+			ctx.filter = "brightness(140%)";
+		}
+		if (!active && hover) {
+			ctx.filter = "grayscale(80%) brightness(140%)";
+		}
+		ctx.drawImage(this._icon, 5, 5, this.icon.width - 10, this.icon.height - 10);
+
+
 	}
 
 	prepareButtons(canvasSize: Size, menuWidth: number, tabEnd: number) {
