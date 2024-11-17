@@ -88,6 +88,7 @@ window.onload = async () => {
 	interf.tabs = await prepareTabs(sprites);
 	interf.tab = 0;
 	interf.recalculateTabSize();
+	interf.calculateTabIcons();
 	
 	const coinsIcon = await loadImage("./img/coins.svg");
 	const populationIcon = await loadImage("./img/people.svg");

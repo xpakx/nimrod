@@ -109,6 +109,12 @@ export class InterfaceLayer {
 		}
 	}
 
+	calculateTabIcons() {
+		for (let tab of this.tabs) {
+			tab.prepareIcon(this.tabWidth);
+		}
+	}
+
 	mouseInsideInterface(position: Position): boolean {
 		if (position.y <= this.topPanelHeight || position.x >= this.canvasSize.width - this.menuWidth) {
 			return true;
@@ -235,22 +241,22 @@ export class InterfaceLayer {
 		const tabSize = this.tabWidth;
 		for(let i = 0; i<this.tabs.length; i++) {
 			const hover = this.inTab(this.mousePosition, i);
+			const currentTab = i == this.tab;
 			if(this.tabImg) {
 				context.drawImage(this.tabImg, this.canvasSize.width - this.menuWidth, start + i*tabSize, tabSize, tabSize);
 			}
-			if(i != this.tab || hover) {
-				context.save()
-			}
-			if(hover) {
-				context.filter = i == this.tab ? "brightness(140%)" : "grayscale(80%) brightness(140%)";
-			} else if(i != this.tab) {
-				context.filter = "grayscale(80%)";
-			}
-			context.drawImage(this.tabs[i].icon, this.canvasSize.width - this.menuWidth + 5, start + i*tabSize + 5, tabSize - 10, tabSize - 10);
-			if(i != this.tab || hover) {
-				context.restore()
-			}
-			if (i != this.tab) {
+
+			let icon = this.tabs[i].icon;
+			if(hover && currentTab) {
+				icon = this.tabs[i].hoverIcon;
+			} else if(hover && !currentTab) {
+				icon = this.tabs[i].inactiveHoverIcon;
+			} else if(!currentTab) {
+				icon = this.tabs[i].inactiveIcon;
+			} 
+			context.drawImage(icon, this.canvasSize.width - this.menuWidth + 5, start + i*tabSize + 5);
+
+			if (!currentTab) {
 				context.strokeStyle = "#343434";
 				context.beginPath();
 				context.moveTo(this.canvasSize.width - this.menuWidth + this.tabWidth, start + i*tabSize);
@@ -375,18 +381,55 @@ export class BuildingButton {
 export class BuildingTab {
 	name: string;
 	buildings: BuildingButton[];
-	icon: HTMLImageElement;
+	_icon: HTMLImageElement;
 	active: boolean = false;
 	itemOffset: number = 0;
 	activeButtons: BuildingButton[] = [];
 	defaultButtonSize = 125;
 	buttonSize = this.defaultButtonSize;
 	mousePosition: Position = {x: -1, y: -1};
+	icon: OffscreenCanvas;
+	inactiveIcon: OffscreenCanvas;
+	hoverIcon: OffscreenCanvas;
+	inactiveHoverIcon: OffscreenCanvas;
 
 	constructor(name: string, buildings: BuildingButton[], icon: HTMLImageElement) {
 		this.name = name;
 		this.buildings = buildings;
-		this.icon = icon;
+		this._icon = icon;
+		this.icon =  new OffscreenCanvas(100, 100);
+		this.inactiveIcon =  new OffscreenCanvas(100, 100);
+		this.hoverIcon =  new OffscreenCanvas(100, 100);
+		this.inactiveHoverIcon =  new OffscreenCanvas(100, 100);
+	}
+
+	prepareIcon(tabSize: number) {
+		this.icon.width = tabSize - 10;
+		this.icon.height = tabSize - 10;
+
+		const offscreenCtx = this.icon.getContext('2d');
+		if (offscreenCtx) {
+			offscreenCtx.clearRect(0, 0, this.icon.width, this.icon.height);
+			offscreenCtx.drawImage(this._icon, 0, 0, this.icon.width, this.icon.height);
+		}
+		const inactiveCtx = this.inactiveIcon.getContext('2d');
+		if (inactiveCtx) {
+			inactiveCtx.clearRect(0, 0, this.icon.width, this.icon.height);
+			inactiveCtx.filter = "grayscale(80%)";
+			inactiveCtx.drawImage(this._icon, 0, 0, this.icon.width, this.icon.height);
+		}
+		const hoverCtx = this.hoverIcon.getContext('2d');
+		if (hoverCtx) {
+			hoverCtx.clearRect(0, 0, this.icon.width, this.icon.height);
+			hoverCtx.filter = "brightness(140%)";
+			hoverCtx.drawImage(this._icon, 0, 0, this.icon.width, this.icon.height);
+		}
+		const inactiveHoverCtx = this.inactiveHoverIcon.getContext('2d');
+		if (inactiveHoverCtx) {
+			inactiveHoverCtx.clearRect(0, 0, this.icon.width, this.icon.height);
+			inactiveHoverCtx.filter = "grayscale(80%) brightness(140%)";
+			inactiveHoverCtx.drawImage(this._icon, 0, 0, this.icon.width, this.icon.height);
+		}
 	}
 
 	prepareButtons(canvasSize: Size, menuWidth: number, tabEnd: number) {
