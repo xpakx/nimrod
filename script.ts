@@ -92,11 +92,9 @@ window.onload = async () => {
 	
 	const coinsIcon = await loadImage("./img/coins.svg");
 	const populationIcon = await loadImage("./img/people.svg");
-	const tab = await loadImage("./img/tab.svg");
 	interf.coinsIcon = coinsIcon;
 	interf.populationIcon = populationIcon;
 	interf.calculateIconsSize();
-	interf.tabImg = tab;
 
 	const roadButton = await loadImage("./img/road-button.svg");
 	const deleteButton = await loadImage("./img/delete-button.svg");

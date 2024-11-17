@@ -8,7 +8,6 @@ export class InterfaceLayer {
 	topPanelHeight = 50;
 	dialogue: DialogueParsed | undefined = undefined;
 	tab: number | undefined = undefined;
-	tabImg: HTMLImageElement | undefined = undefined;
 	tabs: BuildingTab[] = [];
 	populationIcon: HTMLImageElement | undefined = undefined;
 	coinsIcon: HTMLImageElement | undefined = undefined;
@@ -242,11 +241,8 @@ export class InterfaceLayer {
 		for(let i = 0; i<this.tabs.length; i++) {
 			const hover = this.inTab(this.mousePosition, i);
 			const currentTab = i == this.tab;
-			if(this.tabImg) {
-				context.drawImage(this.tabImg, this.canvasSize.width - this.menuWidth, start + i*tabSize, tabSize, tabSize);
-			}
-
 			let icon = this.tabs[i].icon;
+
 			if(hover && currentTab) {
 				icon = this.tabs[i].hoverIcon;
 			} else if(hover && !currentTab) {
@@ -254,15 +250,7 @@ export class InterfaceLayer {
 			} else if(!currentTab) {
 				icon = this.tabs[i].inactiveIcon;
 			} 
-			context.drawImage(icon, this.canvasSize.width - this.menuWidth + 5, start + i*tabSize + 5);
-
-			if (!currentTab) {
-				context.strokeStyle = "#343434";
-				context.beginPath();
-				context.moveTo(this.canvasSize.width - this.menuWidth + this.tabWidth, start + i*tabSize);
-				context.lineTo(this.canvasSize.width - this.menuWidth + this.tabWidth, start + (i+1)*tabSize);
-				context.stroke();
-			}
+			context.drawImage(icon, this.canvasSize.width - this.menuWidth, start + i*tabSize);
 		}
 	}
 
@@ -392,8 +380,9 @@ export class BuildingTab {
 	inactiveIcon: OffscreenCanvas;
 	hoverIcon: OffscreenCanvas;
 	inactiveHoverIcon: OffscreenCanvas;
+	tabImg: HTMLImageElement;
 
-	constructor(name: string, buildings: BuildingButton[], icon: HTMLImageElement) {
+	constructor(name: string, buildings: BuildingButton[], icon: HTMLImageElement, tab: HTMLImageElement) {
 		this.name = name;
 		this.buildings = buildings;
 		this._icon = icon;
@@ -401,34 +390,52 @@ export class BuildingTab {
 		this.inactiveIcon =  new OffscreenCanvas(100, 100);
 		this.hoverIcon =  new OffscreenCanvas(100, 100);
 		this.inactiveHoverIcon =  new OffscreenCanvas(100, 100);
+		this.tabImg = tab;
 	}
 
 	prepareIcon(tabSize: number) {
-		this.icon.width = tabSize - 10;
-		this.icon.height = tabSize - 10;
+		this.icon.width = tabSize;
+		this.icon.height = tabSize;
+		const tabImg = this.tabImg;
 
 		const offscreenCtx = this.icon.getContext('2d');
 		if (offscreenCtx) {
 			offscreenCtx.clearRect(0, 0, this.icon.width, this.icon.height);
-			offscreenCtx.drawImage(this._icon, 0, 0, this.icon.width, this.icon.height);
+			offscreenCtx.drawImage(tabImg, 0, 0, this.icon.width, this.icon.height);
+			offscreenCtx.drawImage(this._icon, 5, 5, this.icon.width - 10, this.icon.height - 10);
 		}
 		const inactiveCtx = this.inactiveIcon.getContext('2d');
 		if (inactiveCtx) {
 			inactiveCtx.clearRect(0, 0, this.icon.width, this.icon.height);
+			inactiveCtx.drawImage(tabImg, 0, 0, this.icon.width, this.icon.height);
 			inactiveCtx.filter = "grayscale(80%)";
-			inactiveCtx.drawImage(this._icon, 0, 0, this.icon.width, this.icon.height);
+			inactiveCtx.drawImage(this._icon, 5, 5, this.icon.width - 10, this.icon.height - 10);
+			inactiveCtx.strokeStyle = "#343434";
+			inactiveCtx.beginPath();
+			inactiveCtx.moveTo(this.icon.width, 0);
+			inactiveCtx.lineTo(this.icon.width, this.icon.height);
+			inactiveCtx.stroke();
+			inactiveCtx.closePath();
 		}
 		const hoverCtx = this.hoverIcon.getContext('2d');
 		if (hoverCtx) {
 			hoverCtx.clearRect(0, 0, this.icon.width, this.icon.height);
+			hoverCtx.drawImage(tabImg, 0, 0, this.icon.width, this.icon.height);
 			hoverCtx.filter = "brightness(140%)";
-			hoverCtx.drawImage(this._icon, 0, 0, this.icon.width, this.icon.height);
+			hoverCtx.drawImage(this._icon, 5, 5, this.icon.width - 10, this.icon.height - 10);
 		}
 		const inactiveHoverCtx = this.inactiveHoverIcon.getContext('2d');
 		if (inactiveHoverCtx) {
 			inactiveHoverCtx.clearRect(0, 0, this.icon.width, this.icon.height);
+			inactiveHoverCtx.drawImage(tabImg, 0, 0, this.icon.width, this.icon.height);
 			inactiveHoverCtx.filter = "grayscale(80%) brightness(140%)";
-			inactiveHoverCtx.drawImage(this._icon, 0, 0, this.icon.width, this.icon.height);
+			inactiveHoverCtx.drawImage(this._icon, 5, 5, this.icon.width - 10, this.icon.height - 10);
+			inactiveHoverCtx.strokeStyle = "#343434";
+			inactiveHoverCtx.beginPath();
+			inactiveHoverCtx.moveTo(this.icon.width, 0);
+			inactiveHoverCtx.lineTo(this.icon.width, this.icon.height);
+			inactiveHoverCtx.stroke();
+			inactiveHoverCtx.closePath();
 		}
 	}
 
