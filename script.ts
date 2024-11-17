@@ -52,6 +52,21 @@ function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
     ctx.fillText(`(${map.isoPlayerMouse.x}, ${map.isoPlayerMouse.y})`, 20, 125);
 }
 
+async function prepareBuildingSprites(): Promise<{[key: string]: BuildingSprite}> {
+	const ziggurat = new BuildingSprite(await loadImage("./img/ziggurat.svg"), 4, map.tileSize);
+	const home = new BuildingSprite(await loadImage("./img/house.svg"), 2, map.tileSize);
+	const tower = new BuildingSprite(await loadImage("./img/tower.svg"), 2, map.tileSize);
+	const well = new BuildingSprite(await loadImage("./img/well.svg"), 2, map.tileSize);
+	const inspector = new BuildingSprite(await loadImage("./img/inspector.svg"), 2, map.tileSize);
+	let sprites: { [key: string]: BuildingSprite } = {}; // TODO
+	sprites["ziggurat"] = ziggurat;
+	sprites["home"] = home;
+	sprites["tower"] = tower;
+	sprites["well"] = well;
+	sprites["inspector"] = inspector;
+	return sprites;
+}
+
 
 window.onload = async () => {
 	const canvas = document.getElementById('gameCanvas') as (HTMLCanvasElement | null);
@@ -67,17 +82,7 @@ window.onload = async () => {
 	canvas.width = canvasWidth;
 	canvas.height = canvasHeight;
 
-	const ziggurat = new BuildingSprite(await loadImage("./img/ziggurat.svg"), 4, map.tileSize);
-	const home = new BuildingSprite(await loadImage("./img/house.svg"), 2, map.tileSize);
-	const tower = new BuildingSprite(await loadImage("./img/tower.svg"), 2, map.tileSize);
-	const well = new BuildingSprite(await loadImage("./img/well.svg"), 2, map.tileSize);
-	const inspector = new BuildingSprite(await loadImage("./img/inspector.svg"), 2, map.tileSize);
-	let sprites: { [key: string]: BuildingSprite } = {}; // TODO
-	sprites["ziggurat"] = ziggurat;
-	sprites["home"] = home;
-	sprites["tower"] = tower;
-	sprites["well"] = well;
-	sprites["inspector"] = inspector;
+	let sprites = await prepareBuildingSprites();
 
 
 	interf.tabs = await prepareTabs(sprites);
@@ -147,7 +152,7 @@ window.onload = async () => {
 	map.putBuilding({x: 3, y: 8}, sprites["home"]);
 	map.putBuilding({x: 1, y: 11}, sprites["home"]);
 	map.putBuilding({x: 3, y: 11}, sprites["home"]);
-	map.getBuilding({x: 3, y: 11})!.setWorker(home);;
+	map.getBuilding({x: 3, y: 11})!.setWorker(sprites["home"]);
 	map.putRoad({x: 0, y: 9}, road, true);
 	map.putRoad({x: 1, y: 9}, road, true);
 	map.putRoad({x: 2, y: 9}, road, true);
