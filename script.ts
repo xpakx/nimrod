@@ -67,6 +67,38 @@ async function prepareBuildingSprites(): Promise<{[key: string]: BuildingSprite}
 	return sprites;
 }
 
+function middleMouseClick(event: MouseEvent) {
+	map.isDragging = true;
+	map.dragStart.x = event.clientX + map.positionOffset.x;
+	map.dragStart.y = event.clientY + map.positionOffset.y;
+}
+
+function rightMouseClick(_event: MouseEvent, sprites: {[key: string]: BuildingSprite}, road: TilingSprite) {
+	if(interf.mouseInsideInterface(playerMouse)) {
+		const clickResult = interf.click(playerMouse);
+		if (clickResult != undefined) {
+			if(clickResult.action == "build" && clickResult.argument != undefined) {
+				const clickedBuilding = sprites[clickResult.argument];
+				if (clickedBuilding) map.switchToBuildMode(clickedBuilding);
+			} else if(clickResult.action == "buildRoad") {
+				map.switchToRoadMode(road);
+			} else if(clickResult.action == "delete") {
+				map.switchToDeleteMode();
+			}
+		}
+		return;
+	}
+	if(map.mode) {
+		map.putBuilding(map.isoPlayerMouse, map.mode, false);
+		map.finalizeBuildingPlacement(map.isoPlayerMouse);
+	} else if(map.deleteMode) {
+		map.deleteBuilding(map.isoPlayerMouse);
+		map.deleteRoad(map.isoPlayerMouse);
+	} else if(map.roadMode) {
+		map.putRoad(map.isoPlayerMouse, road);
+	}
+}
+
 
 window.onload = async () => {
 	const canvas = document.getElementById('gameCanvas') as (HTMLCanvasElement | null);
@@ -350,35 +382,11 @@ window.onload = async () => {
 
 	canvas.addEventListener('mousedown', (event) => {
 		if(event.button == 1) {
-			map.isDragging = true;
-			map.dragStart.x = event.clientX + map.positionOffset.x;
-			map.dragStart.y = event.clientY + map.positionOffset.y;
+			middleMouseClick(event);
 		}
 
 		if(event.button == 0) {
-			if(interf.mouseInsideInterface(playerMouse)) {
-				const clickResult = interf.click(playerMouse);
-				if (clickResult != undefined) {
-					if(clickResult.action == "build" && clickResult.argument != undefined) {
-						const clickedBuilding = sprites[clickResult.argument];
-						if (clickedBuilding) map.switchToBuildMode(clickedBuilding);
-					} else if(clickResult.action == "buildRoad") {
-						map.switchToRoadMode(road);
-					} else if(clickResult.action == "delete") {
-						map.switchToDeleteMode();
-					}
-				}
-				return;
-			}
-			if(map.mode) {
-				map.putBuilding(map.isoPlayerMouse, map.mode, false);
-				map.finalizeBuildingPlacement(map.isoPlayerMouse);
-			} else if(map.deleteMode) {
-				map.deleteBuilding(map.isoPlayerMouse);
-				map.deleteRoad(map.isoPlayerMouse);
-			} else if(map.roadMode) {
-				map.putRoad(map.isoPlayerMouse, road);
-			}
+			rightMouseClick(event, sprites, road);
 		}
 	});
 
