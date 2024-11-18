@@ -1,17 +1,15 @@
 import { Actor, ActorSprite } from "./classes/actor.js";
 import { BuildingSprite, TilingSprite } from "./classes/buildings.js";
+import { GameState } from "./classes/game-state.js";
 import { ActionButton, ButtonRow, InterfaceLayer } from "./classes/interface.js";
-import { MapLayer, Position } from "./classes/map-layer.js";
+import { MapLayer } from "./classes/map-layer.js";
 import { prepareTabs } from "./classes/sidebar.js";
 
-const canvasWidth = 1200;
-const canvasHeight = 800;
+let state = new GameState();
 
-let map = new MapLayer({width: canvasWidth, height: canvasHeight});
-let interf = new InterfaceLayer({width: canvasWidth, height: canvasHeight});
+let map = new MapLayer({width: state.canvasWidth, height: state.canvasHeight});
+let interf = new InterfaceLayer({width: state.canvasWidth, height: state.canvasHeight});
 
-let pedestrians: Actor[] = [];
-let playerMouse: Position = {x: 0, y: 0};
 const dts: number[] = [];
 
 async function loadImage(url: string): Promise<any> {
@@ -24,17 +22,12 @@ async function loadImage(url: string): Promise<any> {
 }
 
 function renderGame(context: CanvasRenderingContext2D, deltaTime: number) {
-	context.clearRect(0, 0, canvasWidth, canvasHeight);
-	map.renderMap(context, pedestrians, deltaTime);
+	context.clearRect(0, 0, state.canvasWidth, state.canvasHeight);
+	map.renderMap(context, state.pedestrians, deltaTime);
 	interf.renderInterface(context, deltaTime);
 	renderDebugInfo(context, deltaTime);
 }
 
-function sortPedestrians(pedestrians: Actor[]) {
-	pedestrians.sort((a, b) => {
-		return a.diagonal - b.diagonal;
-	});
-}
 
 function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
     ctx.font = "26px normal"
@@ -48,7 +41,7 @@ function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
     const dtAvg = dts.reduce((a, b) => a + b, 0)/dts.length;
 
     ctx.fillText(`${Math.floor(1/dtAvg)} FPS`, 20, 75);
-    ctx.fillText(`(${playerMouse.x}, ${playerMouse.y})`, 20, 100);
+    ctx.fillText(`(${state.playerMouse.x}, ${state.playerMouse.y})`, 20, 100);
     ctx.fillText(`(${map.isoPlayerMouse.x}, ${map.isoPlayerMouse.y})`, 20, 125);
 }
 
@@ -74,8 +67,8 @@ function middleMouseClick(event: MouseEvent) {
 }
 
 function rightMouseClick(_event: MouseEvent, sprites: {[key: string]: BuildingSprite}, road: TilingSprite) {
-	if(interf.mouseInsideInterface(playerMouse)) {
-		const clickResult = interf.click(playerMouse);
+	if(interf.mouseInsideInterface(state.playerMouse)) {
+		const clickResult = interf.click(state.playerMouse);
 		if (clickResult != undefined) {
 			if(clickResult.action == "build" && clickResult.argument != undefined) {
 				const clickedBuilding = sprites[clickResult.argument];
@@ -111,8 +104,8 @@ window.onload = async () => {
 		console.log("No context");
 		return;
 	}
-	canvas.width = canvasWidth;
-	canvas.height = canvasHeight;
+	canvas.width = state.canvasWidth;
+	canvas.height = state.canvasHeight;
 
 	let sprites = await prepareBuildingSprites();
 
@@ -282,55 +275,55 @@ window.onload = async () => {
 	map.putRoad({x: 49, y: 8}, road, true);
 
 	const act = new ActorSprite(await loadImage("./img/house.svg"), 2, map.tileSize);
-	pedestrians.push(new Actor(act, {x: 1, y: 9}));
-	pedestrians.push(new Actor(act, {x: 2, y: 9}));
-	pedestrians.push(new Actor(act, {x: 3, y: 9}));
-	pedestrians.push(new Actor(act, {x: 4, y: 9}));
-	pedestrians.push(new Actor(act, {x: 5, y: 9}));
-	pedestrians.push(new Actor(act, {x: 6, y: 9}));
-	pedestrians.push(new Actor(act, {x: 7, y: 9}));
-	pedestrians.push(new Actor(act, {x: 8, y: 9}));
-	pedestrians.push(new Actor(act, {x: 9, y: 9}));
-	pedestrians.push(new Actor(act, {x: 10, y: 9}));
-	pedestrians.push(new Actor(act, {x: 11, y: 9}));
-	pedestrians.push(new Actor(act, {x: 12, y: 9}));
-	pedestrians.push(new Actor(act, {x: 13, y: 9}));
-	pedestrians.push(new Actor(act, {x: 14, y: 9}));
-	pedestrians.push(new Actor(act, {x: 15, y: 9}));
-	pedestrians.push(new Actor(act, {x: 16, y: 9}));
-	pedestrians.push(new Actor(act, {x: 17, y: 9}));
-	pedestrians.push(new Actor(act, {x: 18, y: 9}));
-	pedestrians.push(new Actor(act, {x: 19, y: 9}));
-	pedestrians.push(new Actor(act, {x: 20, y: 9}));
-	pedestrians.push(new Actor(act, {x: 21, y: 9}));
-	pedestrians.push(new Actor(act, {x: 22, y: 9}));
-	pedestrians.push(new Actor(act, {x: 23, y: 9}));
-	pedestrians.push(new Actor(act, {x: 24, y: 9}));
-	pedestrians.push(new Actor(act, {x: 25, y: 9}));
-	pedestrians.push(new Actor(act, {x: 26, y: 9}));
-	pedestrians.push(new Actor(act, {x: 27, y: 9}));
-	pedestrians.push(new Actor(act, {x: 28, y: 9}));
-	pedestrians.push(new Actor(act, {x: 29, y: 9}));
-	pedestrians.push(new Actor(act, {x: 30, y: 9}));
-	pedestrians.push(new Actor(act, {x: 31, y: 9}));
-	pedestrians.push(new Actor(act, {x: 32, y: 9}));
-	pedestrians.push(new Actor(act, {x: 33, y: 9}));
-	pedestrians.push(new Actor(act, {x: 34, y: 9}));
-	pedestrians.push(new Actor(act, {x: 35, y: 9}));
-	pedestrians.push(new Actor(act, {x: 36, y: 9}));
-	pedestrians.push(new Actor(act, {x: 37, y: 9}));
-	pedestrians.push(new Actor(act, {x: 38, y: 9}));
-	pedestrians.push(new Actor(act, {x: 39, y: 9}));
-	pedestrians.push(new Actor(act, {x: 40, y: 9}));
-	pedestrians.push(new Actor(act, {x: 41, y: 9}));
-	pedestrians.push(new Actor(act, {x: 42, y: 9}));
-	pedestrians.push(new Actor(act, {x: 43, y: 9}));
-	pedestrians.push(new Actor(act, {x: 44, y: 9}));
-	pedestrians.push(new Actor(act, {x: 45, y: 9}));
-	pedestrians.push(new Actor(act, {x: 46, y: 9}));
-	pedestrians.push(new Actor(act, {x: 47, y: 9}));
-	pedestrians.push(new Actor(act, {x: 48, y: 9}));
-	pedestrians.push(new Actor(act, {x: 49, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 1, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 2, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 3, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 4, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 5, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 6, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 7, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 8, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 9, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 10, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 11, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 12, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 13, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 14, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 15, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 16, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 17, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 18, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 19, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 20, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 21, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 22, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 23, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 24, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 25, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 26, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 27, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 28, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 29, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 30, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 31, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 32, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 33, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 34, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 35, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 36, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 37, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 38, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 39, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 40, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 41, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 42, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 43, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 44, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 45, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 46, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 47, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 48, y: 9}));
+	state.pedestrians.push(new Actor(act, {x: 49, y: 9}));
 
 
 	function correctOffset() {
@@ -353,11 +346,11 @@ window.onload = async () => {
 
 		const mouseX = event.clientX - rect.left;
 		const mouseY = event.clientY - rect.top;
-		playerMouse = {x: mouseX, y: mouseY};
-		if(!interf.mouseInsideInterface(playerMouse)) {
-			map.updateMousePosition(playerMouse);
+		state.playerMouse = {x: mouseX, y: mouseY};
+		if(!interf.mouseInsideInterface(state.playerMouse)) {
+			map.updateMousePosition(state.playerMouse);
 		} 
-		interf.onMouse(playerMouse);
+		interf.onMouse(state.playerMouse);
 
 		if (map.isDragging) {
 			map.positionOffset.x = map.dragStart.x - event.clientX;
@@ -445,28 +438,28 @@ window.onload = async () => {
 			if(map.positionOffset.y < 0) {
 				map.positionOffset.y = 0;
 			}
-			map.updateMousePosition(playerMouse);
+			map.updateMousePosition(state.playerMouse);
 		}
 		if(moveDown) {
 			map.positionOffset.y = map.positionOffset.y + 10;
 			if(map.positionOffset.y > maxYOffset) {
 				map.positionOffset.y = maxYOffset;
 			}
-			map.updateMousePosition(playerMouse);
+			map.updateMousePosition(state.playerMouse);
 		}
 		if(moveLeft) {
 			map.positionOffset.x = map.positionOffset.x - 10;
 			if(map.positionOffset.x < minXOffset) {
 				map.positionOffset.x = minXOffset;
 			}
-			map.updateMousePosition(playerMouse);
+			map.updateMousePosition(state.playerMouse);
 		}
 		if(moveRight) {
 			map.positionOffset.x = map.positionOffset.x + 10;
 			if(map.positionOffset.x > maxXOffset) {
 				map.positionOffset.x = maxXOffset;
 			}
-			map.updateMousePosition(playerMouse);
+			map.updateMousePosition(state.playerMouse);
 		}
 
 	});
@@ -496,7 +489,7 @@ window.onload = async () => {
 		for(let building of map.buildings) {
 			const newPedestrian = building.tick(deltaTime);
 			if(newPedestrian && building.workerSpawn) {
-				pedestrians.push(new Actor(act, building.workerSpawn));
+				state.pedestrians.push(new Actor(act, building.workerSpawn));
 			}
 		}
 		const dTime = deltaTime > 0.5 ? 0.5 : deltaTime;
@@ -507,12 +500,12 @@ window.onload = async () => {
 			Math.floor(Math.random() * 3),
 			Math.floor(Math.random() * 4),
 		]
-		for(let pedestrian of pedestrians) {
+		for(let pedestrian of state.pedestrians) {
 			diagonalChanged ||= pedestrian.tick(dTime, map.roads, randMap);
 		}
-		pedestrians = pedestrians.filter((p) => !p.dead);
+		state.pedestrians = state.pedestrians.filter((p) => !p.dead);
 		if(diagonalChanged) {
-			sortPedestrians(pedestrians); // TODO: more efficient way?
+			state.sortPedestrians(); // TODO: more efficient way?
 		}
 		renderGame(context, deltaTime);
 		window.requestAnimationFrame(frame);
