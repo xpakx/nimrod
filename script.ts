@@ -124,6 +124,7 @@ window.onload = async () => {
 
 	let sprites = new SpriteLibrary();
 	await sprites.prepareBuildingSprites(map.tileSize);
+	await sprites.prepareRoadSprites(map.tileSize);
 
 
 	interf.tabs = await prepareTabs(sprites.buildings);
@@ -162,33 +163,14 @@ window.onload = async () => {
 	interf.addButtonRow(mapRow);
 
 
-	const roads = [
-		await loadImage("./img/road0000.svg"), 
-		await loadImage("./img/road0001.svg"), 
-		await loadImage("./img/road0010.svg"), 
-		await loadImage("./img/road0011.svg"), 
-		await loadImage("./img/road0100.svg"), 
-		await loadImage("./img/road0101.svg"), 
-		await loadImage("./img/road0110.svg"), 
-		await loadImage("./img/road0111.svg"), 
-		await loadImage("./img/road1000.svg"), 
-		await loadImage("./img/road1001.svg"), 
-		await loadImage("./img/road1010.svg"), 
-		await loadImage("./img/road1011.svg"), 
-		await loadImage("./img/road1100.svg"), 
-		await loadImage("./img/road1101.svg"), 
-		await loadImage("./img/road1110.svg"), 
-		await loadImage("./img/road1111.svg"), 
-	];
-	const road = new TilingSprite(roads, map.tileSize);
 	function rescaleSprites() {
-		for (const key in sprites) {
+		for (const key in sprites.buildings) {
 			sprites.buildings[key].refreshSize(map.tileSize);
 		}
-		road.refreshSize(map.tileSize);
+		sprites.getRoad().refreshSize(map.tileSize);
 	}
 
-	loadMap("test.json", map, sprites, road);
+	loadMap("test.json", map, sprites, sprites.getRoad());
 
 	const act = new ActorSprite(await loadImage("./img/house.svg"), 2, map.tileSize);
 	state.pedestrians.push(new Actor(act, {x: 1, y: 9}));
@@ -247,7 +229,7 @@ window.onload = async () => {
 		}
 
 		if(event.button == 0) {
-			rightMouseClick(event, sprites.buildings, road);
+			rightMouseClick(event, sprites.buildings, sprites.getRoad());
 		}
 	});
 
