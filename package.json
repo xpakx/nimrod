@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "npx jest",
-    "build": "npx tsc && cp -r index.html img/ styles.css dist"
+    "build": "npx tsc && cp -r index.html img/ maps/ styles.css dist"
   },
   "repository": {
     "type": "git",
