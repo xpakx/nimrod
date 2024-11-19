@@ -92,20 +92,34 @@ function rightMouseClick(_event: MouseEvent, sprites: {[key: string]: BuildingSp
 	}
 }
 
-async function loadMap(filname: string, map: MapLayer, sprites: any, road: TilingSprite) {
-	map.putBuilding({x: 3, y: 8}, sprites["home"]);
-	map.putBuilding({x: 1, y: 11}, sprites["home"]);
-	map.putBuilding({x: 3, y: 11}, sprites["home"]);
-	map.putRoad({x: 0, y: 9}, road, true);
-	map.putRoad({x: 1, y: 9}, road, true);
-	map.putRoad({x: 2, y: 9}, road, true);
-	map.putRoad({x: 3, y: 9}, road, true);
-	map.putRoad({x: 4, y: 9}, road, true);
-	map.putRoad({x: 5, y: 9}, road, true);
-	map.putRoad({x: 6, y: 9}, road, true);
-	map.putRoad({x: 7, y: 9}, road, true);
-	map.putRoad({x: 8, y: 9}, road, true);
-	map.putRoad({x: 9, y: 9}, road, true);
+function loadMap(filename: string, map: MapLayer, sprites: any, road: TilingSprite) {
+	fetch(`maps/${filename}`)
+	.then(response => {
+		if (!response.ok) {
+			throw new Error(`HTTP error while loading a map! status: ${response.status}`);
+		}
+		return response.json();
+	})
+	.then(data => {
+		console.log(data);
+		const height = data['size']['height']; 
+		const width = data['size']['width']; 
+		const newMap: string[][] = Array(height).fill(null).map(() => Array(width).fill('#97b106'));
+		map.map = newMap;
+
+		for (let pos of data['roads']) {
+			map.putRoad({x: pos['x'], y: pos['y']}, road, true);
+		}
+
+		for (let building of data['buildings']) {
+			map.putBuilding({x: building['x'], y: building['y']}, sprites[building['type']]);
+		}
+		map.getBuilding({x: 3, y: 11})!.setWorker(sprites["home"]);
+	})
+	.catch(error => {
+		console.log(error);
+		throw new Error(`Error loading the JSON file: ${error}`);
+	});
 }
 
 window.onload = async () => {
@@ -189,7 +203,6 @@ window.onload = async () => {
 
 
 	loadMap("test.json", map, sprites, road);
-	map.getBuilding({x: 3, y: 11})!.setWorker(sprites["home"]);
 
 	const act = new ActorSprite(await loadImage("./img/house.svg"), 2, map.tileSize);
 	state.pedestrians.push(new Actor(act, {x: 1, y: 9}));
