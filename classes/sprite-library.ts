@@ -46,6 +46,13 @@ export class SpriteLibrary {
 		this.road = new TilingSprite(roads, tileSize);
 		return true;
 	}
+
+	rescaleSprites(tileSize: Size) {
+		for (const key in this.buildings) {
+			this.buildings[key].refreshSize(tileSize);
+		}
+		this.getRoad().refreshSize(tileSize);
+	}
 }
 
 async function loadImage(url: string): Promise<any> {

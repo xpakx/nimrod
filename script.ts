@@ -163,13 +163,6 @@ window.onload = async () => {
 	interf.addButtonRow(mapRow);
 
 
-	function rescaleSprites() {
-		for (const key in sprites.buildings) {
-			sprites.buildings[key].refreshSize(map.tileSize);
-		}
-		sprites.getRoad().refreshSize(map.tileSize);
-	}
-
 	loadMap("test.json", map, sprites, sprites.getRoad());
 
 	const act = new ActorSprite(await loadImage("./img/house.svg"), 2, map.tileSize);
@@ -237,7 +230,7 @@ window.onload = async () => {
 		let oldScale = map.scale;
 		map.rescale(dScale);
 		rescaleOffsets(oldScale);
-		rescaleSprites();
+		sprites.rescaleSprites(map.tileSize);
 	}
 
 	canvas.addEventListener('mouseup', (_event) => {
