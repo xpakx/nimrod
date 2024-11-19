@@ -4,6 +4,7 @@ import { GameState } from "./classes/game-state.js";
 import { ActionButton, ButtonRow, InterfaceLayer } from "./classes/interface.js";
 import { MapLayer } from "./classes/map-layer.js";
 import { prepareTabs } from "./classes/sidebar.js";
+import { SpriteLibrary } from "./classes/sprite-library.js";
 
 let state = new GameState();
 
@@ -45,21 +46,6 @@ function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
     ctx.fillText(`(${map.isoPlayerMouse.x}, ${map.isoPlayerMouse.y})`, 20, 125);
 }
 
-async function prepareBuildingSprites(): Promise<{[key: string]: BuildingSprite}> {
-	const ziggurat = new BuildingSprite(await loadImage("./img/ziggurat.svg"), 4, map.tileSize);
-	const home = new BuildingSprite(await loadImage("./img/house.svg"), 2, map.tileSize);
-	const tower = new BuildingSprite(await loadImage("./img/tower.svg"), 2, map.tileSize);
-	const well = new BuildingSprite(await loadImage("./img/well.svg"), 2, map.tileSize);
-	const inspector = new BuildingSprite(await loadImage("./img/inspector.svg"), 2, map.tileSize);
-	let sprites: { [key: string]: BuildingSprite } = {}; // TODO
-	sprites["ziggurat"] = ziggurat;
-	sprites["home"] = home;
-	sprites["tower"] = tower;
-	sprites["well"] = well;
-	sprites["inspector"] = inspector;
-	return sprites;
-}
-
 function middleMouseClick(event: MouseEvent) {
 	map.isDragging = true;
 	map.dragStart.x = event.clientX + map.positionOffset.x;
@@ -92,7 +78,7 @@ function rightMouseClick(_event: MouseEvent, sprites: {[key: string]: BuildingSp
 	}
 }
 
-function loadMap(filename: string, map: MapLayer, sprites: any, road: TilingSprite) {
+function loadMap(filename: string, map: MapLayer, sprites: SpriteLibrary, road: TilingSprite) {
 	fetch(`maps/${filename}`)
 	.then(response => {
 		if (!response.ok) {
@@ -112,9 +98,9 @@ function loadMap(filename: string, map: MapLayer, sprites: any, road: TilingSpri
 		}
 
 		for (let building of data['buildings']) {
-			map.putBuilding({x: building['x'], y: building['y']}, sprites[building['type']]);
+			map.putBuilding({x: building['x'], y: building['y']}, sprites.buildings[building['type']]);
 		}
-		map.getBuilding({x: 3, y: 11})!.setWorker(sprites["home"]);
+		map.getBuilding({x: 3, y: 11})!.setWorker(sprites.buildings["home"]);
 	})
 	.catch(error => {
 		console.log(error);
@@ -136,10 +122,11 @@ window.onload = async () => {
 	canvas.width = state.canvasWidth;
 	canvas.height = state.canvasHeight;
 
-	let sprites = await prepareBuildingSprites();
+	let sprites = new SpriteLibrary();
+	await sprites.prepareBuildingSprites(map.tileSize);
 
 
-	interf.tabs = await prepareTabs(sprites);
+	interf.tabs = await prepareTabs(sprites.buildings);
 	interf.tab = 0;
 	interf.recalculateTabSize();
 	interf.calculateTabIcons();
@@ -196,11 +183,10 @@ window.onload = async () => {
 	const road = new TilingSprite(roads, map.tileSize);
 	function rescaleSprites() {
 		for (const key in sprites) {
-			sprites[key].refreshSize(map.tileSize);
+			sprites.buildings[key].refreshSize(map.tileSize);
 		}
 		road.refreshSize(map.tileSize);
 	}
-
 
 	loadMap("test.json", map, sprites, road);
 
@@ -261,7 +247,7 @@ window.onload = async () => {
 		}
 
 		if(event.button == 0) {
-			rightMouseClick(event, sprites, road);
+			rightMouseClick(event, sprites.buildings, road);
 		}
 	});
 
