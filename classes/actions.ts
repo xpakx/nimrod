@@ -1,5 +1,5 @@
 import { GameState } from "./game-state.js";
-import { InterfaceLayer } from "./interface.js";
+import { Action, InterfaceLayer } from "./interface.js";
 import { MapLayer } from "./map-layer.js";
 import { SpriteLibrary } from "./sprite-library.js";
 
@@ -7,17 +7,16 @@ export function rightMouseClick(_event: MouseEvent, sprites: SpriteLibrary, stat
 	if(interf.mouseInsideInterface(state.playerMouse)) {
 		const clickResult = interf.click(state.playerMouse);
 		if (clickResult != undefined) {
-			if(clickResult.action == "build" && clickResult.argument != undefined) {
-				const clickedBuilding = sprites.buildings[clickResult.argument];
-				if (clickedBuilding) map.switchToBuildMode(clickedBuilding);
-			} else if(clickResult.action == "buildRoad") {
-				map.switchToRoadMode(sprites.getRoad());
-			} else if(clickResult.action == "delete") {
-				map.switchToDeleteMode();
-			}
+			rightMouseCityInterface(clickResult, sprites, map);
 		}
 		return;
 	}
+	if (state.view == "City") {
+		rightMouseCity(sprites, map);
+	}
+}
+
+function rightMouseCity(sprites: SpriteLibrary, map: MapLayer) {
 	if(map.mode) {
 		map.putBuilding(map.isoPlayerMouse, map.mode, false);
 		map.finalizeBuildingPlacement(map.isoPlayerMouse);
@@ -26,6 +25,17 @@ export function rightMouseClick(_event: MouseEvent, sprites: SpriteLibrary, stat
 		map.deleteRoad(map.isoPlayerMouse);
 	} else if(map.roadMode) {
 		map.putRoad(map.isoPlayerMouse, sprites.getRoad());
+	}
+}
+
+function rightMouseCityInterface(clickResult: Action, sprites: SpriteLibrary, map: MapLayer) {
+	if(clickResult.action == "build" && clickResult.argument != undefined) {
+		const clickedBuilding = sprites.buildings[clickResult.argument];
+		if (clickedBuilding) map.switchToBuildMode(clickedBuilding);
+	} else if(clickResult.action == "buildRoad") {
+		map.switchToRoadMode(sprites.getRoad());
+	} else if(clickResult.action == "delete") {
+		map.switchToDeleteMode();
 	}
 }
 
