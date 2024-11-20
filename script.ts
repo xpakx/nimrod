@@ -1,10 +1,11 @@
 import { Actor, ActorSprite } from "./classes/actor.js";
-import { BuildingSprite, TilingSprite } from "./classes/buildings.js";
+import { TilingSprite } from "./classes/buildings.js";
 import { GameState } from "./classes/game-state.js";
 import { ActionButton, ButtonRow, InterfaceLayer } from "./classes/interface.js";
 import { MapLayer } from "./classes/map-layer.js";
 import { prepareTabs } from "./classes/sidebar.js";
 import { SpriteLibrary } from "./classes/sprite-library.js";
+import { rightMouseClick, middleMouseClick } from "./classes/actions.js";
 
 let state = new GameState();
 
@@ -44,38 +45,6 @@ function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
     ctx.fillText(`${Math.floor(1/dtAvg)} FPS`, 20, 75);
     ctx.fillText(`(${state.playerMouse.x}, ${state.playerMouse.y})`, 20, 100);
     ctx.fillText(`(${map.isoPlayerMouse.x}, ${map.isoPlayerMouse.y})`, 20, 125);
-}
-
-function middleMouseClick(event: MouseEvent) {
-	map.isDragging = true;
-	map.dragStart.x = event.clientX + map.positionOffset.x;
-	map.dragStart.y = event.clientY + map.positionOffset.y;
-}
-
-function rightMouseClick(_event: MouseEvent, sprites: {[key: string]: BuildingSprite}, road: TilingSprite) {
-	if(interf.mouseInsideInterface(state.playerMouse)) {
-		const clickResult = interf.click(state.playerMouse);
-		if (clickResult != undefined) {
-			if(clickResult.action == "build" && clickResult.argument != undefined) {
-				const clickedBuilding = sprites[clickResult.argument];
-				if (clickedBuilding) map.switchToBuildMode(clickedBuilding);
-			} else if(clickResult.action == "buildRoad") {
-				map.switchToRoadMode(road);
-			} else if(clickResult.action == "delete") {
-				map.switchToDeleteMode();
-			}
-		}
-		return;
-	}
-	if(map.mode) {
-		map.putBuilding(map.isoPlayerMouse, map.mode, false);
-		map.finalizeBuildingPlacement(map.isoPlayerMouse);
-	} else if(map.deleteMode) {
-		map.deleteBuilding(map.isoPlayerMouse);
-		map.deleteRoad(map.isoPlayerMouse);
-	} else if(map.roadMode) {
-		map.putRoad(map.isoPlayerMouse, road);
-	}
 }
 
 function loadMap(filename: string, map: MapLayer, sprites: SpriteLibrary, road: TilingSprite) {
@@ -218,11 +187,11 @@ window.onload = async () => {
 
 	canvas.addEventListener('mousedown', (event) => {
 		if(event.button == 1) {
-			middleMouseClick(event);
+			middleMouseClick(event, map);
 		}
 
 		if(event.button == 0) {
-			rightMouseClick(event, sprites.buildings, sprites.getRoad());
+			rightMouseClick(event, sprites, state, interf, map);
 		}
 	});
 
