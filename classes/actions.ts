@@ -5,14 +5,16 @@ import { SpriteLibrary } from "./sprite-library.js";
 
 export function rightMouseClick(_event: MouseEvent, sprites: SpriteLibrary, state: GameState, interf: InterfaceLayer, map: MapLayer) {
 	if(interf.mouseInsideInterface(state.playerMouse)) {
-		const clickResult = interf.click(state.playerMouse);
-		if (clickResult != undefined) {
-			rightMouseCityInterface(clickResult, sprites, map);
-		}
+		rightMouseInterface(interf, sprites, map, state);
 		return;
 	}
-	if (state.view == "City") {
-		rightMouseCity(sprites, map);
+	rightMouseClickDo(sprites, map, state);
+}
+
+function rightMouseClickDo(sprites: SpriteLibrary, map: MapLayer, state: GameState) {
+	switch (state.view) {
+		case "City":
+			rightMouseCity(sprites, map);
 	}
 }
 
@@ -25,6 +27,17 @@ function rightMouseCity(sprites: SpriteLibrary, map: MapLayer) {
 		map.deleteRoad(map.isoPlayerMouse);
 	} else if(map.roadMode) {
 		map.putRoad(map.isoPlayerMouse, sprites.getRoad());
+	}
+}
+
+function rightMouseInterface(interf: InterfaceLayer, sprites: SpriteLibrary, map: MapLayer, state: GameState) {
+	const clickResult = interf.click(state.playerMouse);
+	if (!clickResult) {
+		return;
+	}
+	switch (state.view) {
+		case "City":
+			rightMouseCityInterface(clickResult, sprites, map);
 	}
 }
 
