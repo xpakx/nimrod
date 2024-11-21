@@ -5,9 +5,10 @@ import { ActionButton, ButtonRow, InterfaceLayer } from "./classes/interface.js"
 import { MapLayer } from "./classes/map-layer.js";
 import { prepareTabs } from "./classes/sidebar.js";
 import { SpriteLibrary } from "./classes/sprite-library.js";
-import { rightMouseClick, middleMouseClick } from "./classes/actions.js";
+import { Game } from "./classes/game.js";
 
 let state = new GameState();
+let game = new Game();
 
 let map = new MapLayer({width: state.canvasWidth, height: state.canvasHeight});
 let interf = new InterfaceLayer({width: state.canvasWidth, height: state.canvasHeight});
@@ -187,11 +188,11 @@ window.onload = async () => {
 
 	canvas.addEventListener('mousedown', (event) => {
 		if(event.button == 1) {
-			middleMouseClick(event, map);
+			game.middleMouseClick(event, map);
 		}
 
 		if(event.button == 0) {
-			rightMouseClick(event, sprites, state, interf, map);
+			game.rightMouseClick(event, sprites, state, interf, map);
 		}
 	});
 
