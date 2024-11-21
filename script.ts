@@ -1,7 +1,4 @@
 import { Actor } from "./classes/actor.js";
-import { TilingSprite } from "./classes/buildings.js";
-import { MapLayer } from "./classes/map-layer.js";
-import { SpriteLibrary } from "./classes/sprite-library.js";
 import { Game } from "./classes/game.js";
 
 let game = new Game();
@@ -32,6 +29,29 @@ function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
     ctx.fillText(`(${game.map.isoPlayerMouse.x}, ${game.map.isoPlayerMouse.y})`, 20, 125);
 }
 
+function registerMouseEvents(canvas: HTMLCanvasElement) {
+	canvas.addEventListener('mousemove', function(event) {
+		game.onMouseMove(event, canvas);
+	});
+
+	canvas.addEventListener('mousedown', (event) => {
+		if(event.button == 1) {
+			game.onMouseMiddleClick(event);
+		}
+
+		if(event.button == 0) {
+			game.onMouseLeftClick(event);
+		}
+	});
+
+	canvas.addEventListener('mouseup', (event) => {
+		game.onMouseUp(event);
+	});
+
+	canvas.addEventListener('wheel', function(event) {
+		game.onMouseWheel(event);
+	});
+}
 
 window.onload = async () => {
 	const canvas = document.getElementById('gameCanvas') as (HTMLCanvasElement | null);
@@ -50,49 +70,7 @@ window.onload = async () => {
 	game.loadMap("test.json");
 	game.state.pedestrians.push(new Actor(game.sprites.actors['test'], {x: 1, y: 9}));
 
-	canvas.addEventListener('mousemove', function(event) {
-		const rect = canvas.getBoundingClientRect();
-
-		const mouseX = event.clientX - rect.left;
-		const mouseY = event.clientY - rect.top;
-		game.state.playerMouse = {x: mouseX, y: mouseY};
-		if(!game.interf.mouseInsideInterface(game.state.playerMouse)) {
-			game.map.updateMousePosition(game.state.playerMouse);
-		} 
-		game.interf.onMouse(game.state.playerMouse);
-
-		if (game.map.isDragging) {
-			game.map.positionOffset.x = game.map.dragStart.x - event.clientX;
-			game.map.positionOffset.y = game.map.dragStart.y - event.clientY;
-			game.correctOffset();
-		}
-	});
-
-
-	canvas.addEventListener('mousedown', (event) => {
-		if(event.button == 1) {
-			game.middleMouseClick(event);
-		}
-
-		if(event.button == 0) {
-			game.rightMouseClick(event);
-		}
-	});
-
-
-	canvas.addEventListener('mouseup', (_event) => {
-		game.map.isDragging = false;
-	});
-	canvas.addEventListener('wheel', function(event) {
-		if(game.map.isDragging) {
-			return;
-		}
-		if (event.deltaY < 0) {
-			game.rescale(0.2);
-		} else {
-			game.rescale(-0.2);
-		}
-	});
+	registerMouseEvents(canvas);
 
 	let [moveLeft, moveRight, moveUp, moveDown] = [false, false, false, false];
 

@@ -65,22 +65,22 @@ export class Game {
 		this.interf.addButtonRow(mapRow);
 	}
 
-	rightMouseClick(_event: MouseEvent) {
+	onMouseLeftClick(_event: MouseEvent) {
 		if(this.interf.mouseInsideInterface(this.state.playerMouse)) {
-			this.rightMouseInterface();
+			this.leftMouseInterface();
 			return;
 		}
-		this.rightMouseClickMain();
+		this.leftMouseClickMain();
 	}
 
-	rightMouseClickMain() {
+	leftMouseClickMain() {
 		switch (this.state.view) {
 			case "City":
-				this.rightMouseCity();
+				this.leftMouseCity();
 		}
 	}
 
-	rightMouseCity() {
+	leftMouseCity() {
 		if(this.map.mode) {
 			this.map.putBuilding(this.map.isoPlayerMouse, this.map.mode, false);
 			this.map.finalizeBuildingPlacement(this.map.isoPlayerMouse);
@@ -92,18 +92,18 @@ export class Game {
 		}
 	}
 
-	rightMouseInterface() {
+	leftMouseInterface() {
 		const clickResult = this.interf.click(this.state.playerMouse);
 		if (!clickResult) {
 			return;
 		}
 		switch (this.state.view) {
 			case "City":
-				this.rightMouseCityInterface(clickResult, this.sprites, this.map);
+				this.leftMouseCityInterface(clickResult, this.sprites, this.map);
 		}
 	}
 
-	rightMouseCityInterface(clickResult: Action, sprites: SpriteLibrary, map: MapLayer) {
+	leftMouseCityInterface(clickResult: Action, sprites: SpriteLibrary, map: MapLayer) {
 		if(clickResult.action == "build" && clickResult.argument != undefined) {
 			const clickedBuilding = sprites.buildings[clickResult.argument];
 			if (clickedBuilding) map.switchToBuildMode(clickedBuilding);
@@ -114,7 +114,7 @@ export class Game {
 		}
 	}
 
-	middleMouseClick(event: MouseEvent) {
+	onMouseMiddleClick(event: MouseEvent) {
 		this.map.isDragging = true;
 		this.map.dragStart.x = event.clientX + this.map.positionOffset.x;
 		this.map.dragStart.y = event.clientY + this.map.positionOffset.y;
@@ -179,5 +179,38 @@ export class Game {
 			console.log(error);
 			throw new Error(`Error loading the JSON file: ${error}`);
 		});
+	}
+
+	onMouseMove(event: MouseEvent, canvas: HTMLCanvasElement) {
+		const rect = canvas.getBoundingClientRect();
+
+		const mouseX = event.clientX - rect.left;
+		const mouseY = event.clientY - rect.top;
+		this.state.playerMouse = {x: mouseX, y: mouseY};
+		if(!this.interf.mouseInsideInterface(this.state.playerMouse)) {
+			this.map.updateMousePosition(this.state.playerMouse);
+		} 
+		this.interf.onMouse(this.state.playerMouse);
+
+		if (this.map.isDragging) {
+			this.map.positionOffset.x = this.map.dragStart.x - event.clientX;
+			this.map.positionOffset.y = this.map.dragStart.y - event.clientY;
+			this.correctOffset();
+		}
+	}
+
+	onMouseUp(_event: MouseEvent) {
+		this.map.isDragging = false;
+	}
+
+	onMouseWheel(event: WheelEvent) {
+		if(this.map.isDragging) {
+			return;
+		}
+		if (event.deltaY < 0) {
+			this.rescale(0.2);
+		} else {
+			this.rescale(-0.2);
+		}
 	}
 }
