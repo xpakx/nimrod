@@ -1,6 +1,5 @@
-import { Actor, ActorSprite } from "./classes/actor.js";
+import { Actor } from "./classes/actor.js";
 import { TilingSprite } from "./classes/buildings.js";
-import { ActionButton, ButtonRow } from "./classes/interface.js";
 import { MapLayer } from "./classes/map-layer.js";
 import { prepareTabs } from "./classes/sidebar.js";
 import { SpriteLibrary } from "./classes/sprite-library.js";
@@ -10,14 +9,6 @@ let game = new Game();
 
 const dts: number[] = [];
 
-async function loadImage(url: string): Promise<any> {
-    const image = new Image();
-    image.src = url;
-    return new Promise((resolve, reject) => {
-        image.onload = () => resolve(image);
-        image.onerror = reject;
-    });
-}
 
 function renderGame(context: CanvasRenderingContext2D, deltaTime: number) {
 	context.clearRect(0, 0, game.state.canvasWidth, game.state.canvasHeight);
@@ -25,7 +16,6 @@ function renderGame(context: CanvasRenderingContext2D, deltaTime: number) {
 	game.interf.renderInterface(context, deltaTime);
 	renderDebugInfo(context, deltaTime);
 }
-
 
 function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
     ctx.font = "26px normal"
@@ -86,48 +76,17 @@ window.onload = async () => {
 	}
 	canvas.width = game.state.canvasWidth;
 	canvas.height = game.state.canvasHeight;
-	await game.prepareGame();
+	await game.prepareAssets();
 
 	game.interf.tabs = await prepareTabs(game.sprites.buildings);
 	game.interf.tab = 0;
 	game.interf.recalculateTabSize();
 	game.interf.calculateTabIcons();
-	
-	const coinsIcon = await loadImage("./img/coins.svg");
-	const populationIcon = await loadImage("./img/people.svg");
-	game.interf.coinsIcon = coinsIcon;
-	game.interf.populationIcon = populationIcon;
-	game.interf.calculateIconsSize();
-
-	const roadButton = await loadImage("./img/road-button.svg");
-	const deleteButton = await loadImage("./img/delete-button.svg");
-	const menuRow: ButtonRow = {
-		y: game.interf.buildingMenuHeight + 50,	
-		buttons: [
-			new ActionButton(roadButton, {action: "buildRoad", argument: undefined}, {width: 40, height: 40}),
-			new ActionButton(deleteButton, {action: "delete", argument: undefined}, {width: 40, height: 40}),
-		]
-	};
-	game.interf.addButtonRow(menuRow);
-
-	const world = await loadImage("./img/world.svg");
-	const city = await loadImage("./img/city.svg");
-	const kingdom = await loadImage("./img/kingdom.svg");
-	const mapRow: ButtonRow = {
-		y: canvas.height - 80,	
-		buttons: [
-			new ActionButton(city, {action: "goTo", argument: "city"}, {width: 50, height: 50}),
-			new ActionButton(kingdom,{action: "goTo", argument: "kingdom"}, {width: 50, height: 50}),
-			new ActionButton(world,{action: "goTo", argument: "map"}, {width: 50, height: 50}),
-		]
-	};
-	game.interf.addButtonRow(mapRow);
 
 
 	loadMap("test.json", game.map, game.sprites, game.sprites.getRoad());
 
-	const act = new ActorSprite(await loadImage("./img/house.svg"), 2, game.map.tileSize);
-	game.state.pedestrians.push(new Actor(act, {x: 1, y: 9}));
+	game.state.pedestrians.push(new Actor(game.sprites.actors['test'], {x: 1, y: 9}));
 
 
 	function correctOffset() {
@@ -179,11 +138,11 @@ window.onload = async () => {
 
 	canvas.addEventListener('mousedown', (event) => {
 		if(event.button == 1) {
-			game.middleMouseClick(event, game.map);
+			game.middleMouseClick(event);
 		}
 
 		if(event.button == 0) {
-			game.rightMouseClick(event, game.sprites, game.state, game.interf, game.map);
+			game.rightMouseClick(event);
 		}
 	});
 
@@ -293,7 +252,7 @@ window.onload = async () => {
 		for(let building of game.map.buildings) {
 			const newPedestrian = building.tick(deltaTime);
 			if(newPedestrian && building.workerSpawn) {
-				game.state.pedestrians.push(new Actor(act, building.workerSpawn));
+				game.state.pedestrians.push(new Actor(game.sprites.actors['test'], building.workerSpawn));
 			}
 		}
 		const dTime = deltaTime > 0.5 ? 0.5 : deltaTime;
@@ -320,8 +279,7 @@ window.onload = async () => {
 	});
 
 
-	const av = await loadImage("./img/portraits/ratman.svg");
-	game.interf.setDialogue(context, {text: "Welcome to the game!", portrait: av});
+	game.interf.setDialogue(context, {text: "Welcome to the game!", portrait: game.sprites.avatars['ratman']});
 	setTimeout(() => {
 		game.interf.closeDialogue();
 	}, 3000);

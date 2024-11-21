@@ -1,8 +1,12 @@
+import { ActorSprite } from "./actor.js";
 import { BuildingSprite, TilingSprite } from "./buildings.js";
 import { Size } from "./map-layer.js";
 
 export class SpriteLibrary {
 	buildings: {[key: string]: BuildingSprite} = {};
+	avatars: {[key: string]: HTMLImageElement} = {};
+	icons: {[key: string]: HTMLImageElement} = {};
+	actors: {[key: string]: ActorSprite} = {};
 	road?: TilingSprite;
 
 	async prepareBuildingSprites(tileSize: Size): Promise<boolean> {
@@ -17,6 +21,27 @@ export class SpriteLibrary {
 		this.buildings["tower"] = tower;
 		this.buildings["well"] = well;
 		this.buildings["inspector"] = inspector;
+		return true;
+	}
+
+	async prepareAvatars(): Promise<boolean> {
+		this.avatars['ratman'] = await loadImage("./img/portraits/ratman.svg");
+		return true;
+	}
+
+	async prepareIcons(): Promise<boolean> {
+		this.icons['coins'] = await loadImage("./img/coins.svg");
+		this.icons['population'] = await loadImage("./img/people.svg");
+		this.icons['road'] = await loadImage("./img/road-button.svg");
+		this.icons['delete'] = await loadImage("./img/delete-button.svg");
+		this.icons['world'] = await loadImage("./img/world.svg");
+		this.icons['city'] = await loadImage("./img/city.svg");
+		this.icons['kingdom'] = await loadImage("./img/kingdom.svg");
+		return true;
+	}
+
+	async prepareActorSprites(tileSize: Size): Promise<boolean> {
+		this.actors['test'] = new ActorSprite(await loadImage("./img/house.svg"), 2, tileSize);
 		return true;
 	}
 

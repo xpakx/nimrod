@@ -1,5 +1,5 @@
 import { GameState } from "./game-state.js";
-import { Action, InterfaceLayer } from "./interface.js";
+import { Action, ActionButton, ButtonRow, InterfaceLayer } from "./interface.js";
 import { MapLayer, Size } from "./map-layer.js";
 import { SpriteLibrary } from "./sprite-library.js";
 
@@ -20,46 +20,71 @@ export class Game {
 		this.sprites = new SpriteLibrary();
 	}
 
-	async prepareGame() {
+	async prepareAssets() {
 		await this.sprites.prepareBuildingSprites(this.map.tileSize);
+		await this.sprites.prepareActorSprites(this.map.tileSize);
+		await this.sprites.prepareAvatars();
+		await this.sprites.prepareIcons();
 		await this.sprites.prepareRoadSprites(this.map.tileSize);
+		this.interf.coinsIcon = this.sprites.icons['coins'];
+		this.interf.populationIcon = this.sprites.icons['population'];
+		this.interf.calculateIconsSize();
+
+		const menuRow: ButtonRow = {
+			y: this.interf.buildingMenuHeight + 50,	
+			buttons: [
+				new ActionButton(this.sprites.icons['road'], {action: "buildRoad", argument: undefined}, {width: 40, height: 40}),
+				new ActionButton(this.sprites.icons['delete'], {action: "delete", argument: undefined}, {width: 40, height: 40}),
+			]
+		};
+		this.interf.addButtonRow(menuRow);
+
+		const mapRow: ButtonRow = {
+			y: this.state.canvasHeight - 80,	
+			buttons: [
+				new ActionButton(this.sprites.icons['city'], {action: "goTo", argument: "city"}, {width: 50, height: 50}),
+				new ActionButton(this.sprites.icons['kingdom'], {action: "goTo", argument: "kingdom"}, {width: 50, height: 50}),
+				new ActionButton(this.sprites.icons['world'], {action: "goTo", argument: "map"}, {width: 50, height: 50}),
+			]
+		};
+		this.interf.addButtonRow(mapRow);
 	}
 
-	rightMouseClick(_event: MouseEvent, sprites: SpriteLibrary, state: GameState, interf: InterfaceLayer, map: MapLayer) {
-		if(interf.mouseInsideInterface(state.playerMouse)) {
-			this.rightMouseInterface(interf, sprites, map, state);
+	rightMouseClick(_event: MouseEvent) {
+		if(this.interf.mouseInsideInterface(this.state.playerMouse)) {
+			this.rightMouseInterface();
 			return;
 		}
-		this.rightMouseClickMain(sprites, map, state);
+		this.rightMouseClickMain();
 	}
 
-	rightMouseClickMain(sprites: SpriteLibrary, map: MapLayer, state: GameState) {
-		switch (state.view) {
+	rightMouseClickMain() {
+		switch (this.state.view) {
 			case "City":
-				this.rightMouseCity(sprites, map);
+				this.rightMouseCity();
 		}
 	}
 
-	rightMouseCity(sprites: SpriteLibrary, map: MapLayer) {
-		if(map.mode) {
-			map.putBuilding(map.isoPlayerMouse, map.mode, false);
-			map.finalizeBuildingPlacement(map.isoPlayerMouse);
-		} else if(map.deleteMode) {
-			map.deleteBuilding(map.isoPlayerMouse);
-			map.deleteRoad(map.isoPlayerMouse);
-		} else if(map.roadMode) {
-			map.putRoad(map.isoPlayerMouse, sprites.getRoad());
+	rightMouseCity() {
+		if(this.map.mode) {
+			this.map.putBuilding(this.map.isoPlayerMouse, this.map.mode, false);
+			this.map.finalizeBuildingPlacement(this.map.isoPlayerMouse);
+		} else if(this.map.deleteMode) {
+			this.map.deleteBuilding(this.map.isoPlayerMouse);
+			this.map.deleteRoad(this.map.isoPlayerMouse);
+		} else if(this.map.roadMode) {
+			this.map.putRoad(this.map.isoPlayerMouse, this.sprites.getRoad());
 		}
 	}
 
-	rightMouseInterface(interf: InterfaceLayer, sprites: SpriteLibrary, map: MapLayer, state: GameState) {
-		const clickResult = interf.click(state.playerMouse);
+	rightMouseInterface() {
+		const clickResult = this.interf.click(this.state.playerMouse);
 		if (!clickResult) {
 			return;
 		}
-		switch (state.view) {
+		switch (this.state.view) {
 			case "City":
-				this.rightMouseCityInterface(clickResult, sprites, map);
+				this.rightMouseCityInterface(clickResult, this.sprites, this.map);
 		}
 	}
 
@@ -74,9 +99,9 @@ export class Game {
 		}
 	}
 
-	middleMouseClick(event: MouseEvent, map: MapLayer) {
-		map.isDragging = true;
-		map.dragStart.x = event.clientX + map.positionOffset.x;
-		map.dragStart.y = event.clientY + map.positionOffset.y;
+	middleMouseClick(event: MouseEvent) {
+		this.map.isDragging = true;
+		this.map.dragStart.x = event.clientX + this.map.positionOffset.x;
+		this.map.dragStart.y = event.clientY + this.map.positionOffset.y;
 	}
 }
