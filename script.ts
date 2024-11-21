@@ -32,35 +32,6 @@ function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
     ctx.fillText(`(${game.map.isoPlayerMouse.x}, ${game.map.isoPlayerMouse.y})`, 20, 125);
 }
 
-function loadMap(filename: string, map: MapLayer, sprites: SpriteLibrary, road: TilingSprite) {
-	fetch(`maps/${filename}`)
-	.then(response => {
-		if (!response.ok) {
-			throw new Error(`HTTP error while loading a map! status: ${response.status}`);
-		}
-		return response.json();
-	})
-	.then(data => {
-		console.log(data);
-		const height = data['size']['height']; 
-		const width = data['size']['width']; 
-		const newMap: string[][] = Array(height).fill(null).map(() => Array(width).fill('#97b106'));
-		map.map = newMap;
-
-		for (let pos of data['roads']) {
-			map.putRoad({x: pos['x'], y: pos['y']}, road, true);
-		}
-
-		for (let building of data['buildings']) {
-			map.putBuilding({x: building['x'], y: building['y']}, sprites.buildings[building['type']]);
-		}
-		map.getBuilding({x: 3, y: 11})!.setWorker(sprites.buildings["home"]);
-	})
-	.catch(error => {
-		console.log(error);
-		throw new Error(`Error loading the JSON file: ${error}`);
-	});
-}
 
 window.onload = async () => {
 	const canvas = document.getElementById('gameCanvas') as (HTMLCanvasElement | null);
@@ -76,13 +47,8 @@ window.onload = async () => {
 	canvas.width = game.state.canvasWidth;
 	canvas.height = game.state.canvasHeight;
 	await game.prepareAssets();
-
-
-	loadMap("test.json", game.map, game.sprites, game.sprites.getRoad());
-
+	game.loadMap("test.json");
 	game.state.pedestrians.push(new Actor(game.sprites.actors['test'], {x: 1, y: 9}));
-
-
 
 	canvas.addEventListener('mousemove', function(event) {
 		const rect = canvas.getBoundingClientRect();

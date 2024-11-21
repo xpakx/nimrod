@@ -3,6 +3,7 @@ import { Action, ActionButton, ButtonRow, InterfaceLayer } from "./interface.js"
 import { MapLayer, Size } from "./map-layer.js";
 import { SpriteLibrary } from "./sprite-library.js";
 import { prepareTabs } from "./sidebar.js";
+import { TilingSprite } from "./buildings.js";
 
 export class Game {
 	state: GameState;
@@ -148,5 +149,35 @@ export class Game {
 		this.map.rescale(dScale);
 		this.rescaleOffsets(oldScale);
 		this.sprites.rescaleSprites(this.map.tileSize);
+	}
+
+	loadMap(filename: string) {
+		fetch(`maps/${filename}`)
+		.then(response => {
+			if (!response.ok) {
+				throw new Error(`HTTP error while loading a map! status: ${response.status}`);
+			}
+			return response.json();
+		})
+		.then(data => {
+			console.log(data);
+			const height = data['size']['height']; 
+			const width = data['size']['width']; 
+			const newMap: string[][] = Array(height).fill(null).map(() => Array(width).fill('#97b106'));
+			this.map.map = newMap;
+
+			for (let pos of data['roads']) {
+				this.map.putRoad({x: pos['x'], y: pos['y']}, this.sprites.getRoad(), true);
+			}
+
+			for (let building of data['buildings']) {
+				this.map.putBuilding({x: building['x'], y: building['y']}, this.sprites.buildings[building['type']]);
+			}
+			this.map.getBuilding({x: 3, y: 11})!.setWorker(this.sprites.buildings["home"]);
+		})
+		.catch(error => {
+			console.log(error);
+			throw new Error(`Error loading the JSON file: ${error}`);
+		});
 	}
 }
