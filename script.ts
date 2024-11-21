@@ -1,7 +1,6 @@
 import { Actor } from "./classes/actor.js";
 import { TilingSprite } from "./classes/buildings.js";
 import { MapLayer } from "./classes/map-layer.js";
-import { prepareTabs } from "./classes/sidebar.js";
 import { SpriteLibrary } from "./classes/sprite-library.js";
 import { Game } from "./classes/game.js";
 
@@ -78,31 +77,12 @@ window.onload = async () => {
 	canvas.height = game.state.canvasHeight;
 	await game.prepareAssets();
 
-	game.interf.tabs = await prepareTabs(game.sprites.buildings);
-	game.interf.tab = 0;
-	game.interf.recalculateTabSize();
-	game.interf.calculateTabIcons();
-
 
 	loadMap("test.json", game.map, game.sprites, game.sprites.getRoad());
 
 	game.state.pedestrians.push(new Actor(game.sprites.actors['test'], {x: 1, y: 9}));
 
 
-	function correctOffset() {
-		if(game.map.positionOffset.y < 0) {
-			game.map.positionOffset.y = 0;
-		}
-		if(game.map.positionOffset.y > maxYOffset) {
-			game.map.positionOffset.y = maxYOffset;
-		}
-		if(game.map.positionOffset.x < minXOffset) {
-			game.map.positionOffset.x = minXOffset;
-		}
-		if(game.map.positionOffset.x > maxXOffset) {
-			game.map.positionOffset.x = maxXOffset;
-		}
-	}
 
 	canvas.addEventListener('mousemove', function(event) {
 		const rect = canvas.getBoundingClientRect();
@@ -118,22 +98,9 @@ window.onload = async () => {
 		if (game.map.isDragging) {
 			game.map.positionOffset.x = game.map.dragStart.x - event.clientX;
 			game.map.positionOffset.y = game.map.dragStart.y - event.clientY;
-			correctOffset();
+			game.correctOffset();
 		}
 	});
-
-	let maxYOffset = game.map.isoToScreen({x: game.map.map[0].length - 1, y: game.map.map.length - 1}).y + (game.map.tileSize.height/2);
-	let minXOffset = game.map.isoToScreen({x: 0, y: game.map.map.length - 1}).x  - (game.map.tileSize.width/2);
-	let maxXOffset = game.map.isoToScreen({x: game.map.map[0].length - 1, y: 0}).x  + (game.map.tileSize.width/2);
-
-	function rescaleOffsets(oldScale: number) {
-		game.map.positionOffset.x = game.map.scale*game.map.positionOffset.x/oldScale;
-		game.map.positionOffset.y = game.map.scale*game.map.positionOffset.y/oldScale;
-		maxYOffset = game.map.isoToScreen({x: game.map.map[0].length - 1, y: game.map.map.length - 1}).y + (game.map.tileSize.height/2) + game.map.positionOffset.y; // + offset to calculate from 0,0
-		minXOffset = game.map.isoToScreen({x: 0, y: game.map.map.length - 1}).x  - (game.map.tileSize.width/2) + game.map.positionOffset.x;
-		maxXOffset = game.map.isoToScreen({x: game.map.map[0].length - 1, y: 0}).x  + (game.map.tileSize.width/2) + game.map.positionOffset.x;
-		correctOffset();
-	}
 
 
 	canvas.addEventListener('mousedown', (event) => {
@@ -146,12 +113,6 @@ window.onload = async () => {
 		}
 	});
 
-	function rescale(dScale: number) {
-		let oldScale = game.map.scale;
-		game.map.rescale(dScale);
-		rescaleOffsets(oldScale);
-		game.sprites.rescaleSprites(game.map.tileSize);
-	}
 
 	canvas.addEventListener('mouseup', (_event) => {
 		game.map.isDragging = false;
@@ -161,9 +122,9 @@ window.onload = async () => {
 			return;
 		}
 		if (event.deltaY < 0) {
-			rescale(0.2);
+			game.rescale(0.2);
 		} else {
-			rescale(-0.2);
+			game.rescale(-0.2);
 		}
 	});
 
@@ -184,11 +145,11 @@ window.onload = async () => {
 				moveRight = true;
 			break;
 			case '+': {
-				rescale(0.2);
+				game.rescale(0.2);
 			}
 			break;
 			case '-': {
-				rescale(-0.2);
+				game.rescale(-0.2);
 			}
 			break;
 			case '0': case 'Escape': game.map.switchToNormalMode(); break;
@@ -205,22 +166,22 @@ window.onload = async () => {
 		}
 		if(moveDown) {
 			game.map.positionOffset.y = game.map.positionOffset.y + 10;
-			if(game.map.positionOffset.y > maxYOffset) {
-				game.map.positionOffset.y = maxYOffset;
+			if(game.map.positionOffset.y > game.maxYOffset) {
+				game.map.positionOffset.y = game.maxYOffset;
 			}
 			game.map.updateMousePosition(game.state.playerMouse);
 		}
 		if(moveLeft) {
 			game.map.positionOffset.x = game.map.positionOffset.x - 10;
-			if(game.map.positionOffset.x < minXOffset) {
-				game.map.positionOffset.x = minXOffset;
+			if(game.map.positionOffset.x < game.minXOffset) {
+				game.map.positionOffset.x = game.minXOffset;
 			}
 			game.map.updateMousePosition(game.state.playerMouse);
 		}
 		if(moveRight) {
 			game.map.positionOffset.x = game.map.positionOffset.x + 10;
-			if(game.map.positionOffset.x > maxXOffset) {
-				game.map.positionOffset.x = maxXOffset;
+			if(game.map.positionOffset.x > game.maxXOffset) {
+				game.map.positionOffset.x = game.maxXOffset;
 			}
 			game.map.updateMousePosition(game.state.playerMouse);
 		}
