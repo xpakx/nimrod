@@ -86,13 +86,9 @@ window.onload = async () => {
 	}
 	canvas.width = game.state.canvasWidth;
 	canvas.height = game.state.canvasHeight;
+	await game.prepareGame();
 
-	let sprites = new SpriteLibrary();
-	await sprites.prepareBuildingSprites(game.map.tileSize);
-	await sprites.prepareRoadSprites(game.map.tileSize);
-
-
-	game.interf.tabs = await prepareTabs(sprites.buildings);
+	game.interf.tabs = await prepareTabs(game.sprites.buildings);
 	game.interf.tab = 0;
 	game.interf.recalculateTabSize();
 	game.interf.calculateTabIcons();
@@ -128,7 +124,7 @@ window.onload = async () => {
 	game.interf.addButtonRow(mapRow);
 
 
-	loadMap("test.json", game.map, sprites, sprites.getRoad());
+	loadMap("test.json", game.map, game.sprites, game.sprites.getRoad());
 
 	const act = new ActorSprite(await loadImage("./img/house.svg"), 2, game.map.tileSize);
 	game.state.pedestrians.push(new Actor(act, {x: 1, y: 9}));
@@ -187,7 +183,7 @@ window.onload = async () => {
 		}
 
 		if(event.button == 0) {
-			game.rightMouseClick(event, sprites, game.state, game.interf, game.map);
+			game.rightMouseClick(event, game.sprites, game.state, game.interf, game.map);
 		}
 	});
 
@@ -195,7 +191,7 @@ window.onload = async () => {
 		let oldScale = game.map.scale;
 		game.map.rescale(dScale);
 		rescaleOffsets(oldScale);
-		sprites.rescaleSprites(game.map.tileSize);
+		game.sprites.rescaleSprites(game.map.tileSize);
 	}
 
 	canvas.addEventListener('mouseup', (_event) => {

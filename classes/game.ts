@@ -7,6 +7,7 @@ export class Game {
 	state: GameState;
 	map: MapLayer;
 	interf: InterfaceLayer;
+	sprites: SpriteLibrary;
 
 	constructor() {
 		this.state = new GameState();
@@ -16,6 +17,12 @@ export class Game {
 		}; 
 		this.map = new MapLayer(size);
 		this.interf = new InterfaceLayer(size);
+		this.sprites = new SpriteLibrary();
+	}
+
+	async prepareGame() {
+		await this.sprites.prepareBuildingSprites(this.map.tileSize);
+		await this.sprites.prepareRoadSprites(this.map.tileSize);
 	}
 
 	rightMouseClick(_event: MouseEvent, sprites: SpriteLibrary, state: GameState, interf: InterfaceLayer, map: MapLayer) {
