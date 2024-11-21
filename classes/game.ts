@@ -1,9 +1,23 @@
 import { GameState } from "./game-state.js";
 import { Action, InterfaceLayer } from "./interface.js";
-import { MapLayer } from "./map-layer.js";
+import { MapLayer, Size } from "./map-layer.js";
 import { SpriteLibrary } from "./sprite-library.js";
 
 export class Game {
+	state: GameState;
+	map: MapLayer;
+	interf: InterfaceLayer;
+
+	constructor() {
+		this.state = new GameState();
+		const size: Size = {
+			width: this.state.canvasWidth, 
+			height: this.state.canvasHeight
+		}; 
+		this.map = new MapLayer(size);
+		this.interf = new InterfaceLayer(size);
+	}
+
 	rightMouseClick(_event: MouseEvent, sprites: SpriteLibrary, state: GameState, interf: InterfaceLayer, map: MapLayer) {
 		if(interf.mouseInsideInterface(state.playerMouse)) {
 			this.rightMouseInterface(interf, sprites, map, state);

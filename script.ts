@@ -1,17 +1,12 @@
 import { Actor, ActorSprite } from "./classes/actor.js";
 import { TilingSprite } from "./classes/buildings.js";
-import { GameState } from "./classes/game-state.js";
-import { ActionButton, ButtonRow, InterfaceLayer } from "./classes/interface.js";
+import { ActionButton, ButtonRow } from "./classes/interface.js";
 import { MapLayer } from "./classes/map-layer.js";
 import { prepareTabs } from "./classes/sidebar.js";
 import { SpriteLibrary } from "./classes/sprite-library.js";
 import { Game } from "./classes/game.js";
 
-let state = new GameState();
 let game = new Game();
-
-let map = new MapLayer({width: state.canvasWidth, height: state.canvasHeight});
-let interf = new InterfaceLayer({width: state.canvasWidth, height: state.canvasHeight});
 
 const dts: number[] = [];
 
@@ -25,9 +20,9 @@ async function loadImage(url: string): Promise<any> {
 }
 
 function renderGame(context: CanvasRenderingContext2D, deltaTime: number) {
-	context.clearRect(0, 0, state.canvasWidth, state.canvasHeight);
-	map.renderMap(context, state.pedestrians, deltaTime);
-	interf.renderInterface(context, deltaTime);
+	context.clearRect(0, 0, game.state.canvasWidth, game.state.canvasHeight);
+	game.map.renderMap(context, game.state.pedestrians, deltaTime);
+	game.interf.renderInterface(context, deltaTime);
 	renderDebugInfo(context, deltaTime);
 }
 
@@ -44,8 +39,8 @@ function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
     const dtAvg = dts.reduce((a, b) => a + b, 0)/dts.length;
 
     ctx.fillText(`${Math.floor(1/dtAvg)} FPS`, 20, 75);
-    ctx.fillText(`(${state.playerMouse.x}, ${state.playerMouse.y})`, 20, 100);
-    ctx.fillText(`(${map.isoPlayerMouse.x}, ${map.isoPlayerMouse.y})`, 20, 125);
+    ctx.fillText(`(${game.state.playerMouse.x}, ${game.state.playerMouse.y})`, 20, 100);
+    ctx.fillText(`(${game.map.isoPlayerMouse.x}, ${game.map.isoPlayerMouse.y})`, 20, 125);
 }
 
 function loadMap(filename: string, map: MapLayer, sprites: SpriteLibrary, road: TilingSprite) {
@@ -89,35 +84,35 @@ window.onload = async () => {
 		console.log("No context");
 		return;
 	}
-	canvas.width = state.canvasWidth;
-	canvas.height = state.canvasHeight;
+	canvas.width = game.state.canvasWidth;
+	canvas.height = game.state.canvasHeight;
 
 	let sprites = new SpriteLibrary();
-	await sprites.prepareBuildingSprites(map.tileSize);
-	await sprites.prepareRoadSprites(map.tileSize);
+	await sprites.prepareBuildingSprites(game.map.tileSize);
+	await sprites.prepareRoadSprites(game.map.tileSize);
 
 
-	interf.tabs = await prepareTabs(sprites.buildings);
-	interf.tab = 0;
-	interf.recalculateTabSize();
-	interf.calculateTabIcons();
+	game.interf.tabs = await prepareTabs(sprites.buildings);
+	game.interf.tab = 0;
+	game.interf.recalculateTabSize();
+	game.interf.calculateTabIcons();
 	
 	const coinsIcon = await loadImage("./img/coins.svg");
 	const populationIcon = await loadImage("./img/people.svg");
-	interf.coinsIcon = coinsIcon;
-	interf.populationIcon = populationIcon;
-	interf.calculateIconsSize();
+	game.interf.coinsIcon = coinsIcon;
+	game.interf.populationIcon = populationIcon;
+	game.interf.calculateIconsSize();
 
 	const roadButton = await loadImage("./img/road-button.svg");
 	const deleteButton = await loadImage("./img/delete-button.svg");
 	const menuRow: ButtonRow = {
-		y: interf.buildingMenuHeight + 50,	
+		y: game.interf.buildingMenuHeight + 50,	
 		buttons: [
 			new ActionButton(roadButton, {action: "buildRoad", argument: undefined}, {width: 40, height: 40}),
 			new ActionButton(deleteButton, {action: "delete", argument: undefined}, {width: 40, height: 40}),
 		]
 	};
-	interf.addButtonRow(menuRow);
+	game.interf.addButtonRow(menuRow);
 
 	const world = await loadImage("./img/world.svg");
 	const city = await loadImage("./img/city.svg");
@@ -130,27 +125,27 @@ window.onload = async () => {
 			new ActionButton(world,{action: "goTo", argument: "map"}, {width: 50, height: 50}),
 		]
 	};
-	interf.addButtonRow(mapRow);
+	game.interf.addButtonRow(mapRow);
 
 
-	loadMap("test.json", map, sprites, sprites.getRoad());
+	loadMap("test.json", game.map, sprites, sprites.getRoad());
 
-	const act = new ActorSprite(await loadImage("./img/house.svg"), 2, map.tileSize);
-	state.pedestrians.push(new Actor(act, {x: 1, y: 9}));
+	const act = new ActorSprite(await loadImage("./img/house.svg"), 2, game.map.tileSize);
+	game.state.pedestrians.push(new Actor(act, {x: 1, y: 9}));
 
 
 	function correctOffset() {
-		if(map.positionOffset.y < 0) {
-			map.positionOffset.y = 0;
+		if(game.map.positionOffset.y < 0) {
+			game.map.positionOffset.y = 0;
 		}
-		if(map.positionOffset.y > maxYOffset) {
-			map.positionOffset.y = maxYOffset;
+		if(game.map.positionOffset.y > maxYOffset) {
+			game.map.positionOffset.y = maxYOffset;
 		}
-		if(map.positionOffset.x < minXOffset) {
-			map.positionOffset.x = minXOffset;
+		if(game.map.positionOffset.x < minXOffset) {
+			game.map.positionOffset.x = minXOffset;
 		}
-		if(map.positionOffset.x > maxXOffset) {
-			map.positionOffset.x = maxXOffset;
+		if(game.map.positionOffset.x > maxXOffset) {
+			game.map.positionOffset.x = maxXOffset;
 		}
 	}
 
@@ -159,55 +154,55 @@ window.onload = async () => {
 
 		const mouseX = event.clientX - rect.left;
 		const mouseY = event.clientY - rect.top;
-		state.playerMouse = {x: mouseX, y: mouseY};
-		if(!interf.mouseInsideInterface(state.playerMouse)) {
-			map.updateMousePosition(state.playerMouse);
+		game.state.playerMouse = {x: mouseX, y: mouseY};
+		if(!game.interf.mouseInsideInterface(game.state.playerMouse)) {
+			game.map.updateMousePosition(game.state.playerMouse);
 		} 
-		interf.onMouse(state.playerMouse);
+		game.interf.onMouse(game.state.playerMouse);
 
-		if (map.isDragging) {
-			map.positionOffset.x = map.dragStart.x - event.clientX;
-			map.positionOffset.y = map.dragStart.y - event.clientY;
+		if (game.map.isDragging) {
+			game.map.positionOffset.x = game.map.dragStart.x - event.clientX;
+			game.map.positionOffset.y = game.map.dragStart.y - event.clientY;
 			correctOffset();
 		}
 	});
 
-	let maxYOffset = map.isoToScreen({x: map.map[0].length - 1, y: map.map.length - 1}).y + (map.tileSize.height/2);
-	let minXOffset = map.isoToScreen({x: 0, y: map.map.length - 1}).x  - (map.tileSize.width/2);
-	let maxXOffset = map.isoToScreen({x: map.map[0].length - 1, y: 0}).x  + (map.tileSize.width/2);
+	let maxYOffset = game.map.isoToScreen({x: game.map.map[0].length - 1, y: game.map.map.length - 1}).y + (game.map.tileSize.height/2);
+	let minXOffset = game.map.isoToScreen({x: 0, y: game.map.map.length - 1}).x  - (game.map.tileSize.width/2);
+	let maxXOffset = game.map.isoToScreen({x: game.map.map[0].length - 1, y: 0}).x  + (game.map.tileSize.width/2);
 
 	function rescaleOffsets(oldScale: number) {
-		map.positionOffset.x = map.scale*map.positionOffset.x/oldScale;
-		map.positionOffset.y = map.scale*map.positionOffset.y/oldScale;
-		maxYOffset = map.isoToScreen({x: map.map[0].length - 1, y: map.map.length - 1}).y + (map.tileSize.height/2) + map.positionOffset.y; // + offset to calculate from 0,0
-		minXOffset = map.isoToScreen({x: 0, y: map.map.length - 1}).x  - (map.tileSize.width/2) + map.positionOffset.x;
-		maxXOffset = map.isoToScreen({x: map.map[0].length - 1, y: 0}).x  + (map.tileSize.width/2) + map.positionOffset.x;
+		game.map.positionOffset.x = game.map.scale*game.map.positionOffset.x/oldScale;
+		game.map.positionOffset.y = game.map.scale*game.map.positionOffset.y/oldScale;
+		maxYOffset = game.map.isoToScreen({x: game.map.map[0].length - 1, y: game.map.map.length - 1}).y + (game.map.tileSize.height/2) + game.map.positionOffset.y; // + offset to calculate from 0,0
+		minXOffset = game.map.isoToScreen({x: 0, y: game.map.map.length - 1}).x  - (game.map.tileSize.width/2) + game.map.positionOffset.x;
+		maxXOffset = game.map.isoToScreen({x: game.map.map[0].length - 1, y: 0}).x  + (game.map.tileSize.width/2) + game.map.positionOffset.x;
 		correctOffset();
 	}
 
 
 	canvas.addEventListener('mousedown', (event) => {
 		if(event.button == 1) {
-			game.middleMouseClick(event, map);
+			game.middleMouseClick(event, game.map);
 		}
 
 		if(event.button == 0) {
-			game.rightMouseClick(event, sprites, state, interf, map);
+			game.rightMouseClick(event, sprites, game.state, game.interf, game.map);
 		}
 	});
 
 	function rescale(dScale: number) {
-		let oldScale = map.scale;
-		map.rescale(dScale);
+		let oldScale = game.map.scale;
+		game.map.rescale(dScale);
 		rescaleOffsets(oldScale);
-		sprites.rescaleSprites(map.tileSize);
+		sprites.rescaleSprites(game.map.tileSize);
 	}
 
 	canvas.addEventListener('mouseup', (_event) => {
-		map.isDragging = false;
+		game.map.isDragging = false;
 	});
 	canvas.addEventListener('wheel', function(event) {
-		if(map.isDragging) {
+		if(game.map.isDragging) {
 			return;
 		}
 		if (event.deltaY < 0) {
@@ -241,38 +236,38 @@ window.onload = async () => {
 				rescale(-0.2);
 			}
 			break;
-			case '0': case 'Escape': map.switchToNormalMode(); break;
-			case '9': map.switchToDeleteMode(); break;
-			case 'Enter': interf.dialogueAction(); break;
+			case '0': case 'Escape': game.map.switchToNormalMode(); break;
+			case '9': game.map.switchToDeleteMode(); break;
+			case 'Enter': game.interf.dialogueAction(); break;
 		}
 
 		if(moveUp) {
-			map.positionOffset.y = map.positionOffset.y - 10;
-			if(map.positionOffset.y < 0) {
-				map.positionOffset.y = 0;
+			game.map.positionOffset.y = game.map.positionOffset.y - 10;
+			if(game.map.positionOffset.y < 0) {
+				game.map.positionOffset.y = 0;
 			}
-			map.updateMousePosition(state.playerMouse);
+			game.map.updateMousePosition(game.state.playerMouse);
 		}
 		if(moveDown) {
-			map.positionOffset.y = map.positionOffset.y + 10;
-			if(map.positionOffset.y > maxYOffset) {
-				map.positionOffset.y = maxYOffset;
+			game.map.positionOffset.y = game.map.positionOffset.y + 10;
+			if(game.map.positionOffset.y > maxYOffset) {
+				game.map.positionOffset.y = maxYOffset;
 			}
-			map.updateMousePosition(state.playerMouse);
+			game.map.updateMousePosition(game.state.playerMouse);
 		}
 		if(moveLeft) {
-			map.positionOffset.x = map.positionOffset.x - 10;
-			if(map.positionOffset.x < minXOffset) {
-				map.positionOffset.x = minXOffset;
+			game.map.positionOffset.x = game.map.positionOffset.x - 10;
+			if(game.map.positionOffset.x < minXOffset) {
+				game.map.positionOffset.x = minXOffset;
 			}
-			map.updateMousePosition(state.playerMouse);
+			game.map.updateMousePosition(game.state.playerMouse);
 		}
 		if(moveRight) {
-			map.positionOffset.x = map.positionOffset.x + 10;
-			if(map.positionOffset.x > maxXOffset) {
-				map.positionOffset.x = maxXOffset;
+			game.map.positionOffset.x = game.map.positionOffset.x + 10;
+			if(game.map.positionOffset.x > maxXOffset) {
+				game.map.positionOffset.x = maxXOffset;
 			}
-			map.updateMousePosition(state.playerMouse);
+			game.map.updateMousePosition(game.state.playerMouse);
 		}
 
 	});
@@ -299,10 +294,10 @@ window.onload = async () => {
 	const frame = (timestamp: number) => {
 		const deltaTime = (timestamp - prevTimestamp) / 1000;
 		prevTimestamp = timestamp;
-		for(let building of map.buildings) {
+		for(let building of game.map.buildings) {
 			const newPedestrian = building.tick(deltaTime);
 			if(newPedestrian && building.workerSpawn) {
-				state.pedestrians.push(new Actor(act, building.workerSpawn));
+				game.state.pedestrians.push(new Actor(act, building.workerSpawn));
 			}
 		}
 		const dTime = deltaTime > 0.5 ? 0.5 : deltaTime;
@@ -313,12 +308,12 @@ window.onload = async () => {
 			Math.floor(Math.random() * 3),
 			Math.floor(Math.random() * 4),
 		]
-		for(let pedestrian of state.pedestrians) {
-			diagonalChanged ||= pedestrian.tick(dTime, map.roads, randMap);
+		for(let pedestrian of game.state.pedestrians) {
+			diagonalChanged ||= pedestrian.tick(dTime, game.map.roads, randMap);
 		}
-		state.pedestrians = state.pedestrians.filter((p) => !p.dead);
+		game.state.pedestrians = game.state.pedestrians.filter((p) => !p.dead);
 		if(diagonalChanged) {
-			state.sortPedestrians(); // TODO: more efficient way?
+			game.state.sortPedestrians(); // TODO: more efficient way?
 		}
 		renderGame(context, deltaTime);
 		window.requestAnimationFrame(frame);
@@ -330,8 +325,8 @@ window.onload = async () => {
 
 
 	const av = await loadImage("./img/portraits/ratman.svg");
-	interf.setDialogue(context, {text: "Welcome to the game!", portrait: av});
+	game.interf.setDialogue(context, {text: "Welcome to the game!", portrait: av});
 	setTimeout(() => {
-		interf.closeDialogue();
+		game.interf.closeDialogue();
 	}, 3000);
 }
