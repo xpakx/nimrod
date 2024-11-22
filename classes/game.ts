@@ -239,6 +239,7 @@ export class Game {
 			case '0': case 'Escape': this.map.switchToNormalMode(); break;
 			case '9': this.map.switchToDeleteMode(); break;
 			case 'Enter': this.interf.dialogueAction(); break;
+			case 'F9': this.state.debugMode = !this.state.debugMode; break;
 		}
 
 		if(this.state.moveUp) {

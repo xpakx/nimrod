@@ -10,7 +10,9 @@ function renderGame(context: CanvasRenderingContext2D, deltaTime: number) {
 	context.clearRect(0, 0, game.state.canvasWidth, game.state.canvasHeight);
 	game.map.renderMap(context, game.state.pedestrians, deltaTime);
 	game.interf.renderInterface(context, deltaTime);
-	renderDebugInfo(context, deltaTime);
+	if (game.state.debugMode) {
+		renderDebugInfo(context, deltaTime);
+	}
 }
 
 function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {

@@ -15,6 +15,8 @@ export class GameState {
 	public moveUp = false; 
 	public moveDown = false; 
 
+	public debugMode = false;
+
 	sortPedestrians() {
 		this.pedestrians.sort((a, b) => {
 			return a.diagonal - b.diagonal;
