@@ -72,21 +72,19 @@ window.onload = async () => {
 
 	registerMouseEvents(canvas);
 
-	let [moveLeft, moveRight, moveUp, moveDown] = [false, false, false, false];
-
 	document.addEventListener('keydown', function(event) {
 		switch (event.key) {
 			case 'ArrowUp': case 'k':
-				moveUp = true;
+				game.state.moveUp = true;
 			break;
 			case 'ArrowDown': case 'j':
-				moveDown = true;
+				game.state.moveDown = true;
 			break;
 			case 'ArrowLeft': case 'h':
-				moveLeft = true;
+				game.state.moveLeft = true;
 			break;
 			case 'ArrowRight': case 'l':
-				moveRight = true;
+				game.state.moveRight = true;
 			break;
 			case '+': {
 				game.rescale(0.2);
@@ -101,28 +99,28 @@ window.onload = async () => {
 			case 'Enter': game.interf.dialogueAction(); break;
 		}
 
-		if(moveUp) {
+		if(game.state.moveUp) {
 			game.map.positionOffset.y = game.map.positionOffset.y - 10;
 			if(game.map.positionOffset.y < 0) {
 				game.map.positionOffset.y = 0;
 			}
 			game.map.updateMousePosition(game.state.playerMouse);
 		}
-		if(moveDown) {
+		if(game.state.moveDown) {
 			game.map.positionOffset.y = game.map.positionOffset.y + 10;
 			if(game.map.positionOffset.y > game.maxYOffset) {
 				game.map.positionOffset.y = game.maxYOffset;
 			}
 			game.map.updateMousePosition(game.state.playerMouse);
 		}
-		if(moveLeft) {
+		if(game.state.moveLeft) {
 			game.map.positionOffset.x = game.map.positionOffset.x - 10;
 			if(game.map.positionOffset.x < game.minXOffset) {
 				game.map.positionOffset.x = game.minXOffset;
 			}
 			game.map.updateMousePosition(game.state.playerMouse);
 		}
-		if(moveRight) {
+		if(game.state.moveRight) {
 			game.map.positionOffset.x = game.map.positionOffset.x + 10;
 			if(game.map.positionOffset.x > game.maxXOffset) {
 				game.map.positionOffset.x = game.maxXOffset;
@@ -135,16 +133,16 @@ window.onload = async () => {
 	document.addEventListener('keyup', function(event) {
 		switch (event.key) {
 			case 'ArrowUp': case 'k':
-				moveUp = false;
+				game.state.moveUp = false;
 			break;
 			case 'ArrowDown': case 'j':
-				moveDown = false;
+				game.state.moveDown = false;
 			break;
 			case 'ArrowLeft': case 'h':
-				moveLeft = false;
+				game.state.moveLeft = false;
 			break;
 			case 'ArrowRight': case 'l':
-				moveRight = false;
+				game.state.moveRight = false;
 			break;
 		}
 	});

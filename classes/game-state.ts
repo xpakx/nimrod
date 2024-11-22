@@ -10,6 +10,11 @@ export class GameState {
 	public playerMouse: Position = {x: 0, y: 0};
 	public view: View = "City";
 
+	public moveLeft = false; 
+	public moveRight = false; 
+	public moveUp = false; 
+	public moveDown = false; 
+
 	sortPedestrians() {
 		this.pedestrians.sort((a, b) => {
 			return a.diagonal - b.diagonal;
