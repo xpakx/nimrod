@@ -53,6 +53,16 @@ function registerMouseEvents(canvas: HTMLCanvasElement) {
 	});
 }
 
+function registerKeyboardEvents() {
+	document.addEventListener('keydown', function(event) {
+		game.onKeyDown(event);
+	});
+
+	document.addEventListener('keyup', function(event) {
+		game.onKeyUp(event);
+	});
+}
+
 window.onload = async () => {
 	const canvas = document.getElementById('gameCanvas') as (HTMLCanvasElement | null);
 	if (!canvas) {
@@ -71,81 +81,7 @@ window.onload = async () => {
 	game.state.pedestrians.push(new Actor(game.sprites.actors['test'], {x: 1, y: 9}));
 
 	registerMouseEvents(canvas);
-
-	document.addEventListener('keydown', function(event) {
-		switch (event.key) {
-			case 'ArrowUp': case 'k':
-				game.state.moveUp = true;
-			break;
-			case 'ArrowDown': case 'j':
-				game.state.moveDown = true;
-			break;
-			case 'ArrowLeft': case 'h':
-				game.state.moveLeft = true;
-			break;
-			case 'ArrowRight': case 'l':
-				game.state.moveRight = true;
-			break;
-			case '+': {
-				game.rescale(0.2);
-			}
-			break;
-			case '-': {
-				game.rescale(-0.2);
-			}
-			break;
-			case '0': case 'Escape': game.map.switchToNormalMode(); break;
-			case '9': game.map.switchToDeleteMode(); break;
-			case 'Enter': game.interf.dialogueAction(); break;
-		}
-
-		if(game.state.moveUp) {
-			game.map.positionOffset.y = game.map.positionOffset.y - 10;
-			if(game.map.positionOffset.y < 0) {
-				game.map.positionOffset.y = 0;
-			}
-			game.map.updateMousePosition(game.state.playerMouse);
-		}
-		if(game.state.moveDown) {
-			game.map.positionOffset.y = game.map.positionOffset.y + 10;
-			if(game.map.positionOffset.y > game.maxYOffset) {
-				game.map.positionOffset.y = game.maxYOffset;
-			}
-			game.map.updateMousePosition(game.state.playerMouse);
-		}
-		if(game.state.moveLeft) {
-			game.map.positionOffset.x = game.map.positionOffset.x - 10;
-			if(game.map.positionOffset.x < game.minXOffset) {
-				game.map.positionOffset.x = game.minXOffset;
-			}
-			game.map.updateMousePosition(game.state.playerMouse);
-		}
-		if(game.state.moveRight) {
-			game.map.positionOffset.x = game.map.positionOffset.x + 10;
-			if(game.map.positionOffset.x > game.maxXOffset) {
-				game.map.positionOffset.x = game.maxXOffset;
-			}
-			game.map.updateMousePosition(game.state.playerMouse);
-		}
-
-	});
-
-	document.addEventListener('keyup', function(event) {
-		switch (event.key) {
-			case 'ArrowUp': case 'k':
-				game.state.moveUp = false;
-			break;
-			case 'ArrowDown': case 'j':
-				game.state.moveDown = false;
-			break;
-			case 'ArrowLeft': case 'h':
-				game.state.moveLeft = false;
-			break;
-			case 'ArrowRight': case 'l':
-				game.state.moveRight = false;
-			break;
-		}
-	});
+	registerKeyboardEvents();
 
 	let prevTimestamp = 0;
 

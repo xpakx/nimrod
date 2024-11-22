@@ -213,4 +213,78 @@ export class Game {
 			this.rescale(-0.2);
 		}
 	}
+
+	onKeyDown(event: KeyboardEvent) {
+		switch (event.key) {
+			case 'ArrowUp': case 'k':
+				this.state.moveUp = true;
+			break;
+			case 'ArrowDown': case 'j':
+				this.state.moveDown = true;
+			break;
+			case 'ArrowLeft': case 'h':
+				this.state.moveLeft = true;
+			break;
+			case 'ArrowRight': case 'l':
+				this.state.moveRight = true;
+			break;
+			case '+': {
+				this.rescale(0.2);
+			}
+			break;
+			case '-': {
+				this.rescale(-0.2);
+			}
+			break;
+			case '0': case 'Escape': this.map.switchToNormalMode(); break;
+			case '9': this.map.switchToDeleteMode(); break;
+			case 'Enter': this.interf.dialogueAction(); break;
+		}
+
+		if(this.state.moveUp) {
+			this.map.positionOffset.y = this.map.positionOffset.y - 10;
+			if(this.map.positionOffset.y < 0) {
+				this.map.positionOffset.y = 0;
+			}
+			this.map.updateMousePosition(this.state.playerMouse);
+		}
+		if(this.state.moveDown) {
+			this.map.positionOffset.y = this.map.positionOffset.y + 10;
+			if(this.map.positionOffset.y > this.maxYOffset) {
+				this.map.positionOffset.y = this.maxYOffset;
+			}
+			this.map.updateMousePosition(this.state.playerMouse);
+		}
+		if(this.state.moveLeft) {
+			this.map.positionOffset.x = this.map.positionOffset.x - 10;
+			if(this.map.positionOffset.x < this.minXOffset) {
+				this.map.positionOffset.x = this.minXOffset;
+			}
+			this.map.updateMousePosition(this.state.playerMouse);
+		}
+		if(this.state.moveRight) {
+			this.map.positionOffset.x = this.map.positionOffset.x + 10;
+			if(this.map.positionOffset.x > this.maxXOffset) {
+				this.map.positionOffset.x = this.maxXOffset;
+			}
+			this.map.updateMousePosition(this.state.playerMouse);
+		}
+	}
+
+	onKeyUp(event: KeyboardEvent) {
+		switch (event.key) {
+			case 'ArrowUp': case 'k':
+				this.state.moveUp = false;
+			break;
+			case 'ArrowDown': case 'j':
+				this.state.moveDown = false;
+			break;
+			case 'ArrowLeft': case 'h':
+				this.state.moveLeft = false;
+			break;
+			case 'ArrowRight': case 'l':
+				this.state.moveRight = false;
+			break;
+		}
+	}
 }
