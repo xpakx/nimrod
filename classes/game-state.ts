@@ -16,6 +16,8 @@ export class GameState {
 	public moveDown = false; 
 
 	public debugMode = false;
+	public prevTimestamp = 0;
+	public dts: number[] = [];
 
 	sortPedestrians() {
 		this.pedestrians.sort((a, b) => {

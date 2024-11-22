@@ -3,34 +3,6 @@ import { Game } from "./classes/game.js";
 
 let game = new Game();
 
-const dts: number[] = [];
-
-
-function renderGame(context: CanvasRenderingContext2D, deltaTime: number) {
-	context.clearRect(0, 0, game.state.canvasWidth, game.state.canvasHeight);
-	game.map.renderMap(context, game.state.pedestrians, deltaTime);
-	game.interf.renderInterface(context, deltaTime);
-	if (game.state.debugMode) {
-		renderDebugInfo(context, deltaTime);
-	}
-}
-
-function renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
-    ctx.font = "26px normal"
-    ctx.fillStyle = "white"
-
-    dts.push(deltaTime);
-    if (dts.length > 60) {
-        dts.shift();
-    }
-
-    const dtAvg = dts.reduce((a, b) => a + b, 0)/dts.length;
-
-    ctx.fillText(`${Math.floor(1/dtAvg)} FPS`, 20, 75);
-    ctx.fillText(`(${game.state.playerMouse.x}, ${game.state.playerMouse.y})`, 20, 100);
-    ctx.fillText(`(${game.map.isoPlayerMouse.x}, ${game.map.isoPlayerMouse.y})`, 20, 125);
-}
-
 function registerMouseEvents(canvas: HTMLCanvasElement) {
 	canvas.addEventListener('mousemove', function(event) {
 		game.onMouseMove(event, canvas);
@@ -85,37 +57,12 @@ window.onload = async () => {
 	registerMouseEvents(canvas);
 	registerKeyboardEvents();
 
-	let prevTimestamp = 0;
-
 	const frame = (timestamp: number) => {
-		const deltaTime = (timestamp - prevTimestamp) / 1000;
-		prevTimestamp = timestamp;
-		for(let building of game.map.buildings) {
-			const newPedestrian = building.tick(deltaTime);
-			if(newPedestrian && building.workerSpawn) {
-				game.state.pedestrians.push(new Actor(game.sprites.actors['test'], building.workerSpawn));
-			}
-		}
-		const dTime = deltaTime > 0.5 ? 0.5 : deltaTime;
-		let diagonalChanged = false;
-
-		let randMap = [
-			Math.floor(Math.random() * 2),
-			Math.floor(Math.random() * 3),
-			Math.floor(Math.random() * 4),
-		]
-		for(let pedestrian of game.state.pedestrians) {
-			diagonalChanged ||= pedestrian.tick(dTime, game.map.roads, randMap);
-		}
-		game.state.pedestrians = game.state.pedestrians.filter((p) => !p.dead);
-		if(diagonalChanged) {
-			game.state.sortPedestrians(); // TODO: more efficient way?
-		}
-		renderGame(context, deltaTime);
+		game.nextFrame(context, timestamp);
 		window.requestAnimationFrame(frame);
 	};
 	window.requestAnimationFrame((timestamp) => {
-		prevTimestamp = timestamp;
+		game.state.prevTimestamp = timestamp;
 		window.requestAnimationFrame(frame);
 	});
 

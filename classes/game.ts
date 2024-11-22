@@ -3,7 +3,7 @@ import { Action, ActionButton, ButtonRow, InterfaceLayer } from "./interface.js"
 import { MapLayer, Size } from "./map-layer.js";
 import { SpriteLibrary } from "./sprite-library.js";
 import { prepareTabs } from "./sidebar.js";
-import { TilingSprite } from "./buildings.js";
+import { Actor } from "./actor.js";
 
 export class Game {
 	state: GameState;
@@ -13,6 +13,7 @@ export class Game {
 	maxYOffset: number;
 	minXOffset: number;
 	maxXOffset: number;
+
 
 	constructor() {
 		this.state = new GameState();
@@ -24,9 +25,9 @@ export class Game {
 		this.interf = new InterfaceLayer(size);
 		this.sprites = new SpriteLibrary();
 
-	this.maxYOffset = this.map.isoToScreen({x: this.map.map[0].length - 1, y: this.map.map.length - 1}).y + (this.map.tileSize.height/2);
-	this.minXOffset = this.map.isoToScreen({x: 0, y: this.map.map.length - 1}).x  - (this.map.tileSize.width/2);
-	this.maxXOffset = this.map.isoToScreen({x: this.map.map[0].length - 1, y: 0}).x  + (this.map.tileSize.width/2);
+		this.maxYOffset = this.map.isoToScreen({x: this.map.map[0].length - 1, y: this.map.map.length - 1}).y + (this.map.tileSize.height/2);
+		this.minXOffset = this.map.isoToScreen({x: 0, y: this.map.map.length - 1}).x  - (this.map.tileSize.width/2);
+		this.maxXOffset = this.map.isoToScreen({x: this.map.map[0].length - 1, y: 0}).x  + (this.map.tileSize.width/2);
 
 	}
 
@@ -287,5 +288,62 @@ export class Game {
 				this.state.moveRight = false;
 			break;
 		}
+	}
+
+
+	calcState(deltaTime: number) {
+		for(let building of this.map.buildings) {
+			const newPedestrian = building.tick(deltaTime);
+			if(newPedestrian && building.workerSpawn) {
+				this.state.pedestrians.push(new Actor(this.sprites.actors['test'], building.workerSpawn));
+			}
+		}
+		const dTime = deltaTime > 0.5 ? 0.5 : deltaTime;
+		let diagonalChanged = false;
+
+		let randMap = [
+			Math.floor(Math.random() * 2),
+			Math.floor(Math.random() * 3),
+			Math.floor(Math.random() * 4),
+		]
+		for(let pedestrian of this.state.pedestrians) {
+			diagonalChanged ||= pedestrian.tick(dTime, this.map.roads, randMap);
+		}
+		this.state.pedestrians = this.state.pedestrians.filter((p) => !p.dead);
+		if(diagonalChanged) {
+			this.state.sortPedestrians(); // TODO: more efficient way?
+		}
+	}
+
+	renderGame(context: CanvasRenderingContext2D, deltaTime: number) {
+		context.clearRect(0, 0, this.state.canvasWidth, this.state.canvasHeight);
+		this.map.renderMap(context, this.state.pedestrians, deltaTime);
+		this.interf.renderInterface(context, deltaTime);
+		if (this.state.debugMode) {
+			this.renderDebugInfo(context, deltaTime);
+		}
+	}
+
+	renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
+		ctx.font = "26px normal"
+		ctx.fillStyle = "white"
+
+		this.state.dts.push(deltaTime);
+		if (this.state.dts.length > 60) {
+			this.state.dts.shift();
+		}
+
+		const dtAvg = this.state.dts.reduce((a, b) => a + b, 0)/this.state.dts.length;
+
+		ctx.fillText(`${Math.floor(1/dtAvg)} FPS`, 20, 75);
+		ctx.fillText(`(${this.state.playerMouse.x}, ${this.state.playerMouse.y})`, 20, 100);
+		ctx.fillText(`(${this.map.isoPlayerMouse.x}, ${this.map.isoPlayerMouse.y})`, 20, 125);
+	}
+
+	nextFrame(context: CanvasRenderingContext2D, timestamp: number) {
+		const deltaTime = (timestamp - this.state.prevTimestamp) / 1000;
+		this.state.prevTimestamp = timestamp;
+		this.calcState(deltaTime);
+		this.renderGame(context, deltaTime);
 	}
 }
