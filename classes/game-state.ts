@@ -18,6 +18,8 @@ export class GameState {
 	public debugMode = false;
 	public prevTimestamp = 0;
 	public dts: number[] = [];
+	public money: number = 5000;
+	public population: number = 10;
 
 	sortPedestrians() {
 		this.pedestrians.sort((a, b) => {

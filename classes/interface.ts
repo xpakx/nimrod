@@ -1,4 +1,5 @@
 import { BuildingSprite } from "./buildings.js";
+import { GameState } from "./game-state.js";
 import { Position, Size } from "./map-layer.js";
 
 export class InterfaceLayer {
@@ -64,8 +65,8 @@ export class InterfaceLayer {
 		}
 	}
 
-	renderInterface(context: CanvasRenderingContext2D, deltaTime: number) {
-		this.drawTopPanel(context);
+	renderInterface(context: CanvasRenderingContext2D, deltaTime: number, state: GameState) {
+		this.drawTopPanel(context, state);
 		this.drawMenu(context);
 		this.drawTabs(context);
 		this.renderDialogueBox(context, deltaTime);
@@ -121,7 +122,7 @@ export class InterfaceLayer {
 		return false;
 	}
 
-	drawTopPanel(context: CanvasRenderingContext2D) {
+	drawTopPanel(context: CanvasRenderingContext2D, state: GameState) {
 		context.fillStyle = '#1f1f1f';
 		context.fillRect(0, 0, this.canvasSize.width - this.menuWidth, this.topPanelHeight);
 
@@ -129,15 +130,15 @@ export class InterfaceLayer {
 		context.font = '16px Arial';
 		if(this.coinsIcon) {
 			context.drawImage(this.coinsIcon, 50, 30 - 15, this.coinsIconSize.width, this.coinsIconSize.height);
-			context.fillText('1000', 75, 30);
+			context.fillText(`${state.money}`, 75, 30);
 		} else {
-			context.fillText('Gold: 1000', 50, 30);
+			context.fillText(`Gold: ${state.money}`, 50, 30);
 		}
 		if(this.populationIcon) {
 			context.drawImage(this.populationIcon, 200, 30 - 15, this.populationIconSize.width, this.populationIconSize.height);
-			context.fillText('1000', 225, 30);
+			context.fillText(`${state.population}`, 225, 30);
 		} else {
-			context.fillText('Population: 1000', 200, 30);
+			context.fillText(`Population: ${state.population}`, 200, 30);
 		}
 	}
 
