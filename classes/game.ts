@@ -45,25 +45,8 @@ export class Game {
 		this.interf.calculateIconsSize();
 		this.interf.recalculateTabSize();
 		this.interf.calculateTabIcons();
+		this.addCityButtons();
 
-		const menuRow: ButtonRow = {
-			y: this.interf.buildingMenuHeight + 50,	
-			buttons: [
-				new ActionButton(this.sprites.icons['road'], {action: "buildRoad", argument: undefined}, {width: 40, height: 40}),
-				new ActionButton(this.sprites.icons['delete'], {action: "delete", argument: undefined}, {width: 40, height: 40}),
-			]
-		};
-		this.interf.addButtonRow(menuRow);
-
-		const mapRow: ButtonRow = {
-			y: this.state.canvasHeight - 80,	
-			buttons: [
-				new ActionButton(this.sprites.icons['city'], {action: "goTo", argument: "City"}, {width: 50, height: 50}),
-				new ActionButton(this.sprites.icons['kingdom'], {action: "goTo", argument: "Kingdom"}, {width: 50, height: 50}),
-				new ActionButton(this.sprites.icons['world'], {action: "goTo", argument: "World"}, {width: 50, height: 50}),
-			]
-		};
-		this.interf.addButtonRow(mapRow);
 	}
 
 	onMouseLeftClick(_event: MouseEvent) {
@@ -371,15 +354,17 @@ export class Game {
 	}
 
 	toWorld() {
+		this.addWorldButtons();
 		this.state.view = "World";
 	}
 
 	toKingdom() {
+		this.addKingdomButtons();
 		this.state.view = "Kingdom";
 	}
 
 	toCity() {
-		console.log("we're cityng");
+		this.addCityButtons();
 		this.state.view = "City";
 	}
 
@@ -389,5 +374,50 @@ export class Game {
 
 	toBattle() {
 		this.state.view = "Battle";
+	}
+
+	addCityButtons() {
+		this.interf.buttons = [];
+		const menuRow: ButtonRow = {
+			y: this.interf.buildingMenuHeight + 50,	
+			buttons: [
+				new ActionButton(this.sprites.icons['road'], {action: "buildRoad", argument: undefined}, {width: 40, height: 40}),
+				new ActionButton(this.sprites.icons['delete'], {action: "delete", argument: undefined}, {width: 40, height: 40}),
+			]
+		};
+		this.interf.addButtonRow(menuRow);
+
+		const mapRow: ButtonRow = {
+			y: this.state.canvasHeight - 80,	
+			buttons: [
+				new ActionButton(this.sprites.icons['kingdom'], {action: "goTo", argument: "Kingdom"}, {width: 50, height: 50}),
+				new ActionButton(this.sprites.icons['world'], {action: "goTo", argument: "World"}, {width: 50, height: 50}),
+			]
+		};
+		this.interf.addButtonRow(mapRow);
+	}
+
+	addKingdomButtons() {
+		this.interf.buttons = [];
+		const mapRow: ButtonRow = {
+			y: this.state.canvasHeight - 80,	
+			buttons: [
+				new ActionButton(this.sprites.icons['city'], {action: "goTo", argument: "City"}, {width: 50, height: 50}),
+				new ActionButton(this.sprites.icons['world'], {action: "goTo", argument: "World"}, {width: 50, height: 50}),
+			]
+		};
+		this.interf.addButtonRow(mapRow);
+	}
+
+	addWorldButtons() {
+		this.interf.buttons = [];
+		const mapRow: ButtonRow = {
+			y: this.state.canvasHeight - 80,	
+			buttons: [
+				new ActionButton(this.sprites.icons['city'], {action: "goTo", argument: "City"}, {width: 50, height: 50}),
+				new ActionButton(this.sprites.icons['kingdom'], {action: "goTo", argument: "Kingdom"}, {width: 50, height: 50}),
+			]
+		};
+		this.interf.addButtonRow(mapRow);
 	}
 }
