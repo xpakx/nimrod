@@ -112,6 +112,11 @@ export class Game {
 			map.switchToRoadMode(sprites.getRoad());
 		} else if(clickResult.action == "delete") {
 			map.switchToDeleteMode();
+		} else if(clickResult.action == "goTo") {
+			if (clickResult.argument == "map") {
+				this.toWorld();
+				console.log("world");
+			}
 		}
 	}
 
@@ -345,5 +350,25 @@ export class Game {
 		this.state.prevTimestamp = timestamp;
 		this.calcState(deltaTime);
 		this.renderGame(context, deltaTime);
+	}
+
+	toWorld() {
+		this.state.view = "World";
+	}
+
+	toKingdom() {
+		this.state.view = "Kingdom";
+	}
+
+	toCity() {
+		this.state.view = "City";
+	}
+
+	toMenu() {
+		this.state.view = "Menu";
+	}
+
+	toBattle() {
+		this.state.view = "Battle";
 	}
 }
