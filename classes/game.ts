@@ -334,11 +334,17 @@ export class Game {
 
 	renderGame(context: CanvasRenderingContext2D, deltaTime: number) {
 		context.clearRect(0, 0, this.state.canvasWidth, this.state.canvasHeight);
-		this.map.renderMap(context, this.state.pedestrians, deltaTime);
+		if (this.terrainView()) {
+			this.map.renderMap(context, this.state.pedestrians, deltaTime);
+		}
 		this.interf.renderInterface(context, deltaTime, this.state);
 		if (this.state.debugMode) {
 			this.renderDebugInfo(context, deltaTime);
 		}
+	}
+
+	terrainView(): boolean {
+		return this.state.view == "City" || this.state.view == "Battle";
 	}
 
 	renderDebugInfo(ctx: CanvasRenderingContext2D, deltaTime: number) {
