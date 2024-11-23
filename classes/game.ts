@@ -1,5 +1,5 @@
 import { GameState } from "./game-state.js";
-import { Action, ActionButton, ButtonRow, InterfaceLayer } from "./interface.js";
+import { Action, ActionButton, ButtonRow, InterfaceLayer, NavAction } from "./interface.js";
 import { MapLayer, Size } from "./map-layer.js";
 import { SpriteLibrary } from "./sprite-library.js";
 import { prepareTabs } from "./sidebar.js";
@@ -58,9 +58,9 @@ export class Game {
 		const mapRow: ButtonRow = {
 			y: this.state.canvasHeight - 80,	
 			buttons: [
-				new ActionButton(this.sprites.icons['city'], {action: "goTo", argument: "city"}, {width: 50, height: 50}),
-				new ActionButton(this.sprites.icons['kingdom'], {action: "goTo", argument: "kingdom"}, {width: 50, height: 50}),
-				new ActionButton(this.sprites.icons['world'], {action: "goTo", argument: "map"}, {width: 50, height: 50}),
+				new ActionButton(this.sprites.icons['city'], {action: "goTo", argument: "City"}, {width: 50, height: 50}),
+				new ActionButton(this.sprites.icons['kingdom'], {action: "goTo", argument: "Kingdom"}, {width: 50, height: 50}),
+				new ActionButton(this.sprites.icons['world'], {action: "goTo", argument: "World"}, {width: 50, height: 50}),
 			]
 		};
 		this.interf.addButtonRow(mapRow);
@@ -102,6 +102,7 @@ export class Game {
 			case "City":
 				this.leftMouseCityInterface(clickResult, this.sprites, this.map);
 		}
+		this.leftMouseGeneric(clickResult);
 	}
 
 	leftMouseCityInterface(clickResult: Action, sprites: SpriteLibrary, map: MapLayer) {
@@ -112,10 +113,21 @@ export class Game {
 			map.switchToRoadMode(sprites.getRoad());
 		} else if(clickResult.action == "delete") {
 			map.switchToDeleteMode();
-		} else if(clickResult.action == "goTo") {
-			if (clickResult.argument == "map") {
-				this.toWorld();
-				console.log("world");
+		} 
+	}
+
+	leftMouseGeneric(clickResult: Action) {
+		if(clickResult.action == "goTo") {
+			console.log("Go to: " + clickResult.argument);
+			switch (clickResult.argument) {
+				case "World":
+					this.toWorld(); break;
+				case "Kingdom":
+					this.toKingdom(); break;
+				case "City":
+					this.toCity(); break;
+				case "Battle":
+					this.toBattle(); break;
 			}
 		}
 	}
@@ -361,6 +373,7 @@ export class Game {
 	}
 
 	toCity() {
+		console.log("we're cityng");
 		this.state.view = "City";
 	}
 

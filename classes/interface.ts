@@ -552,7 +552,15 @@ export interface ButtonRow {
 	y: number;
 }
 
-export interface Action {
-	action: "build" | "buildRoad" | "delete" | "goTo";
+
+export interface BuildAction {
+	action: "build" | "buildRoad" | "delete";
 	argument: string | undefined;
 }
+
+export interface NavAction {
+	action: "goTo";
+	argument: "World" | "Kingdom" | "City" | "Battle";
+}
+
+export type Action = NavAction | BuildAction;
