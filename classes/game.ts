@@ -216,6 +216,7 @@ export class Game {
 	}
 
 	onKeyDown(event: KeyboardEvent) {
+		// TODO: view-dependend actions
 		switch (event.key) {
 			case 'ArrowUp': case 'k':
 				this.state.moveUp = true;
