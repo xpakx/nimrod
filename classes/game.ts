@@ -384,12 +384,12 @@ export class Game {
 		enemy.name = "Test Goblin";
 		enemy.hp = 20;
 		enemy.enemy = true;
+
+		this.map.resetMap({width: 10, height: 10});
 		this.state.pedestrians = [];
 		this.state.pedestrians.push(hero);
 		this.state.pedestrians.push(enemy);
-		this.map.buildings = [];
-		this.map.roads = this.map.map.map(row => row.map(() => undefined))
-		this.map.map = Array(10).fill(null).map(() => Array(10).fill('#97b106'));
+		console.log(this.state.pedestrians);
 	}
 
 	addCityButtons() {

@@ -24,6 +24,18 @@ export class MapLayer {
 		this.canvasSize.width = canvasSize.width;
 	}
 
+	resetMap(size: Size) {
+		this.buildings = [];
+		this.positionOffset = {x: 0, y: 0};
+		this.map = Array(size.height).fill(null).map(() => Array(size.width).fill('#97b106'));
+		this.isDragging = false;
+		this.deleteMode = false;
+		this.mode = undefined;
+		this.roads = this.map.map(row => row.map(() => undefined))
+		this.blocked = this.map.map(row => row.map(() => false));
+		this.buildingMap = this.map.map(row => row.map(() => undefined))
+	}
+
 	rescale(delta: number) {
 		this.scale += delta;
 		if(this.scale < 0.5) {
