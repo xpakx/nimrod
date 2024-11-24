@@ -4,6 +4,7 @@ import { MapLayer, Size } from "./map-layer.js";
 import { SpriteLibrary } from "./sprite-library.js";
 import { prepareTabs } from "./sidebar.js";
 import { Actor } from "./actor.js";
+import { BattleActor } from "./battle/actor.js";
 
 export class Game {
 	state: GameState;
@@ -242,6 +243,7 @@ export class Game {
 			case '9': this.map.switchToDeleteMode(); break;
 			case 'Enter': this.interf.dialogueAction(); break;
 			case 'F9': this.state.debugMode = !this.state.debugMode; break;
+			case 'F8': this.toBattle(); break;
 		}
 
 		if(this.state.moveUp) {
@@ -375,6 +377,19 @@ export class Game {
 
 	toBattle() {
 		this.state.view = "Battle";
+		const hero = new BattleActor(this.sprites.actors['test'], {x: 1, y: 9});
+		hero.name = "Test Soldier";
+		hero.hp = 100;
+		const enemy = new BattleActor(this.sprites.actors['test'], {x: 9, y: 9});
+		enemy.name = "Test Goblin";
+		enemy.hp = 20;
+		enemy.enemy = true;
+		this.state.pedestrians = [];
+		this.state.pedestrians.push(hero);
+		this.state.pedestrians.push(enemy);
+		this.map.buildings = [];
+		this.map.roads = this.map.map.map(row => row.map(() => undefined))
+		this.map.map = Array(10).fill(null).map(() => Array(10).fill('#97b106'));
 	}
 
 	addCityButtons() {
