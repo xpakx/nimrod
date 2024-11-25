@@ -1,5 +1,5 @@
 import { GameState } from "./game-state.js";
-import { Action, ActionButton, ButtonRow, InterfaceLayer, NavAction } from "./interface.js";
+import { Action, ActionButton, ButtonRow, InterfaceLayer } from "./interface.js";
 import { MapLayer, Size } from "./map-layer.js";
 import { SpriteLibrary } from "./sprite-library.js";
 import { prepareTabs } from "./sidebar.js";
@@ -194,7 +194,7 @@ export class Game {
 		} 
 		this.interf.onMouse(this.state.playerMouse);
 
-		if (this.map.isDragging) {
+		if (this.map.isDragging && this.terrainView()) {
 			this.map.positionOffset.x = this.map.dragStart.x - event.clientX;
 			this.map.positionOffset.y = this.map.dragStart.y - event.clientY;
 			this.correctOffset();
@@ -244,6 +244,10 @@ export class Game {
 			case 'Enter': this.interf.dialogueAction(); break;
 			case 'F9': this.state.debugMode = !this.state.debugMode; break;
 			case 'F8': this.toBattle(); break;
+		}
+
+		if (!this.terrainView()) {
+			return;
 		}
 
 		if(this.state.moveUp) {
