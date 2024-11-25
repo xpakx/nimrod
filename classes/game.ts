@@ -165,8 +165,7 @@ export class Game {
 			console.log(data);
 			const height = data['size']['height']; 
 			const width = data['size']['width']; 
-			const newMap: string[][] = Array(height).fill(null).map(() => Array(width).fill('#97b106'));
-			this.map.map = newMap;
+			this.map.resetMap({"width": width, "height": height});
 
 			for (let pos of data['roads']) {
 				this.map.putRoad({x: pos['x'], y: pos['y']}, this.sprites.getRoad(), true);
@@ -174,6 +173,15 @@ export class Game {
 
 			for (let building of data['buildings']) {
 				this.map.putBuilding({x: building['x'], y: building['y']}, this.sprites.buildings[building['type']]);
+			}
+
+			for (let terrain of data['terrain']) {
+				if ('cost' in terrain) {
+					this.map.costs[terrain['x']][terrain['y']] = terrain['cost'];
+				}
+				if ('color' in terrain) {
+					this.map.map[terrain['x']][terrain['y']] = terrain['color'];
+				}
 			}
 			this.map.getBuilding({x: 3, y: 11})!.setWorker(this.sprites.buildings["home"]);
 		})

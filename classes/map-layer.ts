@@ -19,6 +19,12 @@ export class MapLayer {
 
 	map: string[][] = Array(100).fill(null).map(() => Array(50).fill('#97b106'));
 
+	buildingMap: (Building | undefined)[][] = this.map.map(row => row.map(() => undefined)); // for quicker lookup
+	buildings: Building[] = [];
+	blocked: boolean[][] = this.map.map(row => row.map(() => false));
+	costs: number[][] = this.map.map(row => row.map(() => 1));
+	roads: (Road | undefined)[][] = this.map.map(row => row.map(() => undefined)); // for quicker lookup
+
 	constructor(canvasSize: Size) {
 		this.canvasSize.height = canvasSize.height;
 		this.canvasSize.width = canvasSize.width;
@@ -32,6 +38,7 @@ export class MapLayer {
 		this.deleteMode = false;
 		this.mode = undefined;
 		this.roads = this.map.map(row => row.map(() => undefined))
+		this.costs = this.map.map(row => row.map(() => 1))
 		this.blocked = this.map.map(row => row.map(() => false));
 		this.buildingMap = this.map.map(row => row.map(() => undefined))
 	}
@@ -107,12 +114,6 @@ export class MapLayer {
 			pos.y - building.size.height + this.tileSize.height
 		);
 	}
-
-
-	buildingMap: (Building | undefined)[][] = this.map.map(row => row.map(() => undefined)); // for quicker lookup
-	buildings: Building[] = [];
-	blocked: boolean[][] = this.map.map(row => row.map(() => false));
-	roads: (Road | undefined)[][] = this.map.map(row => row.map(() => undefined)); // for quicker lookup
 
 	onMap(position: Position): boolean {
 		if(position.x < 0 || position.y < 0) {
