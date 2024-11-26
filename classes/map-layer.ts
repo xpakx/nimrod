@@ -493,6 +493,116 @@ export class MapLayer {
 			position.y - 15
 		);
 	}
+
+	isBlocked(position: Position): boolean {
+		return this.blocked[position.x][position.y];
+	}
+
+	getCost(position: Position): number {
+		return this.costs[position.x][position.y];
+	}
+
+	shortestPath(start: Position, end: Position): number {
+		const height = this.map.length;
+		const width = this.map[0].length;
+		if(height == 1 && width == 1) {
+			return 0
+		}
+		let check: boolean[][] = Array(height).fill(null).map(() => Array(width).fill(false));
+
+		let queue = new PriorityQueue();
+		queue.enqueue(new Node(start, end, 0));
+		while(!queue.isEmpty()) {
+			const next = queue.dequeue();
+			if(!next) {
+				break;
+			}
+			if(check[next.pos.x][next.pos.y]) {
+				continue;
+			}
+			check[next.pos.x][next.pos.y] = true;
+			if(this.isBlocked(next.pos)) {
+				continue;
+			}
+			const samePosition = next.pos.x == end.x && next.pos.y == end.y;
+			if(samePosition) {
+				return next.dist;
+			}
+			this.addNeighboursToQueue(queue, end, next);
+		}
+		return -1;
+	}
+
+	addNeighboursToQueue(queue: PriorityQueue, end: Position, next: Node) {
+		const height = this.map.length;
+		const width = this.map[0].length;
+		if(next.pos.x-1 >= 0) {
+			const position: Position = next.step(-1, 0);
+			const cost = this.getCost(position) + next.dist;
+			queue.enqueue(new Node(position, end, cost));
+		}
+		if(next.pos.x+1 < width) {
+			const position: Position = next.step(1, 0);
+			const cost = this.getCost(position) + next.dist;
+			queue.enqueue(new Node(position, end, cost));
+		}
+		if(next.pos.y-1 >= 0) {
+			const position: Position = next.step(0, -1);
+			const cost = this.getCost(position) + next.dist;
+			queue.enqueue(new Node(position, end, cost));
+		}
+		if(next.pos.y+1 < height) {
+			const position: Position = next.step(0, 1);
+			const cost = this.getCost(position) + next.dist;
+			queue.enqueue(new Node(position, end, cost));
+		}
+    }
+}
+
+class Node {
+	pos: Position;
+	dist: number;
+	expected: number;
+
+	constructor(pos: Position, target: Position, dist: number) {
+            this.dist = dist;
+            this.pos = pos;
+            this.expected = target.x - this.pos.x + target.y - this.pos.y + dist;
+	}
+
+	step(deltaX: number, deltaY: number): Position {
+		return {
+			x: this.pos.x + deltaX,
+			y: this.pos.y + deltaY,
+		}
+	}
+
+}
+
+// TODO: better implementation
+class PriorityQueue {
+	queue: Node[];
+
+	constructor() {
+		this.queue = [];
+	}
+
+	enqueue(element: Node) {
+		this.queue.push(element);
+		this.queue.sort((a, b) => a.expected - b.expected);
+	}
+
+	dequeue() {
+		return this.queue.shift();
+	}
+
+	peek() {
+		return this.queue[0];
+	}
+
+	isEmpty() {
+		return this.queue.length === 0;
+	}
 }
 
 export interface Size {
