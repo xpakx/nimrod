@@ -5,6 +5,7 @@ import { SpriteLibrary } from "./sprite-library.js";
 import { prepareTabs } from "./sidebar.js";
 import { Actor } from "./actor.js";
 import { BattleActor } from "./battle/actor.js";
+import { Battle } from "./battle/battle.js";
 
 export class Game {
 	state: GameState;
@@ -388,6 +389,8 @@ export class Game {
 	}
 
 	toBattle() {
+		const battle = new Battle();
+		this.state.currentBattle = battle;
 		this.state.view = "Battle";
 		const hero = new BattleActor(this.sprites.actors['test'], {x: 1, y: 9});
 		hero.name = "Test Soldier";
