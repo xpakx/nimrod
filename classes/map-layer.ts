@@ -502,6 +502,9 @@ export class MapLayer {
 		return this.costs[position.x][position.y];
 	}
 
+
+	path?: Position[] = undefined;
+
 	shortestPath(start: Position, end: Position): number {
 		const height = this.map.length;
 		const width = this.map[0].length;
@@ -509,6 +512,7 @@ export class MapLayer {
 			return 0
 		}
 		let check: boolean[][] = Array(height).fill(null).map(() => Array(width).fill(false));
+		let cameFrom: Map<Position, Position> = new Map();
 
 		let queue = new PriorityQueue();
 		queue.enqueue(new Node(start, end, 0));
@@ -526,37 +530,53 @@ export class MapLayer {
 			}
 			const samePosition = next.pos.x == end.x && next.pos.y == end.y;
 			if(samePosition) {
+				this.reconstructPath(cameFrom, end);
 				return next.dist;
 			}
-			this.addNeighboursToQueue(queue, end, next);
+			this.addNeighboursToQueue(queue, end, next, cameFrom);
 		}
 		return -1;
 	}
 
-	addNeighboursToQueue(queue: PriorityQueue, end: Position, next: Node) {
+	reconstructPath(cameFrom: Map<Position, Position>, end: Position) {
+		this.path = [];
+		let current = end;
+		while (cameFrom.has(current)) {
+			this.path.push(current);
+			current = cameFrom.get(current)!;
+		}
+		this.path.reverse();
+	}
+
+	addNeighboursToQueue(queue: PriorityQueue, end: Position, next: Node, cameFrom: Map<Position, Position>) {
 		const height = this.map.length;
 		const width = this.map[0].length;
 		if(next.pos.x-1 >= 0) {
 			const position: Position = next.step(-1, 0);
-			const cost = this.getCost(position) + next.dist;
-			queue.enqueue(new Node(position, end, cost));
+			this.addNeighbour(position, queue, end, next, cameFrom);
 		}
 		if(next.pos.x+1 < width) {
 			const position: Position = next.step(1, 0);
-			const cost = this.getCost(position) + next.dist;
-			queue.enqueue(new Node(position, end, cost));
+			this.addNeighbour(position, queue, end, next, cameFrom);
 		}
 		if(next.pos.y-1 >= 0) {
 			const position: Position = next.step(0, -1);
-			const cost = this.getCost(position) + next.dist;
-			queue.enqueue(new Node(position, end, cost));
+			this.addNeighbour(position, queue, end, next, cameFrom);
 		}
 		if(next.pos.y+1 < height) {
 			const position: Position = next.step(0, 1);
-			const cost = this.getCost(position) + next.dist;
-			queue.enqueue(new Node(position, end, cost));
+			this.addNeighbour(position, queue, end, next, cameFrom);
 		}
-    }
+	}
+
+	addNeighbour(position: Position, queue: PriorityQueue, end: Position, next: Node, cameFrom: Map<Position, Position>) {
+		const cost = this.getCost(position) + next.dist;
+		if (!cameFrom.has(position)) {
+			cameFrom.set(position, next.pos);
+		}
+		queue.enqueue(new Node(position, end, cost));
+	}
+
 }
 
 class Node {
