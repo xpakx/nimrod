@@ -502,7 +502,6 @@ export class MapLayer {
 		return this.costs[position.x][position.y];
 	}
 
-
 	path?: Position[] = undefined;
 
 	shortestPath(start: Position, end: Position): number {
@@ -511,7 +510,7 @@ export class MapLayer {
 		if(height == 1 && width == 1) {
 			return 0
 		}
-		let check: boolean[][] = Array(height).fill(null).map(() => Array(width).fill(false));
+		let visited: boolean[][] = Array(height).fill(null).map(() => Array(width).fill(false));
 		let cameFrom: Map<Position, Position> = new Map();
 
 		let queue = new PriorityQueue();
@@ -521,15 +520,16 @@ export class MapLayer {
 			if(!next) {
 				break;
 			}
-			if(check[next.pos.x][next.pos.y]) {
+
+			const alreadyVisited = visited[next.pos.x][next.pos.y];
+			if(alreadyVisited) {
 				continue;
 			}
-			check[next.pos.x][next.pos.y] = true;
+			visited[next.pos.x][next.pos.y] = true;
 			if(this.isBlocked(next.pos)) {
 				continue;
 			}
-			const samePosition = next.pos.x == end.x && next.pos.y == end.y;
-			if(samePosition) {
+			if(next.equals(end)) {
 				this.reconstructPath(cameFrom, end);
 				return next.dist;
 			}
@@ -595,6 +595,10 @@ class Node {
 			x: this.pos.x + deltaX,
 			y: this.pos.y + deltaY,
 		}
+	}
+
+	equals(position: Position) {
+		return this.pos.x == position.x && this.pos.y == position.y;
 	}
 
 }
