@@ -348,9 +348,6 @@ export class Game {
 		if (this.terrainView()) {
 			this.map.renderMap(context, this.state.pedestrians, deltaTime);
 		}
-		if (this.state.view == "Battle") {
-			this.map.drawPath(context);
-		}
 		this.interf.renderInterface(context, deltaTime, this.state);
 		if (this.state.debugMode) {
 			this.renderDebugInfo(context, deltaTime);

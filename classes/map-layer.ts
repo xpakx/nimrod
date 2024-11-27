@@ -58,6 +58,9 @@ export class MapLayer {
 	renderMap(context: CanvasRenderingContext2D, pedestrians: Actor[], _deltaTime: number) {
 		this.drawIsometricMap(context);
 		this.renderRoads(context);
+		if (this.path) {
+			this.drawPath(context);
+		}
 		this.renderBuildings(context, pedestrians);
 	}
 
@@ -521,9 +524,14 @@ export class MapLayer {
 		if (!this.path) {
 			return;
 		}
+
+		ctx.save();
+		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileSize.height/2));
 		for (let pos of this.path) {
-			this.drawTile(ctx, pos.x, pos.y, "#ffcccc");
+			const screenPos = this.isoToScreen({x: pos.x, y: pos.y});
+			this.drawTile(ctx, screenPos.x, screenPos.y, "#ffcccc");
 		}
+		ctx.restore();
 	}
 
 	shortestPath(start: Position, end: Position): number {
@@ -533,7 +541,7 @@ export class MapLayer {
 			return 0
 		}
 		let visited: boolean[][] = Array(height).fill(null).map(() => Array(width).fill(false));
-		let cameFrom: Map<Position, Position> = new Map();
+		let cameFrom: PathMap = Array(height).fill(null).map(() => Array(width).fill(undefined));
 
 		let queue = new PriorityQueue();
 		queue.enqueue(new Node(start, end, 0));
@@ -560,18 +568,20 @@ export class MapLayer {
 		return -1;
 	}
 
-	reconstructPath(cameFrom: Map<Position, Position>, end: Position, start: Position) {
+	reconstructPath(cameFrom: PathMap, end: Position, start: Position) {
 		this.path = [];
-		let current = end;
-		while (current && (current.x != start.x || current.y != start.y)) {
+		let current: Position | undefined = end;
+		while (current) {
 			this.path.push(current);
-			current = cameFrom.get(current)!;
+			if (current.x == start.x && current.y == start.y)  {
+				break;
+			}
+			current = cameFrom[current.x][current.y];
 		}
 		this.path.reverse();
-		console.log(cameFrom);
 	}
 
-	addNeighboursToQueue(queue: PriorityQueue, end: Position, next: Node, cameFrom: Map<Position, Position>) {
+	addNeighboursToQueue(queue: PriorityQueue, end: Position, next: Node, cameFrom: PathMap) {
 		const height = this.map.length;
 		const width = this.map[0].length;
 		if(next.pos.x-1 >= 0) {
@@ -592,15 +602,17 @@ export class MapLayer {
 		}
 	}
 
-	addNeighbour(position: Position, queue: PriorityQueue, end: Position, next: Node, cameFrom: Map<Position, Position>) {
+	addNeighbour(position: Position, queue: PriorityQueue, end: Position, next: Node, cameFrom: PathMap) {
 		const cost = this.getCost(position) + next.dist;
-		if (!cameFrom.has(position)) {
-			cameFrom.set(position, next.pos);
+		if (!cameFrom[position.x][position.y]) {
+			cameFrom[position.x][position.y] = next.pos;
 		}
 		queue.enqueue(new Node(position, end, cost));
 	}
 
 }
+
+type PathMap = (Position | undefined)[][];
 
 class Node {
 	pos: Position;
