@@ -587,7 +587,7 @@ class Node {
 	constructor(pos: Position, target: Position, dist: number) {
             this.dist = dist;
             this.pos = pos;
-            this.expected = target.x - this.pos.x + target.y - this.pos.y + dist;
+            this.expected = Math.abs(target.x - this.pos.x) + Math.abs(target.y - this.pos.y) + dist;
 	}
 
 	step(deltaX: number, deltaY: number): Position {
