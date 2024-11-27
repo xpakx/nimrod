@@ -517,6 +517,15 @@ export class MapLayer {
 
 	path?: Position[] = undefined;
 
+	drawPath(ctx: CanvasRenderingContext2D) {
+		if (!this.path) {
+			return;
+		}
+		for (let pos of this.path) {
+			this.drawTile(ctx, pos.x, pos.y, "#ffcccc");
+		}
+	}
+
 	shortestPath(start: Position, end: Position): number {
 		const height = this.map.length;
 		const width = this.map[0].length;
@@ -543,7 +552,7 @@ export class MapLayer {
 				continue;
 			}
 			if(next.equals(end)) {
-				this.reconstructPath(cameFrom, end);
+				this.reconstructPath(cameFrom, end, start);
 				return next.dist;
 			}
 			this.addNeighboursToQueue(queue, end, next, cameFrom);
@@ -551,14 +560,15 @@ export class MapLayer {
 		return -1;
 	}
 
-	reconstructPath(cameFrom: Map<Position, Position>, end: Position) {
+	reconstructPath(cameFrom: Map<Position, Position>, end: Position, start: Position) {
 		this.path = [];
 		let current = end;
-		while (cameFrom.has(current)) {
+		while (current && (current.x != start.x || current.y != start.y)) {
 			this.path.push(current);
 			current = cameFrom.get(current)!;
 		}
 		this.path.reverse();
+		console.log(cameFrom);
 	}
 
 	addNeighboursToQueue(queue: PriorityQueue, end: Position, next: Node, cameFrom: Map<Position, Position>) {
