@@ -374,6 +374,19 @@ export class MapLayer {
 		return true;
 	}
 
+	isTileOnMap(isoPosition: Position): boolean {
+		const height = this.map.length;
+		if (isoPosition.x >= height ||  isoPosition.x < 0) {
+			return false;
+		}
+		const width = this.map[0].length;
+		if (isoPosition.y >= width || isoPosition.y < 0) {
+			return false;
+		}
+
+		return true;
+	}
+
 	renderBuildings(ctx: CanvasRenderingContext2D, pedestrians: Actor[]) {
 		const ghostCanBePlaced = this.mode ? this.canBePlaced(this.isoPlayerMouse, this.mode) : false;
 		ctx.save();

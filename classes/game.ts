@@ -63,6 +63,10 @@ export class Game {
 		switch (this.state.view) {
 			case "City":
 				this.leftMouseCity();
+				break;
+			case "Battle":
+				this.leftMouseBattle();
+				break;
 		}
 	}
 
@@ -469,9 +473,26 @@ export class Game {
 			return;
 		}
 		const start = battle.selectedTile;
+		if (!this.map.isTileOnMap(this.map.isoPlayerMouse)) {
+			return;
+		}
 
-		// if actor on tile
+		// if actor on selected tile
 		const dist = this.map.shortestPath(start, this.map.isoPlayerMouse);
+	        console.log(dist);
 	        // if dist <= actor.movement
+	}
+
+	leftMouseBattle() {
+		if (!this.state.currentBattle) {
+			return;
+		}
+		if (!this.map.isTileOnMap(this.map.isoPlayerMouse)) {
+			return;
+		}
+		const battle = this.state.currentBattle;
+		const x = this.map.isoPlayerMouse.x;
+		const y = this.map.isoPlayerMouse.y;
+		battle.selectedTile = {x: x, y: y};
 	}
 }
