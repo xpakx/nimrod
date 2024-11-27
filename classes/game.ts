@@ -199,7 +199,15 @@ export class Game {
 		const mouseY = event.clientY - rect.top;
 		this.state.playerMouse = {x: mouseX, y: mouseY};
 		if(!this.interf.mouseInsideInterface(this.state.playerMouse)) {
+			const oldX = this.map.isoPlayerMouse.x;
+			const oldY = this.map.isoPlayerMouse.y;
 			this.map.updateMousePosition(this.state.playerMouse);
+			const newX = this.map.isoPlayerMouse.x;
+			const newY = this.map.isoPlayerMouse.y;
+			const isoChange = (oldX != newX || oldY != newY);
+			if (this.state.view == "Battle" || isoChange) {
+				this.battleMouseOver();
+			}
 		} 
 		this.interf.onMouse(this.state.playerMouse);
 
@@ -450,5 +458,20 @@ export class Game {
 			]
 		};
 		this.interf.addButtonRow(mapRow);
+	}
+
+	battleMouseOver() {
+		if (!this.state.currentBattle) {
+			return;
+		}
+		const battle = this.state.currentBattle;
+		if (!battle.selectedTile) {
+			return;
+		}
+		const start = battle.selectedTile;
+
+		// if actor on tile
+		const dist = this.map.shortestPath(start, this.map.isoPlayerMouse);
+	        // if dist <= actor.movement
 	}
 }
