@@ -80,12 +80,23 @@ export class SpriteLibrary {
 	async prepareArrowSprites(tileSize: Size): Promise<boolean> {
 		const arrows = [
 			await loadImage("./img/arrow0011.svg"), 
+			await loadImage("./img/arrow0011.svg"), 
+			await loadImage("./img/arrow0011.svg"), 
+			await loadImage("./img/arrow0011.svg"), 
+			await loadImage("./img/arrow0011.svg"), 
 			await loadImage("./img/arrow0101.svg"), 
 			await loadImage("./img/arrow0110.svg"), 
+			await loadImage("./img/arrow0011.svg"), 
+			await loadImage("./img/arrow0011.svg"), 
 			await loadImage("./img/arrow1001.svg"), 
 			await loadImage("./img/arrow1010.svg"), 
+			await loadImage("./img/arrow0011.svg"), 
 			await loadImage("./img/arrow1100.svg"), 
+			await loadImage("./img/arrow0011.svg"), 
+			await loadImage("./img/arrow0011.svg"), 
+			await loadImage("./img/arrow0011.svg"), 
 		];
+
 		this.arrow = new TilingSprite(arrows, tileSize);
 		return true;
 	}

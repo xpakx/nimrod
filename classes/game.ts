@@ -479,7 +479,7 @@ export class Game {
 		}
 
 		// if actor on selected tile
-		const dist = this.map.shortestPath(start, this.map.isoPlayerMouse);
+		const dist = this.map.shortestPath(start, this.map.isoPlayerMouse, this.sprites.getArrow());
 	        console.log(dist);
 	        // if dist <= actor.movement
 	}

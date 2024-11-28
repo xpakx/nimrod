@@ -518,7 +518,7 @@ export class MapLayer {
 		return this.costs[position.x][position.y];
 	}
 
-	path?: Position[] = undefined;
+	path?: PathElem[] = undefined;
 
 	drawPath(ctx: CanvasRenderingContext2D) {
 		if (!this.path) {
@@ -528,13 +528,13 @@ export class MapLayer {
 		ctx.save();
 		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileSize.height/2));
 		for (let pos of this.path) {
-			const screenPos = this.isoToScreen({x: pos.x, y: pos.y});
-			this.drawTile(ctx, screenPos.x, screenPos.y, "#ffcccc");
+			const screenPos = this.isoToScreen({x: pos.position.x, y: pos.position.y});
+			ctx.drawImage(pos.sprite, screenPos.x-pos.sprites.size.width/2, screenPos.y-pos.sprites.size.height+this.tileSize.height, pos.sprites.size.width, pos.sprites.size.height);
 		}
 		ctx.restore();
 	}
 
-	shortestPath(start: Position, end: Position): number {
+	shortestPath(start: Position, end: Position, arrow: TilingSprite): number {
 		const height = this.map.length;
 		const width = this.map[0].length;
 		if(height == 1 && width == 1) {
@@ -560,7 +560,7 @@ export class MapLayer {
 				continue;
 			}
 			if(next.equals(end)) {
-				this.reconstructPath(cameFrom, end, start);
+				this.reconstructPath(cameFrom, end, start, arrow);
 				return next.dist;
 			}
 			this.addNeighboursToQueue(queue, end, next, cameFrom);
@@ -568,17 +568,47 @@ export class MapLayer {
 		return -1;
 	}
 
-	reconstructPath(cameFrom: PathMap, end: Position, start: Position) {
+	reconstructPath(cameFrom: PathMap, end: Position, start: Position, arrow: TilingSprite) {
 		this.path = [];
 		let current: Position | undefined = end;
+		let last: Position | undefined = undefined;
 		while (current) {
-			this.path.push(current);
+			let pathElem = new PathElem(arrow, current);
+			this.path.push(pathElem);
+			let from = 0;
+			let to = 0;
+			if (last) {
+				[from, to] = this.getBitmapForPath(last, current);
+			}
+			pathElem.xorDir(from);
+			if (this.path.length > 1) {
+				const penultimate = this.path[this.path.length - 2];
+				penultimate.xorDir(to);
+			}
 			if (current.x == start.x && current.y == start.y)  {
+				pathElem.xorDir(to);
 				break;
 			}
+			last = current;
 			current = cameFrom[current.x][current.y];
 		}
+
 		this.path.reverse();
+	}
+
+	getBitmapForPath(last: Position, current: Position): number[] {
+		if (last.x == current.x) {
+			if (last.y == current.y - 1) {
+				return [0b1000, 0b0010]
+			} else {
+				return [0b0010, 0b1000]
+			}
+		} 
+		if (last.x == current.x - 1) {
+			return [0b0001,  0b0100];
+		} else {
+			return [0b0100, 0b0001];
+		}
 	}
 
 	addNeighboursToQueue(queue: PriorityQueue, end: Position, next: Node, cameFrom: PathMap) {
@@ -614,15 +644,34 @@ export class MapLayer {
 
 type PathMap = (Position | undefined)[][];
 
+class PathElem {
+	sprites: TilingSprite;
+	sprite: HTMLImageElement;
+	position: Position;
+	direction: number;
+
+	constructor(sprite: TilingSprite, position: Position) {
+		this.direction = 0;
+		this.sprites = sprite;
+		this.sprite =  sprite.sprites[this.direction];
+		this.position = position;
+	}
+
+	xorDir(dir: number) {
+		this.direction ^= dir;
+		this.sprite = this.sprites.sprites[this.direction];
+	}
+}
+
 class Node {
 	pos: Position;
 	dist: number;
 	expected: number;
 
 	constructor(pos: Position, target: Position, dist: number) {
-            this.dist = dist;
-            this.pos = pos;
-            this.expected = Math.abs(target.x - this.pos.x) + Math.abs(target.y - this.pos.y) + dist;
+		this.dist = dist;
+		this.pos = pos;
+		this.expected = Math.abs(target.x - this.pos.x) + Math.abs(target.y - this.pos.y) + dist;
 	}
 
 	step(deltaX: number, deltaY: number): Position {
