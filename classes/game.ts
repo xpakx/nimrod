@@ -39,6 +39,7 @@ export class Game {
 		await this.sprites.prepareAvatars();
 		await this.sprites.prepareIcons();
 		await this.sprites.prepareRoadSprites(this.map.tileSize);
+		await this.sprites.prepareArrowSprites(this.map.tileSize);
 		this.interf.coinsIcon = this.sprites.icons['coins'];
 		this.interf.populationIcon = this.sprites.icons['population'];
 

@@ -8,6 +8,7 @@ export class SpriteLibrary {
 	icons: {[key: string]: HTMLImageElement} = {};
 	actors: {[key: string]: ActorSprite} = {};
 	road?: TilingSprite;
+	arrow?: TilingSprite;
 
 	async prepareBuildingSprites(tileSize: Size): Promise<boolean> {
 		const ziggurat = new BuildingSprite(await loadImage("./img/ziggurat.svg"), 4, tileSize);
@@ -49,6 +50,10 @@ export class SpriteLibrary {
 		return this.road!;
 	}
 
+	getArrow(): TilingSprite {
+		return this.arrow!;
+	}
+
 	async prepareRoadSprites(tileSize: Size): Promise<boolean> {
 		const roads = [
 			await loadImage("./img/road0000.svg"), 
@@ -72,11 +77,25 @@ export class SpriteLibrary {
 		return true;
 	}
 
+	async prepareArrowSprites(tileSize: Size): Promise<boolean> {
+		const arrows = [
+			await loadImage("./img/arrow0011.svg"), 
+			await loadImage("./img/arrow0101.svg"), 
+			await loadImage("./img/arrow0110.svg"), 
+			await loadImage("./img/arrow1001.svg"), 
+			await loadImage("./img/arrow1010.svg"), 
+			await loadImage("./img/arrow1100.svg"), 
+		];
+		this.arrow = new TilingSprite(arrows, tileSize);
+		return true;
+	}
+
 	rescaleSprites(tileSize: Size) {
 		for (const key in this.buildings) {
 			this.buildings[key].refreshSize(tileSize);
 		}
 		this.getRoad().refreshSize(tileSize);
+		this.getArrow().refreshSize(tileSize);
 	}
 }
 
