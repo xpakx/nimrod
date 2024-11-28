@@ -383,21 +383,25 @@ export class Game {
 	}
 
 	toWorld() {
+		this.map.path = [];
 		this.addWorldButtons();
 		this.state.view = "World";
 	}
 
 	toKingdom() {
+		this.map.path = [];
 		this.addKingdomButtons();
 		this.state.view = "Kingdom";
 	}
 
 	toCity() {
+		this.map.path = [];
 		this.addCityButtons();
 		this.state.view = "City";
 	}
 
 	toMenu() {
+		this.map.path = [];
 		this.state.view = "Menu";
 	}
 
@@ -480,7 +484,6 @@ export class Game {
 
 		// if actor on selected tile
 		const dist = this.map.shortestPath(start, this.map.isoPlayerMouse, this.sprites.getArrow());
-	        console.log(dist);
 	        // if dist <= actor.movement
 	}
 
