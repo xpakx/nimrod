@@ -511,11 +511,11 @@ export class MapLayer {
 	}
 
 	isBlocked(position: Position): boolean {
-		return this.blocked[position.x][position.y];
+		return this.blocked[position.y][position.x];
 	}
 
 	getCost(position: Position): number {
-		return this.costs[position.x][position.y];
+		return this.costs[position.y][position.x];
 	}
 
 	path?: PathElem[] = undefined;
@@ -551,11 +551,11 @@ export class MapLayer {
 				break;
 			}
 
-			const alreadyVisited = visited[next.pos.x][next.pos.y];
+			const alreadyVisited = visited[next.pos.y][next.pos.x];
 			if(alreadyVisited) {
 				continue;
 			}
-			visited[next.pos.x][next.pos.y] = true;
+			visited[next.pos.y][next.pos.x] = true;
 			if(this.isBlocked(next.pos)) {
 				continue;
 			}
