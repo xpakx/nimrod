@@ -1,6 +1,6 @@
 import { GameState } from "./game-state.js";
 import { Action, ActionButton, ButtonRow, InterfaceLayer } from "./interface.js";
-import { MapLayer, Size } from "./map-layer.js";
+import { MapLayer, Position, Size } from "./map-layer.js";
 import { SpriteLibrary } from "./sprite-library.js";
 import { prepareTabs } from "./sidebar.js";
 import { Actor } from "./actor.js";
@@ -482,9 +482,21 @@ export class Game {
 			return;
 		}
 
-		// if actor on selected tile
-		const dist = this.map.shortestPath(start, this.map.isoPlayerMouse, this.sprites.getArrow());
-	        // if dist <= actor.movement
+		if (battle.selectedActor) {
+			const dist = this.map.shortestPath(start, this.map.isoPlayerMouse, this.sprites.getArrow());
+			// if dist <= actor.movement
+		}
+	}
+
+        isMouseOverPedestrian(): BattleActor | undefined {
+		const mouse = this.map.isoPlayerMouse;
+		for (let pedestrian of this.state.pedestrians) {
+			const pos = pedestrian.positionSquare;
+			if(pos.x == mouse.x && pos.y == mouse.y) {
+				return pedestrian as BattleActor;
+			}
+		}
+		return undefined;
 	}
 
 	leftMouseBattle() {
@@ -497,6 +509,29 @@ export class Game {
 		const battle = this.state.currentBattle;
 		const x = this.map.isoPlayerMouse.x;
 		const y = this.map.isoPlayerMouse.y;
+
+		if (battle.selectedTile) {
+			this.battleProcessAction(battle.selectedTile, {x: x, y: y}, battle.selectedActor);
+			battle.selectedTile = undefined;
+			battle.selectedActor = undefined;
+			return;
+		}
+
 		battle.selectedTile = {x: x, y: y};
+		battle.selectedActor = this.isMouseOverPedestrian();
+		console.log(battle.selectedActor);
+		console.log(battle.selectedTile);
+	}
+
+	battleProcessAction(from: Position, to: Position, actor: BattleActor | undefined) {
+		if (!actor || actor.enemy) {
+			// TODO
+			return;
+		}
+		const dist = this.map.shortestPath(from, to, this.sprites.getArrow());
+		this.map.path = [];
+		if (dist <= actor.movement) {
+			actor.position = to;
+		}
 	}
 }
