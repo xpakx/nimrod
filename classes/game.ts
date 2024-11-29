@@ -526,12 +526,14 @@ export class Game {
 	battleProcessAction(from: Position, to: Position, actor: BattleActor | undefined) {
 		if (!actor || actor.enemy) {
 			// TODO
+			this.map.path = [];
 			return;
 		}
 		const dist = this.map.shortestPath(from, to, this.sprites.getArrow());
 		this.map.path = [];
 		if (dist <= actor.movement) {
 			actor.position = to;
+			actor.positionSquare = to;
 		}
 	}
 }
