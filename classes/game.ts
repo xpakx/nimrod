@@ -159,6 +159,29 @@ export class Game {
 		this.sprites.rescaleSprites(this.map.tileSize);
 	}
 
+	applyMap(data: MapData) {
+		console.log(data);
+		this.map.resetMap(data.size);
+
+		for (let pos of data.roads) {
+			this.map.putRoad({x: pos.x, y: pos.y}, this.sprites.getRoad(), true);
+		}
+
+		for (let building of data.buildings) {
+			this.map.putBuilding({x: building.x, y: building.y}, this.sprites.buildings[building.type]);
+		}
+
+		for (let terrain of data.terrain) {
+			if (terrain.cost) {
+				this.map.costs[terrain.x][terrain.y] = terrain.cost;
+			}
+			if (terrain.color) {
+				this.map.map[terrain.x][terrain.y] = terrain.color;
+			}
+		}
+		this.map.getBuilding({x: 3, y: 11})!.setWorker(this.sprites.buildings["home"]);
+	}
+
 	loadMap(filename: string) {
 		fetch(`maps/${filename}`)
 		.then(response => {
@@ -167,30 +190,7 @@ export class Game {
 			}
 			return response.json();
 		})
-		.then(data => {
-			console.log(data);
-			const height = data['size']['height']; 
-			const width = data['size']['width']; 
-			this.map.resetMap({"width": width, "height": height});
-
-			for (let pos of data['roads']) {
-				this.map.putRoad({x: pos['x'], y: pos['y']}, this.sprites.getRoad(), true);
-			}
-
-			for (let building of data['buildings']) {
-				this.map.putBuilding({x: building['x'], y: building['y']}, this.sprites.buildings[building['type']]);
-			}
-
-			for (let terrain of data['terrain']) {
-				if ('cost' in terrain) {
-					this.map.costs[terrain['x']][terrain['y']] = terrain['cost'];
-				}
-				if ('color' in terrain) {
-					this.map.map[terrain['x']][terrain['y']] = terrain['color'];
-				}
-			}
-			this.map.getBuilding({x: 3, y: 11})!.setWorker(this.sprites.buildings["home"]);
-		})
+		.then((data: MapData) => this.applyMap(data))
 		.catch(error => {
 			console.log(error);
 			throw new Error(`Error loading the JSON file: ${error}`);
@@ -536,4 +536,29 @@ export class Game {
 			actor.positionSquare = to;
 		}
 	}
+}
+
+export interface MapData {
+	size: Size;
+	roads: RoadData[];
+	buildings: BuildingData[];
+	terrain: TerrainData[];
+}
+
+interface RoadData {
+	x: number;
+	y: number;
+}
+
+interface BuildingData {
+	x: number;
+	y: number;
+	type: string;
+}
+
+interface TerrainData {
+	x: number;
+	y: number;
+	color?: string;
+	cost?: number;
 }
