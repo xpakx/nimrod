@@ -4,7 +4,7 @@ import { MapLayer, Position, Size } from "./map-layer.js";
 import { SpriteLibrary } from "./sprite-library.js";
 import { prepareTabs } from "./sidebar.js";
 import { Actor } from "./actor.js";
-import { BattleActor } from "./battle/actor.js";
+import { BattleActor, HeroType } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
 
 export class Game {
@@ -177,6 +177,22 @@ export class Game {
 			}
 			if (terrain.color) {
 				this.map.map[terrain.x][terrain.y] = terrain.color;
+			}
+		}
+
+		if (data.actors) {
+			for (let actor of data.actors) {
+				const sprite = this.sprites.actors[actor.image];
+				let pedestrian = new BattleActor(sprite, {x: actor.x, y: actor.y}); 
+				if (actor.enemy === false || actor.enemy === undefined) {
+					pedestrian.enemy = false;
+				}
+				pedestrian.name = actor.name;
+				pedestrian.movement = actor.movement;
+				pedestrian.hp = actor.hp;
+				if (actor.type) {
+					pedestrian.type = actor.type;
+				}
 			}
 		}
 		this.map.getBuilding({x: 3, y: 11})!.setWorker(this.sprites.buildings["home"]);
@@ -543,6 +559,7 @@ export interface MapData {
 	roads: RoadData[];
 	buildings: BuildingData[];
 	terrain: TerrainData[];
+	actors: ActorData[];
 }
 
 interface RoadData {
@@ -561,4 +578,15 @@ interface TerrainData {
 	y: number;
 	color?: string;
 	cost?: number;
+}
+
+interface ActorData {
+	x: number;
+	y: number;
+	enemy?: boolean;
+	name: string;
+	movement: number;
+	type?: HeroType;
+	hp: number;
+	image: string;
 }
