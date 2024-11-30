@@ -5,4 +5,20 @@ export class Battle {
 	public battleStarted = false;
 	public selectedTile?: Position;
 	public selectedActor?: BattleActor;
+
+	public heroes: BattleActor[] = [];
+	public enemies: BattleActor[] = [];
+
+	getPedestrians(): BattleActor[] {
+		const pedestrians = [];
+		pedestrians.push(...this.heroes, ...this.enemies);
+		return pedestrians;
+	}
+
+	selectHero(num: number) {
+		if (num < 0 || num >= this.heroes.length) {
+			return;
+		}
+		this.selectedActor = this.heroes[num];
+	}
 }
