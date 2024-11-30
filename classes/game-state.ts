@@ -1,5 +1,6 @@
 import { Actor } from "./actor.js";
 import { Battle } from "./battle/battle.js";
+import { MapData } from "./game.js";
 import { Position } from "./map-layer.js";
 
 export type View = "City" | "World" | "Battle" | "Kingdom" | "Menu";
@@ -22,6 +23,8 @@ export class GameState {
 	public money: number = 5000;
 	public population: number = 10;
 	public currentBattle?: Battle;
+
+	public tempBattleData?: MapData;
 
 	sortPedestrians() {
 		this.pedestrians.sort((a, b) => {

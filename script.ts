@@ -1,5 +1,5 @@
 import { Actor } from "./classes/actor.js";
-import { Game } from "./classes/game.js";
+import { Game, MapData } from "./classes/game.js";
 
 let game = new Game();
 
@@ -53,6 +53,10 @@ window.onload = async () => {
 	await game.prepareAssets();
 	game.loadMap("test.json");
 	game.state.pedestrians.push(new Actor(game.sprites.actors['test'], {x: 1, y: 9}));
+
+	const battle = await fetch("maps/battle001.json"); 
+	const battleJson = await battle.json() as MapData;
+	game.state.tempBattleData = battleJson;
 
 	registerMouseEvents(canvas);
 	registerKeyboardEvents();
