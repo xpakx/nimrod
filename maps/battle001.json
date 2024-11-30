@@ -21,7 +21,7 @@
 		{"x": 3, "y": 9}
 	],
 	"terrain": [
-		{"x": 5, "y": 4, "color": "#c3c3ff", "cost": 3}
+		{"x": 5, "y": 4, "color": "#c3c3ff", "cost": 5}
 	],
 	"actors": [
 		{"x": 1, "y": 9, "name": "Test Soldier", "movement": 5, "hp": 100, "image": "test"},

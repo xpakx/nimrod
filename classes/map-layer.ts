@@ -22,6 +22,7 @@ export class MapLayer {
 	buildingMap: (Building | undefined)[][] = this.map.map(row => row.map(() => undefined)); // for quicker lookup
 	buildings: Building[] = [];
 	blocked: boolean[][] = this.map.map(row => row.map(() => false));
+	blockedMovement: boolean[][] = this.map.map(row => row.map(() => false));
 	costs: number[][] = this.map.map(row => row.map(() => 1));
 	roads: (Road | undefined)[][] = this.map.map(row => row.map(() => undefined)); // for quicker lookup
 
@@ -40,6 +41,7 @@ export class MapLayer {
 		this.roads = this.map.map(row => row.map(() => undefined))
 		this.costs = this.map.map(row => row.map(() => 1))
 		this.blocked = this.map.map(row => row.map(() => false));
+		this.blockedMovement = this.map.map(row => row.map(() => false));
 		this.buildingMap = this.map.map(row => row.map(() => undefined))
 	}
 
@@ -146,6 +148,7 @@ export class MapLayer {
 			for(let i = position.x; i > position.x-sprite.baseSize; i--) {
 				for(let j = position.y; j > position.y-sprite.baseSize; j--) {
 					this.blocked[j][i] = true;
+					this.blockedMovement[j][i] = true;
 					this.buildingMap[j][i] = newBuilding;
 				}
 			}
@@ -297,6 +300,7 @@ export class MapLayer {
 		for(let i = building.position.x; i > building.position.x-building.sprite.baseSize; i--) {
 			for(let j = building.position.y; j > building.position.y-building.sprite.baseSize; j--) {
 				this.blocked[j][i] = false;
+				this.blockedMovement[j][i] = false;
 				this.buildingMap[j][i] = undefined;
 			}
 		}
@@ -514,6 +518,10 @@ export class MapLayer {
 		return this.blocked[position.y][position.x];
 	}
 
+	isObstacle(position: Position): boolean {
+		return this.blockedMovement[position.y][position.x];
+	}
+
 	getCost(position: Position): number {
 		return this.costs[position.y][position.x];
 	}
@@ -556,7 +564,7 @@ export class MapLayer {
 				continue;
 			}
 			visited[next.pos.y][next.pos.x] = true;
-			if(this.isBlocked(next.pos)) {
+			if(this.isObstacle(next.pos)) {
 				continue;
 			}
 			if(next.equals(end)) {
