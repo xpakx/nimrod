@@ -184,6 +184,12 @@ export class Game {
 	}
 
 	applyBattle(data: MapData) {
+		if (!this.state.currentBattle) {
+			return;
+		}
+		this.state.currentBattle.enemies  = [];
+		this.state.currentBattle.heroes  = [];
+
 		if (data.actors) {
 			for (let actor of data.actors) {
 				const sprite = this.sprites.actors[actor.image];
@@ -198,6 +204,11 @@ export class Game {
 					pedestrian.type = actor.type;
 				}
 				this.state.pedestrians.push(pedestrian);
+				if(pedestrian.enemy) {
+					this.state.currentBattle.enemies.push(pedestrian);
+				} else {
+					this.state.currentBattle.heroes.push(pedestrian);
+				}
 				
 			}
 		}
