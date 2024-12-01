@@ -181,6 +181,9 @@ export class Game {
 		}
 
 		this.state.pedestrians = [];
+	}
+
+	applyBattle(data: MapData) {
 		if (data.actors) {
 			for (let actor of data.actors) {
 				const sprite = this.sprites.actors[actor.image];
@@ -195,6 +198,7 @@ export class Game {
 					pedestrian.type = actor.type;
 				}
 				this.state.pedestrians.push(pedestrian);
+				
 			}
 		}
 	}
@@ -427,6 +431,7 @@ export class Game {
 		this.state.currentBattle = battle;
 		this.state.view = "Battle";
 		this.applyMap(this.state.tempBattleData!);
+		this.applyBattle(this.state.tempBattleData!);
 		console.log(this.state.pedestrians);
 	}
 
