@@ -3,6 +3,7 @@ import { Road } from "../buildings.js";
 
 export class BattleActor extends Actor {
 	enemy: boolean = false;
+	placed: boolean = false;
 	name: string = "???";
 	movement: number = 5;
 	type: HeroType = "normal";
