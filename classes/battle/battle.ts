@@ -8,6 +8,7 @@ export class Battle {
 
 	public heroes: BattleActor[] = [];
 	public enemies: BattleActor[] = [];
+	public maxHeroes: number = 6;
 
 	getPedestrians(): BattleActor[] {
 		const pedestrians = [];
@@ -20,5 +21,13 @@ export class Battle {
 			return;
 		}
 		this.selectedActor = this.heroes[num];
+	}
+
+	addHero(hero: BattleActor): boolean {
+		if(this.maxHeroes >= this.heroes.length) {
+			return false;
+		}
+		this.heroes.push(hero);
+		return true;
 	}
 }
