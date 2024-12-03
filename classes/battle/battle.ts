@@ -9,6 +9,7 @@ export class Battle {
 	public heroes: BattleActor[] = [];
 	public enemies: BattleActor[] = [];
 	public maxHeroes: number = 6;
+	public playerSpawns: Position[] = [];
 
 	getPedestrians(): BattleActor[] {
 		const pedestrians = [];
@@ -41,6 +42,9 @@ export class Battle {
 		if (num < 0 || num >= this.heroes.length) {
 			return false;
 		}
+		if (!this.isInSpawn(pos)) {
+			return false;
+		}
 		let hero = this.heroes[num];
 		hero.position = pos;
 		hero.placed = true;
@@ -56,5 +60,12 @@ export class Battle {
 			return;
 		}
 		this.battleStarted = true;
+	}
+
+	isInSpawn(pos: Position): boolean {
+		if(this.playerSpawns?.length == 0) {
+			return true;
+		}
+		return this.playerSpawns.some((p) => p.x == pos.x && p.y == pos.y);
 	}
 }
