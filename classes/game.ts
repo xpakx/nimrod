@@ -80,6 +80,11 @@ export class Game {
 			this.map.deleteRoad(this.map.isoPlayerMouse);
 		} else if(this.map.roadMode) {
 			this.map.putRoad(this.map.isoPlayerMouse, this.sprites.getRoad());
+		} else {
+			const building = this.map.getCurrentBuilding();
+			if (building) {
+				this.interf.buildingInterface = building.interface;
+			}
 		}
 	}
 
@@ -119,6 +124,8 @@ export class Game {
 				case "Battle":
 					this.toBattle(); break;
 			}
+		} else if(clickResult.action == "open") {
+			this.interf.buildingInterface = clickResult.interface;
 		}
 	}
 

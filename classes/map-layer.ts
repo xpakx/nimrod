@@ -31,6 +31,10 @@ export class MapLayer {
 		this.canvasSize.width = canvasSize.width;
 	}
 
+	getCurrentBuilding(): Building | undefined {
+		return this.getBuilding(this.isoPlayerMouse);
+	}
+
 	resetMap(size: Size) {
 		this.buildings = [];
 		this.positionOffset = {x: 0, y: 0};
