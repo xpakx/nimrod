@@ -1,4 +1,4 @@
-import { BuildingSprite } from "./buildings.js";
+import { BuildingInterface, BuildingSprite } from "./buildings.js";
 import { GameState } from "./game-state.js";
 import { Position, Size } from "./map-layer.js";
 
@@ -19,6 +19,8 @@ export class InterfaceLayer {
 	buildingMenuHeight = 300;
 
 	buttons: ButtonRow[] = [];
+
+	buildingInterface: BuildingInterface | undefined = undefined;
 
 	constructor(canvasSize: Size) {
 		this.canvasSize.height = canvasSize.height;
@@ -72,6 +74,9 @@ export class InterfaceLayer {
 		this.renderDialogueBox(context, deltaTime);
 		if (this.tab  != undefined) {
 			this.tabs[this.tab].draw(context);
+		}
+		if (this.buildingInterface) {
+			this.buildingInterface.renderInterface(context, deltaTime, state);
 		}
 		this.renderButtons(context);
 	}
@@ -563,4 +568,9 @@ export interface NavAction {
 	argument: "World" | "Kingdom" | "City" | "Battle";
 }
 
-export type Action = NavAction | BuildAction;
+export interface OpenBuilding {
+	action: "open";
+	interface: BuildingInterface;
+}
+
+export type Action = NavAction | BuildAction | OpenBuilding;

@@ -1,4 +1,5 @@
 import { ActorSprite } from "./actor.js";
+import { GameState } from "./game-state.js";
 import { Position, Size } from "./map-layer.js";
 
 export class BuildingSprite {
@@ -38,6 +39,7 @@ export class Building {
 
 	workerSpawn: Position | undefined;
 	worker: BuildingWorker | undefined;
+	interface: BuildingInterface;
 
 	constructor(sprite: BuildingSprite, position: Position, accepted: boolean = true) {
 		this.sprite =  sprite;
@@ -47,6 +49,7 @@ export class Building {
 
 		const centerA = [Math.floor((position.x + position.x - sprite.baseSize + 1)/2), Math.floor((position.y + position.y - sprite.baseSize + 1)/2)]
 		this.diagonal = (centerA[0] + centerA[1]);
+		this.interface = new BuildingInterface();
 	}
 
 	setWorker(sprite: ActorSprite) {
@@ -149,4 +152,27 @@ export class TilingSprite {
 		this.size.height = this.sprites[0].height*(this.size.width/this.sprites[0].width);
 	}
 
+}
+
+export class BuildingInterface {
+	menuWidth = 420; // TODO: delete this
+
+	click(_state: GameState) { }
+
+	renderInterface(context: CanvasRenderingContext2D, _deltaTime: number, state: GameState) { 
+		const width = state.canvasWidth - 20 - this.menuWidth;
+		const height = 100;
+		const x = 10;
+		const y = state.canvasHeight - height - 10;
+
+		context.fillStyle = '#444';
+		context.fillRect(x, y, width, height);
+
+		context.strokeStyle = '#fff';
+		context.strokeRect(x, y, width, height);
+
+		context.fillStyle = '#fff';
+		context.font = '16px Arial';
+	}
+	
 }
