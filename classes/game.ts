@@ -443,6 +443,10 @@ export class Game {
 		this.state.view = "Battle";
 		this.applyMap(this.state.tempBattleData!);
 		this.applyBattle(this.state.tempBattleData!);
+		for(let hero of this.state.team) {
+			battle.addHero(hero);
+		}
+
 		console.log(this.state.pedestrians);
 	}
 
