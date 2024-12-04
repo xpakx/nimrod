@@ -1,9 +1,9 @@
 import { ActorSprite } from "./actor.js";
-import { BuildingSprite, TilingSprite } from "./buildings.js";
+import { BuildingInterface, BuildingPrototype, BuildingSprite, TilingSprite } from "./buildings.js";
 import { Size } from "./map-layer.js";
 
 export class SpriteLibrary {
-	buildings: {[key: string]: BuildingSprite} = {};
+	buildings: {[key: string]: BuildingPrototype} = {};
 	avatars: {[key: string]: HTMLImageElement} = {};
 	icons: {[key: string]: HTMLImageElement} = {};
 	actors: {[key: string]: ActorSprite} = {};
@@ -17,11 +17,12 @@ export class SpriteLibrary {
 		const well = new BuildingSprite(await loadImage("./img/well.svg"), 2, tileSize);
 		const inspector = new BuildingSprite(await loadImage("./img/inspector.svg"), 2, tileSize);
 
-		this.buildings["ziggurat"] = ziggurat;
-		this.buildings["home"] = home;
-		this.buildings["tower"] = tower;
-		this.buildings["well"] = well;
-		this.buildings["inspector"] = inspector;
+
+		this.buildings["ziggurat"] = {sprite: ziggurat, interface: new BuildingInterface()};
+		this.buildings["home"] = {sprite: home, interface: new BuildingInterface()};
+		this.buildings["tower"] = {sprite: tower, interface: new BuildingInterface()};
+		this.buildings["well"] = {sprite: well, interface: new BuildingInterface()};
+		this.buildings["inspector"] = {sprite: inspector, interface: new BuildingInterface()};
 		return true;
 	}
 
@@ -103,7 +104,7 @@ export class SpriteLibrary {
 
 	rescaleSprites(tileSize: Size) {
 		for (const key in this.buildings) {
-			this.buildings[key].refreshSize(tileSize);
+			this.buildings[key].sprite.refreshSize(tileSize);
 		}
 		this.getRoad().refreshSize(tileSize);
 		this.getArrow().refreshSize(tileSize);

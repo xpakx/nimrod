@@ -16,7 +16,6 @@ export class Game {
 	minXOffset: number;
 	maxXOffset: number;
 
-
 	constructor() {
 		this.state = new GameState();
 		const size: Size = {
@@ -30,7 +29,6 @@ export class Game {
 		this.maxYOffset = this.map.isoToScreen({x: this.map.map[0].length - 1, y: this.map.map.length - 1}).y + (this.map.tileSize.height/2);
 		this.minXOffset = this.map.isoToScreen({x: 0, y: this.map.map.length - 1}).x  - (this.map.tileSize.width/2);
 		this.maxXOffset = this.map.isoToScreen({x: this.map.map[0].length - 1, y: 0}).x  + (this.map.tileSize.width/2);
-
 	}
 
 	async prepareAssets() {

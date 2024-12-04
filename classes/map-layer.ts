@@ -1,5 +1,5 @@
 import { Actor } from "./actor.js";
-import { Building, BuildingSprite, Road, TilingSprite } from "./buildings.js";
+import { Building, BuildingPrototype, BuildingSprite, Road, TilingSprite } from "./buildings.js";
 
 export class MapLayer {
 	defTileWidth: number = 64;
@@ -13,7 +13,7 @@ export class MapLayer {
 	isoPlayerMouse: Position = {x: -1, y: -1};
 	isDragging: boolean = false;
 	dragStart: Position = {x: 0, y: 0};
-	mode: BuildingSprite | undefined = undefined;
+	mode: BuildingPrototype | undefined = undefined;
 	deleteMode: boolean = false;
 	roadMode: TilingSprite | undefined = undefined;
 
@@ -144,9 +144,11 @@ export class MapLayer {
 		return this.buildingMap[position.y][position.x];
 	}
 
-	putBuilding(position: Position, sprite: BuildingSprite, accepted: boolean = true) {
+
+	putBuilding(position: Position, prototype: BuildingPrototype, accepted: boolean = true) {
+		const sprite = prototype.sprite;
 		if(this.canBePlaced(position, sprite)) {
-			const newBuilding = new Building(sprite, position, accepted);
+			const newBuilding = new Building(prototype, position, accepted);
 			this.buildings.push(newBuilding);
 			this.sortBuildings();
 			for(let i = position.x; i > position.x-sprite.baseSize; i--) {
@@ -399,11 +401,11 @@ export class MapLayer {
 	}
 
 	renderBuildings(ctx: CanvasRenderingContext2D, pedestrians: Actor[]) {
-		const ghostCanBePlaced = this.mode ? this.canBePlaced(this.isoPlayerMouse, this.mode) : false;
+		const ghostCanBePlaced = this.mode ? this.canBePlaced(this.isoPlayerMouse, this.mode.sprite) : false;
 		ctx.save();
 		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileSize.height/2));
 		let ghostDrawn = false;
-		const ghostDiagonal = this.getDiagonal(this.isoPlayerMouse, this.mode);
+		const ghostDiagonal = this.getDiagonal(this.isoPlayerMouse, this.mode?.sprite);
 		let currentDiagonal = 0;
 		let pedestrianIndex = 0;
 		for (const building of this.buildings) {
@@ -468,7 +470,8 @@ export class MapLayer {
 		ctx.filter = red ? "url('./img//red-filter.svg#red') opacity(0.75)" : "grayscale(90%)";
 		ctx.globalAlpha = 0.75;
 		let pos = this.isoToScreen(this.isoPlayerMouse);
-		ctx.drawImage(this.mode.image, pos.x-this.mode.size.width/2, pos.y-this.mode.size.height+this.tileSize.height, this.mode.size.width, this.mode.size.height);
+		const sprite = this.mode.sprite;
+		ctx.drawImage(sprite.image, pos.x-sprite.size.width/2, pos.y-sprite.size.height+this.tileSize.height, sprite.size.width, sprite.size.height);
 		ctx.restore();
 	}
 
@@ -490,7 +493,7 @@ export class MapLayer {
 		this.mode = undefined;
 	}
 
-	switchToBuildMode(sprite: BuildingSprite) {
+	switchToBuildMode(sprite: BuildingPrototype) {
 		this.deleteMode = false;
 		this.roadMode = undefined;
 		this.mode = sprite;

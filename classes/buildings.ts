@@ -2,6 +2,11 @@ import { ActorSprite } from "./actor.js";
 import { GameState } from "./game-state.js";
 import { Position, Size } from "./map-layer.js";
 
+export interface BuildingPrototype {
+	sprite: BuildingSprite;
+	interface: BuildingInterface;
+}
+
 export class BuildingSprite {
 	size: Size = {height: 0, width: 0};
 	image: HTMLImageElement;
@@ -41,15 +46,15 @@ export class Building {
 	worker: BuildingWorker | undefined;
 	interface: BuildingInterface;
 
-	constructor(sprite: BuildingSprite, position: Position, accepted: boolean = true) {
-		this.sprite =  sprite;
+	constructor(prototype: BuildingPrototype, position: Position, accepted: boolean = true) {
+		this.sprite =  prototype.sprite;
 		this.position = position;
 		this.accepted = accepted;
 		this.underCursor = false;
 
-		const centerA = [Math.floor((position.x + position.x - sprite.baseSize + 1)/2), Math.floor((position.y + position.y - sprite.baseSize + 1)/2)]
+		const centerA = [Math.floor((position.x + position.x - this.sprite.baseSize + 1)/2), Math.floor((position.y + position.y - this.sprite.baseSize + 1)/2)]
 		this.diagonal = (centerA[0] + centerA[1]);
-		this.interface = new BuildingInterface();
+		this.interface = prototype.interface;
 	}
 
 	setWorker(sprite: ActorSprite) {

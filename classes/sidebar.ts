@@ -1,4 +1,4 @@
-import { BuildingSprite } from "./buildings.js";
+import { BuildingPrototype, BuildingSprite } from "./buildings.js";
 import { BuildingButton, BuildingTab } from "./interface.js";
 
 async function loadImage(url: string): Promise<any> {
@@ -10,7 +10,7 @@ async function loadImage(url: string): Promise<any> {
     });
 }
 
-export async function prepareTabs(sprites: { [key: string]: BuildingSprite }): Promise<BuildingTab[]> {
+export async function prepareTabs(sprites: { [key: string]: BuildingPrototype }): Promise<BuildingTab[]> {
 	const icons = await loadIcons();
 	return [
 		housingTab(sprites, icons),
@@ -42,10 +42,10 @@ async function loadIcons(): Promise<any> {
 	return sprites;
 }
 
-function housingTab(sprites: { [key: string]: BuildingSprite }, icons: any): BuildingTab {
-	const home = sprites['home'];
-	const well = sprites['well'];
-	const inspector = sprites['inspector'];
+function housingTab(sprites: { [key: string]: BuildingPrototype }, icons: any): BuildingTab {
+	const home = sprites['home'].sprite;
+	const well = sprites['well'].sprite;
+	const inspector = sprites['inspector'].sprite;
 
 	return new BuildingTab(
 		"housing", [
@@ -67,8 +67,8 @@ function housingTab(sprites: { [key: string]: BuildingSprite }, icons: any): Bui
 	)
 }
 
-function religionTab(sprites: { [key: string]: BuildingSprite }, icons: any): BuildingTab {
-	const ziggurat = sprites['ziggurat'];
+function religionTab(sprites: { [key: string]: BuildingPrototype }, icons: any): BuildingTab {
+	const ziggurat = sprites['ziggurat'].sprite;
 
 	return new BuildingTab(
 		"religion", [
@@ -76,8 +76,8 @@ function religionTab(sprites: { [key: string]: BuildingSprite }, icons: any): Bu
 		], icons['religion'], icons['tab'])
 }
 
-function militaryTab(sprites: { [key: string]: BuildingSprite }, icons: any): BuildingTab {
-	const tower = sprites['tower'];
+function militaryTab(sprites: { [key: string]: BuildingPrototype }, icons: any): BuildingTab {
+	const tower = sprites['tower'].sprite;
 
 	return new BuildingTab(
 		"military", [
@@ -85,14 +85,14 @@ function militaryTab(sprites: { [key: string]: BuildingSprite }, icons: any): Bu
 		], icons['military'], icons['tab'])
 }
 
-function agricultureTab(_sprites: { [key: string]: BuildingSprite }, icons: any): BuildingTab {
+function agricultureTab(_sprites: { [key: string]: BuildingPrototype }, icons: any): BuildingTab {
 	return new BuildingTab("agriculture", [], icons['agriculture'], icons['tab'])
 }
 
-function scienceTab(_sprites: { [key: string]: BuildingSprite }, icons: any): BuildingTab {
+function scienceTab(_sprites: { [key: string]: BuildingPrototype }, icons: any): BuildingTab {
 	return new BuildingTab("science", [], icons['science'], icons['tab'])
 }
 
-function industryTab(_sprites: { [key: string]: BuildingSprite }, icons: any): BuildingTab {
+function industryTab(_sprites: { [key: string]: BuildingPrototype }, icons: any): BuildingTab {
 	return new BuildingTab("industry", [], icons['industry'], icons['tab'])
 }
