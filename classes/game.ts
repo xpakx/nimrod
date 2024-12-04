@@ -305,6 +305,11 @@ export class Game {
 			case 'Enter': this.interf.dialogueAction(); break;
 			case 'F9': this.state.debugMode = !this.state.debugMode; break;
 			case 'F8': this.toBattle(); break;
+			case "Escape": {
+				this.interf.buildingInterface = undefined;
+				this.map.switchToNormalMode();
+				break;
+			}
 		}
 
 		if (!this.terrainView()) {
