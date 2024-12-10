@@ -163,6 +163,7 @@ export class BuildingInterface {
 	menuWidth = 420; // TODO: delete this
 
 	click(_state: GameState) { }
+	open(_state: GameState) { }
 
 	renderInterface(context: CanvasRenderingContext2D, _deltaTime: number, state: GameState) { 
 		const width = state.canvasWidth - 20 - this.menuWidth;

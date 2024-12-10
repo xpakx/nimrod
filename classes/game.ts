@@ -82,6 +82,7 @@ export class Game {
 			const building = this.map.getCurrentBuilding();
 			if (building) {
 				this.interf.buildingInterface = building.interface;
+				building.interface.open(this.state);
 			}
 		}
 	}

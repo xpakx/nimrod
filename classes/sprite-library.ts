@@ -1,4 +1,5 @@
 import { ActorSprite } from "./actor.js";
+import { AdventurersGuildInterface } from "./building/adventurers-guild.js";
 import { BuildingInterface, BuildingPrototype, BuildingSprite, TilingSprite } from "./buildings.js";
 import { Size } from "./map-layer.js";
 
@@ -18,7 +19,7 @@ export class SpriteLibrary {
 		const inspector = new BuildingSprite(await loadImage("./img/inspector.svg"), 2, tileSize);
 
 
-		this.buildings["ziggurat"] = {sprite: ziggurat, interface: new BuildingInterface()};
+		this.buildings["ziggurat"] = {sprite: ziggurat, interface: new AdventurersGuildInterface()};
 		this.buildings["home"] = {sprite: home, interface: new BuildingInterface()};
 		this.buildings["tower"] = {sprite: tower, interface: new BuildingInterface()};
 		this.buildings["well"] = {sprite: well, interface: new BuildingInterface()};

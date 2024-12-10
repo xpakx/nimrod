@@ -29,6 +29,7 @@ export class GameState {
 
 	// TODO: controlled by specific building
 	public team: BattleActor[] = [];
+	public allHeroes: BattleActor[] = [];
 
 	sortPedestrians() {
 		this.pedestrians.sort((a, b) => {
