@@ -281,37 +281,41 @@ export class Game {
 		switch (event.key) {
 			case 'ArrowUp': case 'k':
 				this.state.moveUp = true;
-			break;
+				break;
 			case 'ArrowDown': case 'j':
 				this.state.moveDown = true;
-			break;
+				break;
 			case 'ArrowLeft': case 'h':
 				this.state.moveLeft = true;
-			break;
+				break;
 			case 'ArrowRight': case 'l':
 				this.state.moveRight = true;
-			break;
-			case '+': {
+				break;
+			case '+': 
 				this.rescale(0.2);
-			}
-			break;
-			case '-': {
+				break;
+			case '-': 
 				this.rescale(-0.2);
-			}
-			break;
-			case '0': {
+				break;
+			case '0': 
 				this.map.switchToNormalMode(); 
 				break;
-			}
-			case '9': this.map.switchToDeleteMode(); break;
-			case 'Enter': this.interf.dialogueAction(); break;
-			case 'F9': this.state.debugMode = !this.state.debugMode; break;
-			case 'F8': this.toBattle(); break;
-			case "Escape": {
+			case '9': 
+				this.map.switchToDeleteMode();
+				break;
+			case 'Enter': 
+				this.interf.dialogueAction();
+				break;
+			case 'F9': 
+				this.state.debugMode = !this.state.debugMode;
+				break;
+			case 'F8':
+				this.toBattle();
+				break;
+			case "Escape":
 				this.interf.buildingInterface = undefined;
 				this.map.switchToNormalMode();
 				break;
-			}
 		}
 
 		if (!this.terrainView()) {
