@@ -299,7 +299,10 @@ export class Game {
 				this.rescale(-0.2);
 			}
 			break;
-			case '0': case 'Escape': this.map.switchToNormalMode(); break;
+			case '0': {
+				this.map.switchToNormalMode(); 
+				break;
+			}
 			case '9': this.map.switchToDeleteMode(); break;
 			case 'Enter': this.interf.dialogueAction(); break;
 			case 'F9': this.state.debugMode = !this.state.debugMode; break;
