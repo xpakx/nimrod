@@ -14,7 +14,6 @@ export class BattleActor extends Actor {
 	moving: boolean = false;
 	path?: Position[]
 	goal?: Position;
-	lastPosition: Position = {x: 0, y: 0};
 
 	tick(deltaTime: number, _roads: (Road | undefined)[][], _randMap: number[]): boolean {
 		return this.move(deltaTime);
@@ -25,12 +24,9 @@ export class BattleActor extends Actor {
 		this.path.reverse();
 		this.path.pop();
 		this.goal = this.path.pop();
-		this.lastPosition.x = this.positionSquare.x;
-		this.lastPosition.y = this.positionSquare.y;
 		this.direction.x = this.goal!.x - this.positionSquare.x;
 		this.direction.y = this.goal!.y - this.positionSquare.y; 
-		console.log("Start goal:", this.goal);
-		console.log("Start dir:", this.direction);
+		console.log("Ultimate goal:", this.path[0]);
 	}
 
 	reachedGoal(): boolean {
@@ -44,19 +40,16 @@ export class BattleActor extends Actor {
 		if(!this.goal) {
 			return false;
 		}
-		console.log("goal:",this.goal);
-		console.log("curr:",this.positionSquare);
-		console.log("dir:", this.direction);
 		if (this.reachedGoal()) {
 			console.log("new goal");
 			this.goal = this.path?.pop();
 			console.log(this.goal);
-			if (this.goal) {
-				this.direction.x = this.goal.x - this.lastPosition.x;
-				this.direction.y = this.goal.y - this.lastPosition.y;
-				this.lastPosition.x = this.positionSquare.x;
-				this.lastPosition.y = this.positionSquare.y;
+			if (!this.goal) {
+				console.log(this.position);
+				return false;
 			}
+			this.direction.x = this.goal.x - this.positionSquare.x;
+			this.direction.y = this.goal.y - this.positionSquare.y;
 		}
 
 		this.position.x = this.position.x + this.direction.x*deltaTime;
