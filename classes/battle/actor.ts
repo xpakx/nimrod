@@ -20,6 +20,19 @@ export class BattleActor extends Actor {
 		return this.move(deltaTime);
 	}
 
+	setPath(path: Position[]) {
+		this.path = path;
+		this.path.reverse();
+		this.path.pop();
+		this.goal = this.path.pop();
+		this.lastPosition.x = this.positionSquare.x;
+		this.lastPosition.y = this.positionSquare.y;
+		this.direction.x = this.goal!.x - this.positionSquare.x;
+		this.direction.y = this.goal!.y - this.positionSquare.y; 
+		console.log("Start goal:", this.goal);
+		console.log("Start dir:", this.direction);
+	}
+
 	reachedGoal(): boolean {
 		if (!this.goal) {
 			return true;

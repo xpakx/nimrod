@@ -574,10 +574,10 @@ export class Game {
 			return;
 		}
 		const dist = this.map.shortestPath(from, to, this.sprites.getArrow());
+		let path = this.map.path;
 		this.map.path = [];
-		if (dist <= actor.movement) {
-			actor.position = to;
-			actor.positionSquare = to;
+		if (dist <= actor.movement && path) {
+			actor.setPath(path.map((x) => x.position));
 		}
 	}
 }
