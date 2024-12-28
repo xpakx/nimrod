@@ -68,6 +68,11 @@ export class BattleActor extends Actor {
 		this.position.y = positionY;
 		this.positionSquare.x = Math.floor(this.position.x);
 		this.positionSquare.y = Math.floor(this.position.y);
+
+		if (this.positionSquare.x + this.positionSquare.y != this.diagonal) {
+			this.diagonal = this.positionSquare.x + this.positionSquare.y;
+			return true;
+		}
 		return false;
 	}
 }
