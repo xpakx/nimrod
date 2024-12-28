@@ -33,7 +33,7 @@ export class BattleActor extends Actor {
 		if (!this.goal) {
 			return true;
 		}
-		return this.positionSquare.x == this.goal.x && this.positionSquare.y == this.goal.y;
+		return this.position.x == this.goal.x + 0.5 && this.position.y == this.goal.y + 0.5;
 	}
 
 	move(deltaTime: number): boolean {
@@ -52,8 +52,20 @@ export class BattleActor extends Actor {
 			this.direction.y = this.goal.y - this.positionSquare.y;
 		}
 
-		this.position.x = this.position.x + this.direction.x*deltaTime;
-		this.position.y = this.position.y + this.direction.y*deltaTime;
+		let positionX = this.position.x + this.direction.x*deltaTime;
+		let positionY = this.position.y + this.direction.y*deltaTime;
+		if (this.position.x < this.goal.x + 0.5 && positionX > this.goal.x + 0.5) {
+			positionX = this.goal.x + 0.5;
+		}
+		else if (this.position.x > this.goal.x + 0.5 && positionX < this.goal.x + 0.5) {
+			positionX = this.goal.x + 0.5;
+		} if (this.position.y < this.goal.y + 0.5 && positionY > this.goal.y + 0.5) {
+			positionY = this.goal.y + 0.5;
+		} else if (this.position.y > this.goal.y + 0.5 && positionY < this.goal.y + 0.5) {
+			positionY = this.goal.y + 0.5;
+		}
+		this.position.x = positionX;
+		this.position.y = positionY;
 		this.positionSquare.x = Math.floor(this.position.x);
 		this.positionSquare.y = Math.floor(this.position.y);
 		return false;
