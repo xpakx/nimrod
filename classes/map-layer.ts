@@ -548,6 +548,9 @@ export class MapLayer {
 
 		ctx.save();
 		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileSize.height/2));
+		if (!this.pathCorrect) {
+			ctx.filter = "grayscale(80%)"; 
+		}
 		for (let pos of this.path) {
 			const screenPos = this.isoToScreen({x: pos.position.x, y: pos.position.y});
 			ctx.drawImage(pos.sprite, screenPos.x-pos.sprites.size.width/2, screenPos.y-pos.sprites.size.height+this.tileSize.height, pos.sprites.size.width, pos.sprites.size.height);
