@@ -528,7 +528,7 @@ export class Game {
 
 		if (battle.selectedActor) {
 			const dist = this.map.shortestPath(start, this.map.isoPlayerMouse, this.sprites.getArrow());
-			// if dist <= actor.movement
+			this.map.pathCorrect =  dist <= battle.selectedActor.movement;
 		}
 	}
 
@@ -571,11 +571,13 @@ export class Game {
 		if (!actor || actor.enemy) {
 			// TODO
 			this.map.path = [];
+			this.map.pathCorrect = false;
 			return;
 		}
 		const dist = this.map.shortestPath(from, to, this.sprites.getArrow());
 		let path = this.map.path;
 		this.map.path = [];
+		this.map.pathCorrect = false;
 		if (dist <= actor.movement && path) {
 			actor.setPath(path.map((x) => x.position));
 		}

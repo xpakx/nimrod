@@ -534,6 +534,8 @@ export class MapLayer {
 	}
 
 	path?: PathElem[] = undefined;
+	pathCorrect: boolean = false;
+
 
 	drawPath(ctx: CanvasRenderingContext2D) {
 		if (!this.path) {
