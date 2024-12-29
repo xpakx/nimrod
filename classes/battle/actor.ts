@@ -36,24 +36,12 @@ export class BattleActor extends Actor {
 		return this.position.x == this.goal.x + 0.5 && this.position.y == this.goal.y + 0.5;
 	}
 
-	move(deltaTime: number): boolean {
-		if(!this.goal) {
-			return false;
+	updatePosition(deltaX: number, deltaY: number) {
+		let positionX = this.position.x + deltaX;
+		let positionY = this.position.y + deltaY;
+		if (!this.goal) {
+			return;
 		}
-		if (this.reachedGoal()) {
-			console.log("new goal");
-			this.goal = this.path?.pop();
-			console.log(this.goal);
-			if (!this.goal) {
-				console.log(this.position);
-				return false;
-			}
-			this.direction.x = this.goal.x - this.positionSquare.x;
-			this.direction.y = this.goal.y - this.positionSquare.y;
-		}
-
-		let positionX = this.position.x + this.direction.x*deltaTime;
-		let positionY = this.position.y + this.direction.y*deltaTime;
 		if (this.position.x < this.goal.x + 0.5 && positionX > this.goal.x + 0.5) {
 			positionX = this.goal.x + 0.5;
 		}
@@ -68,6 +56,31 @@ export class BattleActor extends Actor {
 		this.position.y = positionY;
 		this.positionSquare.x = Math.floor(this.position.x);
 		this.positionSquare.y = Math.floor(this.position.y);
+	}
+
+	nextGoal(): boolean {
+		console.log("new goal");
+		this.goal = this.path?.pop();
+		console.log(this.goal);
+		if (!this.goal) {
+			console.log(this.position);
+			return false;
+		}
+		this.direction.x = this.goal.x - this.positionSquare.x;
+		this.direction.y = this.goal.y - this.positionSquare.y;
+		return true;
+	}
+
+	move(deltaTime: number): boolean {
+		if(!this.goal) {
+			return false;
+		}
+		if (this.reachedGoal()) {
+			const foundGoal = this.nextGoal();
+			if (!foundGoal) return false;
+		}
+
+		this.updatePosition(this.direction.x*deltaTime, this.direction.y*deltaTime);
 
 		if (this.positionSquare.x + this.positionSquare.y != this.diagonal) {
 			this.diagonal = this.positionSquare.x + this.positionSquare.y;
