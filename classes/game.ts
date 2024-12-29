@@ -433,25 +433,25 @@ export class Game {
 	}
 
 	toWorld() {
-		this.map.path = [];
+		this.map.clearPath();
 		this.addWorldButtons();
 		this.state.view = "World";
 	}
 
 	toKingdom() {
-		this.map.path = [];
+		this.map.clearPath();
 		this.addKingdomButtons();
 		this.state.view = "Kingdom";
 	}
 
 	toCity() {
-		this.map.path = [];
+		this.map.clearPath();
 		this.addCityButtons();
 		this.state.view = "City";
 	}
 
 	toMenu() {
-		this.map.path = [];
+		this.map.clearPath();
 		this.state.view = "Menu";
 	}
 
@@ -570,14 +570,12 @@ export class Game {
 	battleProcessAction(from: Position, to: Position, actor: BattleActor | undefined) {
 		if (!actor || actor.enemy) {
 			// TODO
-			this.map.path = [];
-			this.map.pathCorrect = false;
+			this.map.clearPath();
 			return;
 		}
 		const dist = this.map.shortestPath(from, to, this.sprites.getArrow());
 		let path = this.map.path;
-		this.map.path = [];
-		this.map.pathCorrect = false;
+		this.map.clearPath();
 		if (dist <= actor.movement && path) {
 			actor.setPath(path.map((x) => x.position));
 		}

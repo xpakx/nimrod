@@ -536,6 +536,10 @@ export class MapLayer {
 	path?: PathElem[] = undefined;
 	pathCorrect: boolean = false;
 
+	clearPath() {
+		this.path = [];
+		this.pathCorrect = false;
+	}
 
 	drawPath(ctx: CanvasRenderingContext2D) {
 		if (!this.path) {
