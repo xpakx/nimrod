@@ -691,16 +691,25 @@ export class MapLayer {
 						   const u = toIndex(x, y);
 						   const v = toIndex(nx, ny);
 						   dist[u][v] = 1; // TODO: cost?
-						   pred[u][v] = u; // Predecessor of v is u
+						   pred[u][v] = u; // to, from -> next step
 					   }
 				   }
 			   }
 		   }
 	   }
+	   let roadsToCheck = [];
+	   for (let x = 0; x < rows; x++) {
+		   for (let y = 0; y < columns; y++) {
+			   if (this.roads[x][y]) {
+				   const u = toIndex(x, y);
+				   roadsToCheck.push(u);
+			   }
+		   }
+	   }
 
-	   for (let k = 0; k < size; k++) {
-		   for (let i = 0; i < size; i++) {
-			   for (let j = 0; j < size; j++) {
+	   for (let k of roadsToCheck) {
+		   for (let i of roadsToCheck) {
+			   for (let j of roadsToCheck) {
 				   if (dist[i][k] + dist[k][j] < dist[i][j]) {
 					   dist[i][j] = dist[i][k] + dist[k][j];
 					   pred[i][j] = pred[k][j];
