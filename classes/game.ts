@@ -312,6 +312,9 @@ export class Game {
 			case 'F8':
 				this.toBattle();
 				break;
+			case 'F7':
+				console.log(this.map.floydWarshall());
+				break;
 			case "Escape":
 				this.interf.buildingInterface = undefined;
 				this.map.switchToNormalMode();

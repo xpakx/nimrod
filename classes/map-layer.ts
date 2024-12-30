@@ -664,6 +664,54 @@ export class MapLayer {
 		queue.enqueue(new Node(position, end, cost));
 	}
 
+
+	floydWarshall(): any {
+	   const rows = this.roads.length;
+	   const columns = this.roads[0].length;
+	   const size = rows * columns;
+	   const dist = new Array(size).fill(null).map(() => new Array(size).fill(Infinity));
+	   const pred = new Array(size).fill(null).map(() => new Array(size).fill(null));
+
+	   for (let i = 0; i < size; i++) {
+		   dist[i][i] = 0;
+	   }
+
+	   function toIndex(x: number, y: number) {
+		   return x * columns + y;
+	   }
+
+	   for (let x = 0; x < rows; x++) {
+		   for (let y = 0; y < columns; y++) {
+			   if (this.roads[x][y]) {
+				   const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+				   for (const [dx, dy] of directions) {
+					   const nx = x + dx;
+					   const ny = y + dy;
+					   if (nx >= 0 && nx < rows && ny >= 0 && ny < columns && this.roads[nx][ny]) {
+						   const u = toIndex(x, y);
+						   const v = toIndex(nx, ny);
+						   dist[u][v] = 1; // TODO: cost?
+						   pred[u][v] = u; // Predecessor of v is u
+					   }
+				   }
+			   }
+		   }
+	   }
+
+	   for (let k = 0; k < size; k++) {
+		   for (let i = 0; i < size; i++) {
+			   for (let j = 0; j < size; j++) {
+				   if (dist[i][k] + dist[k][j] < dist[i][j]) {
+					   dist[i][j] = dist[i][k] + dist[k][j];
+					   pred[i][j] = pred[k][j];
+				   }
+			   }
+		   }
+	   }
+
+	   return { dist, pred };
+	}
+
 }
 
 type PathMap = (Position | undefined)[][];
