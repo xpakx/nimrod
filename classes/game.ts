@@ -313,7 +313,8 @@ export class Game {
 				this.toBattle();
 				break;
 			case 'F7':
-				console.log(this.map.floydWarshall());
+				this.map.floydWarshall();
+				console.log(this.map.pred);
 				break;
 			case "Escape":
 				this.interf.buildingInterface = undefined;

@@ -665,7 +665,10 @@ export class MapLayer {
 	}
 
 
-	floydWarshall(): any {
+	dist: number[][] = [];
+	pred: (number | undefined)[][] = [];
+
+	floydWarshall(): void {
 	   const rows = this.roads.length;
 	   const columns = this.roads[0].length;
 	   const size = rows * columns;
@@ -717,8 +720,8 @@ export class MapLayer {
 			   }
 		   }
 	   }
-
-	   return { dist, pred };
+	   this.dist = dist;
+	   this.pred = pred;
 	}
 
 }
