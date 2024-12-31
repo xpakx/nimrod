@@ -165,7 +165,7 @@ export class Game {
 		this.sprites.rescaleSprites(this.map.tileSize);
 	}
 
-	applyMap(data: MapData) {
+	applyMap(data: MapData, updateDistances: boolean = false) {
 		console.log(data);
 		this.map.resetMap(data.size);
 
@@ -187,6 +187,7 @@ export class Game {
 		}
 
 		this.state.pedestrians = [];
+		if (updateDistances) this.map.floydWarshall();
 	}
 
 	applyBattle(data: MapData) {
@@ -220,7 +221,7 @@ export class Game {
 		}
 	}
 
-	loadMap(filename: string) {
+	loadMap(filename: string, updateDistances: boolean = false) {
 		fetch(`maps/${filename}`)
 		.then(response => {
 			if (!response.ok) {
@@ -228,7 +229,7 @@ export class Game {
 			}
 			return response.json();
 		})
-		.then((data: MapData) => this.applyMap(data))
+		.then((data: MapData) => this.applyMap(data, updateDistances))
 		.catch(error => {
 			console.log(error);
 			throw new Error(`Error loading the JSON file: ${error}`);
@@ -450,6 +451,7 @@ export class Game {
 
 	toCity() {
 		this.map.clearPath();
+		this.map.floydWarshall();
 		this.addCityButtons();
 		this.state.view = "City";
 	}

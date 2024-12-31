@@ -51,7 +51,7 @@ window.onload = async () => {
 	canvas.width = game.state.canvasWidth;
 	canvas.height = game.state.canvasHeight;
 	await game.prepareAssets();
-	game.loadMap("test.json");
+	game.loadMap("test.json", true);
 	game.state.pedestrians.push(new Actor(game.sprites.actors['test'], {x: 1, y: 9}));
 
 	const battle = await fetch("maps/battle001.json"); 
