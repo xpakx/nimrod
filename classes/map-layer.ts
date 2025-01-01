@@ -1,5 +1,5 @@
-import { Actor } from "./actor";
-import { Building, BuildingPrototype, BuildingSprite, Road, TilingSprite } from "./buildings";
+import { Actor } from "./actor.js";
+import { Building, BuildingPrototype, BuildingSprite, Road, TilingSprite } from "./buildings.js";
 
 export class MapLayer {
 	defTileWidth: number = 64;

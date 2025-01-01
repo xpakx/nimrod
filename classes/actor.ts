@@ -91,6 +91,7 @@ export class Actor {
 	}
 
 	tick(deltaTime: number, map: MapLayer, randMap: number[]): boolean {
+		console.log("HMM");
 		const roads = map.roads;
 		if(this.travelFinished) {
 			return false;

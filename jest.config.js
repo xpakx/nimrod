@@ -5,4 +5,9 @@ module.exports = {
     "^.+.tsx?$": ["ts-jest",{}],
   },
   testMatch: ['<rootDir>/tests/**/*.test.ts'],
+  moduleFileExtensions: ["js", "ts"],
+moduleNameMapper: {
+   "./buildings.js": "./buildings.ts", // TODO
+   "./actor.js": "./actor.ts",
+  },
 };
