@@ -1,5 +1,5 @@
 import { Road } from "./buildings.js";
-import { Position, Size } from "./map-layer.js";
+import { MapLayer, Position, Size } from "./map-layer.js";
 
 export class ActorSprite {
 	size: Size = {height: 0, width: 0};
@@ -90,7 +90,8 @@ export class Actor {
 			}
 	}
 
-	tick(deltaTime: number, roads: (Road | undefined)[][], randMap: number[]): boolean {
+	tick(deltaTime: number, map: MapLayer, randMap: number[]): boolean {
+		const roads = map.roads;
 		if(this.travelFinished) {
 			return false;
 		}

@@ -391,7 +391,7 @@ export class Game {
 			Math.floor(Math.random() * 4),
 		]
 		for(let pedestrian of this.state.pedestrians) {
-			diagonalChanged ||= pedestrian.tick(dTime, this.map.roads, randMap);
+			diagonalChanged ||= pedestrian.tick(dTime, this.map, randMap);
 		}
 		this.state.pedestrians = this.state.pedestrians.filter((p) => !p.dead);
 		if(diagonalChanged) {

@@ -1,6 +1,6 @@
 import { Actor, ActorSprite } from "../classes/actor";
 import { Road, TilingSprite } from "../classes/buildings";
-import { Position, Size } from "../classes/map-layer";
+import { MapLayer, Position, Size } from "../classes/map-layer";
 
 let OffscreenCanvasMock = jest.fn().mockImplementation((width: number, height: number) => {
 	return {
@@ -125,12 +125,13 @@ describe('Actor', () => {
 	test('tick should update position and direction correctly when moving along a road', () => {
 		const actor = new Actor(spriteMock, position);
 		const road = new Road(new TilingSprite([{ width: 200, height: 200 } as HTMLImageElement], {width: 20, height: 20}), { x: 1, y: 1 }, 0b0001);
-		const roads = [[undefined, undefined], [undefined, road]];
+		const map = new MapLayer({width: 2, height: 2});
+		map.roads = [[undefined, undefined], [undefined, road]];
 		const randMap = [0, 1];
 
 		actor.directionMask = 0b0001;
 		actor.direction = { x: 1, y: 0 };
-		const result = actor.tick(0.5, roads, randMap);
+		const result = actor.tick(0.5, map, randMap);
 
 		expect(actor.position.x).toBeGreaterThan(1.5);
 		expect(actor.position.y).toBeCloseTo(1.5);
@@ -139,9 +140,10 @@ describe('Actor', () => {
 
 	test('tick should handle the dead state correctly when off-road', () => {
 		const actor = new Actor(spriteMock, position);
-		const roads = [[undefined, undefined], [undefined, undefined]];
+		const map = new MapLayer({width: 2, height: 2});
+		map.roads = [[undefined, undefined], [undefined, undefined]];
 
-		const result = actor.tick(1, roads, []);
+		const result = actor.tick(1, map, []);
 
 		expect(actor.dead).toBe(true);
 		expect(actor.direction).toEqual({ x: 0, y: 0 });
@@ -151,14 +153,15 @@ describe('Actor', () => {
 	test('tick should call getNewDir when directionMask is 0', () => {
 		const actor = new Actor(spriteMock, position);
 		const road = new Road(new TilingSprite([{ width: 200, height: 200 } as HTMLImageElement], {width: 20, height: 20}), { x: 5, y: 5 }, 0b0001);
-		const roads = [[undefined, undefined], [undefined, road]];
+		const map = new MapLayer({width: 2, height: 2});
+		map.roads = [[undefined, undefined], [undefined, road]];
 		const randMap = [0, 1];
 
 		actor.directionMask = 0b0000;
 		actor.direction = { x: 0, y: 0 };
 
 		const spyGetNewDir = jest.spyOn(actor, 'getNewDir');
-		actor.tick(1, roads, randMap);
+		actor.tick(1, map, randMap);
 
 		expect(spyGetNewDir).toHaveBeenCalled();
 	});

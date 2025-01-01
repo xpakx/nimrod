@@ -1,6 +1,5 @@
 import { Actor } from "../actor.js";
-import { Road } from "../buildings.js";
-import { Position } from "../map-layer.js";
+import { MapLayer, Position } from "../map-layer.js";
 
 export class BattleActor extends Actor {
 	enemy: boolean = false;
@@ -15,7 +14,7 @@ export class BattleActor extends Actor {
 	path?: Position[]
 	goal?: Position;
 
-	tick(deltaTime: number, _roads: (Road | undefined)[][], _randMap: number[]): boolean {
+	tick(deltaTime: number, _roads: MapLayer, _randMap: number[]): boolean {
 		return this.move(deltaTime);
 	}
 
