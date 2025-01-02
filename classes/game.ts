@@ -317,6 +317,9 @@ export class Game {
 				this.map.floydWarshall();
 				console.log(this.map.pred);
 				break;
+			case 'F6':
+				this.state.pedestrians.push(new Actor(this.sprites.actors['test'], this.map.isoPlayerMouse));
+				break;
 			case "Escape":
 				this.interf.buildingInterface = undefined;
 				this.map.switchToNormalMode();
