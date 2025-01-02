@@ -27,35 +27,6 @@ export class BattleActor extends Actor {
 		console.log("Ultimate goal:", this.path[0]);
 	}
 
-	reachedGoal(): boolean {
-		if (!this.goal) {
-			return true;
-		}
-		return this.position.x == this.goal.x + 0.5 && this.position.y == this.goal.y + 0.5;
-	}
-
-	updatePosition(deltaX: number, deltaY: number) {
-		let positionX = this.position.x + deltaX;
-		let positionY = this.position.y + deltaY;
-		if (!this.goal) {
-			return;
-		}
-		if (this.position.x < this.goal.x + 0.5 && positionX > this.goal.x + 0.5) {
-			positionX = this.goal.x + 0.5;
-		}
-		else if (this.position.x > this.goal.x + 0.5 && positionX < this.goal.x + 0.5) {
-			positionX = this.goal.x + 0.5;
-		} if (this.position.y < this.goal.y + 0.5 && positionY > this.goal.y + 0.5) {
-			positionY = this.goal.y + 0.5;
-		} else if (this.position.y > this.goal.y + 0.5 && positionY < this.goal.y + 0.5) {
-			positionY = this.goal.y + 0.5;
-		}
-		this.position.x = positionX;
-		this.position.y = positionY;
-		this.positionSquare.x = Math.floor(this.position.x);
-		this.positionSquare.y = Math.floor(this.position.y);
-	}
-
 	nextGoal(): boolean {
 		console.log("new goal");
 		this.goal = this.path?.pop();
