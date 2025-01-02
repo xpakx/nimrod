@@ -724,6 +724,22 @@ export class MapLayer {
 	   this.pred = pred;
 	}
 
+
+	getNextStep(start: Position, target: Position): Position | undefined {
+	   const columns = this.roads[0].length;
+	   function toIndex(x: number, y: number) {
+		   return x * columns + y;
+	   }
+	   function fromIndex(index: number): Position {
+		   return { x: Math.floor(index / columns), y: index % columns };
+	   }
+	   const startIndex = toIndex(start.x, start.y);
+	   const targetIndex = toIndex(target.x, target.y);
+	   const step = this.pred[targetIndex][startIndex];
+	   if (!step) return undefined;
+	   return fromIndex(step);
+	}
+
 }
 
 type PathMap = (Position | undefined)[][];
