@@ -45,6 +45,8 @@ export class Actor {
 	traveledSquares = 0;
 	maxTravel = 30;
         travelFinished = false;
+	home = {x: 0, y: 0};
+	goal?: Position;
 
 	constructor(sprite: ActorSprite, position: Position) {
 		this.sprite =  sprite;
@@ -91,10 +93,9 @@ export class Actor {
 	}
 
 	tick(deltaTime: number, map: MapLayer, randMap: number[]): boolean {
-		console.log("HMM");
 		const roads = map.roads;
 		if(this.travelFinished) {
-			return false;
+			return this.returnToHome(deltaTime, map)
 		}
 		if(!roads[this.positionSquare.y][this.positionSquare.x]) {
 			this.dead = true;
@@ -145,6 +146,64 @@ export class Actor {
 			this.position.y = newY;
 		}
 		return diagonalChanged;
+	}
+
+
+	reachedGoal(): boolean {
+		if (!this.goal) {
+			return true;
+		}
+		return this.position.x == this.goal.x + 0.5 && this.position.y == this.goal.y + 0.5;
+	}
+
+	updatePosition(deltaX: number, deltaY: number) {
+		let positionX = this.position.x + deltaX;
+		let positionY = this.position.y + deltaY;
+		if (!this.goal) {
+			return;
+		}
+		if (this.position.x < this.goal.x + 0.5 && positionX > this.goal.x + 0.5) {
+			positionX = this.goal.x + 0.5;
+		}
+		else if (this.position.x > this.goal.x + 0.5 && positionX < this.goal.x + 0.5) {
+			positionX = this.goal.x + 0.5;
+		} if (this.position.y < this.goal.y + 0.5 && positionY > this.goal.y + 0.5) {
+			positionY = this.goal.y + 0.5;
+		} else if (this.position.y > this.goal.y + 0.5 && positionY < this.goal.y + 0.5) {
+			positionY = this.goal.y + 0.5;
+		}
+		this.position.x = positionX;
+		this.position.y = positionY;
+		this.positionSquare.x = Math.floor(this.position.x);
+		this.positionSquare.y = Math.floor(this.position.y);
+	}
+
+	nextGoal(map: MapLayer): boolean {
+		const step = map.getNextStep(this.positionSquare, this.home);
+		if(!step) {
+			return false;
+		}
+		this.goal = step;
+		this.direction.x = step.x - this.positionSquare.x;
+		this.direction.y = step.y - this.positionSquare.y;
+		return true;
+	}
+
+	returnToHome(deltaTime: number, map: MapLayer): boolean {
+		if(!this.goal || this.reachedGoal()) {
+			const foundGoal = this.nextGoal(map);
+			if (!foundGoal) {
+				this.dead = true;
+				return false;
+			}
+		}
+		this.updatePosition(this.direction.x*deltaTime, this.direction.y*deltaTime);
+
+		if (this.positionSquare.x + this.positionSquare.y != this.diagonal) {
+			this.diagonal = this.positionSquare.x + this.positionSquare.y;
+			return true;
+		}
+		return false;
 	}
 }
 
