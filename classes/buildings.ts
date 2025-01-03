@@ -1,6 +1,6 @@
-import { ActorSprite } from "./actor.js";
+import { Actor, ActorSprite } from "./actor.js";
 import { GameState } from "./game-state.js";
-import { Position, Size } from "./map-layer.js";
+import { MapLayer, Position, Size } from "./map-layer.js";
 
 export interface BuildingPrototype {
 	sprite: BuildingSprite;
@@ -108,14 +108,17 @@ export class Building {
 	}
 }
 
-export class BuildingWorker {
+export class BuildingWorker extends Actor {
 	workerOut: boolean = false;
 	workerTimer: number = 0;
 	workerAt: number = 10;
-	sprite: ActorSprite;
 
 	constructor(sprite: ActorSprite) {
-		this.sprite = sprite;
+		super(sprite, {x: 0, y: 0});
+	}
+
+	tick(deltaTime: number, map: MapLayer, randMap: number[]): boolean {
+		return super.tick(deltaTime, map, randMap);
 	}
 }
 
