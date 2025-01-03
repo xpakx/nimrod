@@ -525,6 +525,14 @@ export class MapLayer {
 		return this.blocked[position.y][position.x];
 	}
 
+	isRoad(position: Position): boolean {
+		return this.roads[position.y][position.x] !== undefined;
+	}
+
+	isBuilding(position: Position): boolean {
+		return this.buildingMap[position.y][position.x] !== undefined;
+	}
+
 	isObstacle(position: Position): boolean {
 		return this.blockedMovement[position.y][position.x];
 	}

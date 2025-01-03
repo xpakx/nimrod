@@ -6,6 +6,7 @@ import { prepareTabs } from "./sidebar.js";
 import { Actor } from "./actor.js";
 import { BattleActor, HeroType } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
+import { BuildingWorker } from "./buildings.js";
 
 export class Game {
 	state: GameState;
@@ -318,7 +319,15 @@ export class Game {
 				console.log(this.map.pred);
 				break;
 			case 'F6':
-				this.state.pedestrians.push(new Actor(this.sprites.actors['test'], this.map.isoPlayerMouse));
+				if (!this.state.debugMode) {
+					break; 
+				}
+				if (this.map.isRoad(this.map.isoPlayerMouse)) {
+					this.state.pedestrians.push(new Actor(this.sprites.actors['test'], this.map.isoPlayerMouse));
+				} else if (this.map.isBuilding(this.map.isoPlayerMouse)) {
+					let building = this.map.getBuilding(this.map.isoPlayerMouse)!;
+					building.setWorker(this.sprites.actors['test']);
+				}
 				break;
 			case "Escape":
 				this.interf.buildingInterface = undefined;
