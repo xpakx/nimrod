@@ -190,6 +190,7 @@ export class Actor {
 	nextGoal(map: MapLayer): boolean {
 		console.log(this.home);
 		const step = map.getNextStep(this.positionSquare, this.home);
+		console.log(this.positionSquare, "=>", this.home, " : ", step);
 		if(!step) {
 			return false;
 		}

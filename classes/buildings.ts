@@ -138,6 +138,7 @@ export class BuildingWorker extends Actor {
 			this.workerOut = false;
 			this.travelFinished = false;
 			this.traveledSquares = 0;
+			this.goal = undefined;
 		}
 		return result;
 	}

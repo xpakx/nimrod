@@ -736,10 +736,10 @@ export class MapLayer {
 	getNextStep(start: Position, target: Position): Position | undefined {
 	   const columns = this.roads[0].length;
 	   function toIndex(x: number, y: number) {
-		   return x * columns + y;
+		   return y * columns + x;
 	   }
 	   function fromIndex(index: number): Position {
-		   return { x: Math.floor(index / columns), y: index % columns };
+		   return { y: Math.floor(index / columns), x: index % columns };
 	   }
 	   const startIndex = toIndex(start.x, start.y);
 	   const targetIndex = toIndex(target.x, target.y);
