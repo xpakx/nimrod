@@ -58,7 +58,7 @@ export class Building {
 	}
 
 	setWorker(sprite: ActorSprite) {
-		this.worker = new BuildingWorker(sprite);
+		this.worker = new BuildingWorker(sprite, this.workerSpawn);
 	}
 
 	calculateSpawn(roads: (Road | undefined)[][]) {
@@ -66,6 +66,7 @@ export class Building {
 				const y = this.position.y - this.sprite.baseSize;
 				if(y >= 0 && roads[y][i]) {
 					this.workerSpawn = {x: i, y: y};
+					this.updateWorkerHome()
 					return;
 				}
 		}
@@ -73,6 +74,7 @@ export class Building {
 				const x = this.position.x + 1;
 				if(x >= 0 && roads[i][x]) {
 					this.workerSpawn = {x: x, y: i};
+					this.updateWorkerHome()
 					return;
 				}
 		}
@@ -81,6 +83,7 @@ export class Building {
 				const y = this.position.y + 1;
 				if(y < roads.length && roads[y][i]) {
 					this.workerSpawn = {x: i, y: y};
+					this.updateWorkerHome()
 					return;
 				}
 		}
@@ -88,10 +91,12 @@ export class Building {
 				const x = this.position.x - this.sprite.baseSize;
 				if(x >= 0 && roads[i][x]) {
 					this.workerSpawn = {x: x, y: i};
+					this.updateWorkerHome()
 					return;
 				}
 		}
 		this.workerSpawn = undefined;
+		this.updateWorkerHome()
 	}
 
 	tick(deltaTime: number): boolean {
@@ -102,9 +107,17 @@ export class Building {
 		if(this.worker.workerTimer >= this.worker.workerAt) {
 			this.worker.workerTimer = 0;
 			this.worker.workerOut = true;
+			this.worker.dead = false;
 			return true;
 		}
 		return false;
+	}
+
+	updateWorkerHome() {
+		if (!this.worker || !this.workerSpawn) {
+			return;
+		}
+		this.worker.home = this.workerSpawn;
 	}
 }
 
@@ -113,12 +126,20 @@ export class BuildingWorker extends Actor {
 	workerTimer: number = 0;
 	workerAt: number = 10;
 
-	constructor(sprite: ActorSprite) {
+	constructor(sprite: ActorSprite, home: Position | undefined) {
 		super(sprite, {x: 0, y: 0});
+		if (home) this.home = home;
 	}
 
 	tick(deltaTime: number, map: MapLayer, randMap: number[]): boolean {
-		return super.tick(deltaTime, map, randMap);
+		const result =  super.tick(deltaTime, map, randMap);
+		if (this.dead) {
+			console.log("i am dead");
+			this.workerOut = false;
+			this.travelFinished = false;
+			this.traveledSquares = 0;
+		}
+		return result;
 	}
 }
 

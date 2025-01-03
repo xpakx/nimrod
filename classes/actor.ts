@@ -43,7 +43,7 @@ export class Actor {
 	direction: Position;
 
 	traveledSquares = 0;
-	maxTravel = 30;
+	maxTravel = 10;
         travelFinished = false;
 	home = {x: 0, y: 0};
 	goal?: Position;
@@ -53,6 +53,14 @@ export class Actor {
 		this.positionSquare = {x: Math.floor(position.x), y: Math.floor(position.y)};
 		this.position = {x: this.positionSquare.x + 0.5, y: this.positionSquare.y + 0.5};
 
+		this.diagonal = this.positionSquare.x + this.positionSquare.y;
+		this.directionMask = 0b0000;
+		this.direction = {x: 0, y: 0};
+	}
+
+	setPosition(position: Position) {
+		this.positionSquare = {x: Math.floor(position.x), y: Math.floor(position.y)};
+		this.position = {x: this.positionSquare.x + 0.5, y: this.positionSquare.y + 0.5};
 		this.diagonal = this.positionSquare.x + this.positionSquare.y;
 		this.directionMask = 0b0000;
 		this.direction = {x: 0, y: 0};
@@ -95,6 +103,7 @@ export class Actor {
 	tick(deltaTime: number, map: MapLayer, randMap: number[]): boolean {
 		const roads = map.roads;
 		if(this.travelFinished) {
+			console.log("going home");
 			return this.returnToHome(deltaTime, map)
 		}
 		if(!roads[this.positionSquare.y][this.positionSquare.x]) {
@@ -179,6 +188,7 @@ export class Actor {
 	}
 
 	nextGoal(map: MapLayer): boolean {
+		console.log(this.home);
 		const step = map.getNextStep(this.positionSquare, this.home);
 		if(!step) {
 			return false;

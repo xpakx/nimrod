@@ -390,8 +390,9 @@ export class Game {
 	calcState(deltaTime: number) {
 		for(let building of this.map.buildings) {
 			const newPedestrian = building.tick(deltaTime);
-			if(newPedestrian && building.workerSpawn) {
-				this.state.pedestrians.push(new Actor(this.sprites.actors['test'], building.workerSpawn));
+			if(newPedestrian && building.workerSpawn && building.worker) {
+				building.worker.setPosition(building.workerSpawn);
+				this.state.pedestrians.push(building.worker);
 			}
 		}
 		const dTime = deltaTime > 0.5 ? 0.5 : deltaTime;
