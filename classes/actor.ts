@@ -100,6 +100,10 @@ export class Actor {
 			}
 	}
 
+	isInCenter(): boolean {
+		return this.positionSquare.x + 0.5 == this.position.x && this.positionSquare.y  + 0.5 == this.position.y
+	}
+
 	tick(deltaTime: number, map: MapLayer, randMap: number[]): boolean {
 		const roads = map.roads;
 		if(this.travelFinished) {
@@ -149,6 +153,11 @@ export class Actor {
 				diagonalChanged = true;
 			} 
 			if(hasStepOverHalf(this.direction, this.positionSquare, this.position, newX, newY)) {
+				if (this.travelFinished) {
+					this.position.x = this.positionSquare.x + 0.5;
+					this.position.y = this.positionSquare.y + 0.5;
+					return diagonalChanged;
+				}
 				this.getNewDir(roads, randMap, x, y);
 			}
 			this.position.x = newX;
@@ -200,7 +209,24 @@ export class Actor {
 		return true;
 	}
 
+	align(deltaTime: number) {
+		const newX = this.position.x + this.direction.x*deltaTime;
+		const newY = this.position.y + this.direction.y*deltaTime;
+		if(hasStepOverHalf(this.direction, this.positionSquare, this.position, newX, newY)) {
+			this.position.x = this.positionSquare.x + 0.5
+			this.position.y = this.positionSquare.y + 0.5
+		} else {
+			this.position.x = newX;
+			this.position.y = newY;
+		}
+	}
+
 	returnToHome(deltaTime: number, map: MapLayer): boolean {
+		if(!this.goal && !this.isInCenter()) {
+			console.log("trying to align");
+			this.align(deltaTime);
+			return false;
+		}
 		if(!this.goal || this.reachedGoal()) {
 			const foundGoal = this.nextGoal(map);
 			if (!foundGoal) {
@@ -212,6 +238,7 @@ export class Actor {
 
 		if (this.positionSquare.x + this.positionSquare.y != this.diagonal) {
 			this.diagonal = this.positionSquare.x + this.positionSquare.y;
+			console.log("i am at ", this.position);
 			return true;
 		}
 		return false;
