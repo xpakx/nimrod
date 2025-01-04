@@ -5,6 +5,7 @@ import { MapLayer, Position, Size } from "./map-layer.js";
 export interface BuildingPrototype {
 	sprite: BuildingSprite;
 	interface: BuildingInterface;
+	name: string;
 }
 
 export class BuildingSprite {
@@ -45,12 +46,14 @@ export class Building {
 	workerSpawn: Position | undefined;
 	worker: BuildingWorker | undefined;
 	interface: BuildingInterface;
+	name: string;
 
 	constructor(prototype: BuildingPrototype, position: Position, accepted: boolean = true) {
 		this.sprite =  prototype.sprite;
 		this.position = position;
 		this.accepted = accepted;
 		this.underCursor = false;
+		this.name = prototype.name;
 
 		const centerA = [Math.floor((position.x + position.x - this.sprite.baseSize + 1)/2), Math.floor((position.y + position.y - this.sprite.baseSize + 1)/2)]
 		this.diagonal = (centerA[0] + centerA[1]);

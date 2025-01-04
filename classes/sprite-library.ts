@@ -19,11 +19,11 @@ export class SpriteLibrary {
 		const inspector = new BuildingSprite(await loadImage("./img/inspector.svg"), 2, tileSize);
 
 
-		this.buildings["ziggurat"] = {sprite: ziggurat, interface: new AdventurersGuildInterface()};
-		this.buildings["home"] = {sprite: home, interface: new BuildingInterface()};
-		this.buildings["tower"] = {sprite: tower, interface: new BuildingInterface()};
-		this.buildings["well"] = {sprite: well, interface: new BuildingInterface()};
-		this.buildings["inspector"] = {sprite: inspector, interface: new BuildingInterface()};
+		this.buildings["ziggurat"] = {sprite: ziggurat, interface: new AdventurersGuildInterface(), name: "ziggurat"};
+		this.buildings["home"] = {sprite: home, interface: new BuildingInterface(), name: "home"};
+		this.buildings["tower"] = {sprite: tower, interface: new BuildingInterface(), name: "tower"};
+		this.buildings["well"] = {sprite: well, interface: new BuildingInterface(), name: "well"};
+		this.buildings["inspector"] = {sprite: inspector, interface: new BuildingInterface(), name: "inspector"};
 		return true;
 	}
 

@@ -191,6 +191,49 @@ export class Game {
 		if (updateDistances) this.map.floydWarshall();
 	}
 
+	serializeMap(): MapData {
+		const roads: RoadData[] = [];
+		const buildings: BuildingData[] = [];
+		const terrain: TerrainData[] = [];
+
+		for (let x = 0; x < this.map.roads.length; x++) {
+			for (let y = 0; y < this.map.roads[0].length; y++) {
+				if (this.map.roads[x][y]) {
+					roads.push({ y: x, x: y }); // TODO: fix indexing for roads
+				}
+			}
+		}
+
+		for (const building of this.map.buildings) {
+			buildings.push({
+				x: building.position.x,
+				y: building.position.y,
+				type: building.name,
+			});
+		}
+
+		for (let x = 0; x < this.map.map.length; x++) {
+			for (let y = 0; y < this.map.map[0].length; y++) {
+				if (this.map.costs[x][y] || this.map.map[x][y]) {
+					terrain.push({
+						x,
+						y,
+						cost: this.map.costs[x][y],
+						color: this.map.map[x][y],
+					});
+				}
+			}
+		}
+
+		return {
+			size: { width: this.map.map.length, height: this.map.map[0].length },
+			roads,
+			buildings,
+			terrain,
+			actors: [],
+		};
+	}
+
 	applyBattle(data: MapData) {
 		if (!this.state.currentBattle) {
 			return;
@@ -217,7 +260,7 @@ export class Game {
 				} else {
 					this.state.currentBattle.heroes.push(pedestrian);
 				}
-				
+
 			}
 		}
 	}
@@ -327,6 +370,17 @@ export class Game {
 				} else if (this.map.isBuilding(this.map.isoPlayerMouse)) {
 					let building = this.map.getBuilding(this.map.isoPlayerMouse)!;
 					building.setWorker(this.sprites.actors['test']);
+				}
+				break;
+			case '1':
+				const mapData = this.serializeMap();
+				localStorage.setItem('savedMap', JSON.stringify(mapData));
+				break;
+			case '2':
+				const savedMapJson = localStorage.getItem('savedMap');
+				if (savedMapJson) {
+				  const savedMap = JSON.parse(savedMapJson);
+				  this.applyMap(savedMap);
 				}
 				break;
 			case "Escape":
