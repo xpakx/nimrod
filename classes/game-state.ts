@@ -36,4 +36,17 @@ export class GameState {
 			return a.diagonal - b.diagonal;
 		});
 	}
+
+	insertPedestrian(pedestrian: Actor) {
+		let low = 0, high = this.pedestrians.length;
+		while (low < high) {
+			const mid = Math.floor((low + high) / 2)
+			if (this.pedestrians[mid].diagonal < pedestrian.diagonal) {
+				low = mid + 1;
+			} else {
+				high = mid;
+			}
+		}
+		this.pedestrians.splice(low, 0, pedestrian);
+	}
 }

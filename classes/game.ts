@@ -388,15 +388,14 @@ export class Game {
 
 
 	calcState(deltaTime: number) {
-		let diagonalChanged = false;
 		for(let building of this.map.buildings) {
 			const newPedestrian = building.tick(deltaTime);
 			if(newPedestrian && building.workerSpawn && building.worker) {
 				building.worker.setPosition(building.workerSpawn);
-				this.state.pedestrians.push(building.worker);
-				diagonalChanged = true;
+				this.state.insertPedestrian(building.worker);
 			}
 		}
+		let diagonalChanged = false;
 		const dTime = deltaTime > 0.5 ? 0.5 : deltaTime;
 
 		let randMap = [
