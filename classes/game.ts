@@ -395,7 +395,6 @@ export class Game {
 				this.state.insertPedestrian(building.worker);
 			}
 		}
-		let diagonalChanged = false;
 		const dTime = deltaTime > 0.5 ? 0.5 : deltaTime;
 
 		let randMap = [
@@ -403,12 +402,13 @@ export class Game {
 			Math.floor(Math.random() * 3),
 			Math.floor(Math.random() * 4),
 		]
-		for(let pedestrian of this.state.pedestrians) {
-			diagonalChanged ||= pedestrian.tick(dTime, this.map, randMap);
-		}
-		this.state.pedestrians = this.state.pedestrians.filter((p) => !p.dead);
-		if(diagonalChanged) {
-			this.state.sortPedestrians(); // TODO: more efficient way?
+		let pedestrians = this.state.pedestrians;
+		this.state.pedestrians = [];
+		for(let pedestrian of pedestrians) {
+			pedestrian.tick(dTime, this.map, randMap);
+			if (!pedestrian.dead) {
+				this.state.insertPedestrian(pedestrian);
+			}
 		}
 	}
 
