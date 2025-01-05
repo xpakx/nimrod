@@ -78,7 +78,7 @@ export class Game {
 			this.map.deleteBuilding(this.map.isoPlayerMouse);
 			if (this.map.isRoad(this.map.isoPlayerMouse)) {
 				this.map.deleteRoad(this.map.isoPlayerMouse);
-				this.map.floydWarshall(); // TODO: optimize
+				this.map.updateAfterDeletion(this.map.isoPlayerMouse); // TODO: optimize
 			}
 		} else if(this.map.roadMode) {
 			this.map.putRoad(this.map.isoPlayerMouse, this.sprites.getRoad());

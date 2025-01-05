@@ -732,20 +732,68 @@ export class MapLayer {
 	   this.pred = pred;
 	}
 
+	updateAfterDeletion(pos: Position) {
+		const rows = this.roads.length;
+		const columns = this.roads[0].length;
+		function toIndex(x: number, y: number) {
+			return x * columns + y;
+		}
+		const k = toIndex(pos.y, pos.x); // this is intended; TODO: fix problem with road tables being reversed
+
+		let roadsToCheck = [];
+		for (let x = 0; x < rows; x++) {
+			for (let y = 0; y < columns; y++) {
+				if (this.roads[x][y]) {
+					const u = toIndex(x, y);
+					roadsToCheck.push(u);
+				}
+			}
+		}
+		roadsToCheck.push(k);
+		let roadsToUpdate = [];
+
+		for (let u of roadsToCheck) {
+			for (let v of roadsToCheck) {
+				if (u === k || v === k) {
+					this.dist[u][v] = Infinity; // no path through deleted node
+					this.pred[u][v] = undefined;
+					console.log(`invalidated path (${u}, ${v})`);
+				} 
+				else if (this.dist[u][v] === this.dist[u][k] + this.dist[k][v]) {
+					roadsToUpdate.push([u,v]);
+					this.dist[u][v] = Infinity;
+					this.pred[u][v] = undefined;
+				}
+			}
+		}
+		roadsToCheck.pop();
+		for (let road of roadsToUpdate) {
+			let [u, v] = road;
+			console.log(`recomputing path (${u}, ${v})`); // debug
+			for (let w of roadsToCheck) {
+				if (this.dist[u][w] + this.dist[w][v] < this.dist[u][v]) {
+					this.dist[u][v] = this.dist[u][w] + this.dist[w][v];
+					this.pred[u][v] = this.pred[w][v];
+					console.log(`updated path (${u}, ${v}) via ${w}`); // debug
+				}
+			}
+		}
+	}
+
 
 	getNextStep(start: Position, target: Position): Position | undefined {
-	   const columns = this.roads[0].length;
-	   function toIndex(x: number, y: number) {
-		   return y * columns + x;
-	   }
-	   function fromIndex(index: number): Position {
-		   return { y: Math.floor(index / columns), x: index % columns };
-	   }
-	   const startIndex = toIndex(start.x, start.y);
-	   const targetIndex = toIndex(target.x, target.y);
-	   const step = this.pred[targetIndex][startIndex];
-	   if (!step) return undefined;
-	   return fromIndex(step);
+		const columns = this.roads[0].length;
+		function toIndex(x: number, y: number) {
+			return y * columns + x;
+		}
+		function fromIndex(index: number): Position {
+			return { y: Math.floor(index / columns), x: index % columns };
+		}
+		const startIndex = toIndex(start.x, start.y);
+		const targetIndex = toIndex(target.x, target.y);
+		const step = this.pred[targetIndex][startIndex];
+		if (!step) return undefined;
+		return fromIndex(step);
 	}
 
 }
