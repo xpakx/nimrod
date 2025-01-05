@@ -766,6 +766,7 @@ export class MapLayer {
 				}
 			}
 		}
+		this.dist[k][k] = 0;
 		roadsToCheck.pop();
 		for (let road of roadsToUpdate) {
 			let [u, v] = road;
@@ -778,6 +779,57 @@ export class MapLayer {
 				}
 			}
 		}
+	}
+
+	updateAfterAddition(pos: Position) {
+		const rows = this.roads.length;
+		const columns = this.roads[0].length;
+		function toIndex(x: number, y: number) {
+			return x * columns + y;
+		}
+		const k = toIndex(pos.y, pos.x); // this is intended; TODO: fix problem with road tables being reversed
+
+		let roadsToCheck = [];
+		for (let x = 0; x < rows; x++) {
+			for (let y = 0; y < columns; y++) {
+				if (this.roads[x][y]) {
+					const u = toIndex(x, y);
+					roadsToCheck.push(u);
+				}
+			}
+		}
+
+		const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+		for (const [dx, dy] of directions) {
+			const nx = pos.y + dx;
+			const ny = pos.x + dy;
+			if (nx >= 0 && nx < rows && ny >= 0 && ny < columns && this.roads[nx][ny]) {
+				const u = k;
+				const v = toIndex(nx, ny);
+				this.dist[u][v] = 1;
+				this.pred[u][v] = u;
+				this.dist[v][u] = 1;
+				this.pred[v][u] = v;
+			}
+		}
+
+		for (let u of roadsToCheck) {
+			for (let v of roadsToCheck) {
+				if (this.dist[u][k] + this.dist[k][v] < this.dist[u][v]) {
+					this.dist[u][v] = this.dist[u][k] + this.dist[k][v];
+					this.pred[u][v] = this.pred[k][v];
+				}
+				if (this.dist[k][u] + this.dist[u][v] < this.dist[k][v]) {
+					this.dist[k][v] = this.dist[k][u] + this.dist[u][v];
+					this.pred[k][v] = this.pred[u][v];
+				}
+				if (this.dist[u][v] + this.dist[v][k] < this.dist[u][k]) {
+					this.dist[u][k] = this.dist[u][v] + this.dist[v][k];
+					this.pred[u][k] = this.pred[v][k];
+				}
+			}
+		}
+		console.log(this.pred);
 	}
 
 

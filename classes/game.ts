@@ -82,7 +82,7 @@ export class Game {
 			}
 		} else if(this.map.roadMode) {
 			this.map.putRoad(this.map.isoPlayerMouse, this.sprites.getRoad());
-			this.map.floydWarshall(); // TODO: optimize
+			this.map.updateAfterAddition(this.map.isoPlayerMouse); // TODO: optimize
 		} else {
 			const building = this.map.getCurrentBuilding();
 			if (building) {
