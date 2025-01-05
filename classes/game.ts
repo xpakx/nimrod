@@ -76,9 +76,13 @@ export class Game {
 			this.map.finalizeBuildingPlacement(this.map.isoPlayerMouse);
 		} else if(this.map.deleteMode) {
 			this.map.deleteBuilding(this.map.isoPlayerMouse);
-			this.map.deleteRoad(this.map.isoPlayerMouse);
+			if (this.map.isRoad(this.map.isoPlayerMouse)) {
+				this.map.deleteRoad(this.map.isoPlayerMouse);
+				this.map.floydWarshall(); // TODO: optimize
+			}
 		} else if(this.map.roadMode) {
 			this.map.putRoad(this.map.isoPlayerMouse, this.sprites.getRoad());
+			this.map.floydWarshall(); // TODO: optimize
 		} else {
 			const building = this.map.getCurrentBuilding();
 			if (building) {
