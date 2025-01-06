@@ -251,6 +251,8 @@ export class Game {
 				let pedestrian = new BattleActor(sprite, {x: actor.x, y: actor.y}); 
 				if (actor.enemy === false || actor.enemy === undefined) {
 					pedestrian.enemy = false;
+				} else {
+					pedestrian.enemy = true;
 				}
 				pedestrian.name = actor.name;
 				pedestrian.movement = actor.movement;
