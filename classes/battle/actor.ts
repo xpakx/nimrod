@@ -18,6 +18,9 @@ export class BattleActor extends Actor {
 	}
 
 	setPath(path: Position[]) {
+		if (this.goal) {
+			return;
+		}
 		this.path = path;
 		this.path.reverse();
 		this.path.pop();
