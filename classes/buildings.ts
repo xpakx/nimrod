@@ -103,13 +103,13 @@ export class Building {
 	}
 
 	tick(deltaTime: number): boolean {
-		if(!this.worker || this.worker.workerOut || !this.workerSpawn) {
+		if(!this.worker || this.worker.isAwayFromHome || !this.workerSpawn) {
 			return false;
 		}
-		this.worker.workerTimer += deltaTime;
-		if(this.worker.workerTimer >= this.worker.workerAt) {
-			this.worker.workerTimer = 0;
-			this.worker.workerOut = true;
+		this.worker.timeSinceLastReturn += deltaTime;
+		if(this.worker.timeSinceLastReturn >= this.worker.workStartTime) {
+			this.worker.timeSinceLastReturn = 0;
+			this.worker.isAwayFromHome = true;
 			this.worker.dead = false;
 			return true;
 		}
@@ -122,12 +122,27 @@ export class Building {
 		}
 		this.worker.home = this.workerSpawn;
 	}
+
+	storage: { [key: string]: number } = { "water": 0 }; // TODO
+	capacity: number = 20;
+	supply(worker: BuildingWorker, resource: string, inventory: number): number {
+		if (this.storage.hasOwnProperty(resource) && inventory > 0 && this.storage[resource] < this.capacity) {
+			const amount = Math.min(inventory, this.capacity - this.storage[resource]);
+			this.storage[resource] += amount;
+			console.log(`${worker.name} supplied ${amount} ${resource} to ${this.name} at (${this.position.x}, ${this.position.y})`);
+			return amount;
+		}
+		console.log(`${worker.name} visited ${this.name} at (${this.position.x}, ${this.position.y})`);
+		return 0;
+	}
 }
 
 export class BuildingWorker extends Actor {
-	workerOut: boolean = false;
-	workerTimer: number = 0;
-	workerAt: number = 10;
+	isAwayFromHome: boolean = false;
+	timeSinceLastReturn: number = 0;
+	workStartTime: number = 10;
+	resource: string = "water";
+	inventory: number = 50;
 
 	constructor(sprite: ActorSprite, home: Position | undefined) {
 		super(sprite, {x: 0, y: 0});
@@ -135,15 +150,42 @@ export class BuildingWorker extends Actor {
 	}
 
 	tick(deltaTime: number, map: MapLayer, randMap: number[]): boolean {
+		let [x, y] = [this.positionSquare.x, this.positionSquare.y];
 		const result =  super.tick(deltaTime, map, randMap);
-		if (this.dead) {
-			console.log("i am dead");
-			this.workerOut = false;
-			this.travelFinished = false;
-			this.traveledSquares = 0;
-			this.goal = undefined;
+		this.handleDeath();
+		if (x != this.positionSquare.x || y != this.positionSquare.y) {
+			this.visitBuildings(map);
 		}
 		return result;
+	}
+
+	handleDeath() {
+		if (!this.dead) {
+			return;
+		}
+		// console.log("i am dead");
+		this.isAwayFromHome = false;
+		this.travelFinished = false;
+		this.traveledSquares = 0;
+		this.goal = undefined;
+	}
+
+	visitBuildings(map: MapLayer) {
+		if (this.inventory == 0) {
+			return;
+		}
+		const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+		for (const [dx, dy] of directions) {
+			const pos = {x: this.positionSquare.x + dx, y: this.positionSquare.y + dy};
+			const building = map.getBuilding(pos);
+			if (building) {
+				this.work(building);
+			}
+		}
+	}
+
+	work(building: Building) {
+		this.inventory -= building.supply(this, this.resource, this.inventory);
 	}
 }
 

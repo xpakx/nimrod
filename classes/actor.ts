@@ -38,6 +38,7 @@ export class Actor {
 	positionSquare: Position;
 	diagonal: number;
 	dead: boolean = false;
+	name: String = "actor";
 
 	directionMask: number;
 	direction: Position;
@@ -197,9 +198,8 @@ export class Actor {
 	}
 
 	nextGoal(map: MapLayer): boolean {
-		console.log(this.home);
 		const step = map.getNextStep(this.positionSquare, this.home);
-		console.log(this.positionSquare, "=>", this.home, " : ", step);
+		// console.log(this.positionSquare, "=>", this.home, " : ", step);
 		if(!step) {
 			return false;
 		}
@@ -223,7 +223,7 @@ export class Actor {
 
 	returnToHome(deltaTime: number, map: MapLayer): boolean {
 		if(!this.goal && !this.isInCenter()) {
-			console.log("trying to align");
+			// console.log("trying to align");
 			this.align(deltaTime);
 			return false;
 		}
@@ -238,7 +238,6 @@ export class Actor {
 
 		if (this.positionSquare.x + this.positionSquare.y != this.diagonal) {
 			this.diagonal = this.positionSquare.x + this.positionSquare.y;
-			console.log("i am at ", this.position);
 			return true;
 		}
 		return false;
