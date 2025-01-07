@@ -241,6 +241,10 @@ export class Game {
 		};
 	}
 
+	isPlacedActor(obj: UnplacedActorData): obj is ActorData {
+		return 'x' in obj && 'y' in obj;
+	}
+
 	applyBattle(data: BattleMapData) {
 		if (!this.state.currentBattle) {
 			return;
@@ -251,7 +255,13 @@ export class Game {
 		if (data.actors) {
 			for (let actor of data.actors) {
 				const sprite = this.sprites.actors[actor.image];
-				let pedestrian = new BattleActor(sprite, {x: actor.x, y: actor.y}); 
+				let [x, y] = [0, 0];
+				let toPlace = false;
+				if (this.isPlacedActor(actor)) {
+					[x, y] = [actor.x, actor.y];
+					toPlace = true;
+				} 
+				let pedestrian = new BattleActor(sprite, {x: x, y: y}); 
 				if (actor.enemy === false || actor.enemy === undefined) {
 					pedestrian.enemy = false;
 				} else {
@@ -268,6 +278,10 @@ export class Game {
 					this.state.currentBattle.enemies.push(pedestrian);
 				} else {
 					this.state.currentBattle.heroes.push(pedestrian);
+					if (toPlace) {
+						pedestrian.placed = true;
+						this.state.pedestrians.push(pedestrian);
+					}
 				}
 
 			}
@@ -682,12 +696,14 @@ export class Game {
 		const battle = this.state.currentBattle;
 		const x = this.map.isoPlayerMouse.x;
 		const y = this.map.isoPlayerMouse.y;
+		while(battle.heroes[this.tempBattleIndex].placed) {
+			this.tempBattleIndex += 1;
+		}
 		const placed = battle.placeHero(this.tempBattleIndex, {x: x, y: y});
 		if (!placed) {
 			return;
 		}
 		this.state.pedestrians.push(battle.heroes[this.tempBattleIndex]);
-		this.tempBattleIndex += 1;
 
 		battle.finishPlacement();
 		console.log(this.tempBattleIndex, this.state.currentBattle.battleStarted);
@@ -709,7 +725,7 @@ export interface BattleMapData {
 	roads: RoadData[];
 	buildings: BuildingData[];
 	terrain: TerrainData[];
-	actors: ActorData[];
+	actors: (ActorData | UnplacedActorData)[];
 	spawns: Position[] | undefined;
 }
 
@@ -731,9 +747,13 @@ interface TerrainData {
 	cost?: number;
 }
 
-interface ActorData {
+interface ActorData extends UnplacedActorData {
 	x: number;
 	y: number;
+}
+
+
+interface UnplacedActorData {
 	enemy?: boolean;
 	name: string;
 	movement: number;
