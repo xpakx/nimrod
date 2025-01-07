@@ -64,7 +64,12 @@ export class Game {
 				this.leftMouseCity();
 				break;
 			case "Battle":
-				this.leftMouseBattle();
+				if (this.state.currentBattle?.battleStarted) {
+					this.leftMouseBattle();
+				} else {
+					this.leftMouseBattle();
+					this.leftMouseBattlePrep();
+				}
 				break;
 		}
 	}
@@ -259,8 +264,8 @@ export class Game {
 				if (actor.type) {
 					pedestrian.type = actor.type;
 				}
-				this.state.pedestrians.push(pedestrian);
 				if(pedestrian.enemy) {
+					this.state.pedestrians.push(pedestrian);
 					this.state.currentBattle.enemies.push(pedestrian);
 				} else {
 					this.state.currentBattle.heroes.push(pedestrian);
@@ -662,6 +667,31 @@ export class Game {
 		if (dist <= actor.movement && path) {
 			actor.setPath(path.map((x) => x.position));
 		}
+	}
+
+	tempBattleIndex: number = 0; // TODO
+	leftMouseBattlePrep() {
+		if (!this.state.currentBattle) {
+			return;
+		}
+		if (!this.map.isTileOnMap(this.map.isoPlayerMouse)) {
+			return;
+		}
+		if (this.map.isBlocked(this.map.isoPlayerMouse)) {
+			return;
+		}
+		const battle = this.state.currentBattle;
+		const x = this.map.isoPlayerMouse.x;
+		const y = this.map.isoPlayerMouse.y;
+		const placed = battle.placeHero(this.tempBattleIndex, {x: x, y: y});
+		if (!placed) {
+			return;
+		}
+		this.state.pedestrians.push(battle.heroes[this.tempBattleIndex]);
+		this.tempBattleIndex += 1;
+
+		battle.finishPlacement();
+		console.log(this.tempBattleIndex, this.state.currentBattle.battleStarted);
 	}
 }
 
