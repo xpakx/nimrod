@@ -167,6 +167,7 @@ export class BuildingWorker extends Actor {
 		this.isAwayFromHome = false;
 		this.travelFinished = false;
 		this.traveledSquares = 0;
+		this.inventory = 50; // TODO
 		this.goal = undefined;
 	}
 
@@ -185,7 +186,12 @@ export class BuildingWorker extends Actor {
 	}
 
 	work(building: Building) {
+		if (this.inventory == 0) return;
 		this.inventory -= building.supply(this, this.resource, this.inventory);
+		if (this.inventory <= 0) {
+			this.travelFinished = true;
+			console.log(`${this.name} is out of ${this.resource}, heading home`);
+		}
 	}
 }
 
@@ -203,7 +209,7 @@ export class Road {
 		this.position = position;
 		this.accepted = accepted;
 	}
-	
+
 	xorDir(dir: number) {
 		this.direction ^= dir;
 		this.sprite = this.sprites.sprites[this.direction];
@@ -250,5 +256,5 @@ export class BuildingInterface {
 		context.fillStyle = '#fff';
 		context.font = '16px Arial';
 	}
-	
+
 }
