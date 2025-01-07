@@ -26,5 +26,11 @@
 	"actors": [
 		{"x": 1, "y": 9, "name": "Test Soldier", "movement": 5, "hp": 100, "image": "test"},
 		{"x": 9, "y": 9, "name": "Test Goblin", "movement": 4, "hp": 20, "image": "test", "enemy": true}
+	],
+	"spawns": [
+		{"x": 0, "y": 0},
+		{"x": 1, "y": 0},
+		{"x": 0, "y": 1},
+		{"x": 1, "y": 1}
 	]
 }

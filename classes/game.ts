@@ -6,7 +6,6 @@ import { prepareTabs } from "./sidebar.js";
 import { Actor } from "./actor.js";
 import { BattleActor, HeroType } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
-import { BuildingWorker } from "./buildings.js";
 
 export class Game {
 	state: GameState;
@@ -238,7 +237,7 @@ export class Game {
 		};
 	}
 
-	applyBattle(data: MapData) {
+	applyBattle(data: BattleMapData) {
 		if (!this.state.currentBattle) {
 			return;
 		}
@@ -268,6 +267,11 @@ export class Game {
 				}
 
 			}
+		}
+
+		this.state.currentBattle.playerSpawns = [];
+		if (data.spawns) {
+			this.state.currentBattle.playerSpawns = data.spawns;
 		}
 	}
 
@@ -661,12 +665,23 @@ export class Game {
 	}
 }
 
-export interface MapData {
+export type MapData = CityMapData | BattleMapData;
+
+export interface CityMapData {
 	size: Size;
 	roads: RoadData[];
 	buildings: BuildingData[];
 	terrain: TerrainData[];
 	actors: ActorData[];
+}
+
+export interface BattleMapData {
+	size: Size;
+	roads: RoadData[];
+	buildings: BuildingData[];
+	terrain: TerrainData[];
+	actors: ActorData[];
+	spawns: Position[] | undefined;
 }
 
 interface RoadData {

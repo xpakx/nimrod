@@ -1,7 +1,7 @@
 import { Actor } from "./actor.js";
 import { BattleActor } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
-import { MapData } from "./game.js";
+import { BattleMapData } from "./game.js";
 import { Position } from "./map-layer.js";
 
 export type View = "City" | "World" | "Battle" | "Kingdom" | "Menu";
@@ -25,7 +25,7 @@ export class GameState {
 	public population: number = 10;
 	public currentBattle?: Battle;
 
-	public tempBattleData?: MapData;
+	public tempBattleData?: BattleMapData;
 
 	// TODO: controlled by specific building
 	public team: BattleActor[] = [];
