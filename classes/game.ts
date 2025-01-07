@@ -67,7 +67,6 @@ export class Game {
 				if (this.state.currentBattle?.battleStarted) {
 					this.leftMouseBattle();
 				} else {
-					this.leftMouseBattle();
 					this.leftMouseBattlePrep();
 				}
 				break;

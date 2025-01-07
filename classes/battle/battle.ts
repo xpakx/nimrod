@@ -36,18 +36,13 @@ export class Battle {
 	}
 
 	placeHero(num: number, pos: Position): boolean {
-		console.log(num);
-		console.log(pos);
 		if(this.battleStarted) {
-			console.log("Started already");
 			return false;
 		}
 		if (num < 0 || num >= this.heroes.length) {
-			console.log("Not a hero");
 			return false;
 		}
 		if (!this.isInSpawn(pos)) {
-			console.log("Not a spawn");
 			return false;
 		}
 		let hero = this.heroes[num];
