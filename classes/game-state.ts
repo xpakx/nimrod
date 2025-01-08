@@ -21,7 +21,7 @@ export class GameState {
 	public debugMode = false;
 	public prevTimestamp = 0;
 	public dts: number[] = [];
-	public money: number = 5000;
+	public money: number = 500;
 	public population: number = 10;
 	public currentBattle?: Battle;
 
