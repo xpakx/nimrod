@@ -77,8 +77,8 @@ export class Game {
 		if(this.map.mode) {
 			if (this.state.money < this.map.mode.cost) return;
 			this.state.money -= this.map.mode.cost;
-			this.map.tooCostly = this.state.money < this.map.mode.cost;
 			this.map.putBuilding(this.map.isoPlayerMouse, this.map.mode, false);
+			this.checkCost();
 			this.map.finalizeBuildingPlacement(this.map.isoPlayerMouse);
 		} else if(this.map.deleteMode) {
 			this.map.deleteBuilding(this.map.isoPlayerMouse);
@@ -89,8 +89,8 @@ export class Game {
 		} else if(this.map.roadMode) {
 			if (this.state.money < 2) return;
 			this.state.money -= 2;
-			this.map.tooCostly = this.state.money < 2;
 			this.map.putRoad(this.map.isoPlayerMouse, this.sprites.getRoad());
+			this.checkCost();
 			this.map.updateAfterAddition(this.map.isoPlayerMouse); // TODO: optimize
 		} else {
 			const building = this.map.getCurrentBuilding();
@@ -98,6 +98,16 @@ export class Game {
 				this.interf.buildingInterface = building.interface;
 				building.interface.open(this.state);
 			}
+		}
+	}
+
+	checkCost() {
+		if(this.map.mode) {
+			this.map.tooCostly = this.state.money < this.map.mode.cost;
+			console.log("too costly:", this.map.tooCostly);
+		} else if (this.map.roadMode) {
+			this.map.tooCostly = this.state.money < 2;
+			console.log("too costly:", this.map.tooCostly);
 		}
 	}
 
@@ -117,12 +127,10 @@ export class Game {
 		if(clickResult.action == "build" && clickResult.argument != undefined) {
 			const clickedBuilding = sprites.buildings[clickResult.argument];
 			if (clickedBuilding) map.switchToBuildMode(clickedBuilding);
-			if (this.map.mode) {
-				this.map.tooCostly = this.state.money < this.map.mode.cost;
-			}
+			this.checkCost();
 		} else if(clickResult.action == "buildRoad") {
 			map.switchToRoadMode(sprites.getRoad());
-			this.map.tooCostly = this.state.money < 2;
+			this.checkCost();
 		} else if(clickResult.action == "delete") {
 			map.switchToDeleteMode();
 		} 
@@ -420,6 +428,10 @@ export class Game {
 				  const savedMap = JSON.parse(savedMapJson);
 				  this.applyMap(savedMap);
 				}
+				break;
+			case '3':
+				this.state.money += 500;
+				this.checkCost();
 				break;
 			case "Escape":
 				this.interf.buildingInterface = undefined;
