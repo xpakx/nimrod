@@ -75,6 +75,7 @@ export class Game {
 
 	leftMouseCity() {
 		if(this.map.mode) {
+			this.state.money -= this.map.mode.cost;
 			this.map.putBuilding(this.map.isoPlayerMouse, this.map.mode, false);
 			this.map.finalizeBuildingPlacement(this.map.isoPlayerMouse);
 		} else if(this.map.deleteMode) {
@@ -84,6 +85,7 @@ export class Game {
 				this.map.updateAfterDeletion(this.map.isoPlayerMouse); // TODO: optimize
 			}
 		} else if(this.map.roadMode) {
+			this.state.money -= 2;
 			this.map.putRoad(this.map.isoPlayerMouse, this.sprites.getRoad());
 			this.map.updateAfterAddition(this.map.isoPlayerMouse); // TODO: optimize
 		} else {

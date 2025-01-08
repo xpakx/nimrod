@@ -6,6 +6,7 @@ export interface BuildingPrototype {
 	sprite: BuildingSprite;
 	interface: BuildingInterface;
 	name: string;
+	cost: number;
 }
 
 export class BuildingSprite {
