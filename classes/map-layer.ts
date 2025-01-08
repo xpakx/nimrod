@@ -14,6 +14,7 @@ export class MapLayer {
 	isDragging: boolean = false;
 	dragStart: Position = {x: 0, y: 0};
 	mode: BuildingPrototype | undefined = undefined;
+	tooCostly: boolean = false;
 	deleteMode: boolean = false;
 	roadMode: TilingSprite | undefined = undefined;
 
@@ -247,6 +248,9 @@ export class MapLayer {
 	}
 
 	canBePlaced(position: Position, sprite: BuildingSprite): boolean {
+		if (this.tooCostly) {
+			return false;
+		}
 		const x = position.x;
 		const lowX = x - sprite.baseSize;
 		const y = position.y;
@@ -268,6 +272,9 @@ export class MapLayer {
 	}
 
 	roadCanBePlaced(position: Position): boolean {
+		if (this.tooCostly) {
+			return false;
+		}
 		const x = position.x;
 		const y = position.y;
 		if(x >= this.blocked[0].length || y >= this.blocked.length) {

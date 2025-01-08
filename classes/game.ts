@@ -75,10 +75,9 @@ export class Game {
 
 	leftMouseCity() {
 		if(this.map.mode) {
-			if (this.state.money < this.map.mode.cost) {
-				return;
-			}
+			if (this.state.money < this.map.mode.cost) return;
 			this.state.money -= this.map.mode.cost;
+			this.map.tooCostly = this.state.money < this.map.mode.cost;
 			this.map.putBuilding(this.map.isoPlayerMouse, this.map.mode, false);
 			this.map.finalizeBuildingPlacement(this.map.isoPlayerMouse);
 		} else if(this.map.deleteMode) {
@@ -88,10 +87,9 @@ export class Game {
 				this.map.updateAfterDeletion(this.map.isoPlayerMouse); // TODO: optimize
 			}
 		} else if(this.map.roadMode) {
-			if (this.state.money < 2) {
-				return;
-			}
+			if (this.state.money < 2) return;
 			this.state.money -= 2;
+			this.map.tooCostly = this.state.money < 2;
 			this.map.putRoad(this.map.isoPlayerMouse, this.sprites.getRoad());
 			this.map.updateAfterAddition(this.map.isoPlayerMouse); // TODO: optimize
 		} else {
@@ -119,8 +117,12 @@ export class Game {
 		if(clickResult.action == "build" && clickResult.argument != undefined) {
 			const clickedBuilding = sprites.buildings[clickResult.argument];
 			if (clickedBuilding) map.switchToBuildMode(clickedBuilding);
+			if (this.map.mode) {
+				this.map.tooCostly = this.state.money < this.map.mode.cost;
+			}
 		} else if(clickResult.action == "buildRoad") {
 			map.switchToRoadMode(sprites.getRoad());
+			this.map.tooCostly = this.state.money < 2;
 		} else if(clickResult.action == "delete") {
 			map.switchToDeleteMode();
 		} 
