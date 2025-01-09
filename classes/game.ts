@@ -495,18 +495,15 @@ export class Game {
 
 	calcState(deltaTime: number) {
 		this.minuteCounter += deltaTime;
-		let minuteEnded = false;
-		if(this.minuteCounter >= 60) {
-			this.minuteCounter = 0;
-			minuteEnded = true;
-		}
+		let minuteEnded = this.minuteCounter >= 60;
+		if(minuteEnded) this.minuteCounter = 0;
 		for(let building of this.map.buildings) {
-			const newPedestrian = building.tick(deltaTime);
-			if(newPedestrian && building.workerSpawn && building.worker) {
-				building.worker.setPosition(building.workerSpawn);
-				this.state.insertPedestrian(building.worker);
+			building.tick(deltaTime);
+			if(building.canSpawnWorker()) {
+				const worker = building.spawnWorker();
+				this.state.insertPedestrian(worker);
 			}
-			if(minuteEnded) building.minuteEnd(this.state);
+			if(minuteEnded) building.onMinuteEnd(this.state);
 		}
 		const dTime = deltaTime > 0.5 ? 0.5 : deltaTime;
 

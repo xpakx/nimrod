@@ -49,6 +49,7 @@ export class Building {
 	interface: BuildingInterface;
 	name: string;
 	health: number = 100;
+	readyToSpawn: boolean = false;;
 
 	constructor(prototype: BuildingPrototype, position: Position, accepted: boolean = true) {
 		this.sprite =  prototype.sprite;
@@ -104,7 +105,7 @@ export class Building {
 		this.updateWorkerHome()
 	}
 
-	tick(deltaTime: number): boolean {
+	tick(deltaTime: number) {
 		if(!this.worker || this.worker.isAwayFromHome || !this.workerSpawn) {
 			return false;
 		}
@@ -113,9 +114,20 @@ export class Building {
 			this.worker.timeSinceLastReturn = 0;
 			this.worker.isAwayFromHome = true;
 			this.worker.dead = false;
-			return true;
+			this.readyToSpawn = true;
 		}
-		return false;
+	}
+
+	canSpawnWorker(): boolean {
+		return this.readyToSpawn && this.workerSpawn != undefined && this.worker != undefined;
+	}
+
+	spawnWorker(): BuildingWorker {
+		const worker = this.worker!;
+		const spawn = this.workerSpawn!;
+		worker.setPosition(spawn);
+		this.readyToSpawn = false;
+		return worker;
 	}
 
 	updateWorkerHome() {
@@ -138,7 +150,7 @@ export class Building {
 		return 0;
 	}
 
-	minuteEnd(_state: GameState) {
+	onMinuteEnd(_state: GameState) {
 		this.health = Math.max(this.health - 2, 0);
 		console.log(`${this.name} health is ${this.health} at (${this.position.x}, ${this.position.y})`);
 
