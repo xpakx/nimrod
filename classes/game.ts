@@ -15,6 +15,7 @@ export class Game {
 	maxYOffset: number;
 	minXOffset: number;
 	maxXOffset: number;
+	minuteCounter: number;
 
 	constructor() {
 		this.state = new GameState();
@@ -29,6 +30,7 @@ export class Game {
 		this.maxYOffset = this.map.isoToScreen({x: this.map.map[0].length - 1, y: this.map.map.length - 1}).y + (this.map.tileSize.height/2);
 		this.minXOffset = this.map.isoToScreen({x: 0, y: this.map.map.length - 1}).x  - (this.map.tileSize.width/2);
 		this.maxXOffset = this.map.isoToScreen({x: this.map.map[0].length - 1, y: 0}).x  + (this.map.tileSize.width/2);
+		this.minuteCounter = 0;
 	}
 
 	async prepareAssets() {
@@ -492,12 +494,19 @@ export class Game {
 
 
 	calcState(deltaTime: number) {
+		this.minuteCounter += deltaTime;
+		let minuteEnded = false;
+		if(this.minuteCounter >= 60) {
+			this.minuteCounter = 0;
+			minuteEnded = true;
+		}
 		for(let building of this.map.buildings) {
 			const newPedestrian = building.tick(deltaTime);
 			if(newPedestrian && building.workerSpawn && building.worker) {
 				building.worker.setPosition(building.workerSpawn);
 				this.state.insertPedestrian(building.worker);
 			}
+			if(minuteEnded) building.minuteEnd(this.state);
 		}
 		const dTime = deltaTime > 0.5 ? 0.5 : deltaTime;
 

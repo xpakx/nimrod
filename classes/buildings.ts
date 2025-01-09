@@ -48,6 +48,7 @@ export class Building {
 	worker: BuildingWorker | undefined;
 	interface: BuildingInterface;
 	name: string;
+	health: number = 100;
 
 	constructor(prototype: BuildingPrototype, position: Position, accepted: boolean = true) {
 		this.sprite =  prototype.sprite;
@@ -135,6 +136,12 @@ export class Building {
 		}
 		console.log(`${worker.name} visited ${this.name} at (${this.position.x}, ${this.position.y})`);
 		return 0;
+	}
+
+	minuteEnd(_state: GameState) {
+		this.health = Math.max(this.health - 2, 0);
+		console.log(`${this.name} health is ${this.health} at (${this.position.x}, ${this.position.y})`);
+
 	}
 }
 
