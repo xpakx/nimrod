@@ -1,4 +1,5 @@
 import { Actor } from "./actor.js";
+import { createBuilding } from "./building-factory.js";
 import { Building, BuildingPrototype, BuildingSprite, Road, TilingSprite } from "./buildings.js";
 
 export class MapLayer {
@@ -149,7 +150,7 @@ export class MapLayer {
 	putBuilding(position: Position, prototype: BuildingPrototype, accepted: boolean = true) {
 		const sprite = prototype.sprite;
 		if(this.canBePlaced(position, sprite)) {
-			const newBuilding = new Building(prototype, position, accepted);
+			const newBuilding = createBuilding(position, prototype, accepted);
 			this.buildings.push(newBuilding);
 			this.sortBuildings();
 			for(let i = position.x; i > position.x-sprite.baseSize; i--) {

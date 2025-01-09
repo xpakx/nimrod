@@ -106,10 +106,8 @@ export class Game {
 	checkCost() {
 		if(this.map.mode) {
 			this.map.tooCostly = this.state.money < this.map.mode.cost;
-			console.log("too costly:", this.map.tooCostly);
 		} else if (this.map.roadMode) {
 			this.map.tooCostly = this.state.money < 2;
-			console.log("too costly:", this.map.tooCostly);
 		}
 	}
 

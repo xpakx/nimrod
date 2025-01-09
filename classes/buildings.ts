@@ -153,7 +153,6 @@ export class Building {
 	onMinuteEnd(_state: GameState) {
 		this.health = Math.max(this.health - 2, 0);
 		console.log(`${this.name} health is ${this.health} at (${this.position.x}, ${this.position.y})`);
-
 	}
 }
 
