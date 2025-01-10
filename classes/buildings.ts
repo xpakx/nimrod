@@ -150,6 +150,11 @@ export class Building {
 		return 0;
 	}
 
+	repair(worker: BuildingWorker) {
+		this.health = Math.min(this.health + 20, 100);
+		console.log(`${worker.name} repaired ${this.name} at (${this.position.x}, ${this.position.y})`);
+	}
+
 	onMinuteEnd(_state: GameState) {
 		this.health = Math.max(this.health - 2, 0);
 		console.log(`${this.name} health is ${this.health} at (${this.position.x}, ${this.position.y})`);
@@ -162,10 +167,12 @@ export class BuildingWorker extends Actor {
 	workStartTime: number = 10;
 	resource: string = "water";
 	inventory: number = 50;
+	repairing: boolean;
 
-	constructor(sprite: ActorSprite, home: Position | undefined) {
+	constructor(sprite: ActorSprite, home: Position | undefined, repairing: boolean = false) {
 		super(sprite, {x: 0, y: 0});
 		if (home) this.home = home;
+		this.repairing = repairing;
 	}
 
 	tick(deltaTime: number, map: MapLayer, randMap: number[]): boolean {
@@ -200,6 +207,7 @@ export class BuildingWorker extends Actor {
 			const building = map.getBuilding(pos);
 			if (building) {
 				this.work(building);
+				if (this.repairing) this.repair(building);
 			}
 		}
 	}
@@ -211,6 +219,10 @@ export class BuildingWorker extends Actor {
 			this.travelFinished = true;
 			console.log(`${this.name} is out of ${this.resource}, heading home`);
 		}
+	}
+
+	repair(building: Building) {
+		building.repair(this);
 	}
 }
 
