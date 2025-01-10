@@ -155,7 +155,7 @@ export class Building {
 		this.worker.home = this.workerSpawn;
 	}
 
-	storage: { [key: string]: number } = { "water": 0 }; // TODO
+	storage: { [key: string]: number } = {}; // TODO
 	capacity: number = 20;
 	supply(worker: BuildingWorker, resource: string, inventory: number): number {
 		if (this.storage.hasOwnProperty(resource) && inventory > 0 && this.storage[resource] < this.capacity) {
@@ -176,6 +176,11 @@ export class Building {
 	onMinuteEnd(_state: GameState) {
 		this.health = Math.max(this.health - 2, 0);
 		console.log(`${this.name} health is ${this.health} at (${this.position.x}, ${this.position.y})`);
+	}
+
+	consume(resource: string, amount: number) {
+		this.storage[resource] = Math.max(this.storage[resource] - amount, 0);
+		console.log(`${this.name} ${resource} is ${this.storage[resource]} at (${this.position.x}, ${this.position.y})`);
 	}
 }
 
