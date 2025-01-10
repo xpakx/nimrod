@@ -7,6 +7,15 @@ export interface BuildingPrototype {
 	interface: BuildingInterface;
 	name: string;
 	cost: number;
+	workerOptions?: WorkerOptions;
+}
+
+export interface WorkerOptions {
+	sprite: ActorSprite;
+	repairing?: boolean;
+	resource?: string;
+	inventory?: number;
+	workerStartTime?: number;
 }
 
 export class BuildingSprite {
@@ -61,6 +70,15 @@ export class Building {
 		const centerA = [Math.floor((position.x + position.x - this.sprite.baseSize + 1)/2), Math.floor((position.y + position.y - this.sprite.baseSize + 1)/2)]
 		this.diagonal = (centerA[0] + centerA[1]);
 		this.interface = prototype.interface;
+		if(prototype.workerOptions) this.applyWorkerOptions(prototype.workerOptions);
+	}
+
+	applyWorkerOptions(options: WorkerOptions) {
+		this.setWorker(options.sprite);
+		if (options.repairing) this.worker!.repairing = options.repairing;
+		if (options.resource) this.worker!.resource = options.resource;
+		if (options.inventory) this.worker!.inventory = options.inventory;
+		if (options.workerStartTime) this.worker!.workStartTime = options.workerStartTime;
 	}
 
 	setWorker(sprite: ActorSprite) {
@@ -165,7 +183,7 @@ export class BuildingWorker extends Actor {
 	isAwayFromHome: boolean = false;
 	timeSinceLastReturn: number = 0;
 	workStartTime: number = 10;
-	resource: string = "water";
+	resource?: string;
 	inventory: number = 50;
 	repairing: boolean;
 
@@ -213,6 +231,7 @@ export class BuildingWorker extends Actor {
 	}
 
 	work(building: Building) {
+		if (!this.resource) return;
 		if (this.inventory == 0) return;
 		this.inventory -= building.supply(this, this.resource, this.inventory);
 		if (this.inventory <= 0) {

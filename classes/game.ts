@@ -34,8 +34,8 @@ export class Game {
 	}
 
 	async prepareAssets() {
-		await this.sprites.prepareBuildingSprites(this.map.tileSize);
 		await this.sprites.prepareActorSprites(this.map.tileSize);
+		await this.sprites.prepareBuildingSprites(this.map.tileSize);
 		await this.sprites.prepareAvatars();
 		await this.sprites.prepareIcons();
 		await this.sprites.prepareRoadSprites(this.map.tileSize);
