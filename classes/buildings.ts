@@ -197,6 +197,7 @@ export class BuildingWorker extends Actor {
 	resource?: string;
 	inventory: number = 50;
 	repairing: boolean;
+	resourceQuality?: number;
 
 	constructor(sprite: ActorSprite, home: Position | undefined, repairing: boolean = false) {
 		super(sprite, {x: 0, y: 0});

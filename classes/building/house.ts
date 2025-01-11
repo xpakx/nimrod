@@ -1,9 +1,10 @@
-import { Building, BuildingPrototype, HouseOptions } from "../buildings.js";
+import { Building, BuildingPrototype, BuildingWorker, HouseOptions } from "../buildings.js";
 import { GameState } from "../game-state.js";
 import { Position } from "../map-layer.js";
 
 export class House extends Building {
 	storage: { [key: string]: number } = { "water": 0, "food": 0 }; // TODO
+	qualities: { [key: string]: number } = { "water": 0, "food": 0 }; // TODO
 	population: number = 8; // TODO
 	maxPopulation: number = 8;
 	resourceNeeds: HouseResourceNeeds[] = [];
@@ -36,7 +37,30 @@ export class House extends Building {
 			const perPerson = need.consumptionPerPerson || 0;
 			const totalConsumption = baseConsumption + Math.ceil(perPerson * this.population)
 			this.consume(need.resource, totalConsumption);
+			this.checkQuality(need);
 		}
+	}
+
+	checkQuality(need: HouseResourceNeeds): boolean {
+		if (!need.quality) {
+			return true;
+		}
+		const qualityCorrect = need.quality <= this.qualities[need.resource];
+		this.qualities[need.resource] = Math.max(this.qualities[need.resource] - 1, 1); // TODO
+		return qualityCorrect;
+	}
+
+	isOfBetterQuality(resource: string, newQuality: number): boolean {
+		return this.qualities.hasOwnProperty(resource) && this.qualities[resource] < newQuality;
+	}
+
+	supply(worker: BuildingWorker, resource: string, inventory: number): number {
+		const amountSupplied = super.supply(worker, resource, inventory);
+		if (amountSupplied == 0) return amountSupplied;
+		if (worker.resourceQuality && this.isOfBetterQuality(resource, worker.resourceQuality)) {
+			this.qualities[resource] = worker.resourceQuality;
+		}
+		return amountSupplied;
 	}
 }
 
