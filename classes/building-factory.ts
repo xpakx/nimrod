@@ -4,7 +4,7 @@ import { Position } from "./map-layer.js";
 
 // TODO
 export function createBuilding(position: Position, prototype: BuildingPrototype, accepted: boolean): Building {
-	if (prototype.name == "home") {
+	if (prototype.houseOptions !== undefined) {
 		return new House(prototype, position, accepted);
 	}
 	return new Building(prototype, position, accepted);

@@ -1,4 +1,5 @@
 import { Actor, ActorSprite } from "./actor.js";
+import { HouseLevel } from "./building/house.js";
 import { GameState } from "./game-state.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
 
@@ -8,6 +9,7 @@ export interface BuildingPrototype {
 	name: string;
 	cost: number;
 	workerOptions?: WorkerOptions;
+	houseOptions?: HouseOptions;
 }
 
 export interface WorkerOptions {
@@ -16,6 +18,10 @@ export interface WorkerOptions {
 	resource?: string;
 	inventory?: number;
 	workerStartTime?: number;
+}
+
+export interface HouseOptions {
+	levels?: HouseLevel[];
 }
 
 export class BuildingSprite {

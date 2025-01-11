@@ -29,7 +29,12 @@ export class SpriteLibrary {
 			sprite: home,
 			interface: new BuildingInterface(),
 			name: "home",
-			cost: 12
+			cost: 12,
+			houseOptions: {
+				levels: [
+					{maxPopulation: 8, needs: [{resource: "water"}, {resource: "food"}]}
+				]
+			}
 		};
 		this.buildings["tower"] = {
 			sprite: tower,
