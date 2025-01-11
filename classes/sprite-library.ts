@@ -32,7 +32,13 @@ export class SpriteLibrary {
 			cost: 12,
 			houseOptions: {
 				levels: [
-					{maxPopulation: 8, needs: [{resource: "water"}, {resource: "food"}]}
+					{
+						maxPopulation: 8, 
+						needs: [
+							{resource: "water", consumptionPerPerson: 0.25},
+							{resource: "food", consumptionPerPerson: 0.5}
+						]
+					}
 				]
 			}
 		};
