@@ -10,6 +10,7 @@ export interface BuildingPrototype {
 	cost: number;
 	workerOptions?: WorkerOptions;
 	houseOptions?: HouseOptions;
+	productionOptions?: Recipe[];
 }
 
 export interface WorkerOptions {
@@ -65,6 +66,7 @@ export class Building {
 	name: string;
 	health: number = 100;
 	readyToSpawn: boolean = false;;
+	recipes?: Recipe[];
 
 	constructor(prototype: BuildingPrototype, position: Position, accepted: boolean = true) {
 		this.sprite =  prototype.sprite;
@@ -77,6 +79,7 @@ export class Building {
 		this.diagonal = (centerA[0] + centerA[1]);
 		this.interface = prototype.interface;
 		if(prototype.workerOptions) this.applyWorkerOptions(prototype.workerOptions);
+		if(prototype.productionOptions) this.applyProductionOptions(prototype.productionOptions);
 	}
 
 	applyWorkerOptions(options: WorkerOptions) {
@@ -85,6 +88,10 @@ export class Building {
 		if (options.resource) this.worker!.resource = options.resource;
 		if (options.inventory) this.worker!.inventory = options.inventory;
 		if (options.workerStartTime) this.worker!.workStartTime = options.workerStartTime;
+	}
+
+	applyProductionOptions(options: Recipe[]) {
+		this.recipes = options; // TODO
 	}
 
 	setWorker(sprite: ActorSprite) {
