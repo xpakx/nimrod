@@ -320,3 +320,14 @@ export class BuildingInterface {
 	}
 
 }
+
+export interface Recipe {
+	output: Ingredient;
+	ingredients: Ingredient[];
+	time: number;
+}
+
+interface Ingredient {
+	resource: string;
+	amount: number;
+}
