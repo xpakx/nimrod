@@ -56,7 +56,14 @@ export class SpriteLibrary {
 			workerOptions: {
 				sprite: this.actors['test'],
 				resource: "water"
-			}
+			},
+			productionOptions: [
+				{
+					output: {resource: "water", amount: 100},
+					ingredients: [],
+					time: 1,
+				}	
+			]
 		};
 		this.buildings["inspector"] = {
 			sprite: inspector,

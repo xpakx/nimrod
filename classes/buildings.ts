@@ -94,6 +94,9 @@ export class Building {
 
 	applyProductionOptions(options: Recipe[]) {
 		this.recipes = options; // TODO
+		for (let recipe of options) {
+			this.storage[recipe.output.resource] = 0;
+		}
 	}
 
 	setWorker(sprite: ActorSprite) {
@@ -173,6 +176,7 @@ export class Building {
 	storage: { [key: string]: number } = {}; // TODO
 	capacity: number = 20;
 	supply(worker: BuildingWorker, resource: string, inventory: number): number {
+		if (!this.accepts.has(resource)) return 0;
 		if (this.storage.hasOwnProperty(resource) && inventory > 0 && this.storage[resource] < this.capacity) {
 			const amount = Math.min(inventory, this.capacity - this.storage[resource]);
 			this.storage[resource] += amount;
@@ -191,11 +195,32 @@ export class Building {
 	onMinuteEnd(_state: GameState) {
 		this.health = Math.max(this.health - 2, 0);
 		console.log(`${this.name} health is ${this.health} at (${this.position.x}, ${this.position.y})`);
+
+		if(this.recipes) {
+			this.applyProduction(this.recipes);
+		}
 	}
 
 	consume(resource: string, amount: number) {
 		this.storage[resource] = Math.max(this.storage[resource] - amount, 0);
 		console.log(`${this.name} ${resource} is ${this.storage[resource]} at (${this.position.x}, ${this.position.y})`);
+	}
+
+	applyProduction(recipes: Recipe[]) {
+		for (let recipe of recipes) {
+			const resource = recipe.output.resource;
+			if (!(resource in this.storage)) continue;
+			if (this.storage[resource] >= this.capacity) continue;
+			const enoughResources = recipe.ingredients
+				.every((s) => s.resource in this.storage && this.storage[s.resource] >= s.amount);
+			if (!enoughResources) continue;
+			for (let res of recipe.ingredients) {
+				this.storage[res.resource] = this.storage[res.resource] - res.amount;
+			}
+			const amount = Math.min(recipe.output.amount, this.capacity - this.storage[resource]);
+			this.storage[resource] = this.storage[resource] + amount;
+			console.log(`${this.name} produced ${amount} of ${resource} (${this.position.x}, ${this.position.y})`);
+		}
 	}
 }
 
