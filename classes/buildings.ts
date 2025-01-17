@@ -206,16 +206,34 @@ export class Building {
 		console.log(`${this.name} ${resource} is ${this.storage[resource]} at (${this.position.x}, ${this.position.y})`);
 	}
 
+	productionProgress: { [key: string]: number } = {};
+	productionInProgress(resource: string): number {
+		if (resource in this.productionProgress) {
+			return this.productionProgress[resource];
+		}
+		return 0;
+	}
+
 	applyProduction(recipes: Recipe[]) {
 		for (let recipe of recipes) {
 			const resource = recipe.output.resource;
 			if (!(resource in this.storage)) continue;
 			if (this.storage[resource] >= this.capacity) continue;
-			const enoughResources = recipe.ingredients
-				.every((s) => s.resource in this.storage && this.storage[s.resource] >= s.amount);
-			if (!enoughResources) continue;
-			for (let res of recipe.ingredients) {
-				this.storage[res.resource] = this.storage[res.resource] - res.amount;
+			if (this.productionInProgress(resource) > 0) {
+				this.productionProgress[resource] = this.productionProgress[resource] + 1;
+				if (this.productionProgress[resource] < recipe.time) continue;
+				this.productionProgress[resource] = 0;
+			} else {
+				const enoughResources = recipe.ingredients
+					.every((s) => s.resource in this.storage && this.storage[s.resource] >= s.amount);
+				if (!enoughResources) continue;
+				for (let res of recipe.ingredients) {
+					this.storage[res.resource] = this.storage[res.resource] - res.amount;
+				}
+				if (recipe.time > 1) {
+					this.productionProgress[resource] = 1;
+					continue;
+				}
 			}
 			const amount = Math.min(recipe.output.amount, this.capacity - this.storage[resource]);
 			this.storage[resource] = this.storage[resource] + amount;
