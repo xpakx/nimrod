@@ -14,6 +14,8 @@ export class House extends Building {
 		if (prototype.houseOptions !== undefined) {
 			this.initializeHouse(prototype.houseOptions);
 		}
+		this.accepts.add("water");
+		this.accepts.add("food");
 	}
 
 	initializeHouse(options: HouseOptions) {

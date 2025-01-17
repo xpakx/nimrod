@@ -67,6 +67,7 @@ export class Building {
 	health: number = 100;
 	readyToSpawn: boolean = false;;
 	recipes?: Recipe[];
+	accepts: Set<string>;
 
 	constructor(prototype: BuildingPrototype, position: Position, accepted: boolean = true) {
 		this.sprite =  prototype.sprite;
@@ -80,6 +81,7 @@ export class Building {
 		this.interface = prototype.interface;
 		if(prototype.workerOptions) this.applyWorkerOptions(prototype.workerOptions);
 		if(prototype.productionOptions) this.applyProductionOptions(prototype.productionOptions);
+		this.accepts = new Set<string>();
 	}
 
 	applyWorkerOptions(options: WorkerOptions) {
