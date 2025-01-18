@@ -433,6 +433,25 @@ export class Game {
 				this.state.money += 500;
 				this.checkCost();
 				break;
+			case 'c':
+				if (!this.state.debugMode) {
+					break; 
+				}
+				if (this.map.isBuilding(this.map.isoPlayerMouse)) {
+					let building = this.map.getBuilding(this.map.isoPlayerMouse)!;
+					for (let item in building.storage) {
+						building.storage[item] = 0;
+					}
+				}
+				break;
+			case 'a':
+				if (!this.state.debugMode) {
+					break; 
+				}
+				for(let building of this.map.buildings) {
+					building.onMinuteEnd(this.state);
+				}
+				break;
 			case "Escape":
 				this.interf.buildingInterface = undefined;
 				this.map.switchToNormalMode();
