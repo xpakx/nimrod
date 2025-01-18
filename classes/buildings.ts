@@ -214,31 +214,59 @@ export class Building {
 		return 0;
 	}
 
+	isProductionFinished(resource: string): boolean {
+		return this.productionInProgress(resource) == 0;
+	}
+
 	applyProduction(recipes: Recipe[]) {
 		for (let recipe of recipes) {
-			const resource = recipe.output.resource;
-			if (!(resource in this.storage)) continue;
-			if (this.storage[resource] >= this.capacity) continue;
-			if (this.productionInProgress(resource) > 0) {
-				this.productionProgress[resource] = this.productionProgress[resource] + 1;
-				if (this.productionProgress[resource] < recipe.time) continue;
-				this.productionProgress[resource] = 0;
-			} else {
-				const enoughResources = recipe.ingredients
-					.every((s) => s.resource in this.storage && this.storage[s.resource] >= s.amount);
-				if (!enoughResources) continue;
-				for (let res of recipe.ingredients) {
-					this.storage[res.resource] = this.storage[res.resource] - res.amount;
-				}
-				if (recipe.time > 1) {
-					this.productionProgress[resource] = 1;
-					continue;
-				}
-			}
-			const amount = Math.min(recipe.output.amount, this.capacity - this.storage[resource]);
-			this.storage[resource] = this.storage[resource] + amount;
-			console.log(`${this.name} produced ${amount} of ${resource} (${this.position.x}, ${this.position.y})`);
+			this.applyRecipe(recipe);
 		}
+	}
+
+	isResourceProducible(resource: string): boolean {
+		return resource in this.storage && this.storage[resource] < this.capacity;
+	}
+
+	advanceProduction(recipe: Recipe) {
+		const resource = recipe.output.resource;
+		this.productionProgress[resource] = this.productionProgress[resource] + 1;
+		if (this.productionProgress[resource] < recipe.time) return;
+		this.productionProgress[resource] = 0;
+	}
+
+	hasResources(recipe: Recipe) {
+		return recipe.ingredients.every((s) => s.resource in this.storage && this.storage[s.resource] >= s.amount);
+	}
+
+	startProduction(recipe: Recipe) {
+		const resource = recipe.output.resource;
+		for (let res of recipe.ingredients) {
+			this.storage[res.resource] = this.storage[res.resource] - res.amount;
+		}
+		if (recipe.time > 1) {
+			this.productionProgress[resource] = 1;
+		}
+	}
+
+	finishProduction(recipe: Recipe) {
+		const resource = recipe.output.resource;
+		const amount = Math.min(recipe.output.amount, this.capacity - this.storage[resource]);
+		this.storage[resource] = this.storage[resource] + amount;
+		console.log(`${this.name} produced ${amount} of ${resource} (${this.position.x}, ${this.position.y})`);
+	}
+
+	applyRecipe(recipe: Recipe) {
+		const resource = recipe.output.resource;
+		if (!this.isResourceProducible(resource)) return;
+		if (this.productionInProgress(resource) > 0) {
+			this.advanceProduction(recipe);
+		} else {
+			if (!this.hasResources(recipe)) return;
+			this.startProduction(recipe);
+		}
+		if (!this.isProductionFinished(resource)) return;
+		this.finishProduction(recipe);
 	}
 }
 
