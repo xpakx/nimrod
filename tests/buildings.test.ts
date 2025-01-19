@@ -124,3 +124,58 @@ describe('Building', () => {
 		expect(building.readyToSpawn).toBe(false);
 	});
 });
+
+describe('Building supply logic', () => {
+	let worker: BuildingWorker;
+	let position: Position;
+	let building: Building;
+
+	beforeEach(() => {
+		position = { x: 0, y: 0 };
+		worker = new BuildingWorker(new ActorSprite({ width: 100, height: 200 } as HTMLImageElement, 1, { width: 50, height: 50 }), position);
+		worker.resource = 'wood';
+		worker.inventory = 50;
+
+		const buildingSpriteMock = new BuildingSprite({ width: 100, height: 200 } as HTMLImageElement, 2, { width: 50, height: 50 });
+		const prototype: BuildingPrototype = {
+			sprite: buildingSpriteMock,
+			interface: new BuildingInterface(),
+			name: 'Test Building',
+			cost: 100,
+		};
+		building = new Building(prototype, position);
+		building.accepts.add('wood');
+		building.storage['wood'] = 0;
+		building.capacity = 100;
+	});
+
+	test('should accept resources when storage is not full', () => {
+		const suppliedAmount = building.supply(worker, 'wood', 20);
+
+		expect(suppliedAmount).toBe(20);
+		expect(building.storage['wood']).toBe(20);
+	});
+
+	test('should not accept resources when storage is full', () => {
+		building.storage['wood'] = building.capacity;
+
+		const suppliedAmount = building.supply(worker, 'wood', 20);
+
+		expect(suppliedAmount).toBe(0);
+		expect(building.storage['wood']).toBe(building.capacity);
+	});
+
+	test('should not accept resources the building does not accept', () => {
+		const suppliedAmount = building.supply(worker, 'food', 20);
+
+		expect(suppliedAmount).toBe(0);
+		expect(building.storage['food']).toBeUndefined();
+	});
+
+	test('should not overflow capacity', () => {
+		const suppliedAmount = building.supply(worker, 'wood', 120);
+
+		expect(suppliedAmount).toBe(100);
+		expect(building.storage['wood']).toBe(building.capacity);
+	});
+});
