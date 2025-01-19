@@ -1,4 +1,5 @@
 import { BattleMapData, Game } from "./classes/game.js";
+import { ConsoleTransport, Logger } from "./classes/logger.js";
 
 let game = new Game();
 
@@ -37,19 +38,31 @@ function registerKeyboardEvents() {
 }
 
 window.onload = async () => {
+	const logger = new Logger("Script", {
+		level: 'debug',
+		format: 'plain',
+		transports: [
+			new ConsoleTransport(),
+		],
+	});
+
+	logger.debug('Started app');
 	const canvas = document.getElementById('gameCanvas') as (HTMLCanvasElement | null);
 	if (!canvas) {
-		console.log("No canvas elem");
+		logger.error('No canvas elem');
 		return;
 	}
 	const context = canvas.getContext('2d');
 	if (!context) {
-		console.log("No context");
+		logger.error("No context");
 		return;
 	}
 	canvas.width = game.state.canvasWidth;
 	canvas.height = game.state.canvasHeight;
+	logger.debug('Preparing assets');
 	await game.prepareAssets();
+
+	logger.debug('Loading map');
 	game.loadMap("test.json", true);
 
 	const battle = await fetch("maps/battle001.json"); 

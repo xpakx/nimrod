@@ -25,6 +25,7 @@ let OffscreenCanvasMock = jest.fn().mockImplementation((width: number, height: n
 
 beforeEach(() => {
 	OffscreenCanvas = OffscreenCanvasMock;
+	console.log = () => {};
 });
 
 describe('BuildingSprite', () => {
