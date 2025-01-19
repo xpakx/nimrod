@@ -179,3 +179,48 @@ describe('Building supply logic', () => {
 		expect(building.storage['wood']).toBe(building.capacity);
 	});
 });
+
+describe('Building repair logic', () => {
+	let worker: BuildingWorker;
+	let position: Position;
+	let building: Building;
+
+	beforeEach(() => {
+		position = { x: 0, y: 0 };
+		worker = new BuildingWorker(new ActorSprite({ width: 100, height: 200 } as HTMLImageElement, 1, { width: 50, height: 50 }), position);
+		worker.repairing = true;
+
+		const buildingSpriteMock = new BuildingSprite({ width: 100, height: 200 } as HTMLImageElement, 2, { width: 50, height: 50 });
+		const prototype: BuildingPrototype = {
+			sprite: buildingSpriteMock,
+			interface: new BuildingInterface(),
+			name: 'Test Building',
+			cost: 100,
+		};
+		building = new Building(prototype, position);
+	});
+
+	test('should repair the building when health is below 100', () => {
+		building.health = 80;
+
+		building.repair(worker);
+
+		expect(building.health).toBe(100);
+	});
+
+	test('should not repair the building when health is already 100', () => {
+		building.health = 100;
+
+		building.repair(worker);
+
+		expect(building.health).toBe(100);
+	});
+
+	test('should not overflow health', () => {
+		building.health = 99;
+
+		building.repair(worker);
+
+		expect(building.health).toBe(100);
+	});
+});
