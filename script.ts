@@ -1,5 +1,5 @@
 import { BattleMapData, Game } from "./classes/game.js";
-import { ConsoleTransport, Logger } from "./classes/logger.js";
+import { ConsoleTransport, LoggerFactory } from "./classes/logger.js";
 
 let game = new Game();
 
@@ -38,13 +38,7 @@ function registerKeyboardEvents() {
 }
 
 window.onload = async () => {
-	const logger = new Logger("Script", {
-		level: 'debug',
-		format: 'plain',
-		transports: [
-			new ConsoleTransport(),
-		],
-	});
+	const logger = LoggerFactory.getLogger("Script");
 
 	logger.debug('Started app');
 	const canvas = document.getElementById('gameCanvas') as (HTMLCanvasElement | null);

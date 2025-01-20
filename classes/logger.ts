@@ -82,3 +82,27 @@ export class ConsoleTransport extends LoggerTransport {
 		console.log(`%c ${message}`, this.styles[level]);
 	}
 }
+
+export class LoggerFactory {
+	static loggers: {[key: string]: Logger} = {};
+	static globalLevel: LoggerLevel = "error";
+
+	static getLogger(source: string): Logger {
+		// TODO: custom options
+		let options: LoggerOptions = {
+			level: this.globalLevel,
+		}
+		if (source in this.loggers) {
+			return this.loggers[source];
+		}
+		this.loggers[source] = new Logger(source, options);
+		return this.loggers[source];
+	}
+
+	static updateAllLevels(level: LoggerLevel) {
+		this.globalLevel = level;
+		for (let logger in this.loggers) {
+			this.loggers[logger].level = level;
+		}
+	}
+}
