@@ -6,6 +6,7 @@ import { prepareTabs } from "./sidebar.js";
 import { Actor } from "./actor.js";
 import { BattleActor, HeroType } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
+import { LoggerFactory } from "./logger.js";
 
 export class Game {
 	state: GameState;
@@ -399,6 +400,7 @@ export class Game {
 				break;
 			case 'F9': 
 				this.state.debugMode = !this.state.debugMode;
+				LoggerFactory.updateAllLevels(this.state.debugMode ? "debug" : "error");
 				break;
 			case 'F8':
 				this.toBattle();

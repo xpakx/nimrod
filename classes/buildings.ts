@@ -1,6 +1,7 @@
 import { Actor, ActorSprite } from "./actor.js";
 import { HouseLevel } from "./building/house.js";
 import { GameState } from "./game-state.js";
+import { Logger, LoggerFactory } from "./logger.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
 
 export interface BuildingPrototype {
@@ -68,6 +69,7 @@ export class Building {
 	readyToSpawn: boolean = false;;
 	recipes?: Recipe[];
 	accepts: Set<string>;
+	logger: Logger = LoggerFactory.getLogger("Building");
 
 	constructor(prototype: BuildingPrototype, position: Position, accepted: boolean = true) {
 		this.sprite =  prototype.sprite;
@@ -180,21 +182,21 @@ export class Building {
 		if (this.storage.hasOwnProperty(resource) && inventory > 0 && this.storage[resource] < this.capacity) {
 			const amount = Math.min(inventory, this.capacity - this.storage[resource]);
 			this.storage[resource] += amount;
-			console.log(`${worker.name} supplied ${amount} ${resource} to ${this.name} at (${this.position.x}, ${this.position.y})`);
+			this.logger.debug(`${worker.name} supplied ${amount} ${resource} to ${this.name} at (${this.position.x}, ${this.position.y})`);
 			return amount;
 		}
-		console.log(`${worker.name} visited ${this.name} at (${this.position.x}, ${this.position.y})`);
+		this.logger.debug(`${worker.name} visited ${this.name} at (${this.position.x}, ${this.position.y})`);
 		return 0;
 	}
 
 	repair(worker: BuildingWorker) {
 		this.health = Math.min(this.health + 20, 100);
-		console.log(`${worker.name} repaired ${this.name} at (${this.position.x}, ${this.position.y})`);
+		this.logger.debug(`${worker.name} repaired ${this.name} at (${this.position.x}, ${this.position.y})`);
 	}
 
 	onMinuteEnd(_state: GameState) {
 		this.health = Math.max(this.health - 2, 0);
-		console.log(`${this.name} health is ${this.health} at (${this.position.x}, ${this.position.y})`);
+		this.logger.debug(`${this.name} health is ${this.health} at (${this.position.x}, ${this.position.y})`);
 
 		if(this.recipes) {
 			this.applyProduction(this.recipes);
@@ -203,7 +205,7 @@ export class Building {
 
 	consume(resource: string, amount: number) {
 		this.storage[resource] = Math.max(this.storage[resource] - amount, 0);
-		console.log(`${this.name} ${resource} is ${this.storage[resource]} at (${this.position.x}, ${this.position.y})`);
+		this.logger.debug(`${this.name} ${resource} is ${this.storage[resource]} at (${this.position.x}, ${this.position.y})`);
 	}
 
 	productionProgress: { [key: string]: number } = {};
@@ -253,7 +255,7 @@ export class Building {
 		const resource = recipe.output.resource;
 		const amount = Math.min(recipe.output.amount, this.capacity - this.storage[resource]);
 		this.storage[resource] = this.storage[resource] + amount;
-		console.log(`${this.name} produced ${amount} of ${resource} (${this.position.x}, ${this.position.y})`);
+		this.logger.debug(`${this.name} produced ${amount} of ${resource} (${this.position.x}, ${this.position.y})`);
 	}
 
 	applyRecipe(recipe: Recipe) {
