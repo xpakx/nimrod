@@ -22,7 +22,8 @@ export class GameState {
 	public prevTimestamp = 0;
 	public dts: number[] = [];
 	public money: number = 500;
-	public population: number = 10;
+	public population: number = 0;
+	public maxPopulation: number = 0;
 	public currentBattle?: Battle;
 
 	public tempBattleData?: BattleMapData;

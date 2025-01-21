@@ -7,6 +7,7 @@ import { Actor } from "./actor.js";
 import { BattleActor, HeroType } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
 import { Logger, LoggerFactory } from "./logger.js";
+import { House } from "./building/house.js";
 
 export class Game {
 	state: GameState;
@@ -84,8 +85,17 @@ export class Game {
 			this.map.putBuilding(this.map.isoPlayerMouse, this.map.mode, false);
 			this.checkCost();
 			this.map.finalizeBuildingPlacement(this.map.isoPlayerMouse);
+			if (this.map.mode.houseOptions) {
+				const house = this.map.getBuilding(this.map.isoPlayerMouse) as House;
+				this.state.maxPopulation += house.maxPopulation;
+			}
 		} else if(this.map.deleteMode) {
+			const building = this.map.getBuilding(this.map.isoPlayerMouse);
 			this.map.deleteBuilding(this.map.isoPlayerMouse);
+			if (building && building instanceof House) {
+				this.state.maxPopulation -=  building.maxPopulation;
+				this.state.population -=  building.population;
+			}
 			if (this.map.isRoad(this.map.isoPlayerMouse)) {
 				this.map.deleteRoad(this.map.isoPlayerMouse);
 				this.map.updateAfterDeletion(this.map.isoPlayerMouse); // TODO: optimize
@@ -216,6 +226,12 @@ export class Game {
 
 		this.state.pedestrians = [];
 		if (updateDistances) this.map.floydWarshall();
+		for (let building of this.map.buildings) {
+			if (building instanceof House) {
+				this.state.population += building.population;
+				this.state.maxPopulation += building.maxPopulation;
+			}
+		}
 	}
 
 	serializeMap(): MapData {
@@ -511,11 +527,12 @@ export class Game {
 		}
 	}
 
-
 	calcState(deltaTime: number) {
 		this.minuteCounter += deltaTime;
 		let minuteEnded = this.minuteCounter >= 60;
-		if(minuteEnded) this.minuteCounter = 0;
+		if(minuteEnded) {
+			this.minuteCounter = 0;
+		}
 		for(let building of this.map.buildings) {
 			building.tick(deltaTime);
 			if(building.canSpawnWorker()) {
@@ -539,6 +556,12 @@ export class Game {
 				this.state.insertPedestrian(pedestrian);
 			}
 		}
+		if(minuteEnded) {
+			this.logger.debug("Spawning migrants");
+			// TODO
+			
+		}
+
 	}
 
 	renderGame(context: CanvasRenderingContext2D, deltaTime: number) {

@@ -5,7 +5,7 @@ import { Position } from "../map-layer.js";
 export class House extends Building {
 	storage: { [key: string]: number } = { "water": 0, "food": 0 }; // TODO
 	qualities: { [key: string]: number } = { "water": 0, "food": 0 }; // TODO
-	population: number = 8; // TODO
+	population: number = 0;
 	maxPopulation: number = 8;
 	resourceNeeds: HouseResourceNeeds[] = [];
 
