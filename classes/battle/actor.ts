@@ -1,4 +1,5 @@
 import { Actor } from "../actor.js";
+import { Logger, LoggerFactory } from "../logger.js";
 import { MapLayer, Position } from "../map-layer.js";
 
 export class BattleActor extends Actor {
@@ -9,6 +10,7 @@ export class BattleActor extends Actor {
 	type: HeroType = "normal";
 	hp: number = 0;
 	skills: Skill[] = []
+	logger: Logger = LoggerFactory.getLogger("BattleActor");
 
 	moving: boolean = false;
 	path?: Position[]
@@ -27,15 +29,14 @@ export class BattleActor extends Actor {
 		this.goal = this.path.pop();
 		this.direction.x = this.goal!.x - this.positionSquare.x;
 		this.direction.y = this.goal!.y - this.positionSquare.y; 
-		console.log("Ultimate goal:", this.path[0]);
+		this.logger.debug("Ultimate goal:", this.path[0]);
 	}
 
 	nextGoal(): boolean {
-		console.log("new goal");
 		this.goal = this.path?.pop();
-		console.log(this.goal);
+		this.logger.debug("new goal", this.goal);
 		if (!this.goal) {
-			console.log(this.position);
+			this.logger.debug("Reached position", this.position);
 			return false;
 		}
 		this.direction.x = this.goal.x - this.positionSquare.x;

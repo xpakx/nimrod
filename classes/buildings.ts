@@ -301,7 +301,7 @@ export class BuildingWorker extends Actor {
 		if (!this.dead) {
 			return;
 		}
-		// console.log("i am dead");
+		this.logger.debug("Actor is dead");
 		this.isAwayFromHome = false;
 		this.travelFinished = false;
 		this.traveledSquares = 0;
@@ -330,7 +330,7 @@ export class BuildingWorker extends Actor {
 		this.inventory -= building.supply(this, this.resource, this.inventory);
 		if (this.inventory <= 0) {
 			this.travelFinished = true;
-			console.log(`${this.name} is out of ${this.resource}, heading home`);
+			this.logger.debug(`${this.name} is out of ${this.resource}, heading home`);
 		}
 	}
 

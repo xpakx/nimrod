@@ -1,6 +1,7 @@
 import { Actor } from "./actor.js";
 import { createBuilding } from "./building-factory.js";
 import { Building, BuildingPrototype, BuildingSprite, Road, TilingSprite } from "./buildings.js";
+import { Logger, LoggerFactory } from "./logger.js";
 
 export class MapLayer {
 	defTileWidth: number = 64;
@@ -27,6 +28,8 @@ export class MapLayer {
 	blockedMovement: boolean[][] = this.map.map(row => row.map(() => false));
 	costs: number[][] = this.map.map(row => row.map(() => 1));
 	roads: (Road | undefined)[][] = this.map.map(row => row.map(() => undefined)); // for quicker lookup
+
+	logger: Logger = LoggerFactory.getLogger("MapLayer");
 
 	constructor(canvasSize: Size) {
 		this.canvasSize.height = canvasSize.height;
@@ -765,7 +768,7 @@ export class MapLayer {
 				if (u === k || v === k) {
 					this.dist[u][v] = Infinity; // no path through deleted node
 					this.pred[u][v] = undefined;
-					console.log(`invalidated path (${u}, ${v})`);
+					this.logger.debug(`invalidated path (${u}, ${v})`);
 				} 
 				else if (this.dist[u][v] === this.dist[u][k] + this.dist[k][v]) {
 					roadsToUpdate.push([u,v]);
@@ -778,12 +781,12 @@ export class MapLayer {
 		roadsToCheck.pop();
 		for (let road of roadsToUpdate) {
 			let [u, v] = road;
-			console.log(`recomputing path (${u}, ${v})`); // debug
+			this.logger.debug(`recomputing path (${u}, ${v})`); // debug
 			for (let w of roadsToCheck) {
 				if (this.dist[u][w] + this.dist[w][v] < this.dist[u][v]) {
 					this.dist[u][v] = this.dist[u][w] + this.dist[w][v];
 					this.pred[u][v] = this.pred[w][v];
-					console.log(`updated path (${u}, ${v}) via ${w}`); // debug
+					this.logger.debug(`updated path (${u}, ${v}) via ${w}`); // debug
 				}
 			}
 		}
@@ -837,7 +840,7 @@ export class MapLayer {
 				}
 			}
 		}
-		console.log(this.pred);
+		this.logger.debug("Updated predecessor table", this.pred);
 	}
 
 

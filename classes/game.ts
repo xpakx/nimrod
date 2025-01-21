@@ -6,7 +6,7 @@ import { prepareTabs } from "./sidebar.js";
 import { Actor } from "./actor.js";
 import { BattleActor, HeroType } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
-import { LoggerFactory } from "./logger.js";
+import { Logger, LoggerFactory } from "./logger.js";
 
 export class Game {
 	state: GameState;
@@ -17,6 +17,7 @@ export class Game {
 	minXOffset: number;
 	maxXOffset: number;
 	minuteCounter: number;
+	logger: Logger = LoggerFactory.getLogger("Game");
 
 	constructor() {
 		this.state = new GameState();
@@ -139,7 +140,7 @@ export class Game {
 
 	leftMouseGeneric(clickResult: Action) {
 		if(clickResult.action == "goTo") {
-			console.log("Go to: " + clickResult.argument);
+			this.logger.debug("Go to: " + clickResult.argument);
 			switch (clickResult.argument) {
 				case "World":
 					this.toWorld(); break;
@@ -193,7 +194,7 @@ export class Game {
 	}
 
 	applyMap(data: MapData, updateDistances: boolean = false) {
-		console.log(data);
+		this.logger.debug("Applying map", data);
 		this.map.resetMap(data.size);
 
 		for (let pos of data.roads) {
@@ -322,7 +323,7 @@ export class Game {
 		})
 		.then((data: MapData) => this.applyMap(data, updateDistances))
 		.catch(error => {
-			console.log(error);
+			this.logger.error(error);
 			throw new Error(`Error loading the JSON file: ${error}`);
 		});
 	}
@@ -407,7 +408,6 @@ export class Game {
 				break;
 			case 'F7':
 				this.map.floydWarshall();
-				console.log(this.map.pred);
 				break;
 			case 'F6':
 				if (!this.state.debugMode) {
@@ -613,7 +613,7 @@ export class Game {
 			battle.addHero(hero);
 		}
 
-		console.log(this.state.pedestrians);
+		this.logger.debug("Heroes", this.state.pedestrians);
 	}
 
 	addCityButtons() {
@@ -711,8 +711,8 @@ export class Game {
 
 		battle.selectedTile = {x: x, y: y};
 		battle.selectedActor = this.isMouseOverPedestrian();
-		console.log(battle.selectedActor);
-		console.log(battle.selectedTile);
+		this.logger.debug("Selected actor", battle.selectedActor);
+		this.logger.debug("Selected tile", battle.selectedTile);
 	}
 
 	battleProcessAction(from: Position, to: Position, actor: BattleActor | undefined) {
@@ -753,7 +753,7 @@ export class Game {
 		this.state.pedestrians.push(battle.heroes[this.tempBattleIndex]);
 
 		battle.finishPlacement();
-		console.log(this.tempBattleIndex, this.state.currentBattle.battleStarted);
+		this.logger.debug(`current index: ${this.tempBattleIndex}, started: ${this.state.currentBattle.battleStarted}`);
 	}
 }
 

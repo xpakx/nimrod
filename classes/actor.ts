@@ -1,4 +1,5 @@
 import { Road } from "./buildings.js";
+import { Logger, LoggerFactory } from "./logger.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
 
 export class ActorSprite {
@@ -48,6 +49,7 @@ export class Actor {
         travelFinished = false;
 	home = {x: 0, y: 0};
 	goal?: Position;
+	logger: Logger = LoggerFactory.getLogger("Actor");
 
 	constructor(sprite: ActorSprite, position: Position) {
 		this.sprite =  sprite;
@@ -97,6 +99,7 @@ export class Actor {
 				if(this.traveledSquares == this.maxTravel) {
 					this.traveledSquares = 0;
 					this.travelFinished = true;
+					this.logger.debug("going home");
 				}
 			}
 	}
@@ -108,7 +111,6 @@ export class Actor {
 	tick(deltaTime: number, map: MapLayer, randMap: number[]): boolean {
 		const roads = map.roads;
 		if(this.travelFinished) {
-			console.log("going home");
 			return this.returnToHome(deltaTime, map)
 		}
 		if(!roads[this.positionSquare.y][this.positionSquare.x]) {
@@ -199,7 +201,7 @@ export class Actor {
 
 	nextGoal(map: MapLayer): boolean {
 		const step = map.getNextStep(this.positionSquare, this.home);
-		// console.log(this.positionSquare, "=>", this.home, " : ", step);
+		this.logger.debug(`${this.positionSquare}=>${this.home}: ${step}`);
 		if(!step) {
 			return false;
 		}
@@ -223,7 +225,7 @@ export class Actor {
 
 	returnToHome(deltaTime: number, map: MapLayer): boolean {
 		if(!this.goal && !this.isInCenter()) {
-			// console.log("trying to align");
+			this.logger.debug(`trying to align actor`);
 			this.align(deltaTime);
 			return false;
 		}
