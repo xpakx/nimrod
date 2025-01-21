@@ -7,7 +7,7 @@ import { Actor } from "./actor.js";
 import { BattleActor, HeroType } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
 import { Logger, LoggerFactory } from "./logger.js";
-import { House } from "./building/house.js";
+import { House, Migrant } from "./building/house.js";
 
 export class Game {
 	state: GameState;
@@ -559,7 +559,18 @@ export class Game {
 		if(minuteEnded) {
 			this.logger.debug("Spawning migrants");
 			// TODO
-			
+			const freePlaces = this.state.maxPopulation - this.state.population;
+			const newMigrants = Math.min(20, freePlaces);
+			const emptyHome = this.map.buildings
+				.filter(x => x instanceof House)
+				.find(x => x.population < x.maxPopulation)
+			if (emptyHome) {
+				for (let i=0; i<newMigrants; i++) {
+					const migrant = new Migrant(this.sprites.actors["test"], {x: 0, y: 0});
+					this.state.insertPedestrian(migrant);
+					migrant.setHome(emptyHome, this.map);
+				}
+			}
 		}
 
 	}

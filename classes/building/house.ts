@@ -1,6 +1,7 @@
+import { Actor } from "../actor.js";
 import { Building, BuildingPrototype, BuildingWorker, HouseOptions } from "../buildings.js";
 import { GameState } from "../game-state.js";
-import { Position } from "../map-layer.js";
+import { MapLayer, Position } from "../map-layer.js";
 
 export class House extends Building {
 	storage: { [key: string]: number } = { "water": 0, "food": 0 }; // TODO
@@ -83,4 +84,17 @@ interface HouseVisitorNeeds {
 export interface HouseLevel {
 	needs: HouseNeeds[];
 	maxPopulation: number;
+}
+
+export class Migrant extends Actor {
+	name: String = "migrant";
+
+	canMove(_map: MapLayer): boolean {
+	    return true;
+	}
+
+	setHome(home: House, _map: MapLayer) {
+		this.home = home.position;
+		// calculate path
+	}
 }

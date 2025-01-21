@@ -108,12 +108,17 @@ export class Actor {
 		return this.positionSquare.x + 0.5 == this.position.x && this.positionSquare.y  + 0.5 == this.position.y
 	}
 
+	canMove(map: MapLayer): boolean {
+		const roads = map.roads;
+		return !roads[this.positionSquare.y][this.positionSquare.x]
+	}
+
 	tick(deltaTime: number, map: MapLayer, randMap: number[]): boolean {
 		const roads = map.roads;
 		if(this.travelFinished) {
 			return this.returnToHome(deltaTime, map)
 		}
-		if(!roads[this.positionSquare.y][this.positionSquare.x]) {
+		if(this.canMove(map)) {
 			this.dead = true;
 			this.direction.x = 0;
 			this.direction.y = 0;

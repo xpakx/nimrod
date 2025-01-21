@@ -840,7 +840,7 @@ export class MapLayer {
 				}
 			}
 		}
-		this.logger.debug("Updated predecessor table", this.pred);
+		// this.logger.debug("Updated predecessor table", this.pred);
 	}
 
 
