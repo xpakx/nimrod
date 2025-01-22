@@ -152,8 +152,17 @@ export class Migrant extends Actor {
 		}
 		// TODO: recalculate path if goal is blocked
 
+		let newX = this.direction.x*deltaTime;
+		let newY = this.direction.y*deltaTime;
+
+		// speed adjustment for diagonal movement
+		if (newX != 0 && newY != 0) {
+			const diagonalFactor = Math.sqrt(2);
+			newX /= diagonalFactor;
+			newY /= diagonalFactor;
+		}
 		// TODO: this sometimes fails on diagonal movement
-		this.updatePosition(this.direction.x*deltaTime, this.direction.y*deltaTime);
+		this.updatePosition(newX, newY);
 
 		if (this.positionSquare.x + this.positionSquare.y != this.diagonal) {
 			this.diagonal = this.positionSquare.x + this.positionSquare.y;
