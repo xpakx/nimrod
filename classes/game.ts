@@ -466,9 +466,7 @@ export class Game {
 				if (!this.state.debugMode) {
 					break; 
 				}
-				for(let building of this.map.buildings) {
-					building.onMinuteEnd(this.state);
-				}
+				this.minuteCounter = 60;
 				break;
 			case "Escape":
 				this.interf.buildingInterface = undefined;
@@ -554,6 +552,8 @@ export class Game {
 			pedestrian.tick(dTime, this.map, randMap);
 			if (!pedestrian.dead) {
 				this.state.insertPedestrian(pedestrian);
+			} else if ("settled" in pedestrian && pedestrian.settled) {
+				this.state.population += 1;
 			}
 		}
 		if(minuteEnded) {

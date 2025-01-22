@@ -66,6 +66,16 @@ export class House extends Building {
 		}
 		return amountSupplied;
 	}
+
+	settle(num: number): boolean {
+		const freeSpaces = this.maxPopulation - this.population;
+		if (freeSpaces < num) {
+			return false;
+		}
+		this.logger.debug(`${num} new settlers  in home`);
+		this.population += num;
+		return true;
+	}
 }
 
 export type HouseNeeds = HouseResourceNeeds | HouseVisitorNeeds;
@@ -91,13 +101,15 @@ export class Migrant extends Actor {
 	name: String = "migrant";
 	logger: Logger = LoggerFactory.getLogger("Migrant");
 	path?: Position[]
+	targetHome?: House;
+	settled: boolean = false;
 
 	canMove(_map: MapLayer): boolean {
 	    return true;
 	}
 
 	setHome(home: House, path: Position[]) {
-		this.home = home.position;
+		this.targetHome = home;
 		this.path = path;
 		this.path.reverse();
 		this.path.pop();
@@ -133,6 +145,7 @@ export class Migrant extends Actor {
 		if (this.reachedGoal()) {
 			const foundGoal = this.nextGoal();
 			if (!foundGoal) {
+				this.settled = this.targetHome!.settle(1);
 				this.dead = true;
 				return false;
 			}
