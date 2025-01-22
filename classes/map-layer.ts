@@ -891,7 +891,7 @@ export class MapLayer {
 			if(next.equals(end)) {
 				return this.reconstructMigrantPath(cameFrom, end, start);
 			}
-			this.addNeighboursToQueue(queue, end, next, cameFrom);
+			this.addNeighboursToQueueWithDiagonals(queue, end, next, cameFrom);
 		}
 		return [];
 	}
@@ -914,6 +914,43 @@ export class MapLayer {
 			current = cameFrom[current.x][current.y];
 		}
 		return path.reverse();
+	}
+
+	addNeighboursToQueueWithDiagonals(queue: PriorityQueue, end: Position, next: Node, cameFrom: PathMap) {
+		const height = this.map.length;
+		const width = this.map[0].length;
+		if(next.pos.x-1 >= 0) {
+			const position: Position = next.step(-1, 0);
+			this.addNeighbour(position, queue, end, next, cameFrom);
+		}
+		if(next.pos.x+1 < width) {
+			const position: Position = next.step(1, 0);
+			this.addNeighbour(position, queue, end, next, cameFrom);
+		}
+		if(next.pos.y-1 >= 0) {
+			const position: Position = next.step(0, -1);
+			this.addNeighbour(position, queue, end, next, cameFrom);
+		}
+		if(next.pos.y+1 < height) {
+			const position: Position = next.step(0, 1);
+			this.addNeighbour(position, queue, end, next, cameFrom);
+		}
+		if (next.pos.x-1 >= 0 && next.pos.y-1 >= 0) {
+			const position: Position = next.step(-1, -1);
+			this.addNeighbour(position, queue, end, next, cameFrom);
+		}
+		if (next.pos.x-1 >= 0 && next.pos.y+1 < height) {
+			const position: Position = next.step(-1, 1);
+			this.addNeighbour(position, queue, end, next, cameFrom);
+		}
+		if (next.pos.x+1 < width && next.pos.y-1 >= 0) {
+			const position: Position = next.step(1, -1);
+			this.addNeighbour(position, queue, end, next, cameFrom);
+		}
+		if (next.pos.x+1 < width && next.pos.y+1 < height) {
+			const position: Position = next.step(1, 1);
+			this.addNeighbour(position, queue, end, next, cameFrom);
+		}
 	}
 }
 
