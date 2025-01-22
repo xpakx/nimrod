@@ -561,16 +561,18 @@ export class Game {
 			// TODO
 			const freePlaces = this.state.maxPopulation - this.state.population;
 			const newMigrants = Math.min(20, freePlaces);
-			const emptyHome = this.map.buildings
+			const emptyHouses = this.map.buildings
 				.filter(x => x instanceof House)
-				.find(x => x.population < x.maxPopulation)
-			if (emptyHome) {
+				.filter(x => x.population < x.maxPopulation)
+			if (emptyHouses.length > 0) {
 				for (let i=0; i<newMigrants; i++) {
 					const migrant = new Migrant(this.sprites.actors["test"], {x: 0, y: 0});
-					const path = this.map.shortestMigrantPath(migrant.positionSquare, emptyHome);
+					const randomIndex = Math.floor(Math.random() * emptyHouses.length);
+					const emptyHouse = emptyHouses[randomIndex];
+					const path = this.map.shortestMigrantPath(migrant.positionSquare, emptyHouse);
 					if (path.length > 0) {
 						this.logger.debug("Path for migrant:", path);
-						migrant.setHome(emptyHome, path);
+						migrant.setHome(emptyHouse, path);
 						this.state.insertPedestrian(migrant);
 					}
 				}
