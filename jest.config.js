@@ -9,6 +9,7 @@ module.exports = {
 moduleNameMapper: {
    "../buildings.js": "../buildings.ts",
    "../game-state.js": "../game-state.ts",
+   "../actor.js": "../actor.ts",
    "./buildings.js": "./buildings.ts", // TODO
    "./building-factory.js": "./building-factory.ts",
    "./actor.js": "./actor.ts",

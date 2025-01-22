@@ -859,6 +859,62 @@ export class MapLayer {
 		return fromIndex(step);
 	}
 
+	shortestMigrantPath(start: Position, building: Building): Position[] {
+		const end = building.workerSpawn;
+		if (!end) {
+			return [];
+		}
+		const height = this.map.length;
+		const width = this.map[0].length;
+		if(height == 1 && width == 1) {
+			return []
+		}
+		let visited: boolean[][] = Array(height).fill(null).map(() => Array(width).fill(false));
+		let cameFrom: PathMap = Array(height).fill(null).map(() => Array(width).fill(undefined));
+
+		let queue = new PriorityQueue();
+		queue.enqueue(new Node(start, end, 0));
+		while(!queue.isEmpty()) {
+			const next = queue.dequeue();
+			if(!next) {
+				break;
+			}
+
+			const alreadyVisited = visited[next.pos.y][next.pos.x];
+			if(alreadyVisited) {
+				continue;
+			}
+			visited[next.pos.y][next.pos.x] = true;
+			if(this.isObstacle(next.pos)) {
+				continue;
+			}
+			if(next.equals(end)) {
+				return this.reconstructMigrantPath(cameFrom, end, start);
+			}
+			this.addNeighboursToQueue(queue, end, next, cameFrom);
+		}
+		return [];
+	}
+
+	reconstructMigrantPath(cameFrom: PathMap, end: Position, start: Position): Position[] {
+		let path = [];
+		let current: Position | undefined = end;
+		let last: Position | undefined = undefined;
+		while (current) {
+			path.push(current);
+			let from = 0;
+			let to = 0;
+			if (last) {
+				[from, to] = this.getBitmapForPath(last, current);
+			}
+			if (current.x == start.x && current.y == start.y)  {
+				break;
+			}
+			last = current;
+			current = cameFrom[current.x][current.y];
+		}
+		return path.reverse();
+	}
 }
 
 type PathMap = (Position | undefined)[][];

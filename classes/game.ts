@@ -567,8 +567,12 @@ export class Game {
 			if (emptyHome) {
 				for (let i=0; i<newMigrants; i++) {
 					const migrant = new Migrant(this.sprites.actors["test"], {x: 0, y: 0});
-					this.state.insertPedestrian(migrant);
-					migrant.setHome(emptyHome, this.map);
+					const path = this.map.shortestMigrantPath(migrant.positionSquare, emptyHome);
+					if (path.length > 0) {
+						this.logger.debug("Path for migrant:", path);
+						migrant.setHome(emptyHome, this.map);
+						this.state.insertPedestrian(migrant);
+					}
 				}
 			}
 		}
