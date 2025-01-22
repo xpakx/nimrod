@@ -1,6 +1,7 @@
 import { Actor } from "../actor.js";
 import { Building, BuildingPrototype, BuildingWorker, HouseOptions } from "../buildings.js";
 import { GameState } from "../game-state.js";
+import { Logger, LoggerFactory } from "../logger.js";
 import { MapLayer, Position } from "../map-layer.js";
 
 export class House extends Building {
@@ -88,13 +89,62 @@ export interface HouseLevel {
 
 export class Migrant extends Actor {
 	name: String = "migrant";
+	logger: Logger = LoggerFactory.getLogger("Migrant");
+	path?: Position[]
 
 	canMove(_map: MapLayer): boolean {
 	    return true;
 	}
 
-	setHome(home: House, _map: MapLayer) {
+	setHome(home: House, path: Position[]) {
 		this.home = home.position;
-		// calculate path
+		this.path = path;
+		this.path.reverse();
+		this.path.pop();
+		this.goal = this.path.pop();
+		this.direction.x = this.goal!.x - this.positionSquare.x;
+		this.direction.y = this.goal!.y - this.positionSquare.y; 
+		this.logger.debug("Ultimate goal:", this.path[0]);
+	}
+
+	moving: boolean = false;
+
+	tick(deltaTime: number, _roads: MapLayer, _randMap: number[]): boolean {
+		return this.move(deltaTime);
+	}
+
+	nextGoal(): boolean {
+		this.goal = this.path?.pop();
+		this.logger.debug("new goal", this.goal);
+		if (!this.goal) {
+			this.logger.debug("Reached position", this.position);
+			return false;
+		}
+		this.direction.x = this.goal.x - this.positionSquare.x;
+		this.direction.y = this.goal.y - this.positionSquare.y;
+		return true;
+	}
+
+	move(deltaTime: number): boolean {
+		if(!this.goal) {
+			this.dead = true;
+			return false;
+		}
+		if (this.reachedGoal()) {
+			const foundGoal = this.nextGoal();
+			if (!foundGoal) {
+				this.dead = true;
+				return false;
+			}
+		}
+		// TODO: recalculate path if goal is blocked
+
+		this.updatePosition(this.direction.x*deltaTime, this.direction.y*deltaTime);
+
+		if (this.positionSquare.x + this.positionSquare.y != this.diagonal) {
+			this.diagonal = this.positionSquare.x + this.positionSquare.y;
+			return true;
+		}
+		return false;
 	}
 }

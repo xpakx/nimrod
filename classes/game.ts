@@ -570,7 +570,7 @@ export class Game {
 					const path = this.map.shortestMigrantPath(migrant.positionSquare, emptyHome);
 					if (path.length > 0) {
 						this.logger.debug("Path for migrant:", path);
-						migrant.setHome(emptyHome, this.map);
+						migrant.setHome(emptyHome, path);
 						this.state.insertPedestrian(migrant);
 					}
 				}
