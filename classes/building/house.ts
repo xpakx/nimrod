@@ -121,8 +121,8 @@ export class Migrant extends Actor {
 
 	moving: boolean = false;
 
-	tick(deltaTime: number, _roads: MapLayer, _randMap: number[]): boolean {
-		return this.move(deltaTime);
+	tick(deltaTime: number, map: MapLayer, _randMap: number[]): boolean {
+		return this.move(deltaTime, map);
 	}
 
 	nextGoal(): boolean {
@@ -137,7 +137,7 @@ export class Migrant extends Actor {
 		return true;
 	}
 
-	move(deltaTime: number): boolean {
+	move(deltaTime: number, map: MapLayer): boolean {
 		if(!this.goal) {
 			this.dead = true;
 			return false;
@@ -150,7 +150,24 @@ export class Migrant extends Actor {
 				return false;
 			}
 		}
-		// TODO: recalculate path if goal is blocked
+		if (map.isObstacle(this.goal)) {
+			// TODO: recalculate path if goal is blocked
+			if (!this.targetHome) {
+				this.dead = true;
+				return false;
+			}
+			const path = map.shortestMigrantPath(this.positionSquare, this.targetHome);
+
+			if (path.length == 1) {
+				this.settled = this.targetHome!.settle(1);
+				this.dead = true;
+				return false;
+			}
+			if (path.length > 0) {
+				this.logger.debug("New path:", path);
+				this.setHome(this.targetHome, path);
+			}
+		}
 
 		let newX = this.direction.x*deltaTime;
 		let newY = this.direction.y*deltaTime;
@@ -161,6 +178,7 @@ export class Migrant extends Actor {
 			newX /= diagonalFactor;
 			newY /= diagonalFactor;
 		}
+
 		// TODO: this sometimes fails on diagonal movement
 		this.updatePosition(newX, newY);
 
