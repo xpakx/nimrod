@@ -92,14 +92,16 @@ export class LoggerFactory {
 	static loggers: {[key: string]: Logger} = {};
 	static globalLevel: LoggerLevel = "error";
 
-	static getLogger(source: string): Logger {
-		// TODO: custom options
+	static getLogger(source: string, instanceOptions: LoggerOptions = {}): Logger {
 		let options: LoggerOptions = {
 			level: this.globalLevel,
 		}
 		if (source in this.loggers) {
+			// TODO error if options not empty
 			return this.loggers[source];
 		}
+		if ("transports" in instanceOptions) options.transports = instanceOptions.transports;
+		if ("format" in instanceOptions) options.format = instanceOptions.format;
 		this.loggers[source] = new Logger(source, options);
 		return this.loggers[source];
 	}
