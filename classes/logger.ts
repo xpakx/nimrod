@@ -112,4 +112,12 @@ export class LoggerFactory {
 			this.loggers[logger].level = level;
 		}
 	}
+
+	static updateLevels(level: LoggerLevel, sources: string[]) {
+		for (let key of sources) {
+			if (key in this.loggers) {
+				this.loggers[key].level = level;
+			}
+		}
+	}
 }
