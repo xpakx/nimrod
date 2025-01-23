@@ -151,7 +151,6 @@ export class Migrant extends Actor {
 			}
 		}
 		if (map.isObstacle(this.goal)) {
-			// TODO: recalculate path if goal is blocked
 			if (!this.targetHome) {
 				this.dead = true;
 				return false;

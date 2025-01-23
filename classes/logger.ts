@@ -22,7 +22,7 @@ export class Logger {
 	log(level: LoggerLevel, message: string, context = undefined) {
 		if (this.levels[level] >= this.levels[this.level]) {
 			const formattedMessage = this.formatMessage(level, message, context);
-			this.transports.forEach(transport => transport.log(formattedMessage, level));
+			this.transports.forEach(transport => transport.log(formattedMessage, level, context));
 		}
 	}
 
@@ -34,8 +34,7 @@ export class Logger {
 				return JSON.stringify({ timestamp, level, className, message, ...context });
 			case 'plain':
 			default:
-			        const contextStr = context === undefined ? "" : JSON.stringify(context);
-				return `[${timestamp}] [${level.toUpperCase()}] ${this.className}: ${message} ${contextStr}`;
+				return `[${timestamp}] [${level.toUpperCase()}] ${this.className}: ${message}`;
 		}
 	}
 
@@ -66,7 +65,7 @@ export interface LoggerOptions {
 }
 
 export abstract class LoggerTransport {
-	abstract log(message: string, level: LoggerLevel): void;
+	abstract log(message: string, level: LoggerLevel, context: any): void;
 }
 
 export class ConsoleTransport extends LoggerTransport {
@@ -78,8 +77,14 @@ export class ConsoleTransport extends LoggerTransport {
 		reset: 'color: inherit;',    // Reset to default
 	};
 
-	log(message: string, level: LoggerLevel) {
-		console.log(`%c ${message}`, this.styles[level]);
+	log(message: string, level: LoggerLevel, context: any) {
+		if (context !== undefined) {
+			console.groupCollapsed(`%c ${message}`, this.styles[level]);
+			console.log(context);
+			console.groupEnd();
+		} else {
+			console.log(`%c ${message}`, this.styles[level]);
+		}
 	}
 }
 
