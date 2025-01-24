@@ -206,7 +206,7 @@ export class Actor {
 
 	nextGoal(map: MapLayer): boolean {
 		const step = map.getNextStep(this.positionSquare, this.home);
-		this.logger.debug(`${this.positionSquare}=>${this.home}: ${step}`);
+		this.logger.debug(`${this.logger.formatPosition(this.positionSquare)}=>${this.logger.formatPosition(this.home)}: ${this.logger.formatPosition(step)}`);
 		if(!step) {
 			return false;
 		}

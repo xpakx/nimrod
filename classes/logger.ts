@@ -38,6 +38,13 @@ export class Logger {
 		}
 	}
 
+	formatPosition(position?: {x: number, y: number}): string {
+		if (!position) {
+			return "undefined";
+		}
+		return `(${position.x}, ${position.y})`;
+	}
+
 	debug(message: string, context: any = undefined) {
 		this.log('debug', message, context);
 	}
