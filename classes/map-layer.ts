@@ -859,6 +859,16 @@ export class MapLayer {
 		return fromIndex(step);
 	}
 
+	getDistance(start: Position, target: Position): number {
+		const columns = this.roads[0].length;
+		function toIndex(x: number, y: number) {
+			return y * columns + x;
+		}
+		const startIndex = toIndex(start.x, start.y);
+		const targetIndex = toIndex(target.x, target.y);
+		return this.dist[targetIndex][startIndex];
+	}
+
 	shortestMigrantPath(start: Position, building: Building): Position[] {
 		const end = building.workerSpawn;
 		if (!end) {
