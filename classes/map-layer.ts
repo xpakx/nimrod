@@ -937,20 +937,28 @@ export class MapLayer {
 		}
 		if (next.pos.x-1 >= 0 && next.pos.y-1 >= 0) {
 			const position: Position = next.step(-1, -1);
-			this.addNeighbour(position, queue, end, next, cameFrom);
+			this.addNeighbourDiagonal(position, queue, end, next, cameFrom);
 		}
 		if (next.pos.x-1 >= 0 && next.pos.y+1 < height) {
 			const position: Position = next.step(-1, 1);
-			this.addNeighbour(position, queue, end, next, cameFrom);
+			this.addNeighbourDiagonal(position, queue, end, next, cameFrom);
 		}
 		if (next.pos.x+1 < width && next.pos.y-1 >= 0) {
 			const position: Position = next.step(1, -1);
-			this.addNeighbour(position, queue, end, next, cameFrom);
+			this.addNeighbourDiagonal(position, queue, end, next, cameFrom);
 		}
 		if (next.pos.x+1 < width && next.pos.y+1 < height) {
 			const position: Position = next.step(1, 1);
-			this.addNeighbour(position, queue, end, next, cameFrom);
+			this.addNeighbourDiagonal(position, queue, end, next, cameFrom);
 		}
+	}
+
+	addNeighbourDiagonal(position: Position, queue: PriorityQueue, end: Position, next: Node, cameFrom: PathMap) {
+		const cost = this.getCost(position)*Math.sqrt(2) + next.dist;
+		if (!cameFrom[position.x][position.y]) {
+			cameFrom[position.x][position.y] = next.pos;
+		}
+		queue.enqueue(new Node(position, end, cost));
 	}
 }
 
