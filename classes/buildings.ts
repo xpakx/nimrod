@@ -11,6 +11,7 @@ export interface BuildingPrototype {
 	cost: number;
 	workerOptions?: WorkerOptions;
 	houseOptions?: HouseOptions;
+	storageOptions?: StorageOptions;
 	productionOptions?: Recipe[];
 }
 
@@ -24,6 +25,11 @@ export interface WorkerOptions {
 
 export interface HouseOptions {
 	levels?: HouseLevel[];
+}
+
+export interface StorageOptions {
+	resources?: string[];
+	capacity?: number;
 }
 
 export class BuildingSprite {

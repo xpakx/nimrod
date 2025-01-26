@@ -15,6 +15,7 @@ moduleNameMapper: {
    "./building-factory.js": "./building-factory.ts",
    "./actor.js": "./actor.ts",
    "./building/house.js": "./building/house.ts",
+   "./building/storage.js": "./building/storage.ts",
    "./logger.js": "./logger.ts",
   },
 };

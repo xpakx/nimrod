@@ -1,4 +1,4 @@
-import { Building, BuildingPrototype } from "../buildings.js";
+import { Building, BuildingPrototype, StorageOptions } from "../buildings.js";
 import { MapLayer, Position } from "../map-layer.js";
 
 export class Storage extends Building {
@@ -8,14 +8,22 @@ export class Storage extends Building {
 
 	constructor(prototype: BuildingPrototype, position: Position, accepted: boolean = true) {
 		super(prototype, position, accepted);
-		this.initializeResources();
+		if (prototype.storageOptions) this.initializeResources(prototype.storageOptions);
 	}
 
-	initializeResources() {
-
+	initializeResources(options: StorageOptions) {
+		if (options.resources) {
+			for(let resource of options.resources) {
+				this.storage[resource] = 0;
+			}
+		}
+		if (options.capacity) {
+			this.capacity = options.capacity;
+		}
 	}
 	
 	order(resource: string, amount: number, building: Building, map: MapLayer): number {
+		if (!(resource in this.storage)) return 0;
 		if (!this.canSpawnWorker()) return 0;
 		if (!this.workerSpawn) return 0;
 		if (!building.workerSpawn) return 0;
@@ -24,7 +32,7 @@ export class Storage extends Building {
 		if (dist == Infinity) return 0;
 		if (dist > this.maxDistance) return 0;
 		
-		const inStorage = resource in this.storage ? this.storage[resource] : 0;
+		const inStorage = this.storage[resource];
 		const toDeliver = Math.min(inStorage, amount);
 		this.storage[resource] -= toDeliver;
 
