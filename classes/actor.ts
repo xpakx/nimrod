@@ -118,9 +118,6 @@ export class Actor {
 		if(this.travelFinished) {
 			return this.returnToHome(deltaTime, map)
 		}
-		if(this.travelFinished) {
-			return this.returnToHome(deltaTime, map)
-		}
 		if(this.canMove(map)) {
 			this.dead = true;
 			this.direction.x = 0;
