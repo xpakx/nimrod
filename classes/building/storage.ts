@@ -11,6 +11,12 @@ export class Storage extends Building {
 		if (prototype.storageOptions) this.initializeResources(prototype.storageOptions);
 	}
 
+	tick(_deltaTime: number) {
+		if(!this.worker || this.worker.isAwayFromHome || !this.workerSpawn) {
+			return false;
+		}
+	}
+
 	initializeResources(options: StorageOptions) {
 		if (options.resources) {
 			for(let resource of options.resources) {
@@ -24,8 +30,8 @@ export class Storage extends Building {
 	
 	order(resource: string, amount: number, building: Building, map: MapLayer): number {
 		if (!(resource in this.storage)) return 0;
-		if (!this.canSpawnWorker()) return 0;
 		if (!this.workerSpawn) return 0;
+		if (!this.worker) return 0;
 		if (!building.workerSpawn) return 0;
 
 		const dist = map.getDistance(this.workerSpawn, building.workerSpawn);
@@ -36,7 +42,14 @@ export class Storage extends Building {
 		const toDeliver = Math.min(inStorage, amount);
 		this.storage[resource] -= toDeliver;
 
-		// TODO: send worker;
+		this.readyToSpawn = true;
+		this.worker.isAwayFromHome = true;
+		this.worker.dead = false;
+		this.worker.travelFinished = true; // TODO
+		this.worker.goal = building.workerSpawn;
+		this.worker.resource = resource;
+		this.worker.inventory = toDeliver;
+
 		return toDeliver;
 	}
 }
