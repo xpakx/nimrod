@@ -56,8 +56,7 @@ export class Storage extends Building {
 		worker.goal = building.workerSpawn;
 		worker.resource = resource;
 		worker.inventory = toDeliver;
-		worker.delivery = true;
-		worker.targetBuilding = building;
+		worker.order = {to: building, resource: resource, amount: amount};
 
 		return toDeliver;
 	}
@@ -68,8 +67,7 @@ export class Storage extends Building {
 }
 
 export class DeliveryWorker extends BuildingWorker {
-	delivery: boolean = true;
-	targetBuilding?: Building;
+	order?: DeliveryOrder;
 	homeBuilding?: Building;
 
 	tick(deltaTime: number, map: MapLayer, _randMap: number[]): boolean {
@@ -88,8 +86,8 @@ export class DeliveryWorker extends BuildingWorker {
 			const foundGoal = this.nextGoal(map);
 			if (!foundGoal) {
 				this.travelFinished = true; // TODO: time to unpack?
-				if (this.delivery) this.unpackOrder(this.targetBuilding!);
-				else this.getOrder(this.targetBuilding!);
+				if (this.order?.to) this.unpackOrder(this.order.to);
+				else if(this.order?.from) this.getOrder(this.order.from);
 				return false;
 			}
 		}
@@ -104,7 +102,7 @@ export class DeliveryWorker extends BuildingWorker {
 
 	returnHome(deltaTime: number, map: MapLayer): boolean {
 		const result = super.returnToHome(deltaTime, map);
-		if (this.dead || !this.delivery) this.unpackOrder(this.homeBuilding!);
+		if (this.dead && this.order!.from) this.unpackOrder(this.homeBuilding!);
 		return result;
 	}
 
@@ -116,5 +114,11 @@ export class DeliveryWorker extends BuildingWorker {
 	getOrder(building: Building) {
 		// TODO
 	}
+}
 
+export interface DeliveryOrder {
+	from?: Building;
+	to?: Building;
+	resource: string;
+	amount: number;
 }
