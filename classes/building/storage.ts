@@ -102,20 +102,27 @@ export class DeliveryWorker extends BuildingWorker {
 
 	returnHome(deltaTime: number, map: MapLayer): boolean {
 		const result = super.returnToHome(deltaTime, map);
-		if (this.dead && this.order!.from) this.unpackOrder(this.homeBuilding!);
+		if (this.dead) this.unpackOrder(this.homeBuilding!); // TODO: only if returned to home
 		return result;
 	}
 
 	unpackOrder(building: Building) {
 		if (!this.resource) return;
-		this.inventory -= building.supply(this, this.resource, this.inventory);
+		const amount = building.supply(this, this.resource, this.inventory);
+		this.inventory -= amount;
+
+		if (this.order?.to) {
+			this.order.amount -= amount;
+		}
 	}
 
 	getOrder(building: Building) {
-		// TODO
+		// TODO: make sure to not take more than home can store
 		if (!this.order) return;
 		this.resource = this.order.resource;
 		this.inventory = building.getResources(this, this.order.resource, this.order.amount);
+
+		this.order.amount -= this.inventory;
 	}
 }
 
