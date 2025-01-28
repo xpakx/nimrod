@@ -10,6 +10,10 @@ export class Storage extends Building {
 	constructor(prototype: BuildingPrototype, position: Position, accepted: boolean = true) {
 		super(prototype, position, accepted);
 		if (prototype.storageOptions) this.initializeResources(prototype.storageOptions);
+		if (this.worker) {
+			const worker = this.worker as DeliveryWorker;
+			worker.homeBuilding = this;
+		}
 	}
 
 	tick(_deltaTime: number) {
@@ -43,13 +47,17 @@ export class Storage extends Building {
 		const toDeliver = Math.min(inStorage, amount);
 		this.storage[resource] -= toDeliver;
 
+		const worker = this.worker as DeliveryWorker;
+
 		this.readyToSpawn = true;
-		this.worker.isAwayFromHome = true;
-		this.worker.dead = false;
-		this.worker.travelFinished = false;
-		this.worker.goal = building.workerSpawn;
-		this.worker.resource = resource;
-		this.worker.inventory = toDeliver;
+		worker.isAwayFromHome = true;
+		worker.dead = false;
+		worker.travelFinished = false;
+		worker.goal = building.workerSpawn;
+		worker.resource = resource;
+		worker.inventory = toDeliver;
+		worker.delivery = true;
+		worker.targetBuilding = building;
 
 		return toDeliver;
 	}
@@ -60,6 +68,10 @@ export class Storage extends Building {
 }
 
 export class DeliveryWorker extends BuildingWorker {
+	delivery: boolean = true;
+	targetBuilding?: Building;
+	homeBuilding?: Building;
+
 	tick(deltaTime: number, map: MapLayer, _randMap: number[]): boolean {
 		const result =  this.tickInternal(deltaTime, map);
 		this.handleDeath();
@@ -68,14 +80,16 @@ export class DeliveryWorker extends BuildingWorker {
 
 	tickInternal(deltaTime: number, map: MapLayer): boolean {
 		if(this.travelFinished) return this.returnToHome(deltaTime, map);
-		return this.deliverOrder(deltaTime, map);
+		return this.realizeOrder(deltaTime, map);
 	}
 
-	deliverOrder(deltaTime: number, map: MapLayer): boolean {
+	realizeOrder(deltaTime: number, map: MapLayer): boolean {
 		if(!this.goal || this.reachedGoal()) {
 			const foundGoal = this.nextGoal(map);
 			if (!foundGoal) {
 				this.travelFinished = true; // TODO: time to unpack?
+				if (this.delivery) this.unpackOrder(this.targetBuilding!);
+				else this.getOrder(this.targetBuilding!);
 				return false;
 			}
 		}
@@ -87,4 +101,20 @@ export class DeliveryWorker extends BuildingWorker {
 		}
 		return false;
 	}
+
+	returnHome(deltaTime: number, map: MapLayer): boolean {
+		const result = super.returnToHome(deltaTime, map);
+		if (this.dead || !this.delivery) this.unpackOrder(this.homeBuilding!);
+		return result;
+	}
+
+	unpackOrder(building: Building) {
+		if (!this.resource) return;
+		this.inventory -= building.supply(this, this.resource, this.inventory);
+	}
+
+	getOrder(building: Building) {
+		// TODO
+	}
+
 }
