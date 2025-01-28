@@ -113,6 +113,9 @@ export class DeliveryWorker extends BuildingWorker {
 
 	getOrder(building: Building) {
 		// TODO
+		if (!this.order) return;
+		this.resource = this.order.resource;
+		this.inventory = building.getResources(this, this.order.resource, this.order.amount);
 	}
 }
 

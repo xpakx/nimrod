@@ -195,6 +195,17 @@ export class Building {
 		return 0;
 	}
 
+	getResources(worker: BuildingWorker, resource: string, inventory: number): number {
+		if (!this.accepts.has(resource)) return 0;
+		if (this.storage.hasOwnProperty(resource) && inventory > 0 && this.storage[resource] > 0) {
+			const amount = Math.min(inventory, this.storage[resource]);
+			this.storage[resource] -= amount;
+			this.logger.debug(`${worker.name} took ${amount} ${resource} from ${this.name} at (${this.position.x}, ${this.position.y})`);
+			return amount;
+		}
+		return 0;
+	}
+
 	repair(worker: BuildingWorker) {
 		this.health = Math.min(this.health + 20, 100);
 		this.logger.debug(`${worker.name} repaired ${this.name} at (${this.position.x}, ${this.position.y})`);
