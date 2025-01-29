@@ -58,15 +58,8 @@ export class Storage extends Building {
 		this.storage[resource] -= toDeliver;
 
 		const worker = this.worker as DeliveryWorker;
-
+		worker.startOrder(order, toDeliver);
 		this.readyToSpawn = true;
-		worker.isAwayFromHome = true;
-		worker.dead = false;
-		worker.travelFinished = false;
-		worker.goal = building.workerSpawn;
-		worker.resource = resource;
-		worker.inventory = toDeliver;
-		worker.order = order;
 
 		return toDeliver;
 	}
@@ -86,17 +79,10 @@ export class Storage extends Building {
 		if (inStorage >= this.capacity) return 0; // TODO
 
 		const worker = this.worker as DeliveryWorker;
-
+		worker.startOrder(order);
 		this.readyToSpawn = true;
-		worker.isAwayFromHome = true;
-		worker.dead = false;
-		worker.travelFinished = false;
-		worker.goal = building.workerSpawn;
-		worker.resource = resource;
-		worker.inventory = 0;
-		worker.order = order;
 
-		return 0;
+		return 0; // TODO
 	}
 
 	setWorker(sprite: ActorSprite) {
@@ -112,6 +98,18 @@ export class DeliveryWorker extends BuildingWorker {
 		const result =  this.tickInternal(deltaTime, map);
 		this.handleDeath();
 		return result;
+	}
+
+	startOrder(order: DeliveryOrder, toDeliver: number = 0) {
+		const building = order.from ? order.from : order.to;
+		if (!building) return;
+		this.order = order;
+		this.isAwayFromHome = true;
+		this.dead = false;
+		this.travelFinished = false;
+		this.goal = building.workerSpawn;
+		this.resource = order.resource;
+		this.inventory = toDeliver;
 	}
 
 	tickInternal(deltaTime: number, map: MapLayer): boolean {
