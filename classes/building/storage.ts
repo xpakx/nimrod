@@ -1,6 +1,6 @@
 import { ActorSprite } from "../actor.js";
 import { Building, BuildingPrototype, BuildingWorker, StorageOptions } from "../buildings.js";
-import { MapLayer, Position } from "../map-layer.js";
+import { MapLayer, Position, Size } from "../map-layer.js";
 
 export class Storage extends Building {
 	storage: { [key: string]: number } = { "water": 0, "food": 0 }; // TODO
@@ -170,34 +170,68 @@ export interface DeliveryOrder {
 }
 
 export class DeliveryScheduler {
-	orders: DeliveryOrder[] = [];
+	orderMap: Map<string, DeliveryOrder>[][] = [];
 
-	cleanOrders() {
-		this.orders = this.orders.filter(o => o.amount > 0);
+	updateDimensions(size: Size) {
+		this.orderMap = Array(size.height)
+		.fill(null)
+		.map(() => 
+		     Array(size.width)
+		     .fill(null)
+		     .map(() => new Map<string, DeliveryOrder>())
+		    );
 	}
 
 	addOrder(order: DeliveryOrder) {
-		this.orders.push(order);
-		// TODO
+		const building = order.from ? order.from : order.to;
+		if (!building) return;
+		const orders = this.getOrdersForBuilding(building);
+		if (orders.has(order.resource)) this.invalidateOrder(order);
+		orders.set(order.resource, order);
+	}
+
+	getOrdersForBuilding(building: Building): Map<string, DeliveryOrder> {
+		return this.orderMap[building.position.y][building.position.x];
 	}
 
 	hasDeliveryOrder(building: Building, resource: string): boolean {
-		// TODO: optimize
-		const order = this.orders
-			.filter(o => o.to)
-			.filter(o => o.to === building)
-			.filter(o => o.amount > 0)
-			.find(o => o.resource = resource);
-		return order !== undefined;
+		const orders = this.getOrdersForBuilding(building);
+		const order = orders.get(resource);
+		if (!order) return false;
+		if (!order.to) return false;
+		if (order.to !== building) return false;
+		return order.amount > 0;
 	}
 
 	hasRetrievingOrder(building: Building, resource: string) {
-		// TODO: optimize
-		const order = this.orders
-			.filter(o => o.from)
-			.filter(o => o.from === building)
-			.filter(o => o.amount > 0)
-			.find(o => o.resource = resource);
-		return order !== undefined;
+		const orders = this.getOrdersForBuilding(building);
+		const order = orders.get(resource);
+		if (!order) return false;
+		if (!order.from) return false;
+		if (order.from !== building) return false;
+		return order.amount > 0;
+	}
+
+	invalidateOrder(order: DeliveryOrder) {
+		// TODO
+		order.amount = 0;
+	}
+
+	onBuildingDeletion(building: Building) {
+		const orders = this.getOrdersForBuilding(building);
+		// TODO
+		orders.clear();
+	}
+
+	onStorageDeletion(storage: Storage) {
+		// TODO
+	}
+
+	onBuildingCreation(building: Building) {
+		// TODO
+	}
+
+	onWorkerDeath(pedestrian: DeliveryWorker) {
+		// TODO
 	}
 }
