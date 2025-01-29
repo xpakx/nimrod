@@ -33,10 +33,20 @@ export class Storage extends Building {
 		}
 	}
 	
-	order(resource: string, amount: number, building: Building, map: MapLayer): number {
-		if (!(resource in this.storage)) return 0;
-		if (!this.workerSpawn) return 0;
+	registerOrder(order: DeliveryOrder, map: MapLayer): number {
+		if (!(order.resource in this.storage)) return 0;
 		if (!this.worker) return 0;
+		if (order.to) return this.registerDeliveryOrder(order, map)
+		else if (order.from) return this.registerRetrievingOrder(order, map);
+		return 0;
+	}
+
+	registerDeliveryOrder(order: DeliveryOrder, map: MapLayer): number {
+		if (!this.workerSpawn) return 0;
+		const building = order.to!;
+		const resource = order.resource;
+		const amount = order.amount;
+
 		if (!building.workerSpawn) return 0;
 
 		const dist = map.getDistance(this.workerSpawn, building.workerSpawn);
@@ -56,9 +66,37 @@ export class Storage extends Building {
 		worker.goal = building.workerSpawn;
 		worker.resource = resource;
 		worker.inventory = toDeliver;
-		worker.order = {to: building, resource: resource, amount: amount};
+		worker.order = order;
 
 		return toDeliver;
+	}
+
+	registerRetrievingOrder(order: DeliveryOrder, map: MapLayer): number {
+		if (!this.workerSpawn) return 0;
+		const building = order.from!;
+		const resource = order.resource;
+
+		if (!building.workerSpawn) return 0;
+
+		const dist = map.getDistance(this.workerSpawn, building.workerSpawn);
+		if (dist == Infinity) return 0;
+		if (dist > this.maxDistance) return 0;
+		
+		const inStorage = this.storage[resource];
+		if (inStorage >= this.capacity) return 0; // TODO
+
+		const worker = this.worker as DeliveryWorker;
+
+		this.readyToSpawn = true;
+		worker.isAwayFromHome = true;
+		worker.dead = false;
+		worker.travelFinished = false;
+		worker.goal = building.workerSpawn;
+		worker.resource = resource;
+		worker.inventory = 0;
+		worker.order = order;
+
+		return 0;
 	}
 
 	setWorker(sprite: ActorSprite) {
