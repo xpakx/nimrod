@@ -171,6 +171,7 @@ export interface DeliveryOrder {
 
 export class DeliveryScheduler {
 	orderMap: Map<string, DeliveryOrder>[][] = [];
+	toSchedule: DeliveryOrder[] = [];
 
 	updateDimensions(size: Size) {
 		this.orderMap = Array(size.height)
@@ -213,25 +214,42 @@ export class DeliveryScheduler {
 	}
 
 	invalidateOrder(order: DeliveryOrder) {
-		// TODO
+		if (order.amount == 0) return;
+		// TODO: reset all workers
 		order.amount = 0;
+	}
+
+	scheduleOrder(order: DeliveryOrder) {
+		this.toSchedule.push(order);
 	}
 
 	onBuildingDeletion(building: Building) {
 		const orders = this.getOrdersForBuilding(building);
-		// TODO
+		for (const order of orders.values()) {
+			this.invalidateOrder(order);
+		}
 		orders.clear();
 	}
 
 	onStorageDeletion(storage: Storage) {
-		// TODO
+		const storageWorker = storage.worker as DeliveryWorker | undefined;
+		if (!storageWorker) return;
+		const order = storageWorker.order;
+		if (!order) return;
+		this.scheduleOrder(order);
 	}
 
 	onBuildingCreation(building: Building) {
-		// TODO
+		if (!building.recipes) return;
+		// TODO: create and schedule orders
 	}
 
-	onWorkerDeath(pedestrian: DeliveryWorker) {
-		// TODO
+	onWorkerDeath(worker: DeliveryWorker) {
+		const order = worker.order;
+		if (!order) return;
+		if (order.amount == 0) return;
+		// TODO: check if order is realized
+		worker.order = undefined;
+		this.scheduleOrder(order);
 	}
 }
