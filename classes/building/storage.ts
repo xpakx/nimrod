@@ -168,3 +168,36 @@ export interface DeliveryOrder {
 	resource: string;
 	amount: number;
 }
+
+export class DeliveryScheduler {
+	orders: DeliveryOrder[] = [];
+
+	cleanOrders() {
+		this.orders = this.orders.filter(o => o.amount > 0);
+	}
+
+	addOrder(order: DeliveryOrder) {
+		this.orders.push(order);
+		// TODO
+	}
+
+	hasDeliveryOrder(building: Building, resource: string): boolean {
+		// TODO: optimize
+		const order = this.orders
+			.filter(o => o.to)
+			.filter(o => o.to === building)
+			.filter(o => o.amount > 0)
+			.find(o => o.resource = resource);
+		return order !== undefined;
+	}
+
+	hasRetrievingOrder(building: Building, resource: string) {
+		// TODO: optimize
+		const order = this.orders
+			.filter(o => o.from)
+			.filter(o => o.from === building)
+			.filter(o => o.amount > 0)
+			.find(o => o.resource = resource);
+		return order !== undefined;
+	}
+}
