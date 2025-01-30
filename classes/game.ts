@@ -90,6 +90,7 @@ export class Game {
 				const house = this.map.getBuilding(this.map.isoPlayerMouse) as House;
 				this.state.maxPopulation += house.maxPopulation;
 			}
+			this.state.orders.onBuildingCreation(this.map.getBuilding(this.map.isoPlayerMouse));
 		} else if(this.map.deleteMode) {
 			const building = this.map.getBuilding(this.map.isoPlayerMouse);
 			this.map.deleteBuilding(this.map.isoPlayerMouse);
@@ -101,6 +102,7 @@ export class Game {
 				this.map.deleteRoad(this.map.isoPlayerMouse);
 				this.map.updateAfterDeletion(this.map.isoPlayerMouse); // TODO: optimize
 			}
+			this.state.orders.onBuildingDeletion(building);
 		} else if(this.map.roadMode) {
 			if (this.state.money < 2) return;
 			this.state.money -= 2;
@@ -570,6 +572,9 @@ export class Game {
 				this.state.insertPedestrian(pedestrian);
 			} else if ("settled" in pedestrian && pedestrian.settled) {
 				this.state.population += 1;
+			}
+			if (pedestrian.dead) {
+				this.state.orders.onWorkerDeath(pedestrian);
 			}
 		}
 	}

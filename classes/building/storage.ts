@@ -1,4 +1,4 @@
-import { ActorSprite } from "../actor.js";
+import { Actor, ActorSprite } from "../actor.js";
 import { Building, BuildingPrototype, BuildingWorker, StorageOptions } from "../buildings.js";
 import { MapLayer, Position, Size } from "../map-layer.js";
 
@@ -223,7 +223,8 @@ export class DeliveryScheduler {
 		this.toSchedule.push(order);
 	}
 
-	onBuildingDeletion(building: Building) {
+	onBuildingDeletion(building: Building | undefined) {
+		if (!building) return;
 		const orders = this.getOrdersForBuilding(building);
 		for (const order of orders.values()) {
 			this.invalidateOrder(order);
@@ -239,12 +240,14 @@ export class DeliveryScheduler {
 		this.scheduleOrder(order);
 	}
 
-	onBuildingCreation(building: Building) {
+	onBuildingCreation(building: Building | undefined) {
+		if (!building) return;
 		if (!building.recipes) return;
 		// TODO: create and schedule orders
 	}
 
-	onWorkerDeath(worker: DeliveryWorker) {
+	onWorkerDeath(worker: Actor) {
+		if (!(worker instanceof DeliveryWorker)) return;
 		const order = worker.order;
 		if (!order) return;
 		if (order.amount == 0) return;
