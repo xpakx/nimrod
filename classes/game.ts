@@ -8,6 +8,7 @@ import { BattleActor, HeroType } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
 import { Logger, LoggerFactory } from "./logger.js";
 import { House, Migrant } from "./building/house.js";
+import { DeliveryScheduler } from "./building/storage.js";
 
 export class Game {
 	state: GameState;
@@ -206,6 +207,7 @@ export class Game {
 	applyMap(data: MapData, updateDistances: boolean = false) {
 		this.logger.debug("Applying map", data);
 		this.map.resetMap(data.size);
+		this.state.orders.updateDimensions(data.size);
 
 		for (let pos of data.roads) {
 			this.map.putRoad({x: pos.x, y: pos.y}, this.sprites.getRoad(), true);

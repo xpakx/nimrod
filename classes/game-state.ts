@@ -1,6 +1,7 @@
 import { Actor } from "./actor.js";
 import { BattleActor } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
+import { DeliveryScheduler } from "./building/storage.js";
 import { BattleMapData } from "./game.js";
 import { Position } from "./map-layer.js";
 
@@ -31,6 +32,7 @@ export class GameState {
 	// TODO: controlled by specific building
 	public team: BattleActor[] = [];
 	public allHeroes: BattleActor[] = [];
+	public orders: DeliveryScheduler = new DeliveryScheduler();
 
 	sortPedestrians() {
 		this.pedestrians.sort((a, b) => {
