@@ -217,6 +217,7 @@ export class Game {
 
 		for (let building of data.buildings) {
 			this.map.putBuilding({x: building.x, y: building.y}, this.sprites.buildings[building.type]);
+			this.state.orders.onBuildingCreation(this.map.getBuilding({x: building.x, y: building.y}));
 		}
 
 		for (let terrain of data.terrain) {
