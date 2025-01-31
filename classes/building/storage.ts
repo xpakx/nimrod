@@ -172,6 +172,11 @@ export interface DeliveryOrder {
 export class DeliveryScheduler {
 	orderMap: Map<string, DeliveryOrder>[][] = [];
 	toSchedule: DeliveryOrder[] = [];
+	nondeliverable: Set<string> = new Set<string>();;
+
+	constructor() {
+		this.nondeliverable.add("water");
+	}
 
 	updateDimensions(size: Size) {
 		this.orderMap = Array(size.height)
@@ -255,5 +260,48 @@ export class DeliveryScheduler {
 		// TODO: check if order is realized
 		worker.order = undefined;
 		this.scheduleOrder(order);
+	}
+
+	tick(buildings: Building[]) {
+		for (let building of buildings) {
+			this.checkRecipes(building);
+		}
+	}
+
+	checkRecipes(building: Building) {
+		if (!building.recipes) return;
+		for (let recipe of building.recipes) {
+			for (let ingredient of recipe.ingredients) {
+				const amount = building.getResourceAmount(ingredient.resource);
+				if (amount < 2*ingredient.amount) this.prepareInOrder(building, ingredient.resource, building.capacity - amount);
+			}
+			const amount = building.getResourceAmount(recipe.output.resource);
+			const output = recipe.output.resource;
+			if (amount >= building.capacity) this.prepareOutOrder(building, output, amount);
+		}
+	}
+
+	prepareInOrder(building: Building, resource: string, amount: number) {
+		if (this.nondeliverable.has(resource)) return;
+		const orders = this.getOrdersForBuilding(building);
+		const order = orders.get(resource);
+		if (order && order.amount > 0) return; 
+		if(order) {
+			order.amount = amount;
+			return;
+		}
+		orders.set(resource, {from: building, resource: resource, amount: amount});
+	}
+
+	prepareOutOrder(building: Building, resource: string, amount: number) {
+		if (this.nondeliverable.has(resource)) return;
+		const orders = this.getOrdersForBuilding(building);
+		const order = orders.get(resource);
+		if (order && order.amount > 0) return; 
+		if(order) {
+			order.amount = amount;
+			return;
+		}
+		orders.set(resource, {to: building, resource: resource, amount: amount});
 	}
 }

@@ -258,6 +258,11 @@ export class Building {
 		return recipe.ingredients.every((s) => s.resource in this.storage && this.storage[s.resource] >= s.amount);
 	}
 
+	getResourceAmount(resource: string) {
+		if (!(resource in this.storage)) return 0;
+		return this.storage[resource];
+	}
+
 	startProduction(recipe: Recipe) {
 		const resource = recipe.output.resource;
 		for (let res of recipe.ingredients) {
