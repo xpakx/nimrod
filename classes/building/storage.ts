@@ -230,6 +230,7 @@ export class DeliveryScheduler {
 			this.invalidateOrder(order);
 		}
 		orders.clear();
+		if (building instanceof Storage) this.onStorageDeletion(building);
 	}
 
 	onStorageDeletion(storage: Storage) {
