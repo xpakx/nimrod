@@ -262,7 +262,24 @@ export class DeliveryScheduler {
 		this.scheduleOrder(order);
 	}
 
-	tick() {
+	tick(buildings: Building[]) {
+		let neededResources = this.toSchedule.filter((r) => r.to).map((r) => r.resource);
+		let map = new Map<string, Storage[]>();
+		for (let resource of neededResources) {
+			map.set(resource, []);
+		}
+		for (let building of buildings) {
+			if (!(building instanceof Storage)) continue;
+			for (let resource of neededResources) {
+				if (building.getResourceAmount(resource) > 0) {
+					map.get(resource)!.push(building);
+				}
+			}
+		}
+		
+
+		for (let recipe of this.toSchedule) {
+		}
 		// TODO: process toSchedule
 	}
 
