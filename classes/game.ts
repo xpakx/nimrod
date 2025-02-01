@@ -534,8 +534,11 @@ export class Game {
 		const minuteEnded = this.advanceMinuteCounter(deltaTime);
 		this.calcBuildingsState(deltaTime, minuteEnded);
 		this.calcPedestriansState(deltaTime);
-		if(minuteEnded) this.spawnMigrants();
-		this.state.orders.tick(this.map.buildings);
+		if(minuteEnded) {
+			this.spawnMigrants();
+			this.state.orders.onMinuteEnd(this.map.buildings);
+		}
+		this.state.orders.tick();
 	}
 
 	advanceMinuteCounter(deltaTime: number): boolean {

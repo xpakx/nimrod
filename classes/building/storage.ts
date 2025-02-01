@@ -262,7 +262,11 @@ export class DeliveryScheduler {
 		this.scheduleOrder(order);
 	}
 
-	tick(buildings: Building[]) {
+	tick() {
+		// TODO: process toSchedule
+	}
+
+	onMinuteEnd(buildings: Building[]) {
 		for (let building of buildings) {
 			this.checkRecipes(building);
 		}
