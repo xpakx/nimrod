@@ -262,23 +262,33 @@ export class DeliveryScheduler {
 		this.scheduleOrder(order);
 	}
 
-	tick(buildings: Building[]) {
-		let neededResources = this.toSchedule.filter((r) => r.to).map((r) => r.resource);
+	createStorageMap(buildings: Building[], neededResources: string[]): Map<string, Storage[]> {
 		let map = new Map<string, Storage[]>();
 		for (let resource of neededResources) {
 			map.set(resource, []);
 		}
 		for (let building of buildings) {
 			if (!(building instanceof Storage)) continue;
-			for (let resource of neededResources) {
-				if (building.getResourceAmount(resource) > 0) {
-					map.get(resource)!.push(building);
-				}
+			this.updateStorageMap(neededResources, building, map);
+		}
+		return map;
+	}
+
+	updateStorageMap(resources: string[], storage: Storage, map: Map<string, Storage[]>) {
+		for (let resource of resources) {
+			if (storage.getResourceAmount(resource) > 0) {
+				map.get(resource)!.push(storage);
 			}
 		}
-		
+	}
+
+	tick(buildings: Building[]) {
+		if (this.toSchedule.length == 0) return;
+		let neededResources = this.toSchedule.filter((r) => r.to).map((r) => r.resource);
+		const storages = this.createStorageMap(buildings, neededResources);
 
 		for (let recipe of this.toSchedule) {
+
 		}
 		// TODO: process toSchedule
 	}
