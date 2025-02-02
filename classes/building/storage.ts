@@ -182,6 +182,8 @@ export class DeliveryScheduler {
 	orderMap: Map<string, DeliveryOrder>[][] = [];
 	toSchedule: DeliveryOrder[] = [];
 	nondeliverable: Set<string> = new Set<string>();;
+	timeSinceLastScheduling: number = 0;
+	schedulingFrequencyInSeconds: number = 5;
 
 	constructor() {
 		this.nondeliverable.add("water");
@@ -292,7 +294,11 @@ export class DeliveryScheduler {
 		}
 	}
 
-	tick(buildings: Building[], map: MapLayer) {
+	tick(deltaTime: number, buildings: Building[], map: MapLayer) {
+		this.timeSinceLastScheduling += deltaTime;
+		if(this.timeSinceLastScheduling < this.schedulingFrequencyInSeconds) return;
+		this.timeSinceLastScheduling = 0;
+
 		if (this.toSchedule.length == 0) return;
 		let neededResources = this.toSchedule.filter((r) => r.to).map((r) => r.resource);
 		const storages = this.createStorageMap(buildings, neededResources);

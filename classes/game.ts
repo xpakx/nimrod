@@ -584,11 +584,11 @@ export class Game {
 		}
 	}
 
-	calcOrdersState(_deltaTime: number, minuteEnded: boolean) {
+	calcOrdersState(deltaTime: number, minuteEnded: boolean) {
 		if(minuteEnded) {
 			this.state.orders.onMinuteEnd(this.map.buildings);
 		}
-		this.state.orders.tick(this.map.buildings, this.map);
+		this.state.orders.tick(deltaTime, this.map.buildings, this.map);
 	}
 	
 	spawnMigrants() {
