@@ -538,7 +538,7 @@ export class Game {
 			this.spawnMigrants();
 			this.state.orders.onMinuteEnd(this.map.buildings);
 		}
-		this.state.orders.tick();
+		this.state.orders.tick(this.map.buildings);
 	}
 
 	advanceMinuteCounter(deltaTime: number): boolean {
