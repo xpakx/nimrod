@@ -533,12 +533,8 @@ export class Game {
 	calcState(deltaTime: number) {
 		const minuteEnded = this.advanceMinuteCounter(deltaTime);
 		this.calcBuildingsState(deltaTime, minuteEnded);
-		this.calcPedestriansState(deltaTime);
-		if(minuteEnded) {
-			this.spawnMigrants();
-			this.state.orders.onMinuteEnd(this.map.buildings);
-		}
-		this.state.orders.tick(this.map.buildings);
+		this.calcPedestriansState(deltaTime, minuteEnded);
+		this.calcOrdersState(deltaTime, minuteEnded);
 	}
 
 	advanceMinuteCounter(deltaTime: number): boolean {
@@ -561,7 +557,7 @@ export class Game {
 		}
 	}
 
-	calcPedestriansState(deltaTime: number) {
+	calcPedestriansState(deltaTime: number, minuteEnded: boolean) {
 		const dTime = deltaTime > 0.5 ? 0.5 : deltaTime;
 		let randMap = [
 			Math.floor(Math.random() * 2),
@@ -582,6 +578,17 @@ export class Game {
 				this.state.orders.onWorkerDeath(pedestrian);
 			}
 		}
+
+		if(minuteEnded) {
+			this.spawnMigrants();
+		}
+	}
+
+	calcOrdersState(_deltaTime: number, minuteEnded: boolean) {
+		if(minuteEnded) {
+			this.state.orders.onMinuteEnd(this.map.buildings);
+		}
+		this.state.orders.tick(this.map.buildings);
 	}
 	
 	spawnMigrants() {
