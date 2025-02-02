@@ -588,7 +588,7 @@ export class Game {
 		if(minuteEnded) {
 			this.state.orders.onMinuteEnd(this.map.buildings);
 		}
-		this.state.orders.tick(this.map.buildings);
+		this.state.orders.tick(this.map.buildings, this.map);
 	}
 	
 	spawnMigrants() {

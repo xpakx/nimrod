@@ -45,7 +45,7 @@ export class Storage extends Building {
 		if (!this.workerSpawn) return 0;
 		const building = order.to!;
 		const resource = order.resource;
-		const amount = order.amount;
+		const amount = order.notScheduled ?? order.amount;
 
 		if (!building.workerSpawn) return 0;
 
@@ -62,6 +62,14 @@ export class Storage extends Building {
 		this.readyToSpawn = true;
 
 		return toDeliver;
+	}
+
+	inDistance(building: Building, map: MapLayer): boolean {
+		if (!this.workerSpawn) return false;
+		if (!building.workerSpawn) return false;
+		const dist = map.getDistance(this.workerSpawn, building.workerSpawn);
+		if (dist == Infinity) return false;
+		return dist <= this.maxDistance;
 	}
 
 	registerRetrievingOrder(order: DeliveryOrder, map: MapLayer): number {
@@ -167,6 +175,7 @@ export interface DeliveryOrder {
 	to?: Building;
 	resource: string;
 	amount: number;
+	notScheduled?: number;
 }
 
 export class DeliveryScheduler {
@@ -282,15 +291,29 @@ export class DeliveryScheduler {
 		}
 	}
 
-	tick(buildings: Building[]) {
+	tick(buildings: Building[], map: MapLayer) {
 		if (this.toSchedule.length == 0) return;
 		let neededResources = this.toSchedule.filter((r) => r.to).map((r) => r.resource);
 		const storages = this.createStorageMap(buildings, neededResources);
+		const allStorages = Array.from(storages.values()).flat();
 
-		for (let recipe of this.toSchedule) {
+		let newToSchedule: DeliveryOrder[] = [];
 
+		for (let order of this.toSchedule) {
+			const candidates = order.to ? storages.get(order.resource) : allStorages;
+			if (!candidates) continue;
+			let toDeliver = order.notScheduled ?? order.amount;
+			for (let storage of candidates) {
+				if (toDeliver <= 0) break;
+				toDeliver -= storage.registerOrder(order, map); 
+				// TODO: update storage map
+			}
+			if (toDeliver > 0) {
+				order.notScheduled = toDeliver;
+				newToSchedule.push(order);
+			}
 		}
-		// TODO: process toSchedule
+		this.toSchedule = newToSchedule;
 	}
 
 	onMinuteEnd(buildings: Building[]) {
