@@ -252,6 +252,7 @@ export class DeliveryScheduler {
 		if (!storageWorker) return;
 		const order = storageWorker.order;
 		if (!order) return;
+		// TODO: update notScheduled
 		this.scheduleOrder(order);
 	}
 
@@ -266,7 +267,7 @@ export class DeliveryScheduler {
 		const order = worker.order;
 		if (!order) return;
 		if (order.amount == 0) return;
-		// TODO: check if order is realized
+		// TODO: check if order is realized, update notScheduled
 		worker.order = undefined;
 		this.scheduleOrder(order);
 	}
@@ -300,6 +301,7 @@ export class DeliveryScheduler {
 		let newToSchedule: DeliveryOrder[] = [];
 
 		for (let order of this.toSchedule) {
+			if (order.amount == 0) continue;
 			const candidates = order.to ? storages.get(order.resource) : allStorages;
 			if (!candidates) continue;
 			let toDeliver = order.notScheduled ?? order.amount;
@@ -342,9 +344,13 @@ export class DeliveryScheduler {
 		if (order && order.amount > 0) return; 
 		if(order) {
 			order.amount = amount;
+			order.notScheduled = undefined;
+			this.scheduleOrder(order);
 			return;
 		}
-		orders.set(resource, {from: building, resource: resource, amount: amount});
+		const newOrder = {from: building, resource: resource, amount: amount};
+		orders.set(resource, newOrder);
+		this.scheduleOrder(newOrder);
 	}
 
 	prepareOutOrder(building: Building, resource: string, amount: number) {
@@ -354,8 +360,12 @@ export class DeliveryScheduler {
 		if (order && order.amount > 0) return; 
 		if(order) {
 			order.amount = amount;
+			order.notScheduled = undefined;
+			this.scheduleOrder(order);
 			return;
 		}
-		orders.set(resource, {to: building, resource: resource, amount: amount});
+		const newOrder = {to: building, resource: resource, amount: amount};
+		orders.set(resource, newOrder);
+		this.scheduleOrder(newOrder);
 	}
 }
