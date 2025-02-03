@@ -242,8 +242,19 @@ export class DeliveryScheduler {
 
 	invalidateOrder(order: DeliveryOrder) {
 		if (order.amount == 0) return;
-		// TODO: reset all workers
+		this.resetWorkers(order);
 		order.amount = 0;
+		order.assignedBuildings = [];
+	}
+
+	resetWorkers(order: DeliveryOrder) {
+		if (!order.assignedBuildings) return;
+		for (let storage of order.assignedBuildings) {
+			const worker = storage.worker as DeliveryWorker | undefined;
+			if (!worker) continue;
+			worker.travelFinished = true;
+			worker.order = undefined;
+		}
 	}
 
 	scheduleOrder(order: DeliveryOrder) {
@@ -266,6 +277,9 @@ export class DeliveryScheduler {
 		if (!storageWorker) return;
 		const order = storageWorker.order;
 		if (!order) return;
+		if (order.assignedBuildings) {
+			order.assignedBuildings = order.assignedBuildings.filter(x => x != storage);
+		}
 		// TODO: update notScheduled
 		this.scheduleOrder(order);
 	}
@@ -281,6 +295,9 @@ export class DeliveryScheduler {
 		const order = worker.order;
 		if (!order) return;
 		if (order.amount == 0) return;
+		if (order.assignedBuildings) {
+			order.assignedBuildings = order.assignedBuildings.filter(x => x != worker.homeBuilding);
+		}
 		// TODO: check if order is realized, update notScheduled
 		worker.order = undefined;
 		this.scheduleOrder(order);
@@ -363,6 +380,7 @@ export class DeliveryScheduler {
 		if(order) {
 			order.amount = amount;
 			order.notScheduled = undefined;
+			order.assignedBuildings = [];
 			this.scheduleOrder(order);
 			return;
 		}
@@ -379,6 +397,7 @@ export class DeliveryScheduler {
 		if(order) {
 			order.amount = amount;
 			order.notScheduled = undefined;
+			order.assignedBuildings = [];
 			this.scheduleOrder(order);
 			return;
 		}
