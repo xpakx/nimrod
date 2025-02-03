@@ -1,5 +1,5 @@
 import { Actor, ActorSprite } from "../actor.js";
-import { Building, BuildingPrototype, BuildingWorker, StorageOptions } from "../buildings.js";
+import { Building, BuildingPrototype, BuildingWorker, Recipe, StorageOptions } from "../buildings.js";
 import { MapLayer, Position, Size } from "../map-layer.js";
 
 export class Storage extends Building {
@@ -362,47 +362,41 @@ export class DeliveryScheduler {
 	checkRecipes(building: Building) {
 		if (!building.recipes) return;
 		for (let recipe of building.recipes) {
-			for (let ingredient of recipe.ingredients) {
-				const amount = building.getResourceAmount(ingredient.resource);
-				if (amount < 2*ingredient.amount) this.prepareInOrder(building, ingredient.resource, building.capacity - amount);
-			}
-			const amount = building.getResourceAmount(recipe.output.resource);
-			const output = recipe.output.resource;
-			if (amount >= building.capacity) this.prepareOutOrder(building, output, amount);
+			this.prepareOutOrders(building, recipe);
+			this.prepareInOrders(building, recipe);
 		}
 	}
 
-	prepareInOrder(building: Building, resource: string, amount: number) {
-		if (this.nondeliverable.has(resource)) return;
-		const orders = this.getOrdersForBuilding(building);
-		const order = orders.get(resource);
-		if (order && order.amount > 0) return; 
-		if(order) {
-			order.amount = amount;
-			order.notScheduled = undefined;
-			order.assignedBuildings = [];
-			this.scheduleOrder(order);
-			return;
+	prepareOutOrders(building: Building, recipe: Recipe) {
+		for (let ingredient of recipe.ingredients) {
+			const amount = building.getResourceAmount(ingredient.resource);
+			if (amount < 2*ingredient.amount) this.prepareOrder(building, ingredient.resource, building.capacity - amount, "from");
 		}
-		const newOrder = {from: building, resource: resource, amount: amount};
-		orders.set(resource, newOrder);
-		this.scheduleOrder(newOrder);
 	}
 
-	prepareOutOrder(building: Building, resource: string, amount: number) {
+	prepareInOrders(building: Building, recipe: Recipe) {
+		const amount = building.getResourceAmount(recipe.output.resource);
+		const output = recipe.output.resource;
+		if (amount >= building.capacity) this.prepareOrder(building, output, amount, "to");
+	}
+
+	prepareOrder(building: Building, resource: string, amount: number, type: "to" | "from") {
 		if (this.nondeliverable.has(resource)) return;
 		const orders = this.getOrdersForBuilding(building);
-		const order = orders.get(resource);
+		let order = orders.get(resource);
 		if (order && order.amount > 0) return; 
-		if(order) {
-			order.amount = amount;
-			order.notScheduled = undefined;
-			order.assignedBuildings = [];
-			this.scheduleOrder(order);
-			return;
-		}
-		const newOrder = {to: building, resource: resource, amount: amount};
-		orders.set(resource, newOrder);
-		this.scheduleOrder(newOrder);
+		order = this.resetOrder(order, amount, resource);
+		if (type == "from") order.from = building;
+		else if (type == "to") order.to = building;
+		this.scheduleOrder(order);
+		orders.set(resource, order);
+	}
+
+	resetOrder(order: DeliveryOrder | undefined, amount: number, resource: string): DeliveryOrder {
+		if (!order) return {resource: resource, amount: amount}
+		order.amount = amount;
+		order.notScheduled = undefined;
+		order.assignedBuildings = [];
+		return order;
 	}
 }
