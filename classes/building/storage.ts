@@ -59,9 +59,18 @@ export class Storage extends Building {
 
 		const worker = this.worker as DeliveryWorker;
 		worker.startOrder(order, toDeliver);
+		this.addBuildingToOrder(order);
 		this.readyToSpawn = true;
 
 		return toDeliver;
+	}
+
+	addBuildingToOrder(order: DeliveryOrder) {
+		if (order.assignedBuildings) {
+			order.assignedBuildings.push(this);
+		} else {
+			order.assignedBuildings = [this];
+		}
 	}
 
 	inDistance(building: Building, map: MapLayer): boolean {
@@ -88,6 +97,7 @@ export class Storage extends Building {
 
 		const worker = this.worker as DeliveryWorker;
 		worker.startOrder(order);
+		this.addBuildingToOrder(order);
 		this.readyToSpawn = true;
 
 		return 0; // TODO
@@ -176,6 +186,7 @@ export interface DeliveryOrder {
 	resource: string;
 	amount: number;
 	notScheduled?: number;
+	assignedBuildings?: Storage[];
 }
 
 export class DeliveryScheduler {
