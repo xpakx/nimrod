@@ -292,6 +292,10 @@ export class Building {
 		if (!this.isProductionFinished(resource)) return;
 		this.finishProduction(recipe);
 	}
+
+	onDeletion() {
+		if (this.worker) this.worker.dead = true;
+	}
 }
 
 export class BuildingWorker extends Actor {

@@ -103,6 +103,7 @@ export class Game {
 				this.map.updateAfterDeletion(this.map.isoPlayerMouse); // TODO: optimize
 			}
 			this.state.orders.onBuildingDeletion(building);
+			if (building) building.onDeletion();
 		} else if(this.map.roadMode) {
 			if (this.state.money < 2) return;
 			this.state.money -= 2;
