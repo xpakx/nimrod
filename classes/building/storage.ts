@@ -236,6 +236,7 @@ export class DeliveryScheduler {
 	}
 
 	scheduleOrder(order: DeliveryOrder) {
+		if(this.toSchedule.includes(order)) return;
 		this.toSchedule.push(order);
 	}
 
