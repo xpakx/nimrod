@@ -261,7 +261,7 @@ export class DeliveryScheduler {
 	onBuildingCreation(building: Building | undefined) {
 		if (!building) return;
 		if (!building.recipes) return;
-		// TODO: create and schedule orders
+		this.checkRecipes(building);
 	}
 
 	onWorkerDeath(worker: Actor) {
