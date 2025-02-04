@@ -1,11 +1,14 @@
+const path = require("path");
+
 module.exports = (request, options) => {
-	let resolvedPath = options.defaultResolver(request, options);
+	const resolver = options.defaultResolver;
+	const baseDirHasNodeModules = options.basedir.includes("node_modules");
+	const requestHasNodeModules = request.includes("node_modules");
+	const inNodeModules = baseDirHasNodeModules || requestHasNodeModules;
 
-	if (!resolvedPath.includes("node_modules") && resolvedPath.endsWith(".js")) {
-		const tsPath = resolvedPath.replace(/\.js$/, ".ts");
-		return tsPath;
-	}
+	if (inNodeModules) return resolver(request, options);
+	const newRequest = request.replace(/\.js$/, ".ts");
+	return resolver(newRequest, options);
 
-	return resolvedPath;
 };
 
