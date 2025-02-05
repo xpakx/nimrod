@@ -273,15 +273,8 @@ export class DeliveryScheduler {
 	}
 
 	onStorageDeletion(storage: Storage) {
-		const storageWorker = storage.worker as DeliveryWorker | undefined;
-		if (!storageWorker) return;
-		const order = storageWorker.order;
-		if (!order) return;
-		if (order.assignedBuildings) {
-			order.assignedBuildings = order.assignedBuildings.filter(x => x != storage);
-		}
-		this.clearWorkerOrder(storageWorker, order);
-		this.scheduleOrder(order);
+		if (!storage.worker) return;
+		this.onWorkerDeath(storage.worker); 
 	}
 
 	clearWorkerOrder(worker: DeliveryWorker, order: DeliveryOrder) {
