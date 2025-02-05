@@ -280,8 +280,22 @@ export class DeliveryScheduler {
 		if (order.assignedBuildings) {
 			order.assignedBuildings = order.assignedBuildings.filter(x => x != storage);
 		}
-		// TODO: update notScheduled
+		this.clearWorkerOrder(storageWorker, order);
 		this.scheduleOrder(order);
+	}
+
+	clearWorkerOrder(worker: DeliveryWorker, order: DeliveryOrder) {
+		worker.order = undefined;
+		if (order.amount <= 0) return;
+		if (order.to) {
+			if (!order.notScheduled) order.notScheduled = 0;
+			order.notScheduled += worker.inventory;
+		} else if (order.from) {
+			if (!order.notScheduled) order.notScheduled = 0;
+			// TODO: track how many resources worker is planning to take
+			// TODO: update notScheduled for from order
+			order.notScheduled += worker.inventory;
+		}
 	}
 
 	onBuildingCreation(building: Building | undefined) {
@@ -298,8 +312,7 @@ export class DeliveryScheduler {
 		if (order.assignedBuildings) {
 			order.assignedBuildings = order.assignedBuildings.filter(x => x != worker.homeBuilding);
 		}
-		// TODO: check if order is realized, update notScheduled
-		worker.order = undefined;
+		this.clearWorkerOrder(worker, order);
 		this.scheduleOrder(order);
 	}
 
