@@ -85,14 +85,24 @@ function militaryTab(sprites: { [key: string]: BuildingPrototype }, icons: any):
 		], icons['military'], icons['tab'])
 }
 
-function agricultureTab(_sprites: { [key: string]: BuildingPrototype }, icons: any): BuildingTab {
-	return new BuildingTab("agriculture", [], icons['agriculture'], icons['tab'])
+function agricultureTab(sprites: { [key: string]: BuildingPrototype }, icons: any): BuildingTab {
+	const farm = sprites['farm'].sprite;
+	const bakery = sprites['bakery'].sprite;
+
+	return new BuildingTab("agriculture", [
+		new BuildingButton(farm, "farm"),
+		new BuildingButton(bakery, "bakery"),
+	], icons['agriculture'], icons['tab'])
 }
 
 function scienceTab(_sprites: { [key: string]: BuildingPrototype }, icons: any): BuildingTab {
 	return new BuildingTab("science", [], icons['science'], icons['tab'])
 }
 
-function industryTab(_sprites: { [key: string]: BuildingPrototype }, icons: any): BuildingTab {
-	return new BuildingTab("industry", [], icons['industry'], icons['tab'])
+function industryTab(sprites: { [key: string]: BuildingPrototype }, icons: any): BuildingTab {
+	const storage = sprites['storage'].sprite;
+
+	return new BuildingTab("industry", [
+		new BuildingButton(storage, "storage"),
+	], icons['industry'], icons['tab'])
 }

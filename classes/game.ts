@@ -8,7 +8,6 @@ import { BattleActor, HeroType } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
 import { Logger, LoggerFactory } from "./logger.js";
 import { House, Migrant } from "./building/house.js";
-import { DeliveryScheduler } from "./building/storage.js";
 
 export class Game {
 	state: GameState;

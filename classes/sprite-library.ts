@@ -17,6 +17,9 @@ export class SpriteLibrary {
 		const tower = new BuildingSprite(await loadImage("./img/tower.svg"), 2, tileSize);
 		const well = new BuildingSprite(await loadImage("./img/well.svg"), 2, tileSize);
 		const inspector = new BuildingSprite(await loadImage("./img/inspector.svg"), 2, tileSize);
+		const farm = new BuildingSprite(await loadImage("./img/tower.svg"), 2, tileSize); // TODO
+		const bakery = new BuildingSprite(await loadImage("./img/tower.svg"), 2, tileSize);
+		const storage = new BuildingSprite(await loadImage("./img/tower.svg"), 2, tileSize);
 
 
 		this.buildings["ziggurat"] = {
@@ -75,6 +78,43 @@ export class SpriteLibrary {
 				repairing: true
 			}
 		};
+
+		this.buildings["farm"] = {
+			sprite: farm, 
+			interface: new BuildingInterface(), 
+			name: "farm", 
+			cost: 80,
+			productionOptions: [
+				{
+					output: {resource: "flour", amount: 50},
+					ingredients: [],
+					time: 12,
+				}	
+			]
+		};
+		this.buildings["bakery"] = {
+			sprite: bakery, 
+			interface: new BuildingInterface(), 
+			name: "bakery", 
+			cost: 240,
+			productionOptions: [
+				{
+					output: {resource: "bread", amount: 5},
+					ingredients: [{resource: "flour", amount: 10}],
+					time: 12,
+				}	
+			]
+		};
+		this.buildings["storage"] = {
+			sprite: storage, 
+			interface: new BuildingInterface(), 
+			name: "storage", 
+			cost: 120,
+			storageOptions: {
+				capacity: 50
+			},
+		};
+
 		return true;
 	}
 
