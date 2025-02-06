@@ -131,6 +131,7 @@ export class DeliveryWorker extends BuildingWorker {
 	}
 
 	tickInternal(deltaTime: number, map: MapLayer): boolean {
+		// TODO: aligning
 		if(this.travelFinished) return this.returnToHome(deltaTime, map);
 		return this.realizeOrder(deltaTime, map);
 	}
@@ -156,8 +157,15 @@ export class DeliveryWorker extends BuildingWorker {
 
 	returnHome(deltaTime: number, map: MapLayer): boolean {
 		const result = super.returnToHome(deltaTime, map);
-		if (this.dead) this.unpackOrder(this.homeBuilding!); // TODO: only if returned to home
+		if (this.dead && this.atSpawn()) this.unpackOrder(this.homeBuilding!);
 		return result;
+	}
+
+	atSpawn(): boolean {
+		if (!this.homeBuilding) return false;
+		const spawn = this.homeBuilding.workerSpawn;
+		if (!spawn) return false
+		return this.positionSquare.x == spawn.x && this.positionSquare.y == spawn.y;
 	}
 
 	unpackOrder(building: Building) {
