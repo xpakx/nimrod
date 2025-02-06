@@ -36,6 +36,7 @@ export class Storage extends Building {
 	registerOrder(order: DeliveryOrder, map: MapLayer): number {
 		if (!(order.resource in this.storage)) return 0;
 		if (!this.worker) return 0;
+		if (this.worker.isAwayFromHome) return 0;
 		if (order.to) return this.registerDeliveryOrder(order, map)
 		else if (order.from) return this.registerRetrievingOrder(order, map);
 		return 0;
