@@ -295,9 +295,7 @@ export class DeliveryScheduler {
 			order.notScheduled += worker.inventory;
 		} else if (order.from) {
 			if (!order.notScheduled) order.notScheduled = 0;
-			// TODO: track how many resources worker is planning to take
-			// TODO: update notScheduled for from order
-			order.notScheduled += worker.inventory;
+			order.notScheduled += worker.toFetch;
 		}
 	}
 
