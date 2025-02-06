@@ -1,5 +1,6 @@
 import { Actor, ActorSprite } from "../actor.js";
 import { Building, BuildingPrototype, BuildingWorker, Recipe, StorageOptions } from "../buildings.js";
+import { LoggerFactory } from "../logger.js";
 import { MapLayer, Position, Size } from "../map-layer.js";
 
 export class Storage extends Building {
@@ -60,6 +61,7 @@ export class Storage extends Building {
 
 		const worker = this.worker as DeliveryWorker;
 		worker.startOrder(order, toDeliver);
+		this.logger.debug(`Started delivery order: ${resource} (${toDeliver})`);
 		this.addBuildingToOrder(order);
 		this.readyToSpawn = true;
 
@@ -99,6 +101,7 @@ export class Storage extends Building {
 
 		const worker = this.worker as DeliveryWorker;
 		worker.startOrder(order);
+		this.logger.debug(`Started retrieving order: ${resource} (${amount})`);
 		worker.toFetch = amount;
 		this.addBuildingToOrder(order);
 		this.readyToSpawn = true;
@@ -205,6 +208,7 @@ export class DeliveryScheduler {
 	nondeliverable: Set<string> = new Set<string>();;
 	timeSinceLastScheduling: number = 0;
 	schedulingFrequencyInSeconds: number = 5;
+	logger = LoggerFactory.getLogger("DeliveryScheduler");
 
 	constructor() {
 		this.nondeliverable.add("water");
@@ -343,6 +347,7 @@ export class DeliveryScheduler {
 		this.timeSinceLastScheduling = 0;
 
 		if (this.toSchedule.length == 0) return;
+		this.logger.debug("Calculate orders");
 		let neededResources = this.toSchedule.filter((r) => r.to).map((r) => r.resource);
 		const storages = this.createStorageMap(buildings, neededResources);
 		const allStorages = Array.from(storages.values()).flat();
@@ -350,8 +355,10 @@ export class DeliveryScheduler {
 		let newToSchedule: DeliveryOrder[] = [];
 
 		for (let order of this.toSchedule) {
+			this.logger.debug(`Scheduling order: ${order.resource} (${order.amount})`);
 			if (order.amount == 0) continue;
 			const candidates = order.to ? storages.get(order.resource) : allStorages;
+			this.logger.debug(`Potential storages: ${candidates?.length}`);
 			if (!candidates) continue;
 			let toDeliver = order.notScheduled ?? order.amount;
 			for (let storage of candidates) {
@@ -384,6 +391,7 @@ export class DeliveryScheduler {
 	prepareOutOrders(building: Building, recipe: Recipe) {
 		for (let ingredient of recipe.ingredients) {
 			const amount = building.getResourceAmount(ingredient.resource);
+			this.logger.debug(`Checking out order: ${ingredient.resource} (${amount})`);
 			if (amount < 2*ingredient.amount) this.prepareOrder(building, ingredient.resource, building.capacity - amount, "from");
 		}
 	}
@@ -391,6 +399,7 @@ export class DeliveryScheduler {
 	prepareInOrders(building: Building, recipe: Recipe) {
 		const amount = building.getResourceAmount(recipe.output.resource);
 		const output = recipe.output.resource;
+		this.logger.debug(`Checking in order: ${output} (${amount})`);
 		if (amount >= building.capacity) this.prepareOrder(building, output, amount, "to");
 	}
 
@@ -402,6 +411,7 @@ export class DeliveryScheduler {
 		order = this.resetOrder(order, amount, resource);
 		if (type == "from") order.from = building;
 		else if (type == "to") order.to = building;
+		this.logger.debug("Preparing order");
 		this.scheduleOrder(order);
 		orders.set(resource, order);
 	}
