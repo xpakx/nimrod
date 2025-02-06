@@ -93,14 +93,16 @@ export class Storage extends Building {
 		if (dist > this.maxDistance) return 0;
 		
 		const inStorage = this.storage[resource];
-		if (inStorage >= this.capacity) return 0; // TODO
+		if (inStorage >= this.capacity) return 0;
+		const amount = Math.min(inStorage, order.amount);
 
 		const worker = this.worker as DeliveryWorker;
 		worker.startOrder(order);
+		worker.toFetch = amount;
 		this.addBuildingToOrder(order);
 		this.readyToSpawn = true;
 
-		return 0; // TODO
+		return amount;
 	}
 
 	setWorker(sprite: ActorSprite) {
@@ -111,6 +113,7 @@ export class Storage extends Building {
 export class DeliveryWorker extends BuildingWorker {
 	order?: DeliveryOrder;
 	homeBuilding?: Building;
+	toFetch: number = 0;
 
 	tick(deltaTime: number, map: MapLayer, _randMap: number[]): boolean {
 		const result =  this.tickInternal(deltaTime, map);
@@ -179,11 +182,9 @@ export class DeliveryWorker extends BuildingWorker {
 	}
 
 	getOrder(building: Building) {
-		// TODO: make sure to not take more than home can store
 		if (!this.order) return;
 		this.resource = this.order.resource;
-		this.inventory = building.getResources(this, this.order.resource, this.order.amount);
-
+		this.inventory = building.getResources(this, this.order.resource, this.toFetch);
 		this.order.amount -= this.inventory;
 	}
 }
