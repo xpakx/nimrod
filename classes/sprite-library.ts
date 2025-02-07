@@ -110,6 +110,7 @@ export class SpriteLibrary {
 			interface: new BuildingInterface(), 
 			name: "storage", 
 			cost: 120,
+			workerOptions: {sprite: this.actors['delivery']},
 			storageOptions: {
 				capacity: 50,
 				resources: ['flour'],
@@ -137,6 +138,8 @@ export class SpriteLibrary {
 
 	async prepareActorSprites(tileSize: Size): Promise<boolean> {
 		this.actors['test'] = new ActorSprite(await loadImage("./img/house.svg"), 2, tileSize);
+		this.actors['delivery'] = new ActorSprite(await loadImage("./img/house.svg"), 2, tileSize);
+		this.actors['delivery'].fillStyle = "blue";
 		return true;
 	}
 

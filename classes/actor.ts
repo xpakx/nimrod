@@ -7,6 +7,7 @@ export class ActorSprite {
 	image: HTMLImageElement;
 	baseSize: number;
 	offscreen: OffscreenCanvas;
+	fillStyle: "red" | "blue" = "red";
 
 	constructor(image: HTMLImageElement, size: number, tileSize: Size) {
 		this.image = image;
@@ -24,7 +25,7 @@ export class ActorSprite {
 		const offscreenCtx = this.offscreen.getContext('2d');
 		if (offscreenCtx) {
 			offscreenCtx.clearRect(0, 0, this.size.width, this.size.height);
-			offscreenCtx.fillStyle = "red";
+			offscreenCtx.fillStyle = this.fillStyle;
 			offscreenCtx.beginPath();
 			offscreenCtx.ellipse(10, 15, 10, 15, 0, 0, 2 * Math.PI);
 			offscreenCtx.fill();

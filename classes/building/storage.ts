@@ -1,16 +1,18 @@
 import { Actor, ActorSprite } from "../actor.js";
 import { Building, BuildingPrototype, BuildingWorker, Recipe, StorageOptions } from "../buildings.js";
-import { LoggerFactory } from "../logger.js";
+import { Logger, LoggerFactory } from "../logger.js";
 import { MapLayer, Position, Size } from "../map-layer.js";
 
 export class Storage extends Building {
-	storage: { [key: string]: number } = { "water": 0, "food": 0 }; // TODO
+	storage: { [key: string]: number } = {}; // TODO
 	deliveryInProgress: boolean = false;
 	maxDistance: number = 30;
+	logger: Logger = LoggerFactory.getLogger("Storage");
 
 	constructor(prototype: BuildingPrototype, position: Position, accepted: boolean = true) {
 		super(prototype, position, accepted);
 		if (prototype.storageOptions) this.initializeResources(prototype.storageOptions);
+		if (prototype.workerOptions) this.setWorker(prototype.workerOptions.sprite);
 		if (this.worker) {
 			const worker = this.worker as DeliveryWorker;
 			worker.homeBuilding = this;
@@ -35,9 +37,13 @@ export class Storage extends Building {
 	}
 	
 	registerOrder(order: DeliveryOrder, map: MapLayer): number {
+		this.logger.debug("Registering order");
 		if (!(order.resource in this.storage)) return 0;
+		this.logger.debug("Accepting resource");
 		if (!this.worker) return 0;
+		this.logger.debug("Has worker");
 		if (this.worker.isAwayFromHome) return 0;
+		this.logger.debug("Worker in building");
 		if (order.to) return this.registerDeliveryOrder(order, map)
 		else if (order.from) return this.registerRetrievingOrder(order, map);
 		return 0;
@@ -118,6 +124,7 @@ export class DeliveryWorker extends BuildingWorker {
 	order?: DeliveryOrder;
 	homeBuilding?: Building;
 	toFetch: number = 0;
+	logger: Logger = LoggerFactory.getLogger("DeliveryWorker");
 
 	tick(deltaTime: number, map: MapLayer, _randMap: number[]): boolean {
 		const result =  this.tickInternal(deltaTime, map);
