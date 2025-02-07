@@ -1,5 +1,5 @@
 import { BattleMapData, Game } from "./classes/game.js";
-import { ConsoleTransport, LoggerFactory } from "./classes/logger.js";
+import { LoggerFactory } from "./classes/logger.js";
 
 let game = new Game();
 
@@ -38,6 +38,7 @@ function registerKeyboardEvents() {
 }
 
 window.onload = async () => {
+	LoggerFactory.enable(["DeliveryScheduler", "DeliveryWorker", "Storage"]);
 	const logger = LoggerFactory.getLogger("Script");
 
 	logger.debug('Started app');

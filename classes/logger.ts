@@ -4,6 +4,7 @@ export class Logger {
 	transports: LoggerTransport[];
 	levels: { [key: string]: number };
 	className: string;
+	disabled: boolean = false;
 
 	constructor(source: string, options: LoggerOptions = {}) {
 			this.level = options.level || 'info';
@@ -20,6 +21,7 @@ export class Logger {
 	}
 
 	log(level: LoggerLevel, message: string, context = undefined) {
+		if (this.disabled) return;
 		if (this.levels[level] >= this.levels[this.level]) {
 			const formattedMessage = this.formatMessage(level, message, context);
 			this.transports.forEach(transport => transport.log(formattedMessage, level, context));
@@ -98,6 +100,8 @@ export class ConsoleTransport extends LoggerTransport {
 export class LoggerFactory {
 	static loggers: {[key: string]: Logger} = {};
 	static globalLevel: LoggerLevel = "error";
+	static enabledList?: string[];
+	static disabledList?: string[];
 
 	static getLogger(source: string, instanceOptions: LoggerOptions = {}): Logger {
 		let options: LoggerOptions = {
@@ -109,7 +113,9 @@ export class LoggerFactory {
 		}
 		if ("transports" in instanceOptions) options.transports = instanceOptions.transports;
 		if ("format" in instanceOptions) options.format = instanceOptions.format;
-		this.loggers[source] = new Logger(source, options);
+		let newLogger = new Logger(source, options);
+		this.loggers[source] = newLogger;
+		newLogger.disabled = this.checkDisable(source);
 		return this.loggers[source];
 	}
 
@@ -126,5 +132,31 @@ export class LoggerFactory {
 				this.loggers[key].level = level;
 			}
 		}
+	}
+
+	static checkDisable(source: string): boolean {
+		if (this.enabledList) return !(source in this.enabledList);
+		if (this.disabledList) return source in this.disabledList;
+		return false;
+	}
+
+	static enable(sources: string[]) {
+		for (let loggerName in this.loggers) {
+			const inSources = sources.includes(loggerName);
+			const logger = this.loggers[loggerName];
+			logger.disabled = !inSources;
+		}
+		this.enabledList = sources;
+		this.disabledList = undefined;
+	}
+
+	static disable(sources: string[]) {
+		for (let loggerName in this.loggers) {
+			const inSources = sources.includes(loggerName);
+			const logger = this.loggers[loggerName];
+			logger.disabled = inSources;
+		}
+		this.enabledList = undefined;
+		this.disabledList = sources;
 	}
 }
