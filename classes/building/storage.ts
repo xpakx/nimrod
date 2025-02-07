@@ -1,13 +1,13 @@
 import { Actor, ActorSprite } from "../actor.js";
 import { Building, BuildingPrototype, BuildingWorker, Recipe, StorageOptions } from "../buildings.js";
-import { Logger, LoggerFactory } from "../logger.js";
+import { getLogger, Logger, LoggerFactory } from "../logger.js";
 import { MapLayer, Position, Size } from "../map-layer.js";
 
 export class Storage extends Building {
 	storage: { [key: string]: number } = {}; // TODO
 	deliveryInProgress: boolean = false;
 	maxDistance: number = 30;
-	logger: Logger = LoggerFactory.getLogger("Storage");
+	logger: Logger = getLogger("Storage");
 
 	constructor(prototype: BuildingPrototype, position: Position, accepted: boolean = true) {
 		super(prototype, position, accepted);
@@ -125,7 +125,7 @@ export class DeliveryWorker extends BuildingWorker {
 	order?: DeliveryOrder;
 	homeBuilding?: Building;
 	toFetch: number = 0;
-	logger: Logger = LoggerFactory.getLogger("DeliveryWorker");
+	logger: Logger = getLogger("DeliveryWorker");
 
 	tick(deltaTime: number, map: MapLayer, _randMap: number[]): boolean {
 		const result =  this.tickInternal(deltaTime, map);
@@ -216,7 +216,7 @@ export class DeliveryScheduler {
 	nondeliverable: Set<string> = new Set<string>();;
 	timeSinceLastScheduling: number = 0;
 	schedulingFrequencyInSeconds: number = 5;
-	logger = LoggerFactory.getLogger("DeliveryScheduler");
+	logger = getLogger("DeliveryScheduler");
 
 	constructor() {
 		this.nondeliverable.add("water");

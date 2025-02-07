@@ -1,7 +1,7 @@
 import { Actor, ActorSprite } from "./actor.js";
 import { HouseLevel } from "./building/house.js";
 import { GameState } from "./game-state.js";
-import { Logger, LoggerFactory } from "./logger.js";
+import { getLogger, Logger, LoggerFactory } from "./logger.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
 
 export interface BuildingPrototype {
@@ -75,7 +75,7 @@ export class Building {
 	readyToSpawn: boolean = false;;
 	recipes?: Recipe[];
 	accepts: Set<string>;
-	logger: Logger = LoggerFactory.getLogger("Building");
+	logger: Logger = getLogger("Building");
 
 	constructor(prototype: BuildingPrototype, position: Position, accepted: boolean = true) {
 		this.sprite =  prototype.sprite;

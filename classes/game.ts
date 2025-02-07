@@ -6,7 +6,7 @@ import { prepareTabs } from "./sidebar.js";
 import { Actor } from "./actor.js";
 import { BattleActor, HeroType } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
-import { Logger, LoggerFactory } from "./logger.js";
+import { getLogger, Logger, LoggerFactory } from "./logger.js";
 import { House, Migrant } from "./building/house.js";
 
 export class Game {
@@ -18,7 +18,7 @@ export class Game {
 	minXOffset: number;
 	maxXOffset: number;
 	minuteCounter: number;
-	logger: Logger = LoggerFactory.getLogger("Game");
+	logger: Logger = getLogger("Game");
 
 	constructor() {
 		this.state = new GameState();
@@ -422,7 +422,7 @@ export class Game {
 				break;
 			case 'F9': 
 				this.state.debugMode = !this.state.debugMode;
-				LoggerFactory.updateAllLevels(this.state.debugMode ? "debug" : "error");
+				LoggerFactory.getInstance().updateAllLevels(this.state.debugMode ? "debug" : "error");
 				break;
 			case 'F8':
 				this.toBattle();

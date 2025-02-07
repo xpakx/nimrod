@@ -1,7 +1,7 @@
 import { Actor } from "./actor.js";
 import { createBuilding } from "./building-factory.js";
 import { Building, BuildingPrototype, BuildingSprite, Road, TilingSprite } from "./buildings.js";
-import { Logger, LoggerFactory } from "./logger.js";
+import { getLogger, Logger, LoggerFactory } from "./logger.js";
 
 export class MapLayer {
 	defTileWidth: number = 64;
@@ -29,7 +29,7 @@ export class MapLayer {
 	costs: number[][] = this.map.map(row => row.map(() => 1));
 	roads: (Road | undefined)[][] = this.map.map(row => row.map(() => undefined)); // for quicker lookup
 
-	logger: Logger = LoggerFactory.getLogger("MapLayer");
+	logger: Logger = getLogger("MapLayer");
 
 	constructor(canvasSize: Size) {
 		this.canvasSize.height = canvasSize.height;

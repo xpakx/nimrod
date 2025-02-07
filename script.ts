@@ -38,8 +38,9 @@ function registerKeyboardEvents() {
 }
 
 window.onload = async () => {
-	LoggerFactory.enable(["DeliveryScheduler", "DeliveryWorker", "Storage"]);
-	const logger = LoggerFactory.getLogger("Script");
+	const loggerFactory = LoggerFactory.getInstance();
+	loggerFactory.enable(["DeliveryScheduler", "DeliveryWorker", "Storage"]);
+	const logger = loggerFactory.getLogger("Script");
 
 	logger.debug('Started app');
 	const canvas = document.getElementById('gameCanvas') as (HTMLCanvasElement | null);

@@ -1,7 +1,7 @@
 import { Actor } from "../actor.js";
 import { Building, BuildingPrototype, BuildingWorker, HouseOptions } from "../buildings.js";
 import { GameState } from "../game-state.js";
-import { Logger, LoggerFactory } from "../logger.js";
+import { getLogger, Logger, LoggerFactory } from "../logger.js";
 import { MapLayer, Position } from "../map-layer.js";
 
 export class House extends Building {
@@ -98,7 +98,7 @@ export interface HouseLevel {
 
 export class Migrant extends Actor {
 	name: String = "migrant";
-	logger: Logger = LoggerFactory.getLogger("Migrant");
+	logger: Logger = getLogger("Migrant");
 	path?: Position[]
 	targetHome?: House;
 	settled: boolean = false;

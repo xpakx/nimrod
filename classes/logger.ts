@@ -98,12 +98,20 @@ export class ConsoleTransport extends LoggerTransport {
 }
 
 export class LoggerFactory {
-	static loggers: {[key: string]: Logger} = {};
-	static globalLevel: LoggerLevel = "error";
-	static enabledList?: string[];
-	static disabledList?: string[];
+	private static instance: LoggerFactory;
+	loggers: {[key: string]: Logger} = {};
+	globalLevel: LoggerLevel = "error";
+	enabledList?: string[];
+	disabledList?: string[];
 
-	static getLogger(source: string, instanceOptions: LoggerOptions = {}): Logger {
+	private constructor() {};
+
+	static getInstance(): LoggerFactory {
+		if (!LoggerFactory.instance) LoggerFactory.instance = new LoggerFactory();
+		return LoggerFactory.instance;
+	}
+
+	getLogger(source: string, instanceOptions: LoggerOptions = {}): Logger {
 		let options: LoggerOptions = {
 			level: this.globalLevel,
 		}
@@ -119,14 +127,14 @@ export class LoggerFactory {
 		return this.loggers[source];
 	}
 
-	static updateAllLevels(level: LoggerLevel) {
+	updateAllLevels(level: LoggerLevel) {
 		this.globalLevel = level;
 		for (let logger in this.loggers) {
 			this.loggers[logger].level = level;
 		}
 	}
 
-	static updateLevels(level: LoggerLevel, sources: string[]) {
+	updateLevels(level: LoggerLevel, sources: string[]) {
 		for (let key of sources) {
 			if (key in this.loggers) {
 				this.loggers[key].level = level;
@@ -134,13 +142,13 @@ export class LoggerFactory {
 		}
 	}
 
-	static checkDisable(source: string): boolean {
+	checkDisable(source: string): boolean {
 		if (this.enabledList) return !this.enabledList.includes(source);
 		if (this.disabledList) return this.disabledList.includes(source);
 		return false;
 	}
 
-	static enable(sources: string[]) {
+	enable(sources: string[]) {
 		for (let loggerName in this.loggers) {
 			const inSources = sources.includes(loggerName);
 			const logger = this.loggers[loggerName];
@@ -150,7 +158,7 @@ export class LoggerFactory {
 		this.disabledList = undefined;
 	}
 
-	static disable(sources: string[]) {
+	disable(sources: string[]) {
 		for (let loggerName in this.loggers) {
 			const inSources = sources.includes(loggerName);
 			const logger = this.loggers[loggerName];
@@ -159,4 +167,8 @@ export class LoggerFactory {
 		this.enabledList = undefined;
 		this.disabledList = sources;
 	}
+}
+
+export function getLogger(source: string, instanceOptions: LoggerOptions = {}): Logger {
+	return LoggerFactory.getInstance().getLogger(source, instanceOptions);
 }

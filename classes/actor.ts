@@ -1,5 +1,5 @@
 import { Road } from "./buildings.js";
-import { Logger, LoggerFactory } from "./logger.js";
+import { getLogger, Logger, LoggerFactory } from "./logger.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
 
 export class ActorSprite {
@@ -50,7 +50,7 @@ export class Actor {
         travelFinished = false;
 	home = {x: 0, y: 0};
 	goal?: Position;
-	logger: Logger = LoggerFactory.getLogger("Actor");
+	logger: Logger = getLogger("Actor");
 
 	constructor(sprite: ActorSprite, position: Position) {
 		this.sprite =  sprite;
