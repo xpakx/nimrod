@@ -351,27 +351,33 @@ export class DeliveryScheduler {
 		let neededResources = this.toSchedule.filter((r) => r.to).map((r) => r.resource);
 		const storages = this.createStorageMap(buildings, neededResources);
 		const allStorages = Array.from(storages.values()).flat();
+		this.logger.debug("storages", allStorages);
 
 		let newToSchedule: DeliveryOrder[] = [];
 
 		for (let order of this.toSchedule) {
 			this.logger.debug(`Scheduling order: ${order.resource} (${order.amount})`);
-			if (order.amount == 0) continue;
-			const candidates = order.to ? storages.get(order.resource) : allStorages;
-			this.logger.debug(`Potential storages: ${candidates?.length}`);
+			if (order.amount == 0) return;
+			let candidates = order.to ? storages.get(order.resource) : allStorages;
 			if (!candidates) continue;
-			let toDeliver = order.notScheduled ?? order.amount;
-			for (let storage of candidates) {
-				if (toDeliver <= 0) break;
-				toDeliver -= storage.registerOrder(order, map); 
-				// TODO: update storage map
-			}
-			if (toDeliver > 0) {
-				order.notScheduled = toDeliver;
-				newToSchedule.push(order);
-			}
+			const newOrder = this.finalizeSchedulingOrder(order, candidates, map);
+			if (newOrder) newToSchedule.push(newOrder);
 		}
 		this.toSchedule = newToSchedule;
+	}
+
+	finalizeSchedulingOrder(order: DeliveryOrder, candidates: Storage[], map: MapLayer): DeliveryOrder | undefined {
+		this.logger.debug(`Potential storages: ${candidates?.length}`);
+		let toDeliver = order.notScheduled ?? order.amount;
+		for (let storage of candidates) {
+			if (toDeliver <= 0) break;
+			toDeliver -= storage.registerOrder(order, map); 
+		}
+		if (toDeliver > 0) {
+			order.notScheduled = toDeliver;
+			return order;
+		}
+		return undefined;
 	}
 
 	onMinuteEnd(buildings: Building[]) {
