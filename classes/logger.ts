@@ -135,8 +135,8 @@ export class LoggerFactory {
 	}
 
 	static checkDisable(source: string): boolean {
-		if (this.enabledList) return !(source in this.enabledList);
-		if (this.disabledList) return source in this.disabledList;
+		if (this.enabledList) return !this.enabledList.includes(source);
+		if (this.disabledList) return this.disabledList.includes(source);
 		return false;
 	}
 
