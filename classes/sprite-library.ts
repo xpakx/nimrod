@@ -111,7 +111,8 @@ export class SpriteLibrary {
 			name: "storage", 
 			cost: 120,
 			storageOptions: {
-				capacity: 50
+				capacity: 50,
+				resources: ['flour'],
 			},
 		};
 

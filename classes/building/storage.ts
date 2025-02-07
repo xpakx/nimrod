@@ -355,8 +355,6 @@ export class DeliveryScheduler {
 			if (!(building instanceof Storage)) continue;
 			allStorages.push(building);
 		}
-		this.logger.debug("storages", allStorages);
-
 		let newToSchedule: DeliveryOrder[] = [];
 
 		for (let order of this.toSchedule) {
@@ -374,6 +372,7 @@ export class DeliveryScheduler {
 		this.logger.debug(`Potential storages: ${candidates?.length}`);
 		let toDeliver = order.notScheduled ?? order.amount;
 		for (let storage of candidates) {
+			this.logger.debug(`Left to deliver ${toDeliver}`);
 			if (toDeliver <= 0) break;
 			toDeliver -= storage.registerOrder(order, map); 
 		}
@@ -398,19 +397,19 @@ export class DeliveryScheduler {
 		}
 	}
 
-	prepareOutOrders(building: Building, recipe: Recipe) {
+	prepareInOrders(building: Building, recipe: Recipe) {
 		for (let ingredient of recipe.ingredients) {
 			const amount = building.getResourceAmount(ingredient.resource);
-			this.logger.debug(`Checking out order: ${ingredient.resource} (${amount})`);
-			if (amount < 2*ingredient.amount) this.prepareOrder(building, ingredient.resource, building.capacity - amount, "from");
+			this.logger.debug(`Checking in order: ${ingredient.resource} (${amount})`);
+			if (amount < 2*ingredient.amount) this.prepareOrder(building, ingredient.resource, building.capacity - amount, "to");
 		}
 	}
 
-	prepareInOrders(building: Building, recipe: Recipe) {
+	prepareOutOrders(building: Building, recipe: Recipe) {
 		const amount = building.getResourceAmount(recipe.output.resource);
 		const output = recipe.output.resource;
-		this.logger.debug(`Checking in order: ${output} (${amount})`);
-		if (amount >= building.capacity) this.prepareOrder(building, output, amount, "to");
+		this.logger.debug(`Checking out order: ${output} (${amount})`);
+		if (amount >= building.capacity) this.prepareOrder(building, output, amount, "from");
 	}
 
 	prepareOrder(building: Building, resource: string, amount: number, type: "to" | "from") {
