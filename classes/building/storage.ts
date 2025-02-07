@@ -350,7 +350,11 @@ export class DeliveryScheduler {
 		this.logger.debug("Calculate orders");
 		let neededResources = this.toSchedule.filter((r) => r.to).map((r) => r.resource);
 		const storages = this.createStorageMap(buildings, neededResources);
-		const allStorages = Array.from(storages.values()).flat();
+		let allStorages = [];
+		for (let building of buildings) {
+			if (!(building instanceof Storage)) continue;
+			allStorages.push(building);
+		}
 		this.logger.debug("storages", allStorages);
 
 		let newToSchedule: DeliveryOrder[] = [];
