@@ -102,8 +102,9 @@ export class Storage extends Building {
 		if (dist > this.maxDistance) return 0;
 		
 		const inStorage = this.storage[resource];
-		if (inStorage >= this.capacity) return 0;
-		const amount = Math.min(inStorage, order.amount);
+		const capacity = this.capacity - inStorage;
+		if (capacity <= 0) return 0;
+		const amount = Math.min(capacity, order.amount);
 
 		const worker = this.worker as DeliveryWorker;
 		worker.startOrder(order);
