@@ -473,6 +473,11 @@ export class Game {
 				}
 				this.minuteCounter = 60;
 				break;
+			case 'o':
+				const bldng = this.map.getBuilding(this.map.isoPlayerMouse);
+				if (!bldng) break;
+				bldng.info();
+				break;
 			case "Escape":
 				this.interf.buildingInterface = undefined;
 				this.map.switchToNormalMode();
