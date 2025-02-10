@@ -140,9 +140,29 @@ export class DeliveryWorker extends BuildingWorker {
 		this.isAwayFromHome = true;
 		this.dead = false;
 		this.travelFinished = false;
-		this.goal = building.workerSpawn;
 		this.resource = order.resource;
 		this.inventory = toDeliver;
+	}
+
+	nextGoal(map: MapLayer): boolean {
+		const ultimateGoal = this.getUltimateGoal();
+		if (!ultimateGoal) return false;
+		const step = map.getNextStep(this.positionSquare, ultimateGoal);
+		if(!step) {
+			return false;
+		}
+		this.goal = step;
+		this.direction.x = step.x - this.positionSquare.x;
+		this.direction.y = step.y - this.positionSquare.y;
+		return true;
+	}
+
+	getUltimateGoal(): undefined | Position {
+		if (this.travelFinished) return this.home;
+		if (!this.order) return undefined;
+		const building = this.order.from ? this.order.from : this.order.to;
+		if (!building) return undefined;
+		return building.workerSpawn;
 	}
 
 	tickInternal(deltaTime: number, map: MapLayer): boolean {
