@@ -204,8 +204,10 @@ export class DeliveryWorker extends BuildingWorker {
 	}
 
 	unpackOrder(building: Building) {
+		this.logger.debug("Unpacking order");
 		if (!this.resource) return;
 		const amount = building.supply(this, this.resource, this.inventory);
+		this.logger.debug(`Supplied ${amount} of ${this.resource}`);
 		this.inventory -= amount;
 
 		if (this.order?.to) {
@@ -214,10 +216,12 @@ export class DeliveryWorker extends BuildingWorker {
 	}
 
 	getOrder(building: Building) {
+		this.logger.debug("Getting order");
 		if (!this.order) return;
 		this.resource = this.order.resource;
 		this.inventory = building.getResources(this, this.order.resource, this.toFetch);
 		this.order.amount -= this.inventory;
+		this.logger.debug(`Got ${this.inventory} of ${this.resource}`);
 	}
 }
 

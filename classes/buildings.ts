@@ -196,7 +196,6 @@ export class Building {
 	}
 
 	getResources(worker: BuildingWorker, resource: string, inventory: number): number {
-		if (!this.accepts.has(resource)) return 0;
 		if (this.storage.hasOwnProperty(resource) && inventory > 0 && this.storage[resource] > 0) {
 			const amount = Math.min(inventory, this.storage[resource]);
 			this.storage[resource] -= amount;
