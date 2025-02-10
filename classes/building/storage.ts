@@ -119,6 +119,16 @@ export class Storage extends Building {
 	setWorker(sprite: ActorSprite) {
 		this.worker = new DeliveryWorker(sprite, this.workerSpawn);
 	}
+
+	supply(worker: BuildingWorker, resource: string, inventory: number): number {
+		if (worker != this.worker) return super.supply(worker, resource, inventory);
+		if (this.storage.hasOwnProperty(resource) && inventory > 0 && this.storage[resource] < this.capacity) {
+			const amount = Math.min(inventory, this.capacity - this.storage[resource]);
+			this.storage[resource] += amount;
+			return amount;
+		}
+		return 0;
+	}
 }
 
 export class DeliveryWorker extends BuildingWorker {
@@ -190,7 +200,7 @@ export class DeliveryWorker extends BuildingWorker {
 		return false;
 	}
 
-	returnHome(deltaTime: number, map: MapLayer): boolean {
+	returnToHome(deltaTime: number, map: MapLayer): boolean {
 		const result = super.returnToHome(deltaTime, map);
 		if (this.dead && this.atSpawn()) this.unpackOrder(this.homeBuilding!);
 		return result;

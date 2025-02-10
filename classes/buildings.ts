@@ -295,6 +295,12 @@ export class Building {
 	onDeletion() {
 		if (this.worker) this.worker.dead = true;
 	}
+
+
+	info() {
+		this.logger.info(`Building of type ${this.name} at position (${this.position.x}, ${this.position.y})`);
+		this.logger.info("Storage", this.storage);
+	}
 }
 
 export class BuildingWorker extends Actor {
