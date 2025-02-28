@@ -412,15 +412,22 @@ export class TilingSprite {
 
 export class BuildingInterface {
 	menuWidth = 420; // TODO: delete this
+	topPanelHeight = 50;
+	building?: Building;
 
 	click(_state: GameState) { }
-	open(_state: GameState) { }
+
+	open(_state: GameState, building: Building) {
+		this.building = building;
+	}
 
 	renderInterface(context: CanvasRenderingContext2D, _deltaTime: number, state: GameState) { 
-		const width = state.canvasWidth - 20 - this.menuWidth;
-		const height = 100;
-		const x = 10;
-		const y = state.canvasHeight - height - 10;
+		const leftMargin = 80;
+		const width = state.canvasWidth - 2 * leftMargin - this.menuWidth;
+		const height = 300;
+		const x = leftMargin;
+		const middleOfMap = (state.canvasHeight - this.topPanelHeight) / 2  + this.topPanelHeight;
+		const y = middleOfMap - height / 2;
 
 		context.fillStyle = '#444';
 		context.fillRect(x, y, width, height);
