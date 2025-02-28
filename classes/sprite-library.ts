@@ -26,12 +26,14 @@ export class SpriteLibrary {
 			sprite: ziggurat, 
 			interface: new AdventurersGuildInterface(), 
 			name: "ziggurat", 
+			visibleName: "Temple", 
 			cost: 120
 		};
 		this.buildings["home"] = {
 			sprite: home,
 			interface: new BuildingInterface(),
 			name: "home",
+			visibleName: "House", 
 			cost: 12,
 			houseOptions: {
 				levels: [
@@ -49,12 +51,14 @@ export class SpriteLibrary {
 			sprite: tower,
 			interface: new BuildingInterface(),
 			name: "tower",
+			visibleName: "Tower", 
 			cost: 24
 		};
 		this.buildings["well"] = {
 			sprite: well,
 			interface: new BuildingInterface(),
 			name: "well",
+			visibleName: "Well", 
 			cost: 10,
 			workerOptions: {
 				sprite: this.actors['test'],
@@ -72,6 +76,7 @@ export class SpriteLibrary {
 			sprite: inspector,
 			interface: new BuildingInterface(),
 			name: "inspector",
+			visibleName: "Inspector Tower", 
 			cost: 15,
 			workerOptions: {
 				sprite: this.actors['test'],
@@ -83,6 +88,7 @@ export class SpriteLibrary {
 			sprite: farm, 
 			interface: new BuildingInterface(), 
 			name: "farm", 
+			visibleName: "Wheat Farm", 
 			cost: 80,
 			productionOptions: [
 				{
@@ -96,6 +102,7 @@ export class SpriteLibrary {
 			sprite: bakery, 
 			interface: new BuildingInterface(), 
 			name: "bakery", 
+			visibleName: "Bakery", 
 			cost: 240,
 			productionOptions: [
 				{
@@ -109,6 +116,7 @@ export class SpriteLibrary {
 			sprite: storage, 
 			interface: new BuildingInterface(), 
 			name: "storage", 
+			visibleName: "Granary", 
 			cost: 120,
 			workerOptions: {sprite: this.actors['delivery']},
 			storageOptions: {

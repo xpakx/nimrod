@@ -1,13 +1,14 @@
 import { Actor, ActorSprite } from "./actor.js";
 import { HouseLevel } from "./building/house.js";
 import { GameState } from "./game-state.js";
-import { getLogger, Logger, LoggerFactory } from "./logger.js";
+import { getLogger, Logger } from "./logger.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
 
 export interface BuildingPrototype {
 	sprite: BuildingSprite;
 	interface: BuildingInterface;
 	name: string;
+	visibleName: string;
 	cost: number;
 	workerOptions?: WorkerOptions;
 	houseOptions?: HouseOptions;
@@ -71,6 +72,7 @@ export class Building {
 	worker: BuildingWorker | undefined;
 	interface: BuildingInterface;
 	name: string;
+	visibleName: string;
 	health: number = 100;
 	readyToSpawn: boolean = false;;
 	recipes?: Recipe[];
@@ -83,6 +85,7 @@ export class Building {
 		this.accepted = accepted;
 		this.underCursor = false;
 		this.name = prototype.name;
+		this.visibleName = prototype.visibleName;
 
 		const centerA = [Math.floor((position.x + position.x - this.sprite.baseSize + 1)/2), Math.floor((position.y + position.y - this.sprite.baseSize + 1)/2)]
 		this.diagonal = (centerA[0] + centerA[1]);
@@ -461,7 +464,7 @@ export class BuildingInterface {
 
 		context.fillStyle = '#fff';
 		context.font = '24px Arial';
-		context.fillText(building.name, nameX, nameY); // TODO: add visibleName attr
+		context.fillText(building.visibleName, nameX, nameY);
 	}
 
 
