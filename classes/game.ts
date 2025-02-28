@@ -60,6 +60,9 @@ export class Game {
 			this.leftMouseInterface();
 			return;
 		}
+		if (this.interf.buildingInterface) {
+			this.interf.buildingInterface = undefined;
+		}
 		this.leftMouseClickMain();
 	}
 

@@ -1,5 +1,5 @@
 import { BattleActor } from "../battle/actor.js";
-import { BuildingInterface } from "../buildings.js";
+import { Building, BuildingInterface } from "../buildings.js";
 import { GameState } from "../game-state.js";
 import { Position, Size } from "../map-layer.js";
 
@@ -30,26 +30,15 @@ export class AdventurersGuildInterface extends BuildingInterface {
 		state.team.push(actor);
 	}
 
-	open(state: GameState) {
+	open(state: GameState, building: Building) {
+		super.open(state, building);
 		this.heroes = state.allHeroes;
 		this.team = state.team;
 		this.prepareTeamButtons();
 	}
 
-	renderInterface(context: CanvasRenderingContext2D, _deltaTime: number, state: GameState) { 
-		const width = state.canvasWidth - 200 - this.menuWidth;
-		const height = 500;
-		const x = 100;
-		const y = height/2;
-
-		context.fillStyle = '#444';
-		context.fillRect(x, y, width, height);
-
-		context.strokeStyle = '#fff';
-		context.strokeRect(x, y, width, height);
-
-		context.fillStyle = '#fff';
-		context.font = '16px Arial';
+	renderInterface(context: CanvasRenderingContext2D, deltaTime: number, state: GameState) { 
+		super.renderInterface(context, deltaTime, state);
 		this.renderTeamButtons();
 	}
 

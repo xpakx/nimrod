@@ -124,6 +124,9 @@ export class InterfaceLayer {
 		if (position.y <= this.topPanelHeight || position.x >= this.canvasSize.width - this.menuWidth) {
 			return true;
 		}
+		if (this.buildingInterface && this.buildingInterface.inInterface(position)) {
+			return true;
+		}
 		return false;
 	}
 
@@ -285,6 +288,13 @@ export class InterfaceLayer {
 	}
 
 	click(position: Position): Action | undefined { // TODO
+		if (this.buildingInterface) {
+			if (this.buildingInterface.inInterface(position)) {
+				return undefined;
+			} else {
+				this.buildingInterface = undefined;
+			}
+		}
 		const tab = this.getTabUnderCursor(position);
 		if (tab != undefined) {
 			this.tab = tab;

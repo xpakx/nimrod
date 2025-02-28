@@ -417,11 +417,24 @@ export class BuildingInterface {
 	menuWidth = 420; // TODO: delete this
 	topPanelHeight = 50;
 	building?: Building;
+	state?: GameState; // TODO: just update width, etc
 
 	click(_state: GameState) { }
 
-	open(_state: GameState, building: Building) {
+	open(state: GameState, building: Building) {
+		this.state = state;
 		this.building = building;
+	}
+
+	inInterface(pos: Position): boolean {
+		if (!this.state) return false;
+		const leftMargin = 80;
+		const width = this.state.canvasWidth - 2 * leftMargin - this.menuWidth;
+		const height = 300;
+		const x = leftMargin;
+		const middleOfMap = (this.state.canvasHeight - this.topPanelHeight) / 2  + this.topPanelHeight;
+		const y = middleOfMap - height / 2;
+		return (pos.x >= x && pos.x <= x + width && pos.y >= y && pos.y <= y + height);
 	}
 
 	renderInterface(context: CanvasRenderingContext2D, _deltaTime: number, state: GameState) { 
