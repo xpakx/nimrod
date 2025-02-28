@@ -18,8 +18,8 @@ export class SpriteLibrary {
 		const well = new BuildingSprite(await loadImage("./img/well.svg"), 2, tileSize);
 		const inspector = new BuildingSprite(await loadImage("./img/inspector.svg"), 2, tileSize);
 		const farm = new BuildingSprite(await loadImage("./img/tower.svg"), 2, tileSize); // TODO
-		const bakery = new BuildingSprite(await loadImage("./img/tower.svg"), 2, tileSize);
-		const storage = new BuildingSprite(await loadImage("./img/tower.svg"), 2, tileSize);
+		const bakery = new BuildingSprite(await loadImage("./img/bakery.svg"), 2, tileSize);
+		const storage = new BuildingSprite(await loadImage("./img/granary.svg"), 4, tileSize);
 
 
 		this.buildings["ziggurat"] = {
