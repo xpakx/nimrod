@@ -437,7 +437,33 @@ export class BuildingInterface {
 
 		context.fillStyle = '#fff';
 		context.font = '16px Arial';
+
+		const building = this.building!;
+		const lineHeight = 24;
+		const topPadding = 10;
+		const leftPadding = 10;
+
+
+		const imageSize = 80;
+		const imagePadding = 20;
+		const rectSize = imageSize + 2*imagePadding;
+		const imageX = x + leftPadding;
+		const imageY = y + topPadding;
+		context.fillStyle = '#575757';
+		context.fillRect(imageX, imageY, rectSize, rectSize);
+		context.strokeStyle = '#fff';
+		context.strokeRect(imageX, imageY, rectSize, rectSize);
+
+		context.drawImage(building.sprite.image, imageX + imagePadding, imageY + imagePadding, imageSize, imageSize);
+
+		const nameX = imageX + imageSize + 2*imagePadding + 20;
+		const nameY = y + topPadding + lineHeight;
+
+		context.fillStyle = '#fff';
+		context.font = '24px Arial';
+		context.fillText(building.name, nameX, nameY); // TODO: add visibleName attr
 	}
+
 
 }
 
