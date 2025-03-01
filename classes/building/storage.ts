@@ -402,7 +402,7 @@ export class DeliveryScheduler {
 
 		for (let order of this.toSchedule) {
 			this.logger.debug(`Scheduling order: ${order.resource} (${order.amount})`);
-			if (order.amount == 0) return;
+			if (order.amount == 0) continue;
 			let candidates = order.to ? storages.get(order.resource) : allStorages;
 			if (!candidates) continue;
 			const newOrder = this.finalizeSchedulingOrder(order, candidates, map);
