@@ -109,7 +109,7 @@ export class SpriteLibrary {
 				{
 					output: {resource: "bread", amount: 5},
 					ingredients: [{resource: "flour", amount: 10}],
-					time: 12,
+					time: 5,
 				}	
 			]
 		};
@@ -122,7 +122,7 @@ export class SpriteLibrary {
 			workerOptions: {sprite: this.actors['delivery']},
 			storageOptions: {
 				capacity: 50,
-				resources: ['flour'],
+				resources: ['flour', 'bread'],
 			},
 		};
 

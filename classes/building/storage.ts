@@ -514,7 +514,8 @@ export class StorageInterface extends BuildingInterface {
 			const amount = this.building.getResourceAmount(resource);
 			const resourceString = `${resource} (${amount}) `;
 			console.log(`${resource}, ${amount}`);
-				this.context.fillText(resourceString, resourcesX, imageEnd + i * lineHeight);
+			this.context.fillText(resourceString, resourcesX, imageEnd + i * lineHeight);
+			i += 1;
 		}
 	}
 }

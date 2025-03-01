@@ -91,9 +91,9 @@ export class Building {
 		const centerA = [Math.floor((position.x + position.x - this.sprite.baseSize + 1)/2), Math.floor((position.y + position.y - this.sprite.baseSize + 1)/2)]
 		this.diagonal = (centerA[0] + centerA[1]);
 		this.interface = prototype.interface;
+		this.accepts = new Set<string>();
 		if(prototype.workerOptions) this.applyWorkerOptions(prototype.workerOptions);
 		if(prototype.productionOptions) this.applyProductionOptions(prototype.productionOptions);
-		this.accepts = new Set<string>();
 	}
 
 	applyWorkerOptions(options: WorkerOptions) {
@@ -108,6 +108,10 @@ export class Building {
 		this.recipes = options; // TODO
 		for (let recipe of options) {
 			this.storage[recipe.output.resource] = 0;
+			for (let ingredient of recipe.ingredients) {
+				this.storage[ingredient.resource] = 0;
+				this.accepts.add(ingredient.resource);
+			}
 		}
 	}
 
@@ -189,7 +193,8 @@ export class Building {
 	capacity: number = 20;
 	supply(worker: BuildingWorker, resource: string, inventory: number): number {
 		if (!this.accepts.has(resource)) return 0;
-		if (this.storage.hasOwnProperty(resource) && inventory > 0 && this.storage[resource] < this.capacity) {
+		const inStock = this.getResourceAmount(resource);
+		if (resource in this.storage && inventory > 0 && inStock < this.capacity) {
 			const amount = Math.min(inventory, this.capacity - this.storage[resource]);
 			this.storage[resource] += amount;
 			this.logger.debug(`${worker.name} supplied ${amount} ${resource} to ${this.name} at (${this.position.x}, ${this.position.y})`);
@@ -523,6 +528,8 @@ export class BuildingInterface {
 				}
 				const amount = this.building.getResourceAmount(recipe.output.resource);
 				this.context.fillText(`${ingredientString} -> ${recipe.output.resource} (${amount})`, recipesX, imageEnd + i * lineHeight);
+
+				i += 1;
 			}
 		}
 	}
