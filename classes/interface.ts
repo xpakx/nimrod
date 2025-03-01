@@ -76,7 +76,7 @@ export class InterfaceLayer {
 			this.tabs[this.tab].draw(context);
 		}
 		if (this.buildingInterface) {
-			this.buildingInterface.renderInterface(context, deltaTime, state);
+			this.buildingInterface.drawInterface(context, deltaTime, state);
 		}
 		this.renderButtons(context);
 	}

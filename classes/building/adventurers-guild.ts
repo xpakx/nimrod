@@ -37,8 +37,8 @@ export class AdventurersGuildInterface extends BuildingInterface {
 		this.prepareTeamButtons();
 	}
 
-	renderInterface(context: CanvasRenderingContext2D, deltaTime: number, state: GameState) { 
-		super.renderInterface(context, deltaTime, state);
+	renderInterface(state: GameState) { 
+		super.renderInterface(state);
 		this.renderTeamButtons();
 	}
 

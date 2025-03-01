@@ -1,6 +1,7 @@
 import { Actor, ActorSprite } from "./actor.js";
 import { HouseLevel } from "./building/house.js";
 import { GameState } from "./game-state.js";
+import { Game } from "./game.js";
 import { getLogger, Logger } from "./logger.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
 
@@ -418,12 +419,14 @@ export class BuildingInterface {
 	topPanelHeight = 50;
 	building?: Building;
 	state?: GameState; // TODO: just update width, etc
+	offscreen?: OffscreenCanvas;
 
 	click(_state: GameState) { }
 
 	open(state: GameState, building: Building) {
 		this.state = state;
 		this.building = building;
+		this.renderInterface(state);
 	}
 
 	inInterface(pos: Position): boolean {
@@ -437,7 +440,12 @@ export class BuildingInterface {
 		return (pos.x >= x && pos.x <= x + width && pos.y >= y && pos.y <= y + height);
 	}
 
-	renderInterface(context: CanvasRenderingContext2D, _deltaTime: number, state: GameState) { 
+	drawInterface(context: CanvasRenderingContext2D, _deltaTime: number, _state: GameState) {
+		if (!this.offscreen) return;
+		context.drawImage(this.offscreen, 0, 0);
+	}
+
+	renderInterface(state: GameState) { 
 		const leftMargin = 80;
 		const width = state.canvasWidth - 2 * leftMargin - this.menuWidth;
 		const height = 300;
@@ -445,6 +453,8 @@ export class BuildingInterface {
 		const middleOfMap = (state.canvasHeight - this.topPanelHeight) / 2  + this.topPanelHeight;
 		const y = middleOfMap - height / 2;
 
+		this.offscreen = new OffscreenCanvas(state.canvasWidth, state.canvasHeight);
+		const context = this.offscreen.getContext("2d")!;
 		context.fillStyle = '#444';
 		context.fillRect(x, y, width, height);
 
