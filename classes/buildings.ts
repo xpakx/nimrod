@@ -420,6 +420,7 @@ export class BuildingInterface {
 	building?: Building;
 	state?: GameState; // TODO: just update width, etc
 	offscreen?: OffscreenCanvas;
+	context?: OffscreenCanvasRenderingContext2D;
 
 	click(_state: GameState) { }
 
@@ -454,15 +455,15 @@ export class BuildingInterface {
 		const y = middleOfMap - height / 2;
 
 		this.offscreen = new OffscreenCanvas(state.canvasWidth, state.canvasHeight);
-		const context = this.offscreen.getContext("2d")!;
-		context.fillStyle = '#444';
-		context.fillRect(x, y, width, height);
+		this.context = this.offscreen.getContext("2d")!;
+		this.context.fillStyle = '#444';
+		this.context.fillRect(x, y, width, height);
 
-		context.strokeStyle = '#fff';
-		context.strokeRect(x, y, width, height);
+		this.context.strokeStyle = '#fff';
+		this.context.strokeRect(x, y, width, height);
 
-		context.fillStyle = '#fff';
-		context.font = '16px Arial';
+		this.context.fillStyle = '#fff';
+		this.context.font = '16px Arial';
 
 		const building = this.building!;
 		const lineHeight = 24;
@@ -475,19 +476,55 @@ export class BuildingInterface {
 		const rectSize = imageSize + 2*imagePadding;
 		const imageX = x + leftPadding;
 		const imageY = y + topPadding;
-		context.fillStyle = '#575757';
-		context.fillRect(imageX, imageY, rectSize, rectSize);
-		context.strokeStyle = '#fff';
-		context.strokeRect(imageX, imageY, rectSize, rectSize);
+		this.context.fillStyle = '#575757';
+		this.context.fillRect(imageX, imageY, rectSize, rectSize);
+		this.context.strokeStyle = '#fff';
+		this.context.strokeRect(imageX, imageY, rectSize, rectSize);
 
-		context.drawImage(building.sprite.image, imageX + imagePadding, imageY + imagePadding, imageSize, imageSize);
+		this.context.drawImage(building.sprite.image, imageX + imagePadding, imageY + imagePadding, imageSize, imageSize);
 
 		const nameX = imageX + imageSize + 2*imagePadding + 20;
 		const nameY = y + topPadding + lineHeight;
 
-		context.fillStyle = '#fff';
-		context.font = '24px Arial';
-		context.fillText(building.visibleName, nameX, nameY);
+		this.context.fillStyle = '#fff';
+		this.context.font = '24px Arial';
+		this.context.fillText(building.visibleName, nameX, nameY);
+
+		this.renderRecipes(state);
+		
+	}
+
+	renderRecipes(state: GameState) {
+		if (!this.building || !this.building.recipes) return;
+		if (!this.context) return;
+		const height = 300;
+		const middleOfMap = (state.canvasHeight - this.topPanelHeight) / 2  + this.topPanelHeight;
+		const y = middleOfMap - height / 2;
+		const topPadding = 10;
+		const imageSize = 80;
+		const imagePadding = 20;
+		const imageEnd = y + topPadding + 24 + 20;
+
+		const leftMargin = 80;
+		const leftPadding = 10;
+
+		const lineHeight = 20;
+		let i = 0;
+		this.context.fillStyle = '#fff';
+		this.context.font = '15px Arial';
+		const recipesX = leftMargin + leftPadding + imageSize + 2*imagePadding + 20;
+
+		for (let recipe of this.building.recipes) {
+			if (recipe.output) {
+				let ingredientString = "";
+				for (let ingredient of recipe.ingredients) {
+					const amount = this.building.getResourceAmount(ingredient.resource);
+					ingredientString += `${ingredient.resource} (${amount}) `;
+				}
+				const amount = this.building.getResourceAmount(recipe.output.resource);
+				this.context.fillText(`${ingredientString} -> ${recipe.output.resource} (${amount})`, recipesX, imageEnd + i * lineHeight);
+			}
+		}
 	}
 
 
