@@ -60,7 +60,8 @@ describe('Building', () => {
 		prototype = {
 			sprite: buildingSpriteMock,
 			interface: new BuildingInterface(),
-			name: 'Test Building',
+			name: 'test',
+			visibleName: 'Test Building',
 			cost: 100,
 		};
 	});
@@ -70,7 +71,8 @@ describe('Building', () => {
 
 		expect(building.sprite).toBe(buildingSpriteMock);
 		expect(building.position).toEqual(position);
-		expect(building.name).toBe('Test Building');
+		expect(building.name).toBe('test');
+		expect(building.visibleName).toBe('Test Building');
 		expect(building.health).toBe(100);
 		expect(building.accepted).toBe(true);
 	});
@@ -141,7 +143,8 @@ describe('Building supply logic', () => {
 		const prototype: BuildingPrototype = {
 			sprite: buildingSpriteMock,
 			interface: new BuildingInterface(),
-			name: 'Test Building',
+			name: 'test',
+			visibleName: 'Test Building',
 			cost: 100,
 		};
 		building = new Building(prototype, position);
@@ -195,7 +198,8 @@ describe('Building repair logic', () => {
 		const prototype: BuildingPrototype = {
 			sprite: buildingSpriteMock,
 			interface: new BuildingInterface(),
-			name: 'Test Building',
+			name: 'test',
+			visibleName: 'Test Building',
 			cost: 100,
 		};
 		building = new Building(prototype, position);
