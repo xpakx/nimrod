@@ -1,6 +1,7 @@
 import { Actor, ActorSprite } from "../actor.js";
-import { Building, BuildingPrototype, BuildingWorker, Recipe, StorageOptions } from "../buildings.js";
-import { getLogger, Logger, LoggerFactory } from "../logger.js";
+import { Building, BuildingInterface, BuildingPrototype, BuildingWorker, Recipe, StorageOptions } from "../buildings.js";
+import { GameState } from "../game-state.js";
+import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position, Size } from "../map-layer.js";
 
 export class Storage extends Building {
@@ -473,5 +474,47 @@ export class DeliveryScheduler {
 		order.notScheduled = undefined;
 		order.assignedBuildings = [];
 		return order;
+	}
+}
+
+
+export class StorageInterface extends BuildingInterface {
+
+	click(_state: GameState) {
+	}
+
+	renderInterface(state: GameState) { 
+		super.renderInterface(state);
+		this.renderResources(state);
+	}
+
+	renderResources(state: GameState) {
+		if (!this.building) return;
+		if (!this.context) return;
+		const height = 300;
+		const middleOfMap = (state.canvasHeight - this.topPanelHeight) / 2  + this.topPanelHeight;
+		const y = middleOfMap - height / 2;
+		const topPadding = 10;
+		const imageSize = 80;
+		const imagePadding = 20;
+		const imageEnd = y + topPadding + 24 + 20;
+
+		const leftMargin = 80;
+		const leftPadding = 10;
+
+		const lineHeight = 20;
+		let i = 0;
+
+		this.context.fillStyle = '#fff';
+		this.context.font = '15px Arial';
+		const resourcesX = leftMargin + leftPadding + imageSize + 2*imagePadding + 20;
+
+		const resources = this.building.storage;
+		for (let resource in resources) {
+			const amount = this.building.getResourceAmount(resource);
+			const resourceString = `${resource} (${amount}) `;
+			console.log(`${resource}, ${amount}`);
+				this.context.fillText(resourceString, resourcesX, imageEnd + i * lineHeight);
+		}
 	}
 }

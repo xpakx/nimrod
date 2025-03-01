@@ -1,5 +1,6 @@
 import { ActorSprite } from "./actor.js";
 import { AdventurersGuildInterface } from "./building/adventurers-guild.js";
+import { StorageInterface } from "./building/storage.js";
 import { BuildingInterface, BuildingPrototype, BuildingSprite, TilingSprite } from "./buildings.js";
 import { Size } from "./map-layer.js";
 
@@ -114,7 +115,7 @@ export class SpriteLibrary {
 		};
 		this.buildings["storage"] = {
 			sprite: storage, 
-			interface: new BuildingInterface(), 
+			interface: new StorageInterface(), 
 			name: "storage", 
 			visibleName: "Granary", 
 			cost: 120,
