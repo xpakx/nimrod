@@ -3,13 +3,12 @@ import { BattleActor } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
 import { DeliveryScheduler } from "./building/storage.js";
 import { BattleMapData } from "./game.js";
-import { Position } from "./map-layer.js";
+import { Position, Size } from "./map-layer.js";
 
 export type View = "City" | "World" | "Battle" | "Kingdom" | "Menu";
 
 export class GameState {
-	public canvasWidth = 1200;
-	public canvasHeight = 800;
+	public canvasSize: Size = {width: 1200, height: 800};
 	public pedestrians: Actor[] = [];
 	public playerMouse: Position = {x: 0, y: 0};
 	public view: View = "City";

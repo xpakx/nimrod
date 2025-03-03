@@ -1,7 +1,6 @@
 import { Actor, ActorSprite } from "./actor.js";
 import { HouseLevel } from "./building/house.js";
 import { GameState } from "./game-state.js";
-import { Game } from "./game.js";
 import { getLogger, Logger } from "./logger.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
 
@@ -460,10 +459,10 @@ export class BuildingInterface {
 	inInterface(pos: Position): boolean {
 		if (!this.state) return false;
 		const leftMargin = 80;
-		const width = this.state.canvasWidth - 2 * leftMargin - this.menuWidth;
+		const width = this.state.canvasSize.width - 2 * leftMargin - this.menuWidth;
 		const height = 300;
 		const x = leftMargin;
-		const middleOfMap = (this.state.canvasHeight - this.topPanelHeight) / 2  + this.topPanelHeight;
+		const middleOfMap = (this.state.canvasSize.height - this.topPanelHeight) / 2  + this.topPanelHeight;
 		const y = middleOfMap - height / 2;
 		return (pos.x >= x && pos.x <= x + width && pos.y >= y && pos.y <= y + height);
 	}
@@ -475,13 +474,13 @@ export class BuildingInterface {
 
 	renderInterface(state: GameState) { 
 		const leftMargin = 80;
-		const width = state.canvasWidth - 2 * leftMargin - this.menuWidth;
+		const width = state.canvasSize.width - 2 * leftMargin - this.menuWidth;
 		const height = 300;
 		const x = leftMargin;
-		const middleOfMap = (state.canvasHeight - this.topPanelHeight) / 2  + this.topPanelHeight;
+		const middleOfMap = (state.canvasSize.height - this.topPanelHeight) / 2  + this.topPanelHeight;
 		const y = middleOfMap - height / 2;
 
-		this.offscreen = new OffscreenCanvas(state.canvasWidth, state.canvasHeight);
+		this.offscreen = new OffscreenCanvas(state.canvasSize.width, state.canvasSize.height);
 		this.context = this.offscreen.getContext("2d")!;
 		this.context.fillStyle = '#444';
 		this.context.fillRect(x, y, width, height);
@@ -525,7 +524,7 @@ export class BuildingInterface {
 		if (!this.building || !this.building.recipes) return;
 		if (!this.context) return;
 		const height = 300;
-		const middleOfMap = (state.canvasHeight - this.topPanelHeight) / 2  + this.topPanelHeight;
+		const middleOfMap = (state.canvasSize.height - this.topPanelHeight) / 2  + this.topPanelHeight;
 		const y = middleOfMap - height / 2;
 		const topPadding = 10;
 		const imageSize = 80;

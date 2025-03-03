@@ -1,7 +1,7 @@
 import { Actor } from "./actor.js";
 import { createBuilding } from "./building-factory.js";
 import { Building, BuildingPrototype, BuildingSprite, Road, TilingSprite } from "./buildings.js";
-import { getLogger, Logger, LoggerFactory } from "./logger.js";
+import { getLogger, Logger } from "./logger.js";
 
 export class MapLayer {
 	defTileWidth: number = 64;
@@ -32,8 +32,7 @@ export class MapLayer {
 	logger: Logger = getLogger("MapLayer");
 
 	constructor(canvasSize: Size) {
-		this.canvasSize.height = canvasSize.height;
-		this.canvasSize.width = canvasSize.width;
+		this.canvasSize = canvasSize;
 	}
 
 	getCurrentBuilding(): Building | undefined {

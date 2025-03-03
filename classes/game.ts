@@ -22,12 +22,8 @@ export class Game {
 
 	constructor() {
 		this.state = new GameState();
-		const size: Size = {
-			width: this.state.canvasWidth, 
-			height: this.state.canvasHeight
-		}; 
-		this.map = new MapLayer(size);
-		this.interf = new InterfaceLayer(size);
+		this.map = new MapLayer(this.state.canvasSize);
+		this.interf = new InterfaceLayer(this.state.canvasSize);
 		this.sprites = new SpriteLibrary();
 
 		this.maxYOffset = this.map.isoToScreen({x: this.map.map[0].length - 1, y: this.map.map.length - 1}).y + (this.map.tileSize.height/2);
@@ -620,11 +616,13 @@ export class Game {
 	}
 
 	getEmptyHouses(): House[] {
-		return this.map.buildings.filter(x => x instanceof House).filter(x => x.population < x.maxPopulation);
+		return this.map.buildings
+		.filter(x => x instanceof House)
+		.filter(x => x.population < x.maxPopulation);
 	}
 
 	renderGame(context: CanvasRenderingContext2D, deltaTime: number) {
-		context.clearRect(0, 0, this.state.canvasWidth, this.state.canvasHeight);
+		context.clearRect(0, 0, this.state.canvasSize.width, this.state.canvasSize.height);
 		if (this.terrainView()) {
 			this.map.renderMap(context, this.state.pedestrians, deltaTime);
 		}
@@ -710,7 +708,7 @@ export class Game {
 		this.interf.addButtonRow(menuRow);
 
 		const mapRow: ButtonRow = {
-			y: this.state.canvasHeight - 80,	
+			y: this.state.canvasSize.height - 80,	
 			buttons: [
 				new ActionButton(this.sprites.icons['kingdom'], {action: "goTo", argument: "Kingdom"}, {width: 50, height: 50}),
 				new ActionButton(this.sprites.icons['world'], {action: "goTo", argument: "World"}, {width: 50, height: 50}),
@@ -722,7 +720,7 @@ export class Game {
 	addKingdomButtons() {
 		this.interf.buttons = [];
 		const mapRow: ButtonRow = {
-			y: this.state.canvasHeight - 80,	
+			y: this.state.canvasSize.height - 80,	
 			buttons: [
 				new ActionButton(this.sprites.icons['city'], {action: "goTo", argument: "City"}, {width: 50, height: 50}),
 				new ActionButton(this.sprites.icons['world'], {action: "goTo", argument: "World"}, {width: 50, height: 50}),
@@ -734,7 +732,7 @@ export class Game {
 	addWorldButtons() {
 		this.interf.buttons = [];
 		const mapRow: ButtonRow = {
-			y: this.state.canvasHeight - 80,	
+			y: this.state.canvasSize.height - 80,	
 			buttons: [
 				new ActionButton(this.sprites.icons['city'], {action: "goTo", argument: "City"}, {width: 50, height: 50}),
 				new ActionButton(this.sprites.icons['kingdom'], {action: "goTo", argument: "Kingdom"}, {width: 50, height: 50}),

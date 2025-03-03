@@ -23,8 +23,7 @@ export class InterfaceLayer {
 	buildingInterface: BuildingInterface | undefined = undefined;
 
 	constructor(canvasSize: Size) {
-		this.canvasSize.height = canvasSize.height;
-		this.canvasSize.width = canvasSize.width;
+		this.canvasSize = canvasSize;
 	}
 
 	onMouse(position: Position) {

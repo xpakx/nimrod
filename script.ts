@@ -53,8 +53,8 @@ window.onload = async () => {
 		logger.error("No context");
 		return;
 	}
-	canvas.width = game.state.canvasWidth;
-	canvas.height = game.state.canvasHeight;
+	canvas.width = game.state.canvasSize.width;
+	canvas.height = game.state.canvasSize.height;
 	logger.debug('Preparing assets');
 	await game.prepareAssets();
 

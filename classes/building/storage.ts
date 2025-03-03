@@ -492,7 +492,7 @@ export class StorageInterface extends BuildingInterface {
 		if (!this.building) return;
 		if (!this.context) return;
 		const height = 300;
-		const middleOfMap = (state.canvasHeight - this.topPanelHeight) / 2  + this.topPanelHeight;
+		const middleOfMap = (state.canvasSize.height - this.topPanelHeight) / 2  + this.topPanelHeight;
 		const y = middleOfMap - height / 2;
 		const topPadding = 10;
 		const imageSize = 80;
