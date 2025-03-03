@@ -1,0 +1,127 @@
+[
+	{
+		"name": "ziggurat", 
+		"visibleName": "Temple", 
+		"sprite": "ziggurat", 
+		"size": 4,
+		"interface": "AdventurersGuildInterface", 
+		"cost": 120
+	},
+	{
+		"name": "home", 
+		"visibleName": "House", 
+		"sprite": "house", 
+		"size": 2,
+		"cost": 12,
+		"houseOptions": {
+			"levels": [
+				{
+					"maxPopulation": 8, 
+					"needs": [
+						{
+							"resource": "water",
+							"consumptionPerPerson": 0.25
+						},
+						{
+							"resource": "food",
+							"consumptionPerPerson": 0.5
+						}
+					]
+				}
+			]
+		}
+	},
+	{
+		"name": "tower", 
+		"visibleName": "Tower", 
+		"sprite": "tower", 
+		"size": 2,
+		"cost": 24
+	},
+	{
+		"name": "well",
+		"visibleName": "Well", 
+		"sprite": "well",
+		"size": 2,
+		"cost": 10,
+		"workerOptions": {
+			"sprite": "test",
+			"resource": "water"
+		},
+		"productionOptions": [
+			{
+				"output": {
+					"resource": "water",
+					"amount": 100
+				},
+				"ingredients": [],
+				"time": 1
+			}
+		]
+	},
+	{
+		"sprite": "inspector",
+		"size": 2,
+		"name": "inspector",
+		"visibleName": "Inspector Tower", 
+		"cost": 15,
+		"workerOptions": {
+			"sprite": "test",
+			"repairing": true
+		}
+	},
+	{
+		"sprite": "farm", 
+		"size": 4,
+		"name": "farm", 
+		"visibleName": "Wheat Farm", 
+		"cost": 80,
+		"productionOptions": [
+			{
+				"output": {
+					"resource": "flour",
+					"amount": 50
+				},
+				"ingredients": [],
+				"time": 12
+			}	
+		]
+	},
+	{
+		"sprite": "bakery", 
+		"size": 4,
+		"name": "bakery", 
+		"visibleName": "Bakery", 
+		"cost": 240,
+		"productionOptions": [
+			{
+				"output": {
+					"resource": "bread",
+					"amount": 5
+				},
+				"ingredients": [
+					{
+						"resource": "flour",
+						"amount": 10
+					}
+				],
+				"time": 5
+			}	
+		]
+	},
+	{
+		"sprite": "granary", 
+		"size": 4,
+		"interface": "StorageInterface", 
+		"name": "storage", 
+		"visibleName": "Granary", 
+		"cost": 120,
+		"workerOptions": {
+			"sprite": "delivery"
+		},
+		"storageOptions": {
+			"capacity": 50,
+			"resources": ["flour", "bread"]
+		}
+	}
+]

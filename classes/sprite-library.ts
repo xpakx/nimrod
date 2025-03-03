@@ -1,8 +1,27 @@
 import { ActorSprite } from "./actor.js";
-import { AdventurersGuildInterface } from "./building/adventurers-guild.js";
-import { StorageInterface } from "./building/storage.js";
-import { BuildingInterface, BuildingPrototype, BuildingSprite, TilingSprite } from "./buildings.js";
+import { BuildingInterface, BuildingPrototype, BuildingSprite, HouseOptions, Recipe, StorageOptions, TilingSprite, WorkerOptions } from "./buildings.js";
 import { Size } from "./map-layer.js";
+
+export interface BuildingConfig {
+	sprite: string;
+	size: number;
+	name: string;
+	visibleName: string;
+	interface?: string | BuildingInterface;
+	cost: number;
+	workerOptions?: WorkerConfig;
+	houseOptions?: HouseOptions;
+	storageOptions?: StorageOptions;
+	productionOptions?: Recipe[];
+}
+
+export interface WorkerConfig {
+	sprite: string;
+	repairing?: boolean;
+	resource?: string;
+	inventory?: number;
+	workerStartTime?: number;
+}
 
 export class SpriteLibrary {
 	buildings: {[key: string]: BuildingPrototype} = {};
@@ -12,120 +31,51 @@ export class SpriteLibrary {
 	road?: TilingSprite;
 	arrow?: TilingSprite;
 
-	async prepareBuildingSprites(tileSize: Size): Promise<boolean> {
-		const ziggurat = new BuildingSprite(await loadImage("./img/ziggurat.svg"), 4, tileSize);
-		const home = new BuildingSprite(await loadImage("./img/house.svg"), 2, tileSize);
-		const tower = new BuildingSprite(await loadImage("./img/tower.svg"), 2, tileSize);
-		const well = new BuildingSprite(await loadImage("./img/well.svg"), 2, tileSize);
-		const inspector = new BuildingSprite(await loadImage("./img/inspector.svg"), 2, tileSize);
-		const farm = new BuildingSprite(await loadImage("./img/farm.svg"), 4, tileSize); // TODO
-		const bakery = new BuildingSprite(await loadImage("./img/bakery.svg"), 2, tileSize);
-		const storage = new BuildingSprite(await loadImage("./img/granary.svg"), 4, tileSize);
-
-
-		this.buildings["ziggurat"] = {
-			sprite: ziggurat, 
-			interface: new AdventurersGuildInterface(), 
-			name: "ziggurat", 
-			visibleName: "Temple", 
-			cost: 120
-		};
-		this.buildings["home"] = {
-			sprite: home,
-			interface: new BuildingInterface(),
-			name: "home",
-			visibleName: "House", 
-			cost: 12,
-			houseOptions: {
-				levels: [
-					{
-						maxPopulation: 8, 
-						needs: [
-							{resource: "water", consumptionPerPerson: 0.25},
-							{resource: "food", consumptionPerPerson: 0.5}
-						]
-					}
-				]
+	async prepareBuildingSprites(config: string | BuildingConfig[], tileSize: Size): Promise<boolean> {
+		if (typeof(config) === "string") {
+			config = await loadBuildings(config);
+		}
+		for (let buildingConfig of config) {
+			const sprite = new BuildingSprite(
+				await loadImage(`./img/${buildingConfig.sprite}.svg`),
+				buildingConfig.size,
+				tileSize
+			);
+			let interf: BuildingInterface;
+			if (buildingConfig.interface) {
+				if (typeof(buildingConfig.interface) === "string") {
+					interf = new BuildingInterface(); // TODO
+				} else {
+					interf = buildingConfig.interface;
+				}
+			} else {
+				interf = new BuildingInterface();
 			}
-		};
-		this.buildings["tower"] = {
-			sprite: tower,
-			interface: new BuildingInterface(),
-			name: "tower",
-			visibleName: "Tower", 
-			cost: 24
-		};
-		this.buildings["well"] = {
-			sprite: well,
-			interface: new BuildingInterface(),
-			name: "well",
-			visibleName: "Well", 
-			cost: 10,
-			workerOptions: {
-				sprite: this.actors['test'],
-				resource: "water"
-			},
-			productionOptions: [
-				{
-					output: {resource: "water", amount: 100},
-					ingredients: [],
-					time: 1,
-				}	
-			]
-		};
-		this.buildings["inspector"] = {
-			sprite: inspector,
-			interface: new BuildingInterface(),
-			name: "inspector",
-			visibleName: "Inspector Tower", 
-			cost: 15,
-			workerOptions: {
-				sprite: this.actors['test'],
-				repairing: true
+			
+			const building: BuildingPrototype = {
+				sprite: sprite,
+				interface: interf,
+				name: buildingConfig.name,
+				visibleName: buildingConfig.visibleName,
+				cost: buildingConfig.cost,
+				houseOptions: buildingConfig.houseOptions,
+				storageOptions: buildingConfig.storageOptions,
+				productionOptions: buildingConfig.productionOptions,
 			}
-		};
+			if (buildingConfig.workerOptions) {
+				const workerOptions: WorkerOptions = {
+					sprite: this.actors[buildingConfig.workerOptions.sprite],
+					repairing: buildingConfig.workerOptions.repairing,
+					resource: buildingConfig.workerOptions.resource,
+					inventory: buildingConfig.workerOptions.inventory,
+					workerStartTime: buildingConfig.workerOptions.workerStartTime,
+				};
+				building.workerOptions = workerOptions;
 
-		this.buildings["farm"] = {
-			sprite: farm, 
-			interface: new BuildingInterface(), 
-			name: "farm", 
-			visibleName: "Wheat Farm", 
-			cost: 80,
-			productionOptions: [
-				{
-					output: {resource: "flour", amount: 50},
-					ingredients: [],
-					time: 12,
-				}	
-			]
-		};
-		this.buildings["bakery"] = {
-			sprite: bakery, 
-			interface: new BuildingInterface(), 
-			name: "bakery", 
-			visibleName: "Bakery", 
-			cost: 240,
-			productionOptions: [
-				{
-					output: {resource: "bread", amount: 5},
-					ingredients: [{resource: "flour", amount: 10}],
-					time: 5,
-				}	
-			]
-		};
-		this.buildings["storage"] = {
-			sprite: storage, 
-			interface: new StorageInterface(), 
-			name: "storage", 
-			visibleName: "Granary", 
-			cost: 120,
-			workerOptions: {sprite: this.actors['delivery']},
-			storageOptions: {
-				capacity: 50,
-				resources: ['flour', 'bread'],
-			},
-		};
+			}
 
+			this.buildings[buildingConfig.name] = building;
+		}
 		return true;
 	}
 
@@ -149,6 +99,7 @@ export class SpriteLibrary {
 		this.actors['test'] = new ActorSprite(await loadImage("./img/house.svg"), 2, tileSize);
 		this.actors['delivery'] = new ActorSprite(await loadImage("./img/house.svg"), 2, tileSize);
 		this.actors['delivery'].fillStyle = "blue";
+		this.actors['delivery'].refreshSize(tileSize);
 		return true;
 	}
 
@@ -225,3 +176,15 @@ async function loadImage(url: string): Promise<any> {
     });
 }
 
+async function loadBuildings(filename: string): Promise<BuildingConfig[]> {
+	try {
+		const response = await fetch(`config/${filename}`);
+		if (!response.ok) {
+			throw new Error(`Cannot load config for buldings: ${response.status}`);
+		}
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		throw error;
+	}
+}

@@ -1,7 +1,7 @@
 import { GameState } from "./game-state.js";
 import { Action, ActionButton, ButtonRow, InterfaceLayer } from "./interface.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
-import { SpriteLibrary } from "./sprite-library.js";
+import { BuildingConfig, SpriteLibrary } from "./sprite-library.js";
 import { prepareTabs } from "./sidebar.js";
 import { Actor } from "./actor.js";
 import { BattleActor, HeroType } from "./battle/actor.js";
@@ -32,9 +32,9 @@ export class Game {
 		this.minuteCounter = 0;
 	}
 
-	async prepareAssets() {
+	async prepareAssets(buildings: string | BuildingConfig[]) {
 		await this.sprites.prepareActorSprites(this.map.tileSize);
-		await this.sprites.prepareBuildingSprites(this.map.tileSize);
+		await this.sprites.prepareBuildingSprites(buildings, this.map.tileSize);
 		await this.sprites.prepareAvatars();
 		await this.sprites.prepareIcons();
 		await this.sprites.prepareRoadSprites(this.map.tileSize);
