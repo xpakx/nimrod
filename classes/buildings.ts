@@ -381,7 +381,7 @@ export class BuildingWorker extends Actor {
 
 export class Road {
 	sprites: TilingSprite;
-	sprite: HTMLImageElement;
+	sprite: OffscreenCanvas;
 	position: Position;
 	accepted: boolean;
 	direction: number;
@@ -389,14 +389,14 @@ export class Road {
 	constructor(sprite: TilingSprite, position: Position, direction: number, accepted: boolean = true) {
 		this.direction = direction;
 		this.sprites = sprite;
-		this.sprite =  sprite.sprites[this.direction];
+		this.sprite =  sprite.offscreens[this.direction];
 		this.position = position;
 		this.accepted = accepted;
 	}
 
 	xorDir(dir: number) {
 		this.direction ^= dir;
-		this.sprite = this.sprites.sprites[this.direction];
+		this.sprite = this.sprites.offscreens[this.direction];
 	}
 }
 
@@ -405,16 +405,38 @@ export class TilingSprite {
 	size: Size = {height: 0, width: 0};
 	sprites: HTMLImageElement[];
 	baseSize: number;
+	offscreens: OffscreenCanvas[] = [];
 
 	constructor(sprites: HTMLImageElement[], tileSize: Size) {
 		this.sprites = sprites;
 		this.baseSize = 1;
+		this.initOffscreens();
 		this.refreshSize(tileSize);
+	}
+
+	initOffscreens() {
+		for (let _ of this.sprites) {
+			const offscreen =  new OffscreenCanvas(100, 100);
+			offscreen.width = this.size.width;
+			offscreen.height = this.size.height;
+			this.offscreens.push(offscreen);
+		}
 	}
 
 	refreshSize(tileSize: Size) {
 		this.size.width = tileSize.width * this.baseSize;
 		this.size.height = this.sprites[0].height*(this.size.width/this.sprites[0].width);
+
+		for (let i in this.sprites) {
+			const image = this.sprites[i];
+			const offscreen = this.offscreens[i];
+			offscreen.width = this.size.width;
+			offscreen.height = this.size.height;
+			const offscreenCtx = offscreen.getContext('2d');
+			if (!offscreenCtx) continue;
+			offscreenCtx.clearRect(0, 0, this.size.width, this.size.height);
+			offscreenCtx.drawImage(image, 0, 0, this.size.width, this.size.height);
+		}
 	}
 
 }
