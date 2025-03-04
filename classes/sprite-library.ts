@@ -24,6 +24,11 @@ export interface WorkerConfig {
 	workerStartTime?: number;
 }
 
+export interface SpriteConfig {
+    name: string;
+    sprite: string;
+}
+
 export class SpriteLibrary {
 	buildings: {[key: string]: BuildingPrototype} = {};
 	avatars: {[key: string]: HTMLImageElement} = {};
@@ -100,8 +105,21 @@ export class SpriteLibrary {
 		return true;
 	}
 
-	async prepareAvatars(): Promise<boolean> {
-		this.avatars['ratman'] = await loadImage("./img/portraits/ratman.svg");
+	async prepareAvatars(config: string | SpriteConfig[]): Promise<boolean> {
+		if (typeof config === 'string') {
+			config = await loadSpriteConfig(config);
+		}
+
+		for (const avatarConfig of config) {
+			try {
+				const image = await loadImage(`./img/portraits/${avatarConfig.sprite}.svg`);
+				this.avatars[avatarConfig.name] = image;
+			} catch (error) {
+				console.error(`Failed to load avatar image for key "${avatarConfig.name}":`, error);
+				return false;
+			}
+		}
+
 		return true;
 	}
 
@@ -208,4 +226,12 @@ async function loadBuildings(filename: string): Promise<BuildingConfig[]> {
 	} catch (error) {
 		throw error;
 	}
+}
+
+async function loadSpriteConfig(filename: string): Promise<SpriteConfig[]> {
+    const response = await fetch(`config/${filename}`);
+    if (!response.ok) {
+	    throw new Error(`Cannot load config for avatars: ${response.status}`);
+    }
+    return await response.json();
 }

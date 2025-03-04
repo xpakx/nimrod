@@ -1,6 +1,6 @@
 import { BattleMapData, Game } from "./classes/game.js";
 import { LoggerFactory } from "./classes/logger.js";
-import { buildingSettings } from "./classes/building-settings.js";
+import { avatarSettings, buildingSettings } from "./classes/building-settings.js";
 
 let game = new Game();
 
@@ -57,7 +57,7 @@ window.onload = async () => {
 	canvas.width = game.state.canvasSize.width;
 	canvas.height = game.state.canvasSize.height;
 	logger.debug('Preparing assets');
-	await game.prepareAssets(buildingSettings);
+	await game.prepareAssets(buildingSettings, avatarSettings);
 
 	logger.debug('Loading map');
 	game.loadMap("test.json", true);
