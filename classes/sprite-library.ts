@@ -106,16 +106,24 @@ export class SpriteLibrary {
 	}
 
 	async prepareAvatars(config: string | SpriteConfig[]): Promise<boolean> {
+		return this.prepareSprites(config, this.avatars, "./img/portraits");
+	}
+
+	async prepareIcons(config: string | SpriteConfig[]): Promise<boolean> {
+		return this.prepareSprites(config, this.icons);
+	}
+
+	async prepareSprites(config: string | SpriteConfig[], result: {[key: string]: HTMLImageElement}, uriPrefix: string = "./img"): Promise<boolean> {
 		if (typeof config === 'string') {
 			config = await loadSpriteConfig(config);
 		}
 
-		for (const avatarConfig of config) {
+		for (const spriteConfig of config) {
 			try {
-				const image = await loadImage(`./img/portraits/${avatarConfig.sprite}.svg`);
-				this.avatars[avatarConfig.name] = image;
+				const image = await loadImage(`${uriPrefix}/${spriteConfig.sprite}.svg`);
+				result[spriteConfig.name] = image;
 			} catch (error) {
-				console.error(`Failed to load avatar image for key "${avatarConfig.name}":`, error);
+				console.error(`Failed to load image for key "${spriteConfig.name}":`, error);
 				return false;
 			}
 		}
@@ -123,18 +131,9 @@ export class SpriteLibrary {
 		return true;
 	}
 
-	async prepareIcons(): Promise<boolean> {
-		this.icons['coins'] = await loadImage("./img/coins.svg");
-		this.icons['population'] = await loadImage("./img/people.svg");
-		this.icons['road'] = await loadImage("./img/road-button.svg");
-		this.icons['delete'] = await loadImage("./img/delete-button.svg");
-		this.icons['world'] = await loadImage("./img/world.svg");
-		this.icons['city'] = await loadImage("./img/city.svg");
-		this.icons['kingdom'] = await loadImage("./img/kingdom.svg");
-		return true;
-	}
-
 	async prepareActorSprites(tileSize: Size): Promise<boolean> {
+		// Placeholder: Using house.svg as a temporary image for actors.
+		// TODO: Replace with actual actor sprites
 		this.actors['test'] = new ActorSprite(await loadImage("./img/house.svg"), 2, tileSize);
 		this.actors['delivery'] = new ActorSprite(await loadImage("./img/house.svg"), 2, tileSize);
 		this.actors['delivery'].fillStyle = "blue";

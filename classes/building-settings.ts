@@ -116,3 +116,34 @@ export const avatarSettings: SpriteConfig[] = [
 		sprite: "ratman"
 	},
 ];
+
+export const iconSettings: SpriteConfig[] = [
+	{
+		name: 'coins',
+		sprite: 'coins'
+	},
+	{
+		name: 'population',
+		sprite: 'people'
+	},
+	{
+		name: 'road',
+		sprite: 'road-button'
+	},
+	{
+		name: 'delete',
+		sprite: 'delete-button'
+	},
+	{
+		name: 'world',
+		sprite: 'world'
+	},
+	{
+		name: 'city',
+		sprite: 'city'
+	},
+	{
+		name: 'kingdom',
+		sprite: 'kingdom'
+	},
+];

@@ -32,11 +32,11 @@ export class Game {
 		this.minuteCounter = 0;
 	}
 
-	async prepareAssets(buildings: string | BuildingConfig[], avatars: string | SpriteConfig[]) {
+	async prepareAssets(buildings: string | BuildingConfig[], avatars: string | SpriteConfig[], icons: string | SpriteConfig[]) {
 		await this.sprites.prepareActorSprites(this.map.tileSize);
 		await this.sprites.prepareBuildingSprites(buildings, this.map.tileSize);
 		await this.sprites.prepareAvatars(avatars);
-		await this.sprites.prepareIcons();
+		await this.sprites.prepareIcons(icons);
 		await this.sprites.prepareRoadSprites(this.map.tileSize);
 		await this.sprites.prepareArrowSprites(this.map.tileSize);
 		this.interf.coinsIcon = this.sprites.icons['coins'];
