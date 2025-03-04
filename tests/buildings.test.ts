@@ -1,6 +1,6 @@
-import { Building, BuildingInterface, BuildingPrototype, BuildingSprite, BuildingWorker, Road, TilingSprite, WorkerOptions } from "../classes/buildings";
+import { Building, BuildingInterface, BuildingPrototype, BuildingSprite, BuildingWorker, WorkerOptions } from "../classes/buildings";
 import { ActorSprite } from "../classes/actor";
-import { MapLayer, Position, Size } from "../classes/map-layer";
+import { Position, Size } from "../classes/map-layer";
 
 let OffscreenCanvasMock = jest.fn().mockImplementation((width: number, height: number) => {
 	return {
