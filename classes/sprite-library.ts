@@ -1,5 +1,6 @@
 import { ActorSprite } from "./actor.js";
 import { BuildingInterface, BuildingPrototype, BuildingSprite, HouseOptions, Recipe, StorageOptions, TilingSprite, WorkerOptions } from "./buildings.js";
+import { getLogger, Logger } from "./logger.js";
 import { Size } from "./map-layer.js";
 
 export interface BuildingConfig {
@@ -30,6 +31,17 @@ export class SpriteLibrary {
 	actors: {[key: string]: ActorSprite} = {};
 	road?: TilingSprite;
 	arrow?: TilingSprite;
+	buildingInterfaces: { [key: string]: new () => BuildingInterface } = {};
+	logger: Logger = getLogger("SpriteLibrary");
+
+	registerBuildingInterface<T extends BuildingInterface>(interfaceClass: new () => T): void {
+		const key = interfaceClass.name;
+		if (this.buildingInterfaces[key]) {
+			this.logger.warn(`Interface with key "${key}" is already registered.`);
+			return;
+		}
+		this.buildingInterfaces[key] = interfaceClass;
+	}
 
 	async prepareBuildingSprites(config: string | BuildingConfig[], tileSize: Size): Promise<boolean> {
 		if (typeof(config) === "string") {
@@ -44,7 +56,12 @@ export class SpriteLibrary {
 			let interf: BuildingInterface;
 			if (buildingConfig.interface) {
 				if (typeof(buildingConfig.interface) === "string") {
-					interf = new BuildingInterface(); // TODO
+					if (buildingConfig.interface in this.buildingInterfaces) {
+						interf = new this.buildingInterfaces[buildingConfig.interface]();
+					} else {
+						this.logger.warn(`Interface "${buildingConfig.interface}" not registered.`);
+						interf = new BuildingInterface();
+					}
 				} else {
 					interf = buildingConfig.interface;
 				}
