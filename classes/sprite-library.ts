@@ -47,52 +47,56 @@ export class SpriteLibrary {
 		if (typeof(config) === "string") {
 			config = await loadBuildings(config);
 		}
-		for (let buildingConfig of config) {
-			const sprite = new BuildingSprite(
-				await loadImage(`./img/${buildingConfig.sprite}.svg`),
-				buildingConfig.size,
-				tileSize
-			);
-			let interf: BuildingInterface;
-			if (buildingConfig.interface) {
-				if (typeof(buildingConfig.interface) === "string") {
-					if (buildingConfig.interface in this.buildingInterfaces) {
-						interf = new this.buildingInterfaces[buildingConfig.interface]();
-					} else {
-						this.logger.warn(`Interface "${buildingConfig.interface}" not registered.`);
-						interf = new BuildingInterface();
-					}
+		const promises = config.map(async (buildingConfig) => this.prepareBuilding(buildingConfig, tileSize));
+		await Promise.all(promises);
+		return true;
+	}
+
+	private async prepareBuilding(buildingConfig: BuildingConfig, tileSize: Size): Promise<boolean> {
+		const sprite = new BuildingSprite(
+			await loadImage(`./img/${buildingConfig.sprite}.svg`),
+			buildingConfig.size,
+			tileSize
+		);
+		let interf: BuildingInterface;
+		if (buildingConfig.interface) {
+			if (typeof(buildingConfig.interface) === "string") {
+				if (buildingConfig.interface in this.buildingInterfaces) {
+					interf = new this.buildingInterfaces[buildingConfig.interface]();
 				} else {
-					interf = buildingConfig.interface;
+					this.logger.warn(`Interface "${buildingConfig.interface}" not registered.`);
+					interf = new BuildingInterface();
 				}
 			} else {
-				interf = new BuildingInterface();
+				interf = buildingConfig.interface;
 			}
-			
-			const building: BuildingPrototype = {
-				sprite: sprite,
-				interface: interf,
-				name: buildingConfig.name,
-				visibleName: buildingConfig.visibleName,
-				cost: buildingConfig.cost,
-				houseOptions: buildingConfig.houseOptions,
-				storageOptions: buildingConfig.storageOptions,
-				productionOptions: buildingConfig.productionOptions,
-			}
-			if (buildingConfig.workerOptions) {
-				const workerOptions: WorkerOptions = {
-					sprite: this.actors[buildingConfig.workerOptions.sprite],
-					repairing: buildingConfig.workerOptions.repairing,
-					resource: buildingConfig.workerOptions.resource,
-					inventory: buildingConfig.workerOptions.inventory,
-					workerStartTime: buildingConfig.workerOptions.workerStartTime,
-				};
-				building.workerOptions = workerOptions;
-
-			}
-
-			this.buildings[buildingConfig.name] = building;
+		} else {
+			interf = new BuildingInterface();
 		}
+
+		const building: BuildingPrototype = {
+			sprite: sprite,
+			interface: interf,
+			name: buildingConfig.name,
+			visibleName: buildingConfig.visibleName,
+			cost: buildingConfig.cost,
+			houseOptions: buildingConfig.houseOptions,
+			storageOptions: buildingConfig.storageOptions,
+			productionOptions: buildingConfig.productionOptions,
+		}
+		if (buildingConfig.workerOptions) {
+			const workerOptions: WorkerOptions = {
+				sprite: this.actors[buildingConfig.workerOptions.sprite],
+				repairing: buildingConfig.workerOptions.repairing,
+				resource: buildingConfig.workerOptions.resource,
+				inventory: buildingConfig.workerOptions.inventory,
+				workerStartTime: buildingConfig.workerOptions.workerStartTime,
+			};
+			building.workerOptions = workerOptions;
+
+		}
+
+		this.buildings[buildingConfig.name] = building;
 		return true;
 	}
 
