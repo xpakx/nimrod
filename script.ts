@@ -40,7 +40,7 @@ function registerKeyboardEvents() {
 
 window.onload = async () => {
 	const loggerFactory = LoggerFactory.getInstance();
-	loggerFactory.enable(["DeliveryScheduler", "DeliveryWorker", "Storage"]);
+	loggerFactory.enable(["DeliveryScheduler", "DeliveryWorker", "Storage", "SpriteLibrary"]);
 	const logger = loggerFactory.getLogger("Script");
 
 	logger.debug('Started app');

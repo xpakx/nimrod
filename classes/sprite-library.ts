@@ -150,49 +150,56 @@ export class SpriteLibrary {
 	}
 
 	async prepareRoadSprites(tileSize: Size): Promise<boolean> {
-		const roads = [
-			await loadImage("./img/road0000.svg"), 
-			await loadImage("./img/road0001.svg"), 
-			await loadImage("./img/road0010.svg"), 
-			await loadImage("./img/road0011.svg"), 
-			await loadImage("./img/road0100.svg"), 
-			await loadImage("./img/road0101.svg"), 
-			await loadImage("./img/road0110.svg"), 
-			await loadImage("./img/road0111.svg"), 
-			await loadImage("./img/road1000.svg"), 
-			await loadImage("./img/road1001.svg"), 
-			await loadImage("./img/road1010.svg"), 
-			await loadImage("./img/road1011.svg"), 
-			await loadImage("./img/road1100.svg"), 
-			await loadImage("./img/road1101.svg"), 
-			await loadImage("./img/road1110.svg"), 
-			await loadImage("./img/road1111.svg"), 
-		];
-		this.road = new TilingSprite(roads, tileSize);
+		this.road = await this.prepareTilingSprites("road", tileSize);
 		return true;
 	}
 
-	async prepareArrowSprites(tileSize: Size): Promise<boolean> {
-		const arrows = [
-			await loadImage("./img/arrow0011.svg"), 
-			await loadImage("./img/arrow0011.svg"), 
-			await loadImage("./img/arrow0011.svg"), 
-			await loadImage("./img/arrow0011.svg"), 
-			await loadImage("./img/arrow0011.svg"), 
-			await loadImage("./img/arrow0101.svg"), 
-			await loadImage("./img/arrow0110.svg"), 
-			await loadImage("./img/arrow0011.svg"), 
-			await loadImage("./img/arrow0011.svg"), 
-			await loadImage("./img/arrow1001.svg"), 
-			await loadImage("./img/arrow1010.svg"), 
-			await loadImage("./img/arrow0011.svg"), 
-			await loadImage("./img/arrow1100.svg"), 
-			await loadImage("./img/arrow0011.svg"), 
-			await loadImage("./img/arrow0011.svg"), 
-			await loadImage("./img/arrow0011.svg"), 
-		];
+	private async prepareTilingSprites(name: string, tileSize: Size, minOnes: number = 0, maxOnes: number = 4): Promise<TilingSprite> {
+		// TODO: manually setting size of the first tile is just a hack
+		// to make everything work for not-full tilesets
+		const size: Size = {width: 0, height: 0};
+		const sprites = [];
+		for (let i = 0; i < 16; i++) {
+			const ones = this.countOnes(i);
+			if (ones < minOnes || ones > maxOnes) {
+				sprites.push(this.getDummyTile());
+				continue;
+			}
+			const binary = i.toString(2).padStart(4, '0');
+			const path = `./img/${name}${binary}.svg`;
+			try {
+				const image = await loadImage(path);
+				sprites.push(image);
+				size.width = image.width;
+				size.height = image.height;
+			} catch (error) {
+				this.logger.error(`Failed to load ${name} image: ${path}`, error);
+				sprites.push(this.getDummyTile());
+			}
+		}
+		sprites[0].width = size.width;
+		sprites[0].height = size.height;
+		return new TilingSprite(sprites, tileSize);
+	}
 
-		this.arrow = new TilingSprite(arrows, tileSize);
+	private getDummyTile(): any {
+		const image = new Image();
+		image.width = 10;
+		image.height = 10;
+		return image;
+	}
+
+	private countOnes(n: number): number {
+		let count = 0;
+		while (n > 0) {
+			count += n & 1;
+			n >>>= 1;
+		}
+		return count;
+	}
+
+	async prepareArrowSprites(tileSize: Size): Promise<boolean> {
+		this.arrow = await this.prepareTilingSprites("arrow", tileSize, 2, 2);
 		return true;
 	}
 
