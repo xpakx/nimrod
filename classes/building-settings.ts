@@ -56,7 +56,7 @@ export const buildingSettings: BuildingConfig[] = [
 	},
 	{
 		sprite: "inspector",
-		size: 4,
+		size: 2,
 		name: "inspector",
 		visibleName: "Inspector Tower", 
 		cost: 15,
