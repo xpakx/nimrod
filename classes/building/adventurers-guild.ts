@@ -9,33 +9,37 @@ export class AdventurersGuildInterface extends BuildingInterface {
 	heroes: BattleActor[] = [];
 	team: BattleActor[] = [];
 	teamButtons: HeroButtonRow = new HeroButtonRow();
+	allHeroesButtons: HeroButtonRow = new HeroButtonRow();
 	logger: Logger = getLogger("AdventurersGuildInterface");
 
 	click(position: Position): Action | undefined {
 		const teamId = this.teamButtons.buttonAt(position);
-		this.logger.debug(`${teamId} clicked`);
 		if (teamId >= 0) {
+			this.logger.debug(`${teamId} clicked`);
 			return {"action": "removeHero", index: teamId};
 		}
-		return undefined;
-	}
 
-	add(actor: BattleActor, state: GameState) {
-		this.team.push(actor);
-		this.teamButtons.buttons = [];
-		this.prepareTeamButtons(state);
+		const heroId = this.allHeroesButtons.buttonAt(position);
+		if (heroId >= 0) {
+			this.logger.debug(`${heroId} clicked`);
+			return {"action": "addHero", index: heroId};
+		}
+
+		return undefined;
 	}
 
 	open(state: GameState, building: Building) {
 		this.heroes = state.allHeroes;
 		this.team = state.team;
 		this.prepareTeamButtons(state);
+		this.prepareHeroButtons(state);
 		super.open(state, building);
 	}
 
 	renderInterface(state: GameState) { 
 		super.renderInterface(state);
-		this.renderTeamButtons();
+		this.renderButtons(this.teamButtons);
+		this.renderButtons(this.allHeroesButtons);
 	}
 
 	prepareTeamButtons(state: GameState) {
@@ -62,10 +66,33 @@ export class AdventurersGuildInterface extends BuildingInterface {
 		}
 	}
 
-	renderTeamButtons() {
+	prepareHeroButtons(state: GameState) {
+		const portraitSize = 60;
+		const leftMargin = 80;
+		const width = state.canvasSize.width - 2 * leftMargin - this.menuWidth;
+		const height = 300;
+		const x = leftMargin;
+		const middleOfMap = (state.canvasSize.height - this.topPanelHeight) / 2  + this.topPanelHeight;
+		const y = middleOfMap - height / 2 + 40;
+		let heroY = y + 10;
+		let heroX = x + 150;
+		this.allHeroesButtons.buttons = [];
+		for (let hero of this.heroes) {
+			const heroButton = new HeroButton(
+				hero.portrait || hero.sprite.image,
+				{width: portraitSize, height: portraitSize},
+				{x: heroX, y: heroY},
+				hero.rank
+			);
+			this.allHeroesButtons.buttons.push(heroButton);
+			heroX += 10 + portraitSize;
+		}
+	}
+
+	renderButtons(row: HeroButtonRow) {
 		if (!this.context) return;
 		const imagePadding = 5;
-		for (let button of this.teamButtons.buttons) {
+		for (let button of row.buttons) {
 			this.context.fillStyle = button.getFillColor();
 			this.context.beginPath();
 			this.context.arc(button.position.x + button.size.width/2, button.position.y + button.size.width/2, button.size.width/2, 0, 2 * Math.PI);

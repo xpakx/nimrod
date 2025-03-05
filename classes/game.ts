@@ -149,7 +149,28 @@ export class Game {
 		} else if(clickResult.action == "delete") {
 			map.switchToDeleteMode();
 		} else if(clickResult.action == "removeHero") {
+			this.logger.debug("Removing hero from team");
 			this.state.team.splice(clickResult.index, 1);
+			this.logger.debug("Team:", this.state.team);
+			const guild = this.interf.buildingInterface as (AdventurersGuildInterface | undefined);
+			if (guild) {
+				guild.prepareTeamButtons(this.state);
+				guild.renderInterface(this.state);
+			}
+		} else if(clickResult.action == "addHero") {
+			this.logger.debug("Adding hero to team");
+			const maxTeamSize = 6;
+			if (this.state.team.length >= maxTeamSize) {
+				return;
+			}
+			if (clickResult.index >= this.state.allHeroes.length) {
+				return;
+			}
+			const hero = this.state.allHeroes[clickResult.index];
+			if (this.state.team.includes(hero)) {
+				return;
+			}
+			this.state.team.push(hero);
 			this.logger.debug("Team:", this.state.team);
 			const guild = this.interf.buildingInterface as (AdventurersGuildInterface | undefined);
 			if (guild) {

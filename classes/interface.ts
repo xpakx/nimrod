@@ -582,9 +582,9 @@ export interface OpenBuilding {
 	interface: BuildingInterface;
 }
 
-export interface RemoveFromTeam {
-	action: "removeHero";
+export interface TeamAction {
+	action: "removeHero" | "addHero";
 	index: number;
 }
 
-export type Action = NavAction | BuildAction | OpenBuilding | RemoveFromTeam;
+export type Action = NavAction | BuildAction | OpenBuilding | TeamAction;
