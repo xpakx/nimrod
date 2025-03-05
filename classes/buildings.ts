@@ -548,14 +548,17 @@ export class BuildingInterface {
 					ingredientString += `${ingredient.resource} (${amount}) `;
 				}
 				const amount = this.building.getResourceAmount(recipe.output.resource);
-				this.context.fillText(`${ingredientString} -> ${recipe.output.resource} (${amount})`, recipesX, imageEnd + i * lineHeight);
+				const progress = this.building.productionProgress[recipe.output.resource] || 0;
+				this.context.fillText(
+					`${ingredientString} -> ${recipe.output.resource} (${amount}) [${progress}/${recipe.time}]`,
+					recipesX, 
+					imageEnd + i * lineHeight
+				);
 
 				i += 1;
 			}
 		}
 	}
-
-
 }
 
 export interface Recipe {
