@@ -1,26 +1,23 @@
 import { BattleActor, HeroRank } from "../battle/actor.js";
 import { Building, BuildingInterface } from "../buildings.js";
 import { GameState } from "../game-state.js";
+import { Action } from "../interface.js";
+import { getLogger, Logger } from "../logger.js";
 import { Position, Size } from "../map-layer.js";
 
 export class AdventurersGuildInterface extends BuildingInterface {
 	heroes: BattleActor[] = [];
 	team: BattleActor[] = [];
 	teamButtons: HeroButtonRow = new HeroButtonRow();
+	logger: Logger = getLogger("AdventurersGuildInterface");
 
-	click(state: GameState) {
-		const teamId = this.teamButtons.buttonAt(state.playerMouse);
-		console.log(teamId);
+	click(position: Position): Action | undefined {
+		const teamId = this.teamButtons.buttonAt(position);
+		this.logger.debug(`${teamId} clicked`);
 		if (teamId >= 0) {
-			this.remove(teamId, state);
-			return;
+			return {"action": "removeHero", index: teamId};
 		}
-	}
-
-	remove(i: number, state: GameState) {
-		this.team = this.team.splice(i, 1);
-		this.teamButtons.buttons = this.teamButtons.buttons.splice(i, 1);
-		state.team = this.team;
+		return undefined;
 	}
 
 	add(actor: BattleActor, state: GameState) {
@@ -52,6 +49,7 @@ export class AdventurersGuildInterface extends BuildingInterface {
 		const heroWidth = this.team.length*portraitSize + (this.team.length - 1)*10
 		let heroY = y;
 		let heroX = x + width/2 - heroWidth/2;
+		this.teamButtons.buttons = [];
 		for (let hero of this.team) {
 			const heroButton = new HeroButton(
 				hero.portrait || hero.sprite.image,

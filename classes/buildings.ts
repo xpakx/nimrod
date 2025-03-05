@@ -1,6 +1,7 @@
 import { Actor, ActorSprite } from "./actor.js";
 import { HouseLevel } from "./building/house.js";
 import { GameState } from "./game-state.js";
+import { Action } from "./interface.js";
 import { getLogger, Logger } from "./logger.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
 
@@ -448,7 +449,9 @@ export class BuildingInterface {
 	offscreen?: OffscreenCanvas;
 	context?: OffscreenCanvasRenderingContext2D;
 
-	click(_state: GameState) { }
+	click(_position: Position): Action | undefined { 
+		return undefined;
+	}
 
 	open(state: GameState, building: Building) {
 		this.state = state;

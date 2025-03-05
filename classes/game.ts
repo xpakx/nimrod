@@ -8,6 +8,7 @@ import { BattleActor, HeroType } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
 import { getLogger, Logger, LoggerFactory } from "./logger.js";
 import { House, Migrant } from "./building/house.js";
+import { AdventurersGuildInterface } from "./building/adventurers-guild.js";
 
 export class Game {
 	state: GameState;
@@ -147,7 +148,15 @@ export class Game {
 			this.checkCost();
 		} else if(clickResult.action == "delete") {
 			map.switchToDeleteMode();
-		} 
+		} else if(clickResult.action == "removeHero") {
+			this.state.team.splice(clickResult.index, 1);
+			this.logger.debug("Team:", this.state.team);
+			const guild = this.interf.buildingInterface as (AdventurersGuildInterface | undefined);
+			if (guild) {
+				guild.prepareTeamButtons(this.state);
+				guild.renderInterface(this.state);
+			}
+		}
 	}
 
 	leftMouseGeneric(clickResult: Action) {

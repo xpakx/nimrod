@@ -480,9 +480,6 @@ export class DeliveryScheduler {
 
 export class StorageInterface extends BuildingInterface {
 
-	click(_state: GameState) {
-	}
-
 	renderInterface(state: GameState) { 
 		super.renderInterface(state);
 		this.renderResources(state);

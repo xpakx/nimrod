@@ -289,7 +289,7 @@ export class InterfaceLayer {
 	click(position: Position): Action | undefined { // TODO
 		if (this.buildingInterface) {
 			if (this.buildingInterface.inInterface(position)) {
-				return undefined;
+				return this.buildingInterface.click(position);
 			} else {
 				this.buildingInterface = undefined;
 			}
@@ -582,4 +582,9 @@ export interface OpenBuilding {
 	interface: BuildingInterface;
 }
 
-export type Action = NavAction | BuildAction | OpenBuilding;
+export interface RemoveFromTeam {
+	action: "removeHero";
+	index: number;
+}
+
+export type Action = NavAction | BuildAction | OpenBuilding | RemoveFromTeam;
