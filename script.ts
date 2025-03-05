@@ -1,6 +1,7 @@
 import { BattleMapData, Game } from "./classes/game.js";
 import { LoggerFactory } from "./classes/logger.js";
 import { avatarSettings, buildingSettings, iconSettings } from "./classes/building-settings.js";
+import { BattleActor } from "./classes/battle/actor.js";
 
 let game = new Game();
 
@@ -77,6 +78,9 @@ window.onload = async () => {
 		game.state.prevTimestamp = timestamp;
 		window.requestAnimationFrame(frame);
 	});
+
+	let hero = new BattleActor(game.sprites.actors['delivery'], {x: 0, y: 0}); 
+	game.state.team = [hero, hero, hero, hero];
 
 
 	game.interf.setDialogue(context, {text: "Welcome to the game!", portrait: game.sprites.avatars['ratman']});
