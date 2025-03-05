@@ -80,7 +80,12 @@ window.onload = async () => {
 	});
 
 	let hero = new BattleActor(game.sprites.actors['delivery'], {x: 0, y: 0}); 
-	game.state.team = [hero, hero, hero, hero];
+	let hero2 = new BattleActor(game.sprites.actors['delivery'], {x: 0, y: 0}); 
+	hero.portrait = game.sprites.avatars['ratman'];
+	hero2.portrait = game.sprites.avatars['ratman'];
+	hero2.rank = "rare";
+	game.state.team = [hero, hero2];
+	game.state.allHeroes = [hero, hero2];
 
 
 	game.interf.setDialogue(context, {text: "Welcome to the game!", portrait: game.sprites.avatars['ratman']});

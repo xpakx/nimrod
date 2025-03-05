@@ -1,6 +1,8 @@
 import { Actor } from "../actor.js";
-import { getLogger, Logger, LoggerFactory } from "../logger.js";
+import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position } from "../map-layer.js";
+
+export type HeroRank = "common" | "rare"; 
 
 export class BattleActor extends Actor {
 	enemy: boolean = false;
@@ -11,6 +13,7 @@ export class BattleActor extends Actor {
 	hp: number = 0;
 	skills: Skill[] = []
 	logger: Logger = getLogger("BattleActor");
+	rank: HeroRank = "common";
 
 	moving: boolean = false;
 	path?: Position[]

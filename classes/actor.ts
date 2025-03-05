@@ -36,6 +36,7 @@ export class ActorSprite {
 
 export class Actor {
 	sprite: ActorSprite;
+	portrait?: HTMLImageElement;
 	position: Position;
 	positionSquare: Position;
 	diagonal: number;
