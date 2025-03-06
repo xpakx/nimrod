@@ -60,7 +60,7 @@ export class AdventurersGuildInterface extends BuildingInterface {
 				hero.portrait || hero.sprite.image,
 				{width: portraitSize, height: portraitSize},
 				{x: heroX, y: heroY},
-				hero.rank
+				hero
 			);
 			this.teamButtons.buttons.push(heroButton);
 			heroX += 10 + portraitSize;
@@ -88,7 +88,7 @@ export class AdventurersGuildInterface extends BuildingInterface {
 				hero.portrait || hero.sprite.image,
 				{width: portraitSize, height: portraitSize},
 				{x: 0, y: 0},
-				hero.rank
+				hero
 			);
 			this.allHeroesButtons.buttons.push(heroButton);
 		}
@@ -98,35 +98,33 @@ export class AdventurersGuildInterface extends BuildingInterface {
 
 	renderButtons(row: HeroButtonRow) {
 		if (!this.context) return;
-		const imagePadding = 5;
 		for (let button of row.buttons) {
+			this.context.drawImage(button.image, button.position.x, button.position.y);
 			this.context.fillStyle = button.getFillColor();
-			this.context.beginPath();
-			this.context.arc(button.position.x + button.size.width/2, button.position.y + button.size.width/2, button.size.width/2, 0, 2 * Math.PI);
-			this.context.fill();
-
-			this.context.drawImage(button.image, button.position.x + imagePadding, button.position.y + imagePadding, button.size.width - 2*imagePadding, button.size.height - 2*imagePadding);
-
-			this.context.strokeStyle = button.getBorderColor();
-			this.context.beginPath();
-			this.context.arc(button.position.x + button.size.width/2, button.position.y + button.size.width/2, button.size.width/2, 0, 2 * Math.PI);
-			this.context.stroke();
 		}
 	}
 }
 
 export class HeroButton {
-	image: HTMLImageElement;
+	_image: HTMLImageElement;
+	image: OffscreenCanvas;
+	context: OffscreenCanvasRenderingContext2D;
 	hover: boolean = false;
 	position: Position;
 	size: Size;
 	rank: HeroRank;
+	hero: BattleActor;
+	imagePadding: number = 5;
 
-	constructor(image: HTMLImageElement, size: Size, position: Position, rank: HeroRank) {
-		this.image = image;
+	constructor(image: HTMLImageElement, size: Size, position: Position, hero: BattleActor) {
+		this._image = image;
+		this.image = new OffscreenCanvas(size.width, size.height);
+		this.context = this.image.getContext("2d")!; // TODO
 		this.size = size;
 		this.position = position;
-		this.rank = rank;
+		this.rank = hero.rank;
+		this.hero = hero;
+		this.drawImage();
 	}
 
 	inButton(position: Position): boolean {
@@ -149,6 +147,20 @@ export class HeroButton {
 		if (this.rank == "common") return '#fff';
 		else if (this.rank == "rare") return '#dd1';
 		return '#000';
+	}
+
+	drawImage() {
+		this.context.fillStyle = this.getFillColor();
+		this.context.beginPath();
+		this.context.arc(this.size.width/2, this.size.width/2, this.size.width/2, 0, 2 * Math.PI);
+		this.context.fill();
+
+		this.context.drawImage(this._image, this.imagePadding, this.imagePadding, this.size.width - 2*this.imagePadding, this.size.height - 2*this.imagePadding);
+
+		this.context.strokeStyle = this.getBorderColor();
+		this.context.beginPath();
+		this.context.arc(this.size.width/2, this.size.width/2, this.size.width/2, 0, 2 * Math.PI);
+		this.context.stroke();
 	}
 }
 
@@ -229,20 +241,9 @@ export class HeroButtonPane {
 	}
 
 	draw(context: OffscreenCanvasRenderingContext2D) {
-		const imagePadding = 5;
-		// TODO: move to icon
 		for(let button of this.activeButtons) {
+			context.drawImage(button.image, button.position.x, button.position.y);
 			context.fillStyle = button.getFillColor();
-			context.beginPath();
-			context.arc(button.position.x + button.size.width/2, button.position.y + button.size.width/2, button.size.width/2, 0, 2 * Math.PI);
-			context.fill();
-
-			context.drawImage(button.image, button.position.x + imagePadding, button.position.y + imagePadding, button.size.width - 2*imagePadding, button.size.height - 2*imagePadding);
-
-			context.strokeStyle = button.getBorderColor();
-			context.beginPath();
-			context.arc(button.position.x + button.size.width/2, button.position.y + button.size.width/2, button.size.width/2, 0, 2 * Math.PI);
-			context.stroke();
 		}
 	}
 
