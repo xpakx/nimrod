@@ -13,16 +13,16 @@ export class AdventurersGuildInterface extends BuildingInterface {
 	logger: Logger = getLogger("AdventurersGuildInterface");
 
 	click(position: Position): Action | undefined {
-		const teamId = this.teamButtons.buttonAt(position);
-		if (teamId >= 0) {
-			this.logger.debug(`${teamId} clicked`);
-			return {"action": "removeHero", index: teamId};
+		const teamHero = this.teamButtons.buttonAt(position);
+		if (teamHero) {
+			this.logger.debug(`Team hero clicked`, teamHero);
+			return {"action": "removeHero", hero: teamHero};
 		}
 
-		const heroId = this.allHeroesButtons.buttonAt(position);
-		if (heroId >= 0) {
-			this.logger.debug(`${heroId} clicked`);
-			return {"action": "addHero", index: heroId};
+		const hero = this.allHeroesButtons.buttonAt(position);
+		if (hero) {
+			this.logger.debug(`Hero clicked:`, hero);
+			return {"action": "addHero", hero: hero};
 		}
 
 		return undefined;
@@ -156,13 +156,13 @@ export class HeroButton {
 export class HeroButtonRow {
 	buttons: HeroButton[] = [];
 
-	buttonAt(position: Position): number {
+	buttonAt(position: Position): BattleActor | undefined {
 		for (let i=0; i<this.buttons.length; i++) {
 			if (this.buttons[i].inButton(position)) {
-				return i;
+				return this.buttons[i].hero;
 			}
 		}
-		return -1;
+		return undefined;
 	}
 
 	draw(context: OffscreenCanvasRenderingContext2D) {
@@ -243,13 +243,13 @@ export class HeroButtonPane {
 		}
 	}
 
-	buttonAt(position: Position): number {
+	buttonAt(position: Position): BattleActor | undefined {
 		for (let i=0; i<this.activeButtons.length; i++) {
 			if (this.activeButtons[i].inButton(position)) {
-				return this.itemOffset + i; // TODO
+				return this.activeButtons[i].hero;
 			}
 		}
-		return -1;
+		return undefined;
 	}
 
 }

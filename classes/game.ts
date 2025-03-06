@@ -150,7 +150,8 @@ export class Game {
 			map.switchToDeleteMode();
 		} else if(clickResult.action == "removeHero") {
 			this.logger.debug("Removing hero from team");
-			this.state.team.splice(clickResult.index, 1);
+			const index = this.state.team.findIndex((hero) => hero === clickResult.hero);
+			this.state.team.splice(index, 1);
 			this.logger.debug("Team:", this.state.team);
 			const guild = this.interf.buildingInterface as (AdventurersGuildInterface | undefined);
 			if (guild) {
@@ -163,10 +164,7 @@ export class Game {
 			if (this.state.team.length >= maxTeamSize) {
 				return;
 			}
-			if (clickResult.index >= this.state.allHeroes.length) {
-				return;
-			}
-			const hero = this.state.allHeroes[clickResult.index];
+			const hero = clickResult.hero;
 			if (this.state.team.includes(hero)) {
 				return;
 			}

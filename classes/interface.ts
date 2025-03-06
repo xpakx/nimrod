@@ -1,3 +1,4 @@
+import { BattleActor } from "./battle/actor.js";
 import { BuildingInterface, BuildingSprite } from "./buildings.js";
 import { GameState } from "./game-state.js";
 import { Position, Size } from "./map-layer.js";
@@ -584,7 +585,7 @@ export interface OpenBuilding {
 
 export interface TeamAction {
 	action: "removeHero" | "addHero";
-	index: number;
+	hero: BattleActor;
 }
 
 export type Action = NavAction | BuildAction | OpenBuilding | TeamAction;
