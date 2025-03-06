@@ -9,7 +9,7 @@ export class AdventurersGuildInterface extends BuildingInterface {
 	heroes: BattleActor[] = [];
 	team: BattleActor[] = [];
 	teamButtons: HeroButtonRow = new HeroButtonRow();
-	allHeroesButtons: HeroButtonRow = new HeroButtonRow();
+	allHeroesButtons: HeroButtonPane = new HeroButtonPane([], {x: 0, y: 0}, {width: 0, height: 0}); // TODO
 	logger: Logger = getLogger("AdventurersGuildInterface");
 
 	click(position: Position): Action | undefined {
@@ -39,6 +39,7 @@ export class AdventurersGuildInterface extends BuildingInterface {
 	renderInterface(state: GameState) { 
 		super.renderInterface(state);
 		this.renderButtons(this.teamButtons);
+		this.allHeroesButtons.draw(this.context!);
 		this.renderButtons(this.allHeroesButtons);
 	}
 
@@ -76,17 +77,23 @@ export class AdventurersGuildInterface extends BuildingInterface {
 		const y = middleOfMap - height / 2 + 40;
 		let heroY = y + 10;
 		let heroX = x + 150;
+		this.allHeroesButtons.position.x = heroX;
+		this.allHeroesButtons.position.y = heroY;
+		this.allHeroesButtons.size.width = width - 150;
+		this.allHeroesButtons.size.height = height - 200; // TODO
+
 		this.allHeroesButtons.buttons = [];
 		for (let hero of this.heroes) {
 			const heroButton = new HeroButton(
 				hero.portrait || hero.sprite.image,
 				{width: portraitSize, height: portraitSize},
-				{x: heroX, y: heroY},
+				{x: 0, y: 0},
 				hero.rank
 			);
 			this.allHeroesButtons.buttons.push(heroButton);
-			heroX += 10 + portraitSize;
 		}
+
+		this.allHeroesButtons.prepareButtons();
 	}
 
 	renderButtons(row: HeroButtonRow) {
@@ -147,7 +154,6 @@ export class HeroButton {
 
 export class HeroButtonRow {
 	buttons: HeroButton[] = [];
-	y: number = 100;
 
 	buttonAt(position: Position): number {
 		for (let i=0; i<this.buttons.length; i++) {
@@ -157,4 +163,96 @@ export class HeroButtonRow {
 		}
 		return -1;
 	}
+}
+
+export class HeroButtonPane {
+	buttons: HeroButton[];
+
+	itemOffset: number = 0;
+	activeButtons: HeroButton[] = [];
+
+	position: Position;
+	size: Size;
+
+	constructor(heroes: HeroButton[], position: Position, size: Size) {
+		this.buttons = heroes;
+		this.position = position;
+		this.size = size;
+	}
+
+	prepareButtons() {
+		this.activeButtons = [];
+		const buttonMargin = 10;
+
+		let xStart = this.position.x;
+		let yStart = this.position.y;
+		let xMax = this.position.x + this.size.width;
+		let yMax = this.position.y + this.size.height;
+		let currentYOffset = 0;
+		let currentXOffset = 0;
+
+		for(let i = this.itemOffset; i<this.buttons.length; i++) {
+			const currentButton = this.buttons[i];
+			const buttonWidth = currentButton.size.width;
+			const buttonHeight = currentButton.size.height;
+
+			let currentX = xStart + currentXOffset * (buttonWidth + buttonMargin);
+			let currentY = yStart + currentYOffset * (buttonHeight + buttonMargin);
+			if(currentX + buttonWidth >= xMax) {
+				currentXOffset = 0;
+				currentYOffset += 1;
+				currentX = xStart;
+				currentY = yStart + currentYOffset * (buttonHeight + buttonMargin);
+				if (currentY >= yMax) {
+					return;
+				}
+			}
+
+			let iconWidth = currentButton.image.width;
+			let iconHeight = currentButton.image.height;
+			let iconSize = buttonWidth > buttonHeight ? buttonWidth : buttonHeight;
+			if(iconWidth > iconHeight) {
+				iconHeight = iconHeight*(iconSize/iconWidth);
+				iconWidth = iconSize;
+			} else {
+				iconWidth = iconWidth*(iconSize/iconHeight);
+				iconHeight = iconSize;
+			}
+
+			currentButton.position.x = currentX;
+			currentButton.position.y = currentY;
+			// TODO: image size
+			
+			this.activeButtons.push(currentButton);
+			currentXOffset += 1;
+		}
+	}
+
+	draw(context: OffscreenCanvasRenderingContext2D) {
+		const imagePadding = 5;
+		// TODO: move to icon
+		for(let button of this.activeButtons) {
+			context.fillStyle = button.getFillColor();
+			context.beginPath();
+			context.arc(button.position.x + button.size.width/2, button.position.y + button.size.width/2, button.size.width/2, 0, 2 * Math.PI);
+			context.fill();
+
+			context.drawImage(button.image, button.position.x + imagePadding, button.position.y + imagePadding, button.size.width - 2*imagePadding, button.size.height - 2*imagePadding);
+
+			context.strokeStyle = button.getBorderColor();
+			context.beginPath();
+			context.arc(button.position.x + button.size.width/2, button.position.y + button.size.width/2, button.size.width/2, 0, 2 * Math.PI);
+			context.stroke();
+		}
+	}
+
+	buttonAt(position: Position): number {
+		for (let i=0; i<this.activeButtons.length; i++) {
+			if (this.activeButtons[i].inButton(position)) {
+				return this.itemOffset + i; // TODO
+			}
+		}
+		return -1;
+	}
+
 }
