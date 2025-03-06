@@ -445,28 +445,36 @@ export class BuildingInterface {
 	menuWidth = 420; // TODO: delete this
 	topPanelHeight = 50;
 	building?: Building;
-	state?: GameState; // TODO: just update width, etc
 	offscreen?: OffscreenCanvas;
 	context?: OffscreenCanvasRenderingContext2D;
+
+	size: Size = {width: 0, height: 0};
+	position: Position = {x: 0, y: 0};
+	leftMargin: number = 80;
 
 	click(_position: Position): Action | undefined { 
 		return undefined;
 	}
 
 	open(state: GameState, building: Building) {
-		this.state = state;
-		this.building = building;
+		this.preRender(state, building);
 		this.renderInterface(state);
 	}
 
+	preRender(state: GameState, building: Building) {
+		this.position.x = this.leftMargin;
+		this.size.width = state.canvasSize.width - 2*this.leftMargin - this.menuWidth;
+		this.size.height = 300;
+		const middleOfMap = (state.canvasSize.height - this.topPanelHeight) / 2  + this.topPanelHeight;
+		this.position.y = middleOfMap - this.size.height / 2;
+		this.building = building;
+	}
+
 	inInterface(pos: Position): boolean {
-		if (!this.state) return false;
-		const leftMargin = 80;
-		const width = this.state.canvasSize.width - 2 * leftMargin - this.menuWidth;
-		const height = 300;
-		const x = leftMargin;
-		const middleOfMap = (this.state.canvasSize.height - this.topPanelHeight) / 2  + this.topPanelHeight;
-		const y = middleOfMap - height / 2;
+		const width = this.size.width;
+		const height = this.size.height;
+		const x = this.position.x;
+		const y = this.position.y;
 		return (pos.x >= x && pos.x <= x + width && pos.y >= y && pos.y <= y + height);
 	}
 
@@ -476,12 +484,10 @@ export class BuildingInterface {
 	}
 
 	renderInterface(state: GameState) { 
-		const leftMargin = 80;
-		const width = state.canvasSize.width - 2 * leftMargin - this.menuWidth;
-		const height = 300;
-		const x = leftMargin;
-		const middleOfMap = (state.canvasSize.height - this.topPanelHeight) / 2  + this.topPanelHeight;
-		const y = middleOfMap - height / 2;
+		const width = this.size.width;
+		const height = this.size.height;
+		const x = this.position.x;
+		const y = this.position.y;
 
 		this.offscreen = new OffscreenCanvas(state.canvasSize.width, state.canvasSize.height);
 		this.context = this.offscreen.getContext("2d")!;
@@ -519,16 +525,13 @@ export class BuildingInterface {
 		this.context.font = '24px Arial';
 		this.context.fillText(building.visibleName, nameX, nameY);
 
-		this.renderRecipes(state);
-		
+		this.renderRecipes();
 	}
 
-	renderRecipes(state: GameState) {
+	renderRecipes() {
 		if (!this.building || !this.building.recipes) return;
 		if (!this.context) return;
-		const height = 300;
-		const middleOfMap = (state.canvasSize.height - this.topPanelHeight) / 2  + this.topPanelHeight;
-		const y = middleOfMap - height / 2;
+		const y = this.position.y;
 		const topPadding = 10;
 		const imageSize = 80;
 		const imagePadding = 20;

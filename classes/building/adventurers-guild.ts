@@ -31,9 +31,10 @@ export class AdventurersGuildInterface extends BuildingInterface {
 	open(state: GameState, building: Building) {
 		this.heroes = state.allHeroes;
 		this.team = state.team;
-		this.prepareTeamButtons(state);
-		this.prepareHeroButtons(state);
-		super.open(state, building);
+		this.preRender(state, building);
+		this.prepareTeamButtons();
+		this.prepareHeroButtons();
+		this.renderInterface(state);
 	}
 
 	renderInterface(state: GameState) { 
@@ -43,13 +44,12 @@ export class AdventurersGuildInterface extends BuildingInterface {
 		this.renderButtons(this.allHeroesButtons);
 	}
 
-	prepareTeamButtons(state: GameState) {
+	prepareTeamButtons() {
 		const portraitSize = 60;
-		const leftMargin = 80;
-		const width = state.canvasSize.width - 2 * leftMargin - this.menuWidth;
-		const height = 300;
-		const x = leftMargin;
-		const middleOfMap = (state.canvasSize.height - this.topPanelHeight) / 2  + this.topPanelHeight;
+		const width = this.size.width;
+		const height = this.size.height;
+		const x = this.position.x;
+		const middleOfMap = this.position.y + (height) / 2;
 		const y = middleOfMap + height / 2 - 10 - portraitSize;
 		const heroWidth = this.team.length*portraitSize + (this.team.length - 1)*10
 		let heroY = y;
@@ -67,14 +67,12 @@ export class AdventurersGuildInterface extends BuildingInterface {
 		}
 	}
 
-	prepareHeroButtons(state: GameState) {
+	prepareHeroButtons() {
 		const portraitSize = 60;
-		const leftMargin = 80;
-		const width = state.canvasSize.width - 2 * leftMargin - this.menuWidth;
-		const height = 300;
-		const x = leftMargin;
-		const middleOfMap = (state.canvasSize.height - this.topPanelHeight) / 2  + this.topPanelHeight;
-		const y = middleOfMap - height / 2 + 40;
+		const width = this.size.width;
+		const height = this.size.height;
+		const x = this.position.x;
+		const y = this.position.y + 40;
 		let heroY = y + 10;
 		let heroX = x + 150;
 		this.allHeroesButtons.position.x = heroX;
@@ -185,6 +183,7 @@ export class HeroButtonPane {
 
 	position: Position;
 	size: Size;
+	buttonGap: number = 10;
 
 	constructor(heroes: HeroButton[], position: Position, size: Size) {
 		this.buttons = heroes;
@@ -194,7 +193,6 @@ export class HeroButtonPane {
 
 	prepareButtons() {
 		this.activeButtons = [];
-		const buttonMargin = 10;
 
 		let xStart = this.position.x;
 		let yStart = this.position.y;
@@ -208,13 +206,13 @@ export class HeroButtonPane {
 			const buttonWidth = currentButton.size.width;
 			const buttonHeight = currentButton.size.height;
 
-			let currentX = xStart + currentXOffset * (buttonWidth + buttonMargin);
-			let currentY = yStart + currentYOffset * (buttonHeight + buttonMargin);
+			let currentX = xStart + currentXOffset * (buttonWidth + this.buttonGap);
+			let currentY = yStart + currentYOffset * (buttonHeight + this.buttonGap);
 			if(currentX + buttonWidth >= xMax) {
 				currentXOffset = 0;
 				currentYOffset += 1;
 				currentX = xStart;
-				currentY = yStart + currentYOffset * (buttonHeight + buttonMargin);
+				currentY = yStart + currentYOffset * (buttonHeight + this.buttonGap);
 				if (currentY >= yMax) {
 					return;
 				}

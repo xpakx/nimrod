@@ -154,7 +154,7 @@ export class Game {
 			this.logger.debug("Team:", this.state.team);
 			const guild = this.interf.buildingInterface as (AdventurersGuildInterface | undefined);
 			if (guild) {
-				guild.prepareTeamButtons(this.state);
+				guild.prepareTeamButtons();
 				guild.renderInterface(this.state);
 			}
 		} else if(clickResult.action == "addHero") {
@@ -174,7 +174,7 @@ export class Game {
 			this.logger.debug("Team:", this.state.team);
 			const guild = this.interf.buildingInterface as (AdventurersGuildInterface | undefined);
 			if (guild) {
-				guild.prepareTeamButtons(this.state);
+				guild.prepareTeamButtons();
 				guild.renderInterface(this.state);
 			}
 		}
