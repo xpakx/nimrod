@@ -39,9 +39,8 @@ export class AdventurersGuildInterface extends BuildingInterface {
 
 	renderInterface(state: GameState) { 
 		super.renderInterface(state);
-		this.renderButtons(this.teamButtons);
+		this.teamButtons.draw(this.context!);
 		this.allHeroesButtons.draw(this.context!);
-		this.renderButtons(this.allHeroesButtons);
 	}
 
 	prepareTeamButtons() {
@@ -92,14 +91,6 @@ export class AdventurersGuildInterface extends BuildingInterface {
 		}
 
 		this.allHeroesButtons.prepareButtons();
-	}
-
-	renderButtons(row: HeroButtonRow) {
-		if (!this.context) return;
-		for (let button of row.buttons) {
-			this.context.drawImage(button.image, button.position.x, button.position.y);
-			this.context.fillStyle = button.getFillColor();
-		}
 	}
 }
 
@@ -173,6 +164,13 @@ export class HeroButtonRow {
 		}
 		return -1;
 	}
+
+	draw(context: OffscreenCanvasRenderingContext2D) {
+		for (let button of this.buttons) {
+			context.drawImage(button.image, button.position.x, button.position.y);
+		}
+	}
+
 }
 
 export class HeroButtonPane {
