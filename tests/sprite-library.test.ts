@@ -1,5 +1,5 @@
 import { ActorSprite } from "../classes/actor";
-import { BuildingInterface } from "../classes/buildings";
+import { BuildingInterface } from "../classes/building/buildings";
 import { getLogger } from "../classes/logger";
 import { Size } from "../classes/map-layer";
 import { BuildingConfig, SpriteLibrary } from "../classes/sprite-library";

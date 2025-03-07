@@ -1,5 +1,5 @@
-import { AdventurersGuildInterface } from "./building/adventurers-guild.js";
-import { StorageInterface } from "./building/storage.js";
+import { AdventurersGuildInterface } from "./interface/adventurers-guild.js";
+import { StorageInterface } from "./interface/storage.js";
 import { SpriteConfig, BuildingConfig } from "./sprite-library.js";
 
 export const buildingSettings: BuildingConfig[] = [

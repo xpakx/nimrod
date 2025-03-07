@@ -1,7 +1,7 @@
 import { Actor } from "../actor.js";
-import { Building, BuildingPrototype, BuildingWorker, HouseOptions } from "../buildings.js";
+import { Building, BuildingPrototype, BuildingWorker, HouseOptions } from "./buildings.js";
 import { GameState } from "../game-state.js";
-import { getLogger, Logger, LoggerFactory } from "../logger.js";
+import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position } from "../map-layer.js";
 
 export class House extends Building {

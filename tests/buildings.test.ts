@@ -1,4 +1,4 @@
-import { Building, BuildingInterface, BuildingPrototype, BuildingSprite, BuildingWorker, WorkerOptions } from "../classes/buildings";
+import { Building, BuildingInterface, BuildingPrototype, BuildingSprite, BuildingWorker, WorkerOptions } from "../classes/building/buildings";
 import { ActorSprite } from "../classes/actor";
 import { Position, Size } from "../classes/map-layer";
 

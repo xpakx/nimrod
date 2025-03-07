@@ -1,14 +1,14 @@
 import { GameState } from "./game-state.js";
-import { Action, ActionButton, ButtonRow, InterfaceLayer } from "./interface.js";
+import { Action, ActionButton, ButtonRow, InterfaceLayer } from "./interface/interface.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
 import { SpriteConfig, BuildingConfig, SpriteLibrary } from "./sprite-library.js";
-import { prepareTabs } from "./sidebar.js";
+import { prepareTabs } from "./interface/sidebar.js";
 import { Actor } from "./actor.js";
 import { BattleActor, HeroType } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
 import { getLogger, Logger, LoggerFactory } from "./logger.js";
 import { House, Migrant } from "./building/house.js";
-import { AdventurersGuildInterface } from "./building/adventurers-guild.js";
+import { AdventurersGuildInterface } from "./interface/adventurers-guild.js";
 
 export class Game {
 	state: GameState;

@@ -1,15 +1,16 @@
 import { BattleActor, HeroRank } from "../battle/actor.js";
-import { Building, BuildingInterface } from "../buildings.js";
+import { Building, BuildingInterface } from "../building/buildings.js";
 import { GameState } from "../game-state.js";
-import { Action } from "../interface.js";
+import { Action } from "../interface/interface.js";
+import { Button, ButtonContainer, ButtonPane } from "../interface/button.js";
 import { getLogger, Logger } from "../logger.js";
 import { Position, Size } from "../map-layer.js";
 
 export class AdventurersGuildInterface extends BuildingInterface {
 	heroes: BattleActor[] = [];
 	team: BattleActor[] = [];
-	teamButtons: HeroButtonRow = new HeroButtonRow();
-	allHeroesButtons: HeroButtonPane = new HeroButtonPane([], {x: 0, y: 0}, {width: 0, height: 0}); // TODO
+	teamButtons: ButtonContainer = new HeroButtonRow();
+	allHeroesButtons: ButtonPane = new HeroButtonPane();
 	logger: Logger = getLogger("AdventurersGuildInterface");
 
 	click(position: Position): Action | undefined {
@@ -25,13 +26,13 @@ export class AdventurersGuildInterface extends BuildingInterface {
 		const teamHero = this.teamButtons.buttonAt(localPosition);
 		if (teamHero) {
 			this.logger.debug(`Team hero clicked`, teamHero);
-			return {"action": "removeHero", hero: teamHero};
+			return teamHero;
 		}
 
 		const hero = this.allHeroesButtons.buttonAt(localPosition);
 		if (hero) {
 			this.logger.debug(`Hero clicked:`, hero);
-			return {"action": "addHero", hero: hero};
+			return hero;
 		}
 
 
@@ -67,7 +68,8 @@ export class AdventurersGuildInterface extends BuildingInterface {
 				hero.portrait || hero.sprite.image,
 				{width: portraitSize, height: portraitSize},
 				{x: heroX, y: heroY},
-				hero
+				hero,
+				"delete"
 			);
 			this.teamButtons.buttons.push(heroButton);
 			heroX += 10 + portraitSize;
@@ -92,7 +94,8 @@ export class AdventurersGuildInterface extends BuildingInterface {
 				hero.portrait || hero.sprite.image,
 				{width: portraitSize, height: portraitSize},
 				{x: 0, y: 0},
-				hero
+				hero,
+				"add"
 			);
 			this.allHeroesButtons.buttons.push(heroButton);
 		}
@@ -101,7 +104,9 @@ export class AdventurersGuildInterface extends BuildingInterface {
 	}
 }
 
-export class HeroButton {
+type HeroActionType = "delete" | "add";
+
+export class HeroButton implements Button {
 	_image: HTMLImageElement;
 	image: OffscreenCanvas;
 	context: OffscreenCanvasRenderingContext2D;
@@ -111,8 +116,9 @@ export class HeroButton {
 	rank: HeroRank;
 	hero: BattleActor;
 	imagePadding: number = 5;
+	action: HeroActionType;
 
-	constructor(image: HTMLImageElement, size: Size, position: Position, hero: BattleActor) {
+	constructor(image: HTMLImageElement, size: Size, position: Position, hero: BattleActor, action: HeroActionType) {
 		this._image = image;
 		this.image = new OffscreenCanvas(size.width, size.height);
 		this.context = this.image.getContext("2d")!; // TODO
@@ -120,6 +126,7 @@ export class HeroButton {
 		this.position = position;
 		this.rank = hero.rank;
 		this.hero = hero;
+		this.action = action;
 		this.drawImage();
 	}
 
@@ -158,15 +165,25 @@ export class HeroButton {
 		this.context.arc(this.size.width/2, this.size.width/2, this.size.width/2, 0, 2 * Math.PI);
 		this.context.stroke();
 	}
+
+	getClickAction(): Action | undefined {
+		if (this.action == "delete") {
+			return {"action": "removeHero", hero: this.hero};
+		}
+		if (this.action == "add") {
+			return {"action": "addHero", hero: this.hero};
+		}
+		return undefined;
+	}
 }
 
-export class HeroButtonRow {
-	buttons: HeroButton[] = [];
+export class HeroButtonRow implements ButtonContainer {
+	buttons: Button[] = [];
 
-	buttonAt(position: Position): BattleActor | undefined {
+	buttonAt(position: Position): Action | undefined {
 		for (let i=0; i<this.buttons.length; i++) {
 			if (this.buttons[i].inButton(position)) {
-				return this.buttons[i].hero;
+				return this.buttons[i].getClickAction();
 			}
 		}
 		return undefined;
@@ -177,26 +194,25 @@ export class HeroButtonRow {
 			context.drawImage(button.image, button.position.x, button.position.y);
 		}
 	}
-
 }
 
-export class HeroButtonPane {
-	buttons: HeroButton[];
+export class HeroButtonPane implements ButtonPane {
+	buttons: Button[];
 
 	itemOffset: number = 0;
-	activeButtons: HeroButton[] = [];
+	activeButtons: Button[] = [];
 
 	position: Position;
 	size: Size;
 	buttonGap: number = 10;
 
-	nextPageButton?: HeroButton;
-	prevPageButton?: HeroButton;
+	nextPageButton?: Button;
+	prevPageButton?: Button;
 
-	constructor(heroes: HeroButton[], position: Position, size: Size) {
-		this.buttons = heroes;
-		this.position = position;
-		this.size = size;
+	constructor() {
+		this.buttons = [];
+		this.position = {x: 0, y: 0};
+		this.size = {width: 0, height: 0};
 	}
 
 	hasPrevPage(): boolean {
@@ -253,20 +269,8 @@ export class HeroButtonPane {
 				}
 			}
 
-			let iconWidth = currentButton.image.width;
-			let iconHeight = currentButton.image.height;
-			let iconSize = buttonWidth > buttonHeight ? buttonWidth : buttonHeight;
-			if(iconWidth > iconHeight) {
-				iconHeight = iconHeight*(iconSize/iconWidth);
-				iconWidth = iconSize;
-			} else {
-				iconWidth = iconWidth*(iconSize/iconHeight);
-				iconHeight = iconSize;
-			}
-
 			currentButton.position.x = currentX;
 			currentButton.position.y = currentY;
-			// TODO: image size
 			
 			this.activeButtons.push(currentButton);
 			currentXOffset += 1;
@@ -279,10 +283,10 @@ export class HeroButtonPane {
 		}
 	}
 
-	buttonAt(position: Position): BattleActor | undefined {
+	buttonAt(position: Position): Action | undefined {
 		for (let i=0; i<this.activeButtons.length; i++) {
 			if (this.activeButtons[i].inButton(position)) {
-				return this.activeButtons[i].hero;
+				return this.activeButtons[i].getClickAction();
 			}
 		}
 		return undefined;

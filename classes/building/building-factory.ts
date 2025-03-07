@@ -1,7 +1,7 @@
-import { House } from "./building/house.js";
-import { Storage } from "./building/storage.js";
+import { House } from "./house.js";
+import { Storage } from "./storage.js";
 import { Building, BuildingPrototype } from "./buildings.js";
-import { Position } from "./map-layer.js";
+import { Position } from "../map-layer.js";
 
 // TODO
 export function createBuilding(position: Position, prototype: BuildingPrototype, accepted: boolean): Building {

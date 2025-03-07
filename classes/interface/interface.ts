@@ -1,7 +1,7 @@
-import { BattleActor } from "./battle/actor.js";
-import { BuildingInterface, BuildingSprite } from "./buildings.js";
-import { GameState } from "./game-state.js";
-import { Position, Size } from "./map-layer.js";
+import { BattleActor } from "../battle/actor.js";
+import { BuildingInterface, BuildingSprite } from "../building/buildings.js";
+import { GameState } from "../game-state.js";
+import { Position, Size } from "../map-layer.js";
 
 export class InterfaceLayer {
 	canvasSize: Size = {width: 0, height: 0};

@@ -1,5 +1,5 @@
 import { Actor, ActorSprite } from "../classes/actor";
-import { Road, TilingSprite } from "../classes/buildings";
+import { Road, TilingSprite } from "../classes/building/buildings";
 import { MapLayer, Position, Size } from "../classes/map-layer";
 
 let OffscreenCanvasMock = jest.fn().mockImplementation((width: number, height: number) => {

@@ -1,6 +1,6 @@
 import { Actor } from "./actor.js";
-import { createBuilding } from "./building-factory.js";
-import { Building, BuildingPrototype, BuildingSprite, Road, TilingSprite } from "./buildings.js";
+import { createBuilding } from "./building/building-factory.js";
+import { Building, BuildingPrototype, BuildingSprite, Road, TilingSprite } from "./building/buildings.js";
 import { getLogger, Logger } from "./logger.js";
 
 export class MapLayer {

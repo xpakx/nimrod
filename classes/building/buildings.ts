@@ -1,9 +1,9 @@
-import { Actor, ActorSprite } from "./actor.js";
-import { HouseLevel } from "./building/house.js";
-import { GameState } from "./game-state.js";
-import { Action } from "./interface.js";
-import { getLogger, Logger } from "./logger.js";
-import { MapLayer, Position, Size } from "./map-layer.js";
+import { Actor, ActorSprite } from "../actor.js";
+import { HouseLevel } from "./house.js";
+import { GameState } from "../game-state.js";
+import { Action } from "../interface/interface.js";
+import { getLogger, Logger } from "../logger.js";
+import { MapLayer, Position, Size } from "../map-layer.js";
 
 export interface BuildingPrototype {
 	sprite: BuildingSprite;

@@ -1,5 +1,5 @@
-import { Road } from "./buildings.js";
-import { getLogger, Logger, LoggerFactory } from "./logger.js";
+import { Road } from "./building/buildings.js";
+import { getLogger, Logger } from "./logger.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
 
 export class ActorSprite {

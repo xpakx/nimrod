@@ -1,5 +1,5 @@
 import { ActorSprite } from "./actor.js";
-import { BuildingInterface, BuildingPrototype, BuildingSprite, HouseOptions, Recipe, StorageOptions, TilingSprite, WorkerOptions } from "./buildings.js";
+import { BuildingInterface, BuildingPrototype, BuildingSprite, HouseOptions, Recipe, StorageOptions, TilingSprite, WorkerOptions } from "./building/buildings.js";
 import { getLogger, Logger } from "./logger.js";
 import { Size } from "./map-layer.js";
 
