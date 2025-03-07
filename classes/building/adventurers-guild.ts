@@ -13,7 +13,8 @@ export class AdventurersGuildInterface extends BuildingInterface {
 	logger: Logger = getLogger("AdventurersGuildInterface");
 
 	click(position: Position): Action | undefined {
-		const pageChange = this.allHeroesButtons.navButtonAt(position);
+		const localPosition = {x: position.x - this.position.x, y: position.y - this.position.y};
+		const pageChange = this.allHeroesButtons.navButtonAt(localPosition);
 		if (pageChange < 0) {
 			this.allHeroesButtons.toPrevPage();
 			this.renderInterface()
@@ -21,13 +22,13 @@ export class AdventurersGuildInterface extends BuildingInterface {
 			this.allHeroesButtons.toNextPage();
 			this.renderInterface()
 		}
-		const teamHero = this.teamButtons.buttonAt(position);
+		const teamHero = this.teamButtons.buttonAt(localPosition);
 		if (teamHero) {
 			this.logger.debug(`Team hero clicked`, teamHero);
 			return {"action": "removeHero", hero: teamHero};
 		}
 
-		const hero = this.allHeroesButtons.buttonAt(position);
+		const hero = this.allHeroesButtons.buttonAt(localPosition);
 		if (hero) {
 			this.logger.debug(`Hero clicked:`, hero);
 			return {"action": "addHero", hero: hero};
@@ -56,12 +57,10 @@ export class AdventurersGuildInterface extends BuildingInterface {
 		const portraitSize = 60;
 		const width = this.size.width;
 		const height = this.size.height;
-		const x = this.position.x;
-		const middleOfMap = this.position.y + (height) / 2;
-		const y = middleOfMap + height / 2 - 10 - portraitSize;
+		const y =  height - 10 - portraitSize;
 		const heroWidth = this.team.length*portraitSize + (this.team.length - 1)*10
 		let heroY = y;
-		let heroX = x + width/2 - heroWidth/2;
+		let heroX = width/2 - heroWidth/2;
 		this.teamButtons.buttons = [];
 		for (let hero of this.team) {
 			const heroButton = new HeroButton(
@@ -79,10 +78,9 @@ export class AdventurersGuildInterface extends BuildingInterface {
 		const portraitSize = 60;
 		const width = this.size.width;
 		const height = this.size.height;
-		const x = this.position.x;
-		const y = this.position.y + 40;
+		const y = 40;
 		let heroY = y + 10;
-		let heroX = x + 150;
+		let heroX = 150;
 		this.allHeroesButtons.position.x = heroX;
 		this.allHeroesButtons.position.y = heroY;
 		this.allHeroesButtons.size.width = width - 150;

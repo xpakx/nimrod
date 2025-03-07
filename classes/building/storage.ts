@@ -1,7 +1,6 @@
 import { Actor, ActorSprite } from "../actor.js";
 import { Building, BuildingInterface, BuildingPrototype, BuildingWorker, Recipe, StorageOptions } from "../buildings.js";
 import { GameState } from "../game-state.js";
-import { Game } from "../game.js";
 import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position, Size } from "../map-layer.js";
 
@@ -484,21 +483,17 @@ export class StorageInterface extends BuildingInterface {
 	open(state: GameState, building: Building) {
 		this.preRender(state, building);
 		this.renderInterface();
-		this.renderResources(state);
+		this.renderResources();
 	}
 
-	renderResources(state: GameState) {
+	renderResources() {
 		if (!this.building) return;
 		if (!this.context) return;
-		const height = 300;
-		const middleOfMap = (state.canvasSize.height - this.topPanelHeight) / 2  + this.topPanelHeight;
-		const y = middleOfMap - height / 2;
 		const topPadding = 10;
 		const imageSize = 80;
 		const imagePadding = 20;
-		const imageEnd = y + topPadding + 24 + 20;
+		const imageEnd = topPadding + 24 + 20;
 
-		const leftMargin = 80;
 		const leftPadding = 10;
 
 		const lineHeight = 20;
@@ -506,7 +501,7 @@ export class StorageInterface extends BuildingInterface {
 
 		this.context.fillStyle = '#fff';
 		this.context.font = '15px Arial';
-		const resourcesX = leftMargin + leftPadding + imageSize + 2*imagePadding + 20;
+		const resourcesX = leftPadding + imageSize + 2*imagePadding + 20;
 
 		const resources = this.building.storage;
 		for (let resource in resources) {

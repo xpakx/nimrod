@@ -449,7 +449,6 @@ export class BuildingInterface {
 	context?: OffscreenCanvasRenderingContext2D;
 
 	size: Size = {width: 0, height: 0};
-	canvasSize: Size = {width: 0, height: 0}; // TODO: remove
 	position: Position = {x: 0, y: 0};
 	leftMargin: number = 80;
 
@@ -466,8 +465,6 @@ export class BuildingInterface {
 		this.position.x = this.leftMargin;
 		this.size.width = state.canvasSize.width - 2*this.leftMargin - this.menuWidth;
 		this.size.height = 300;
-		this.canvasSize.width = state.canvasSize.width;
-		this.canvasSize.height = state.canvasSize.height;
 		const middleOfMap = (state.canvasSize.height - this.topPanelHeight) / 2  + this.topPanelHeight;
 		this.position.y = middleOfMap - this.size.height / 2;
 		this.building = building;
@@ -483,16 +480,16 @@ export class BuildingInterface {
 
 	drawInterface(context: CanvasRenderingContext2D, _deltaTime: number, _state: GameState) {
 		if (!this.offscreen) return;
-		context.drawImage(this.offscreen, 0, 0);
+		context.drawImage(this.offscreen, this.position.x, this.position.y);
 	}
 
 	renderInterface() { 
 		const width = this.size.width;
 		const height = this.size.height;
-		const x = this.position.x;
-		const y = this.position.y;
+		const x = 0;
+		const y = 0;
 
-		this.offscreen = new OffscreenCanvas(this.canvasSize.width, this.canvasSize.height);
+		this.offscreen = new OffscreenCanvas(this.size.width, this.size.height);
 		this.context = this.offscreen.getContext("2d")!;
 		this.context.fillStyle = '#444';
 		this.context.fillRect(x, y, width, height);
@@ -512,7 +509,7 @@ export class BuildingInterface {
 		const imageSize = 80;
 		const imagePadding = 20;
 		const rectSize = imageSize + 2*imagePadding;
-		const imageX = x + leftPadding;
+		const imageX =  + leftPadding;
 		const imageY = y + topPadding;
 		this.context.fillStyle = '#575757';
 		this.context.fillRect(imageX, imageY, rectSize, rectSize);
@@ -534,20 +531,19 @@ export class BuildingInterface {
 	renderRecipes() {
 		if (!this.building || !this.building.recipes) return;
 		if (!this.context) return;
-		const y = this.position.y;
+		const y = 0;
 		const topPadding = 10;
 		const imageSize = 80;
 		const imagePadding = 20;
 		const imageEnd = y + topPadding + 24 + 20;
 
-		const leftMargin = 80;
 		const leftPadding = 10;
 
 		const lineHeight = 20;
 		let i = 0;
 		this.context.fillStyle = '#fff';
 		this.context.font = '15px Arial';
-		const recipesX = leftMargin + leftPadding + imageSize + 2*imagePadding + 20;
+		const recipesX = leftPadding + imageSize + 2*imagePadding + 20;
 
 		for (let recipe of this.building.recipes) {
 			if (recipe.output) {
