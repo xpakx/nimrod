@@ -13,6 +13,14 @@ export class AdventurersGuildInterface extends BuildingInterface {
 	logger: Logger = getLogger("AdventurersGuildInterface");
 
 	click(position: Position): Action | undefined {
+		const pageChange = this.allHeroesButtons.navButtonAt(position);
+		if (pageChange < 0) {
+			this.allHeroesButtons.toPrevPage();
+			this.renderInterface()
+		} else if (pageChange > 0)  {
+			this.allHeroesButtons.toNextPage();
+			this.renderInterface()
+		}
 		const teamHero = this.teamButtons.buttonAt(position);
 		if (teamHero) {
 			this.logger.debug(`Team hero clicked`, teamHero);
@@ -184,10 +192,40 @@ export class HeroButtonPane {
 	size: Size;
 	buttonGap: number = 10;
 
+	nextPageButton?: HeroButton;
+	prevPageButton?: HeroButton;
+
 	constructor(heroes: HeroButton[], position: Position, size: Size) {
 		this.buttons = heroes;
 		this.position = position;
 		this.size = size;
+	}
+
+	hasPrevPage(): boolean {
+		return this.itemOffset > 0;
+	}
+
+	hasNextPage(): boolean {
+		const currentPageSize = this.activeButtons.length;
+		const itemOffsetEnd = this.itemOffset + currentPageSize;
+		const lastItemIndex = this.buttons.length - 1;
+		return itemOffsetEnd < lastItemIndex;
+	}
+
+	toPrevPage() {
+		if (!this.hasPrevPage()) return;
+		const currentPageSize = this.activeButtons.length;
+		const prevPageItemOffset = this.itemOffset - currentPageSize;
+		this.itemOffset = Math.max(0, prevPageItemOffset);
+		this.prepareButtons();
+	}
+
+	toNextPage() {
+		if (!this.hasNextPage()) return;
+		const currentPageSize = this.activeButtons.length;
+		const itemOffsetEnd = this.itemOffset + currentPageSize;
+		this.itemOffset = Math.min(this.buttons.length - 1, itemOffsetEnd);
+		this.prepareButtons();
 	}
 
 	prepareButtons() {
@@ -252,4 +290,13 @@ export class HeroButtonPane {
 		return undefined;
 	}
 
+	navButtonAt(position: Position): number {
+		if (this.nextPageButton && this.nextPageButton.inButton(position)) {
+			return 1;
+		}
+		if (this.prevPageButton && this.prevPageButton.inButton(position)) {
+			return -1;
+		}
+		return 0;
+	}
 }

@@ -86,8 +86,10 @@ window.onload = async () => {
 	hero2.rank = "rare";
 	game.state.team = [hero, hero2];
 	game.state.allHeroes = [
-		hero, hero2, hero, hero, hero, hero, hero, hero, hero,
-		hero, hero2, hero, hero, hero, hero, hero, hero, hero
+		hero2, hero, hero, hero, hero, hero, hero, hero, hero, hero, hero, hero,
+		hero, hero2, hero, hero, hero, hero, hero, hero, hero, hero, hero, hero,
+		hero, hero, hero2, hero, hero, hero, hero, hero, hero, hero, hero, hero,
+		hero, hero, hero, hero2, hero, hero, hero, hero, hero, hero, hero, hero,
 	];
 
 
