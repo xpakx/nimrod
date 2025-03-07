@@ -449,6 +449,7 @@ export class BuildingInterface {
 	context?: OffscreenCanvasRenderingContext2D;
 
 	size: Size = {width: 0, height: 0};
+	canvasSize: Size = {width: 0, height: 0}; // TODO: remove
 	position: Position = {x: 0, y: 0};
 	leftMargin: number = 80;
 
@@ -458,13 +459,15 @@ export class BuildingInterface {
 
 	open(state: GameState, building: Building) {
 		this.preRender(state, building);
-		this.renderInterface(state);
+		this.renderInterface();
 	}
 
 	preRender(state: GameState, building: Building) {
 		this.position.x = this.leftMargin;
 		this.size.width = state.canvasSize.width - 2*this.leftMargin - this.menuWidth;
 		this.size.height = 300;
+		this.canvasSize.width = state.canvasSize.width;
+		this.canvasSize.height = state.canvasSize.height;
 		const middleOfMap = (state.canvasSize.height - this.topPanelHeight) / 2  + this.topPanelHeight;
 		this.position.y = middleOfMap - this.size.height / 2;
 		this.building = building;
@@ -483,13 +486,13 @@ export class BuildingInterface {
 		context.drawImage(this.offscreen, 0, 0);
 	}
 
-	renderInterface(state: GameState) { 
+	renderInterface() { 
 		const width = this.size.width;
 		const height = this.size.height;
 		const x = this.position.x;
 		const y = this.position.y;
 
-		this.offscreen = new OffscreenCanvas(state.canvasSize.width, state.canvasSize.height);
+		this.offscreen = new OffscreenCanvas(this.canvasSize.width, this.canvasSize.height);
 		this.context = this.offscreen.getContext("2d")!;
 		this.context.fillStyle = '#444';
 		this.context.fillRect(x, y, width, height);

@@ -1,6 +1,7 @@
 import { Actor, ActorSprite } from "../actor.js";
 import { Building, BuildingInterface, BuildingPrototype, BuildingWorker, Recipe, StorageOptions } from "../buildings.js";
 import { GameState } from "../game-state.js";
+import { Game } from "../game.js";
 import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position, Size } from "../map-layer.js";
 
@@ -480,8 +481,9 @@ export class DeliveryScheduler {
 
 export class StorageInterface extends BuildingInterface {
 
-	renderInterface(state: GameState) { 
-		super.renderInterface(state);
+	open(state: GameState, building: Building) {
+		this.preRender(state, building);
+		this.renderInterface();
 		this.renderResources(state);
 	}
 

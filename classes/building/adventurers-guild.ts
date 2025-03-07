@@ -25,6 +25,7 @@ export class AdventurersGuildInterface extends BuildingInterface {
 			return {"action": "addHero", hero: hero};
 		}
 
+
 		return undefined;
 	}
 
@@ -34,11 +35,11 @@ export class AdventurersGuildInterface extends BuildingInterface {
 		this.preRender(state, building);
 		this.prepareTeamButtons();
 		this.prepareHeroButtons();
-		this.renderInterface(state);
+		this.renderInterface();
 	}
 
-	renderInterface(state: GameState) { 
-		super.renderInterface(state);
+	renderInterface() { 
+		super.renderInterface();
 		this.teamButtons.draw(this.context!);
 		this.allHeroesButtons.draw(this.context!);
 	}
@@ -239,7 +240,6 @@ export class HeroButtonPane {
 	draw(context: OffscreenCanvasRenderingContext2D) {
 		for(let button of this.activeButtons) {
 			context.drawImage(button.image, button.position.x, button.position.y);
-			context.fillStyle = button.getFillColor();
 		}
 	}
 
