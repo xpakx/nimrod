@@ -588,4 +588,10 @@ export interface TeamAction {
 	hero: BattleActor;
 }
 
-export type Action = NavAction | BuildAction | OpenBuilding | TeamAction;
+export interface PageAction {
+	action: "page";
+	argument: "next" | "prev";
+}
+
+
+export type Action = NavAction | BuildAction | OpenBuilding | TeamAction | PageAction;

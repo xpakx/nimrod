@@ -15,14 +15,15 @@ export class AdventurersGuildInterface extends BuildingInterface {
 
 	click(position: Position): Action | undefined {
 		const localPosition = {x: position.x - this.position.x, y: position.y - this.position.y};
-		const pageChange = this.allHeroesButtons.navButtonAt(localPosition);
-		if (pageChange < 0) {
-			this.allHeroesButtons.toPrevPage();
+		const action = this.allHeroesButtons.navButtonAt(localPosition);
+		if (action && action.action == "page") {
+			if (action.argument == "next") {
+				this.allHeroesButtons.toNextPage();
+			} else {
+				this.allHeroesButtons.toPrevPage();
+			}
 			this.renderInterface()
-		} else if (pageChange > 0)  {
-			this.allHeroesButtons.toNextPage();
-			this.renderInterface()
-		}
+		} 
 		const teamHero = this.teamButtons.buttonAt(localPosition);
 		if (teamHero) {
 			this.logger.debug(`Team hero clicked`, teamHero);
@@ -86,7 +87,7 @@ export class AdventurersGuildInterface extends BuildingInterface {
 		this.allHeroesButtons.position.x = heroX;
 		this.allHeroesButtons.position.y = heroY;
 		this.allHeroesButtons.size.width = width - 150;
-		this.allHeroesButtons.size.height = height - 200; // TODO
+		this.allHeroesButtons.size.height = height - 120; // TODO
 
 		this.allHeroesButtons.buttons = [];
 		for (let hero of this.heroes) {
@@ -252,6 +253,9 @@ export class HeroButtonPane implements ButtonPane {
 		let currentYOffset = 0;
 		let currentXOffset = 0;
 
+		this.nextPageButton = new NavButton({x: xMax - 50 - 10, y: yMax - 40}, "prev");
+		this.prevPageButton = new NavButton({x: xMax - 20 - 10, y: yMax - 40}, "next");
+
 		for(let i = this.itemOffset; i<this.buttons.length; i++) {
 			const currentButton = this.buttons[i];
 			const buttonWidth = currentButton.size.width;
@@ -264,7 +268,7 @@ export class HeroButtonPane implements ButtonPane {
 				currentYOffset += 1;
 				currentX = xStart;
 				currentY = yStart + currentYOffset * (buttonHeight + this.buttonGap);
-				if (currentY >= yMax) {
+				if (currentY + buttonHeight >= yMax) {
 					return;
 				}
 			}
@@ -281,6 +285,12 @@ export class HeroButtonPane implements ButtonPane {
 		for(let button of this.activeButtons) {
 			context.drawImage(button.image, button.position.x, button.position.y);
 		}
+		if (this.prevPageButton) {
+			context.drawImage(this.prevPageButton.image, this.prevPageButton.position.x, this.prevPageButton.position.y);
+		}
+		if (this.nextPageButton) {
+			context.drawImage(this.nextPageButton.image, this.nextPageButton.position.x, this.nextPageButton.position.y);
+		}
 	}
 
 	buttonAt(position: Position): Action | undefined {
@@ -292,13 +302,56 @@ export class HeroButtonPane implements ButtonPane {
 		return undefined;
 	}
 
-	navButtonAt(position: Position): number {
+	navButtonAt(position: Position): Action | undefined {
 		if (this.nextPageButton && this.nextPageButton.inButton(position)) {
-			return 1;
+			return this.nextPageButton.getClickAction();
 		}
 		if (this.prevPageButton && this.prevPageButton.inButton(position)) {
-			return -1;
+			return this.prevPageButton.getClickAction();
 		}
-		return 0;
+		return undefined;
 	}
+}
+
+export class NavButton implements Button {
+    image: OffscreenCanvas;
+    context: OffscreenCanvasRenderingContext2D;
+    hover: boolean;
+    position: Position;
+    size: Size;
+    dir: "next" | "prev";
+
+    constructor(position: Position, dir: "next" | "prev") {
+	    this.size = {width: 20, height: 20};
+	    this.image = new OffscreenCanvas(this.size.width, this.size.height);
+	    this.context = this.image.getContext("2d")!; // TODO
+	    this.position = position;
+	    this.hover = false;
+	    this.dir = dir;
+	    this.drawImage();
+    }
+
+    inButton(position: Position): boolean {
+	    if(position.x < this.position.x || position.x > this.position.x + this.size.width) {
+		    return false;
+	    }
+	    if(position.y < this.position.y || position.y > this.position.y + this.size.height) {
+		    return false;
+	    }
+	    return true;
+    }
+
+    drawImage(): void {
+	    this.context.fillStyle = '#ddd';
+	    this.context.beginPath();
+	    this.context.arc(this.size.width/2, this.size.width/2, this.size.width/2, 0, 2 * Math.PI);
+	    this.context.fill();
+    }
+
+    getClickAction(): Action | undefined {
+	    return {
+		    "action": "page",
+		    "argument": this.dir
+	    };
+    }
 }

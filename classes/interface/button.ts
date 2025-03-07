@@ -28,5 +28,5 @@ export interface ButtonPane extends ButtonContainer {
 	toPrevPage(): void;
 	toNextPage(): void;
 	prepareButtons(): void;
-	navButtonAt(position: Position): number;
+	navButtonAt(position: Position): Action | undefined;
 }
