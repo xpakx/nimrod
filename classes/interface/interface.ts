@@ -2,6 +2,7 @@ import { BattleActor } from "../battle/actor.js";
 import { BuildingInterface, BuildingSprite } from "../building/buildings.js";
 import { GameState } from "../game-state.js";
 import { Position, Size } from "../map-layer.js";
+import { Button } from "./button.js";
 
 export class InterfaceLayer {
 	canvasSize: Size = {width: 0, height: 0};
@@ -369,28 +370,82 @@ export class DialogueParsed {
 	}
 }
 
-export class BuildingButton {
-	image: BuildingSprite;
-	name: string;
+export class BuildingButton implements Button {
+	image: OffscreenCanvas;
+	context: OffscreenCanvasRenderingContext2D;
+
+	hoverImage: OffscreenCanvas;
+	hoverContext: OffscreenCanvasRenderingContext2D;
+
+	_image: BuildingSprite;
 	hover: boolean = false;
 	position: Position = {x: 0, y: 0};
-	imgPosition: Position = {x: 0, y: 0};
-	imgSize: Size = {width: 0, height: 0};
+	size: Size = {width: 0, height: 0};
+	name: string;
+	defaultButtonSize = 125;
+	buttonSize = this.defaultButtonSize;
+	menuWidth = 420;
 
 	constructor(image: BuildingSprite, name: string) {
-		this.image = image;
 		this.name = name;
+		this._image = image;
+		this.image = new OffscreenCanvas(this.defaultButtonSize, this.defaultButtonSize);
+		this.context = this.image.getContext("2d")!; // TODO
+		this.hoverImage = new OffscreenCanvas(this.defaultButtonSize, this.defaultButtonSize);
+		this.hoverContext = this.hoverImage.getContext("2d")!; // TODO
+		this.drawImage();
+	}
+
+	inButton(_position: Position): boolean {
+		return false;
+	}
+
+	drawImage(): void {
+		if (!this.context) return;
+		const menuPadding = 20;
+		const menuWidth = this.menuWidth;
+		this.buttonSize = this.defaultButtonSize < menuWidth - menuPadding ? this.defaultButtonSize : menuWidth - menuPadding;
+		const buttonPadding = 20;
+		const buildingSize = this.buttonSize - 2 * buttonPadding;
+		let buildingWidth = this._image.size.width;
+		let buildingHeight = this._image.size.height;
+
+		if(buildingWidth > buildingHeight) {
+			buildingHeight = buildingHeight*(buildingSize/buildingWidth);
+			buildingWidth = buildingSize;
+		} else {
+			buildingWidth = buildingWidth*(buildingSize/buildingHeight);
+			buildingHeight = buildingSize;
+		}
+		const paddingWidth = (this.buttonSize - buildingWidth) / 2;
+		const paddingHeight = (this.buttonSize - buildingHeight) / 2;
+
+
+		this.context.fillStyle = '#1a1a1a';
+		this.context.fillRect(0, 0, this.buttonSize, this.buttonSize);
+		this.context.save();
+		this.context.filter = "grayscale(40%)";
+		this.context.drawImage(this._image.image, paddingWidth, paddingHeight, buildingWidth, buildingHeight);
+		this.context.restore();
+
+		this.hoverContext.fillStyle = '#3a3a3a';
+		this.hoverContext.fillRect(0, 0, this.buttonSize, this.buttonSize);
+		this.hoverContext.drawImage(this._image.image, paddingWidth, paddingHeight, buildingWidth, buildingHeight);
+	}
+
+	getClickAction(): Action | undefined {
+		return {action: "build", argument: this.name}
 	}
 }
 
 
 export class BuildingTab {
 	name: string;
-	buildings: BuildingButton[];
+	buildings: Button[];
 	_icon: HTMLImageElement;
 	active: boolean = false;
 	itemOffset: number = 0;
-	activeButtons: BuildingButton[] = [];
+	activeButtons: Button[] = [];
 	defaultButtonSize = 125;
 	buttonSize = this.defaultButtonSize;
 	mousePosition: Position = {x: -1, y: -1};
@@ -454,17 +509,13 @@ export class BuildingTab {
 			ctx.filter = "grayscale(80%) brightness(140%)";
 		}
 		ctx.drawImage(this._icon, 5, 5, this.icon.width - 10, this.icon.height - 10);
-
-
 	}
 
 	prepareButtons(canvasSize: Size, menuWidth: number, tabEnd: number) {
 		this.activeButtons = [];
 		const menuPadding = 20;
 		this.buttonSize = this.defaultButtonSize < menuWidth - menuPadding ? this.defaultButtonSize : menuWidth - menuPadding;
-		const buttonPadding = 20;
 		const buttonMargin = 10;
-		const buildingSize = this.buttonSize - 2 * buttonPadding;
 
 		let xStart = canvasSize.width - menuWidth + menuPadding;
 		let xMax = canvasSize.width - menuPadding;
@@ -484,24 +535,8 @@ export class BuildingTab {
 				}
 			}
 
-			let buildingWidth = this.buildings[i].image.size.width;
-			let buildingHeight = this.buildings[i].image.size.height;
-			if(buildingWidth > buildingHeight) {
-				buildingHeight = buildingHeight*(buildingSize/buildingWidth);
-				buildingWidth = buildingSize;
-			} else {
-				buildingWidth = buildingWidth*(buildingSize/buildingHeight);
-				buildingHeight = buildingSize;
-			}
-
-			const paddingWidth = (buildingSize - buildingWidth) / 2
-			const paddingHeight = (buildingSize - buildingHeight) / 2
 			this.buildings[i].position.x = currentX;
 			this.buildings[i].position.y = currentY;
-			this.buildings[i].imgPosition.x = currentX + buttonPadding + paddingWidth;
-			this.buildings[i].imgPosition.y = currentY + paddingHeight + buttonPadding;
-			this.buildings[i].imgSize.width = buildingWidth;
-			this.buildings[i].imgSize.height = buildingHeight;
 			
 			this.activeButtons.push(this.buildings[i]);
 
@@ -512,16 +547,11 @@ export class BuildingTab {
 	draw(context: CanvasRenderingContext2D) {
 		for(let button of this.activeButtons) {
 			let hover = this.inButton(this.mousePosition, button);
-			context.fillStyle = hover ? '#3a3a3a' : '#1a1a1a';
-			context.fillRect(button.position.x, button.position.y, this.buttonSize, this.buttonSize);
-
-			if(!hover) {
-				context.save();
-				context.filter = "grayscale(40%)";
-			}
-			context.drawImage(button.image.image, button.imgPosition.x, button.imgPosition.y, button.imgSize.width, button.imgSize.height);
-			if(!hover) {
-				context.restore();
+			if (hover) {
+				const buildigButton = button as BuildingButton;
+				context.drawImage(buildigButton.hoverImage, button.position.x, button.position.y);
+			} else {
+				context.drawImage(button.image, button.position.x, button.position.y);
 			}
 		}
 	}
@@ -530,7 +560,7 @@ export class BuildingTab {
 		this.mousePosition = position;
 	}
 
-	inButton(position: Position, button: BuildingButton): boolean {
+	inButton(position: Position, button: Button): boolean {
 		if(position.x < button.position.x || position.x > button.position.x + this.buttonSize) {
 			return false;
 		}
@@ -543,7 +573,7 @@ export class BuildingTab {
 	click(position: Position): Action | undefined { // TODO
 		for(let button of this.activeButtons) {
 			if(this.inButton(position, button)) {
-				return {action: "build", argument: button.name};
+				return button.getClickAction();
 			}
 		}
 		return undefined;
