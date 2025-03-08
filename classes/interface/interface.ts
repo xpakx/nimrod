@@ -436,6 +436,11 @@ export class BuildingButton implements Button {
 	getClickAction(): Action | undefined {
 		return {action: "build", argument: this.name}
 	}
+
+	draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, hovered: boolean): void {
+		const image = hovered ? this.hoverImage : this.image;
+		context.drawImage(image, this.position.x, this.position.y);
+	}
 }
 
 
@@ -547,12 +552,7 @@ export class BuildingTab {
 	draw(context: CanvasRenderingContext2D) {
 		for(let button of this.activeButtons) {
 			let hover = this.inButton(this.mousePosition, button);
-			if (hover) {
-				const buildigButton = button as BuildingButton;
-				context.drawImage(buildigButton.hoverImage, button.position.x, button.position.y);
-			} else {
-				context.drawImage(button.image, button.position.x, button.position.y);
-			}
+			button.draw(context, hover);
 		}
 	}
 

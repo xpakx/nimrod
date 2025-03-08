@@ -180,6 +180,10 @@ export class HeroButton implements Button {
 		}
 		return undefined;
 	}
+
+	draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, hovered: boolean): void {
+		context.drawImage(this.image, this.position.x, this.position.y);
+	}
 }
 
 export class HeroButtonRow implements ButtonContainer {
@@ -197,12 +201,7 @@ export class HeroButtonRow implements ButtonContainer {
 	draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, position: Position) {
 		for (let button of this.buttons) {
 			const hovered = button.inButton(position);
-			if (hovered) {
-				context.save();
-				context.filter = "grayscale(80%)"; 
-			}
-			context.drawImage(button.image, button.position.x, button.position.y);
-			if (hovered) context.restore();
+			button.draw(context, hovered);
 		}
 	}
 }
@@ -298,30 +297,15 @@ export class HeroButtonPane implements ButtonPane {
 		for (let i = this.itemOffset; i < buttonEnd; i++) {
 			const button = this.buttons[i];
 			const hovered = button.inButton(position);
-			if (hovered) {
-				context.save();
-				context.filter = "grayscale(80%)"; 
-			}
-			context.drawImage(button.image, button.position.x, button.position.y);
-			if (hovered) context.restore();
+			button.draw(context, hovered);
 		}
 		if (this.prevPageButton) {
 			const hovered = this.prevPageButton.inButton(position);
-			if (hovered) {
-				context.save();
-				context.filter = "grayscale(80%)"; 
-			}
-			context.drawImage(this.prevPageButton.image, this.prevPageButton.position.x, this.prevPageButton.position.y);
-			if (hovered) context.restore();
+			this.prevPageButton.draw(context, hovered);
 		}
 		if (this.nextPageButton) {
 			const hovered = this.nextPageButton.inButton(position);
-			if (hovered) {
-				context.save();
-				context.filter = "grayscale(80%)"; 
-			}
-			context.drawImage(this.nextPageButton.image, this.nextPageButton.position.x, this.nextPageButton.position.y);
-			if (hovered) context.restore();
+			this.nextPageButton.draw(context, hovered);
 		}
 	}
 
@@ -387,4 +371,9 @@ export class NavButton implements Button {
 		    "argument": this.dir
 	    };
     }
+
+
+    draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, hovered: boolean): void {
+		context.drawImage(this.image, this.position.x, this.position.y);
+	}
 }

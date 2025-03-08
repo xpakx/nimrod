@@ -2,15 +2,14 @@ import { Action } from "./interface.js";
 import { Position, Size } from "../map-layer.js";
 
 export interface Button {
-	image: OffscreenCanvas;
-	context: OffscreenCanvasRenderingContext2D;
-	hover: boolean;
 	position: Position;
 	size: Size;
 
 	inButton(position: Position): boolean;
 	drawImage(): void;
 	getClickAction(): Action | undefined;
+
+	draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, hovered: boolean): void;
 }
 
 export interface ButtonContainer {
