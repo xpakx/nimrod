@@ -5,9 +5,9 @@ import { Position, Size } from "../map-layer.js";
 
 export class InterfaceLayer {
 	canvasSize: Size = {width: 0, height: 0};
-	menuWidth = 420;
+	menuWidth: number;
 	tabWidth = 65;
-	topPanelHeight = 50;
+	topPanelHeight: number;
 	dialogue: DialogueParsed | undefined = undefined;
 	tab: number | undefined = undefined;
 	tabs: BuildingTab[] = [];
@@ -23,8 +23,10 @@ export class InterfaceLayer {
 
 	buildingInterface: BuildingInterface | undefined = undefined;
 
-	constructor(canvasSize: Size) {
+	constructor(canvasSize: Size, menuWidth: number,  topPanelHeight: number) {
 		this.canvasSize = canvasSize;
+		this.menuWidth = menuWidth;
+		this.topPanelHeight = topPanelHeight;
 	}
 
 	onMouse(position: Position) {

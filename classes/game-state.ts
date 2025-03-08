@@ -28,10 +28,12 @@ export class GameState {
 
 	public tempBattleData?: BattleMapData;
 
-	// TODO: controlled by specific building
 	public team: BattleActor[] = [];
 	public allHeroes: BattleActor[] = [];
 	public orders: DeliveryScheduler = new DeliveryScheduler();
+
+	menuWidth = 420; // ???
+	topPanelHeight = 50; // ????
 
 	sortPedestrians() {
 		this.pedestrians.sort((a, b) => {

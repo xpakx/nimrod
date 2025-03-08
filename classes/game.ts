@@ -24,7 +24,7 @@ export class Game {
 	constructor() {
 		this.state = new GameState();
 		this.map = new MapLayer(this.state.canvasSize);
-		this.interf = new InterfaceLayer(this.state.canvasSize);
+		this.interf = new InterfaceLayer(this.state.canvasSize, this.state.menuWidth, this.state.topPanelHeight);
 		this.sprites = new SpriteLibrary();
 
 		this.maxYOffset = this.map.isoToScreen({x: this.map.map[0].length - 1, y: this.map.map.length - 1}).y + (this.map.tileSize.height/2);

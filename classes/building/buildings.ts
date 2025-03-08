@@ -442,8 +442,6 @@ export class TilingSprite {
 }
 
 export class BuildingInterface {
-	menuWidth = 420; // TODO: delete this
-	topPanelHeight = 50;
 	building?: Building;
 	offscreen?: OffscreenCanvas;
 	context?: OffscreenCanvasRenderingContext2D;
@@ -463,9 +461,9 @@ export class BuildingInterface {
 
 	preRender(state: GameState, building: Building) {
 		this.position.x = this.leftMargin;
-		this.size.width = state.canvasSize.width - 2*this.leftMargin - this.menuWidth;
+		this.size.width = state.canvasSize.width - 2*this.leftMargin - state.menuWidth;
 		this.size.height = 300;
-		const middleOfMap = (state.canvasSize.height - this.topPanelHeight) / 2  + this.topPanelHeight;
+		const middleOfMap = (state.canvasSize.height - state.topPanelHeight) / 2  + state.topPanelHeight;
 		this.position.y = middleOfMap - this.size.height / 2;
 		this.building = building;
 	}
