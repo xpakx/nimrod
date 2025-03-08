@@ -51,8 +51,6 @@ export class AdventurersGuildInterface extends BuildingInterface {
 
 	renderInterface() { 
 		super.renderInterface();
-		this.teamButtons.draw(this.context!);
-		this.allHeroesButtons.draw(this.context!);
 	}
 
 	prepareTeamButtons() {
@@ -102,6 +100,14 @@ export class AdventurersGuildInterface extends BuildingInterface {
 		}
 
 		this.allHeroesButtons.prepareButtons();
+	}
+
+	drawInterface(context: CanvasRenderingContext2D, _deltaTime: number, state: GameState) {
+		const localPosition = {x: state.playerMouse.x - this.position.x, y: state.playerMouse.y - this.position.y};
+		if (!this.offscreen) return;
+		context.drawImage(this.offscreen, this.position.x, this.position.y);
+		this.teamButtons.draw(this.context!, localPosition);
+		this.allHeroesButtons.draw(this.context!, localPosition);
 	}
 }
 
@@ -190,9 +196,15 @@ export class HeroButtonRow implements ButtonContainer {
 		return undefined;
 	}
 
-	draw(context: OffscreenCanvasRenderingContext2D) {
+	draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, position: Position) {
 		for (let button of this.buttons) {
+			const hovered = button.inButton(position);
+			if (hovered) {
+				context.save();
+				context.filter = "grayscale(80%)"; 
+			}
 			context.drawImage(button.image, button.position.x, button.position.y);
+			if (hovered) context.restore();
 		}
 	}
 }
@@ -281,15 +293,33 @@ export class HeroButtonPane implements ButtonPane {
 		}
 	}
 
-	draw(context: OffscreenCanvasRenderingContext2D) {
-		for(let button of this.activeButtons) {
+	draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, position: Position) {
+		for (let button of this.activeButtons) {
+			const hovered = button.inButton(position);
+			if (hovered) {
+				context.save();
+				context.filter = "grayscale(80%)"; 
+			}
 			context.drawImage(button.image, button.position.x, button.position.y);
+			if (hovered) context.restore();
 		}
 		if (this.prevPageButton) {
+			const hovered = this.prevPageButton.inButton(position);
+			if (hovered) {
+				context.save();
+				context.filter = "grayscale(80%)"; 
+			}
 			context.drawImage(this.prevPageButton.image, this.prevPageButton.position.x, this.prevPageButton.position.y);
+			if (hovered) context.restore();
 		}
 		if (this.nextPageButton) {
+			const hovered = this.nextPageButton.inButton(position);
+			if (hovered) {
+				context.save();
+				context.filter = "grayscale(80%)"; 
+			}
 			context.drawImage(this.nextPageButton.image, this.nextPageButton.position.x, this.nextPageButton.position.y);
+			if (hovered) context.restore();
 		}
 	}
 
@@ -342,7 +372,7 @@ export class NavButton implements Button {
     }
 
     drawImage(): void {
-	    this.context.fillStyle = '#ddd';
+	    this.context.fillStyle = '#dfd';
 	    this.context.beginPath();
 	    this.context.arc(this.size.width/2, this.size.width/2, this.size.width/2, 0, 2 * Math.PI);
 	    this.context.fill();

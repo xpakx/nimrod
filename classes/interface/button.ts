@@ -15,7 +15,7 @@ export interface Button {
 
 export interface ButtonContainer {
 	buttons: Button[];
-	draw(context: OffscreenCanvasRenderingContext2D): void;
+	draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, mousePosition: Position): void;
 	buttonAt(position: Position): Action | undefined;
 }
 
