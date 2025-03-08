@@ -22,7 +22,6 @@ export class AdventurersGuildInterface extends BuildingInterface {
 			} else {
 				this.allHeroesButtons.toPrevPage();
 			}
-			this.renderInterface()
 		} 
 		const teamHero = this.teamButtons.buttonAt(localPosition);
 		if (teamHero) {
@@ -47,10 +46,6 @@ export class AdventurersGuildInterface extends BuildingInterface {
 		this.prepareTeamButtons();
 		this.prepareHeroButtons();
 		this.renderInterface();
-	}
-
-	renderInterface() { 
-		super.renderInterface();
 	}
 
 	prepareTeamButtons() {
@@ -106,8 +101,11 @@ export class AdventurersGuildInterface extends BuildingInterface {
 		const localPosition = {x: state.playerMouse.x - this.position.x, y: state.playerMouse.y - this.position.y};
 		if (!this.offscreen) return;
 		context.drawImage(this.offscreen, this.position.x, this.position.y);
-		this.teamButtons.draw(this.context!, localPosition);
-		this.allHeroesButtons.draw(this.context!, localPosition);
+		context.save();
+		context.translate(this.position.x, this.position.y);
+		this.teamButtons.draw(context, localPosition);
+		this.allHeroesButtons.draw(context, localPosition);
+		context.restore();
 	}
 }
 
@@ -213,11 +211,12 @@ export class HeroButtonPane implements ButtonPane {
 	buttons: Button[];
 
 	itemOffset: number = 0;
-	activeButtons: Button[] = [];
 
 	position: Position;
 	size: Size;
 	buttonGap: number = 10;
+	pageSize: number = 1;
+	page: number = 0;
 
 	nextPageButton?: Button;
 	prevPageButton?: Button;
@@ -233,31 +232,24 @@ export class HeroButtonPane implements ButtonPane {
 	}
 
 	hasNextPage(): boolean {
-		const currentPageSize = this.activeButtons.length;
-		const itemOffsetEnd = this.itemOffset + currentPageSize;
+		const itemOffsetEnd = this.itemOffset + this.pageSize;
 		const lastItemIndex = this.buttons.length - 1;
 		return itemOffsetEnd < lastItemIndex;
 	}
 
 	toPrevPage() {
 		if (!this.hasPrevPage()) return;
-		const currentPageSize = this.activeButtons.length;
-		const prevPageItemOffset = this.itemOffset - currentPageSize;
-		this.itemOffset = Math.max(0, prevPageItemOffset);
-		this.prepareButtons();
+		this.page -= 1;
+		this.itemOffset = this.pageSize * this.page;
 	}
 
 	toNextPage() {
 		if (!this.hasNextPage()) return;
-		const currentPageSize = this.activeButtons.length;
-		const itemOffsetEnd = this.itemOffset + currentPageSize;
-		this.itemOffset = Math.min(this.buttons.length - 1, itemOffsetEnd);
-		this.prepareButtons();
+		this.page += 1;
+		this.itemOffset = this.pageSize * this.page;
 	}
 
 	prepareButtons() {
-		this.activeButtons = [];
-
 		let xStart = this.position.x;
 		let yStart = this.position.y;
 		let xMax = this.position.x + this.size.width;
@@ -268,7 +260,7 @@ export class HeroButtonPane implements ButtonPane {
 		this.nextPageButton = new NavButton({x: xMax - 50 - 10, y: yMax - 40}, "prev");
 		this.prevPageButton = new NavButton({x: xMax - 20 - 10, y: yMax - 40}, "next");
 
-		for(let i = this.itemOffset; i<this.buttons.length; i++) {
+		for(let i = 0; i<this.buttons.length; i++) {
 			const currentButton = this.buttons[i];
 			const buttonWidth = currentButton.size.width;
 			const buttonHeight = currentButton.size.height;
@@ -281,20 +273,30 @@ export class HeroButtonPane implements ButtonPane {
 				currentX = xStart;
 				currentY = yStart + currentYOffset * (buttonHeight + this.buttonGap);
 				if (currentY + buttonHeight >= yMax) {
-					return;
+					this.pageSize = i;
+					break;
 				}
 			}
 
 			currentButton.position.x = currentX;
 			currentButton.position.y = currentY;
 			
-			this.activeButtons.push(currentButton);
 			currentXOffset += 1;
+		}
+
+		for(let i = this.pageSize - 1; i<this.buttons.length; i++) {
+			const currentButton = this.buttons[i];
+			const relatedIndex = i % this.pageSize;
+			const relatedButton = this.buttons[relatedIndex];
+			currentButton.position.x = relatedButton.position.x;
+			currentButton.position.y = relatedButton.position.y;
 		}
 	}
 
 	draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, position: Position) {
-		for (let button of this.activeButtons) {
+		const buttonEnd = Math.min(this.itemOffset + this.pageSize, this.buttons.length);
+		for (let i = this.itemOffset; i < buttonEnd; i++) {
+			const button = this.buttons[i];
 			const hovered = button.inButton(position);
 			if (hovered) {
 				context.save();
@@ -324,9 +326,10 @@ export class HeroButtonPane implements ButtonPane {
 	}
 
 	buttonAt(position: Position): Action | undefined {
-		for (let i=0; i<this.activeButtons.length; i++) {
-			if (this.activeButtons[i].inButton(position)) {
-				return this.activeButtons[i].getClickAction();
+		for (let i = this.itemOffset; i < this.itemOffset + this.pageSize && i < this.buttons.length; i++ ) {
+			const button = this.buttons[i];
+			if (button.inButton(position)) {
+				return button.getClickAction();
 			}
 		}
 		return undefined;

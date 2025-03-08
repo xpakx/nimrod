@@ -89,7 +89,7 @@ window.onload = async () => {
 		hero2, hero, hero, hero, hero, hero, hero, hero, hero, hero, hero, hero,
 		hero, hero2, hero, hero, hero, hero, hero, hero, hero, hero, hero, hero,
 		hero, hero, hero2, hero, hero, hero, hero, hero, hero, hero, hero, hero,
-		hero, hero, hero, hero2, hero, hero, hero, hero, hero, hero, hero, hero,
+		hero, hero, hero, hero2,
 	];
 
 
