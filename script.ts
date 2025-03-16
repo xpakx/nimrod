@@ -58,7 +58,9 @@ window.onload = async () => {
 	canvas.width = game.state.canvasSize.width;
 	canvas.height = game.state.canvasSize.height;
 	logger.debug('Preparing assets');
-	await game.prepareAssets(buildingSettings, avatarSettings, iconSettings);
+
+	const tabIcons = ["housing", "religion", "military", "agriculture", "science", "industry", "tab"]
+	await game.prepareAssets(buildingSettings, avatarSettings, iconSettings, tabIcons);
 
 	logger.debug('Loading map');
 	game.loadMap("test.json", true);

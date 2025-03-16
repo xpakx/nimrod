@@ -10,8 +10,8 @@ async function loadImage(url: string): Promise<any> {
     });
 }
 
-export async function prepareTabs(sprites: { [key: string]: BuildingPrototype }): Promise<BuildingTab[]> {
-	const icons = await loadIcons();
+export async function prepareTabs(sprites: { [key: string]: BuildingPrototype }, iconList: string[]): Promise<BuildingTab[]> {
+	const icons = await loadIcons(iconList);
 	return [
 		housingTab(sprites, icons),
 		religionTab(sprites, icons),
@@ -22,23 +22,12 @@ export async function prepareTabs(sprites: { [key: string]: BuildingPrototype })
 	];
 }
 
-async function loadIcons(): Promise<any> {
-	const housing = await loadImage("./img/housing.svg");
-	const religion = await loadImage("./img/religion.svg");
-	const military = await loadImage("./img/military.svg");
-	const agriculture = await loadImage("./img/agriculture.svg");
-	const science = await loadImage("./img/science.svg");
-	const industry = await loadImage("./img/industry.svg");
-	const tab = await loadImage("./img/tab.svg");
-
+async function loadIcons(iconList: string[]): Promise<any> {
 	let sprites: { [key: string]: BuildingSprite } = {}; // TODO
-	sprites["housing"] = housing;
-	sprites["religion"] = religion;
-	sprites["military"] = military;
-	sprites["agriculture"] = agriculture;
-	sprites["science"] = science;
-	sprites["industry"] = industry;
-	sprites["tab"] = tab;
+	for (let icon of iconList) {
+		const img = await loadImage(`./img/${icon}.svg`);
+		sprites[icon] = img;
+	}
 	return sprites;
 }
 

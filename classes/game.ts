@@ -33,7 +33,7 @@ export class Game {
 		this.minuteCounter = 0;
 	}
 
-	async prepareAssets(buildings: string | BuildingConfig[], avatars: string | SpriteConfig[], icons: string | SpriteConfig[]) {
+	async prepareAssets(buildings: string | BuildingConfig[], avatars: string | SpriteConfig[], icons: string | SpriteConfig[], tabIcons: string[]) {
 		await this.sprites.prepareActorSprites(this.map.tileSize);
 		await this.sprites.prepareBuildingSprites(buildings, this.map.tileSize);
 		await this.sprites.prepareAvatars(avatars);
@@ -43,7 +43,7 @@ export class Game {
 		this.interf.coinsIcon = this.sprites.icons['coins'];
 		this.interf.populationIcon = this.sprites.icons['population'];
 
-		this.interf.tabs = await prepareTabs(this.sprites.buildings);
+		this.interf.tabs = await prepareTabs(this.sprites.buildings, tabIcons);
 		this.interf.tab = 0;
 		this.interf.calculateIconsSize();
 		this.interf.recalculateTabSize();
