@@ -10,16 +10,53 @@ async function loadImage(url: string): Promise<any> {
     });
 }
 
+export interface BuildingTabSettings {
+	icon: string;
+	buildings: string[];
+}
+
+export interface SidebarConfig {
+	icons: string[];
+	tabs: BuildingTabSettings[];
+}
+
+const tabSettings: SidebarConfig = {
+	icons: [],
+	tabs: [
+		{
+			icon: "housing",
+			buildings: ["home", "well", "inspector"]
+		},
+		{
+			icon: "religion",
+			buildings: ["ziggurat"]
+		},
+		{
+			icon: "military",
+			buildings: ["tower"]
+		},
+		{
+			icon: "agriculture",
+			buildings: ["farm", "bakery"]
+		},
+		{
+			icon: "science",
+			buildings: []
+		},
+		{
+			icon: "industry",
+			buildings: ["storage"]
+		},
+	]
+}
+
 export async function prepareTabs(sprites: { [key: string]: BuildingPrototype }, iconList: string[]): Promise<BuildingTab[]> {
 	const icons = await loadIcons(iconList);
-	return [
-		housingTab(sprites, icons),
-		religionTab(sprites, icons),
-		militaryTab(sprites, icons),
-		agricultureTab(sprites, icons),
-		scienceTab(sprites, icons),
-		industryTab(sprites, icons),
-	];
+	let tabs: BuildingTab[] = [];
+	for (let tab of tabSettings.tabs) {
+		tabs.push(createTab(sprites, icons, tab))
+	}
+	return tabs;
 }
 
 async function loadIcons(iconList: string[]): Promise<any> {
@@ -31,58 +68,19 @@ async function loadIcons(iconList: string[]): Promise<any> {
 	return sprites;
 }
 
-function housingTab(sprites: { [key: string]: BuildingPrototype }, icons: any): BuildingTab {
-	const home = sprites['home'].sprite;
-	const well = sprites['well'].sprite;
-	const inspector = sprites['inspector'].sprite;
-
+function createTab(sprites: any, icons: any, settings: BuildingTabSettings): BuildingTab {
+	const icon = icons[settings.icon];
+	const tabIcon = icons["tab"];
+	let buttons: BuildingButton[] = [];
+	for (let building of settings.buildings) {
+		const buildingSprite = sprites[building].sprite;
+		const button = new BuildingButton(buildingSprite, building);
+		buttons.push(button);
+	}
 	return new BuildingTab(
-		"housing", [
-			new BuildingButton(home, "home"),
-			new BuildingButton(well, "well"),
-			new BuildingButton(inspector, "inspector"),
-		], 
-		icons['housing'],
-		icons['tab']
+		settings.icon,
+		buttons,
+		icon,
+		tabIcon
 	)
-}
-
-function religionTab(sprites: { [key: string]: BuildingPrototype }, icons: any): BuildingTab {
-	const ziggurat = sprites['ziggurat'].sprite;
-
-	return new BuildingTab(
-		"religion", [
-			new BuildingButton(ziggurat, "ziggurat"),
-		], icons['religion'], icons['tab'])
-}
-
-function militaryTab(sprites: { [key: string]: BuildingPrototype }, icons: any): BuildingTab {
-	const tower = sprites['tower'].sprite;
-
-	return new BuildingTab(
-		"military", [
-			new BuildingButton(tower, "tower"),
-		], icons['military'], icons['tab'])
-}
-
-function agricultureTab(sprites: { [key: string]: BuildingPrototype }, icons: any): BuildingTab {
-	const farm = sprites['farm'].sprite;
-	const bakery = sprites['bakery'].sprite;
-
-	return new BuildingTab("agriculture", [
-		new BuildingButton(farm, "farm"),
-		new BuildingButton(bakery, "bakery"),
-	], icons['agriculture'], icons['tab'])
-}
-
-function scienceTab(_sprites: { [key: string]: BuildingPrototype }, icons: any): BuildingTab {
-	return new BuildingTab("science", [], icons['science'], icons['tab'])
-}
-
-function industryTab(sprites: { [key: string]: BuildingPrototype }, icons: any): BuildingTab {
-	const storage = sprites['storage'].sprite;
-
-	return new BuildingTab("industry", [
-		new BuildingButton(storage, "storage"),
-	], icons['industry'], icons['tab'])
 }
