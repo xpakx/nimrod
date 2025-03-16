@@ -115,6 +115,8 @@ export class HeroButton implements Button {
 	_image: HTMLImageElement;
 	image: OffscreenCanvas;
 	context: OffscreenCanvasRenderingContext2D;
+	hoverImage: OffscreenCanvas;
+	hoverContext: OffscreenCanvasRenderingContext2D;
 	hover: boolean = false;
 	position: Position;
 	size: Size;
@@ -127,12 +129,15 @@ export class HeroButton implements Button {
 		this._image = image;
 		this.image = new OffscreenCanvas(size.width, size.height);
 		this.context = this.image.getContext("2d")!; // TODO
+		this.hoverImage = new OffscreenCanvas(size.width, size.height);
+		this.hoverContext = this.image.getContext("2d")!; // TODO
 		this.size = size;
 		this.position = position;
 		this.rank = hero.rank;
 		this.hero = hero;
 		this.action = action;
 		this.drawImage();
+		this.drawHoverImage();
 	}
 
 	inButton(position: Position): boolean {
@@ -171,6 +176,23 @@ export class HeroButton implements Button {
 		this.context.stroke();
 	}
 
+	drawHoverImage() {
+		this.hoverContext.save();
+		this.hoverContext.filter = "grayscale(80%)"; 
+		this.hoverContext.fillStyle = this.getFillColor();
+		this.hoverContext.beginPath();
+		this.hoverContext.arc(this.size.width/2, this.size.width/2, this.size.width/2, 0, 2 * Math.PI);
+		this.hoverContext.fill();
+
+		this.hoverContext.drawImage(this._image, this.imagePadding, this.imagePadding, this.size.width - 2*this.imagePadding, this.size.height - 2*this.imagePadding);
+
+		this.hoverContext.strokeStyle = this.getBorderColor();
+		this.hoverContext.beginPath();
+		this.hoverContext.arc(this.size.width/2, this.size.width/2, this.size.width/2, 0, 2 * Math.PI);
+		this.hoverContext.stroke();
+		this.hoverContext.restore();
+	}
+
 	getClickAction(): Action | undefined {
 		if (this.action == "delete") {
 			return {"action": "removeHero", hero: this.hero};
@@ -182,7 +204,8 @@ export class HeroButton implements Button {
 	}
 
 	draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, hovered: boolean): void {
-		context.drawImage(this.image, this.position.x, this.position.y);
+		const image = hovered ? this.hoverImage : this.image;
+		context.drawImage(image, this.position.x, this.position.y);
 	}
 }
 
