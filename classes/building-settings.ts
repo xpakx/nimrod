@@ -1,4 +1,5 @@
 import { AdventurersGuildInterface } from "./interface/adventurers-guild.js";
+import { SidebarConfig } from "./interface/sidebar.js";
 import { StorageInterface } from "./interface/storage.js";
 import { SpriteConfig, BuildingConfig } from "./sprite-library.js";
 
@@ -147,3 +148,33 @@ export const iconSettings: SpriteConfig[] = [
 		sprite: 'kingdom'
 	},
 ];
+
+export const tabSettings: SidebarConfig = {
+	icons: ["housing", "religion", "military", "agriculture", "science", "industry", "tab"],
+	tabs: [
+		{
+			icon: "housing",
+			buildings: ["home", "well", "inspector"]
+		},
+		{
+			icon: "religion",
+			buildings: ["ziggurat"]
+		},
+		{
+			icon: "military",
+			buildings: ["tower"]
+		},
+		{
+			icon: "agriculture",
+			buildings: ["farm", "bakery"]
+		},
+		{
+			icon: "science",
+			buildings: []
+		},
+		{
+			icon: "industry",
+			buildings: ["storage"]
+		},
+	]
+}

@@ -20,40 +20,10 @@ export interface SidebarConfig {
 	tabs: BuildingTabSettings[];
 }
 
-const tabSettings: SidebarConfig = {
-	icons: [],
-	tabs: [
-		{
-			icon: "housing",
-			buildings: ["home", "well", "inspector"]
-		},
-		{
-			icon: "religion",
-			buildings: ["ziggurat"]
-		},
-		{
-			icon: "military",
-			buildings: ["tower"]
-		},
-		{
-			icon: "agriculture",
-			buildings: ["farm", "bakery"]
-		},
-		{
-			icon: "science",
-			buildings: []
-		},
-		{
-			icon: "industry",
-			buildings: ["storage"]
-		},
-	]
-}
-
-export async function prepareTabs(sprites: { [key: string]: BuildingPrototype }, iconList: string[]): Promise<BuildingTab[]> {
-	const icons = await loadIcons(iconList);
+export async function prepareTabs(sprites: { [key: string]: BuildingPrototype }, settings: SidebarConfig): Promise<BuildingTab[]> {
+	const icons = await loadIcons(settings.icons);
 	let tabs: BuildingTab[] = [];
-	for (let tab of tabSettings.tabs) {
+	for (let tab of settings.tabs) {
 		tabs.push(createTab(sprites, icons, tab))
 	}
 	return tabs;

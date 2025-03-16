@@ -1,6 +1,6 @@
 import { BattleMapData, Game } from "./classes/game.js";
 import { LoggerFactory } from "./classes/logger.js";
-import { avatarSettings, buildingSettings, iconSettings } from "./classes/building-settings.js";
+import { avatarSettings, buildingSettings, iconSettings, tabSettings } from "./classes/building-settings.js";
 import { BattleActor } from "./classes/battle/actor.js";
 
 let game = new Game();
@@ -59,8 +59,7 @@ window.onload = async () => {
 	canvas.height = game.state.canvasSize.height;
 	logger.debug('Preparing assets');
 
-	const tabIcons = ["housing", "religion", "military", "agriculture", "science", "industry", "tab"]
-	await game.prepareAssets(buildingSettings, avatarSettings, iconSettings, tabIcons);
+	await game.prepareAssets(buildingSettings, avatarSettings, iconSettings, tabSettings);
 
 	logger.debug('Loading map');
 	game.loadMap("test.json", true);

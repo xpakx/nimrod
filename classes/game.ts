@@ -2,7 +2,7 @@ import { GameState } from "./game-state.js";
 import { Action, ActionButton, ButtonRow, InterfaceLayer } from "./interface/interface.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
 import { SpriteConfig, BuildingConfig, SpriteLibrary } from "./sprite-library.js";
-import { prepareTabs } from "./interface/sidebar.js";
+import { prepareTabs, SidebarConfig } from "./interface/sidebar.js";
 import { Actor } from "./actor.js";
 import { BattleActor, HeroType } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
@@ -33,7 +33,7 @@ export class Game {
 		this.minuteCounter = 0;
 	}
 
-	async prepareAssets(buildings: string | BuildingConfig[], avatars: string | SpriteConfig[], icons: string | SpriteConfig[], tabIcons: string[]) {
+	async prepareAssets(buildings: string | BuildingConfig[], avatars: string | SpriteConfig[], icons: string | SpriteConfig[], tabSettings: SidebarConfig) {
 		await this.sprites.prepareActorSprites(this.map.tileSize);
 		await this.sprites.prepareBuildingSprites(buildings, this.map.tileSize);
 		await this.sprites.prepareAvatars(avatars);
@@ -43,7 +43,7 @@ export class Game {
 		this.interf.coinsIcon = this.sprites.icons['coins'];
 		this.interf.populationIcon = this.sprites.icons['population'];
 
-		this.interf.tabs = await prepareTabs(this.sprites.buildings, tabIcons);
+		this.interf.tabs = await prepareTabs(this.sprites.buildings, tabSettings);
 		this.interf.tab = 0;
 		this.interf.calculateIconsSize();
 		this.interf.recalculateTabSize();
