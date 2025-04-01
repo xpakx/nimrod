@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "npx jest",
-    "build": "npx tsc && cp -r index.html img/ maps/ config/ styles.css dist"
+    "build": "npx tsc && cp -r index.html img/ maps/ config/ styles.css dist",
+    "clean": "rm -rf dist/*",
+    "serve": "python3 -m http.server --directory dist 8080"
   },
   "repository": {
     "type": "git",
