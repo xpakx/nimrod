@@ -130,7 +130,7 @@ export class HeroButton implements Button {
 		this.image = new OffscreenCanvas(size.width, size.height);
 		this.context = this.image.getContext("2d")!; // TODO
 		this.hoverImage = new OffscreenCanvas(size.width, size.height);
-		this.hoverContext = this.image.getContext("2d")!; // TODO
+		this.hoverContext = this.hoverImage.getContext("2d")!; // TODO
 		this.size = size;
 		this.position = position;
 		this.rank = hero.rank;
