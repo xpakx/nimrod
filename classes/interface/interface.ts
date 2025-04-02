@@ -3,6 +3,7 @@ import { GameState } from "../game-state.js";
 import { Position, Size } from "../map-layer.js";
 import { Action } from "./actions.js";
 import { BuildingTab } from "./building-tab.js";
+import { Button, ButtonContainer } from "./button.js";
 import { Dialogue, DialogueParsed } from "./dialogue.js";
 
 export class InterfaceLayer {
@@ -21,7 +22,7 @@ export class InterfaceLayer {
 
 	buildingMenuHeight = 300;
 
-	buttons: ButtonRow[] = [];
+	buttons: ButtonContainer[] = [];
 
 	buildingInterface: BuildingInterface | undefined = undefined;
 
@@ -40,7 +41,7 @@ export class InterfaceLayer {
 
 	addButtonRow(row: ButtonRow) {
 		this.buttons.push(row);
-		this.calculateButtonRow(row);
+		row.calculateButtonRow(this.menuWidth, this.canvasSize.width);
 	}
 
 	calculateIconsSize() {
@@ -52,22 +53,6 @@ export class InterfaceLayer {
 		if(this.populationIcon) {
 			this.populationIconSize.height = height;
 			this.populationIconSize.width = this.populationIcon.width*(height/this.populationIcon.height);
-		}
-	}
-
-	calculateButtonRow(row: ButtonRow) {
-		const gap = 20;
-		let size = 0;
-		for(let button of row.buttons) {
-			size += button.size.width;
-		}
-		size += (row.buttons.length - 1) * gap;
-		const padding = Math.floor((this.menuWidth - size)/2)
-		let x = padding + this.canvasSize.width - this.menuWidth;
-		for(let button of row.buttons) {
-			button.position.x = x;
-			button.position.y = row.y;
-			x += button.size.width + gap;
 		}
 	}
 
@@ -87,28 +72,8 @@ export class InterfaceLayer {
 
 	renderButtons(context: CanvasRenderingContext2D) {
 		for(let row of this.buttons) {
-			for(let button of row.buttons) {
-				const hover = this.inButton(this.mousePosition, button);
-				if(hover) {
-					context.save();
-					context.filter = "brightness(140%)";
-				} 
-				context.drawImage(button.image, button.position.x, button.position.y, button.size.width, button.size.height);
-				if(hover) {
-					context.restore()
-				}
-			}
+			row.draw(context, this.mousePosition);
 		}
-	}
-
-	inButton(position: Position, button: ActionButton): boolean {
-		if(position.x < button.position.x || position.x > button.position.x + button.size.width) {
-			return false;
-		}
-		if(position.y < button.position.y || position.y > button.position.y + button.size.height) {
-			return false;
-		}
-		return true;
 	}
 
 	recalculateTabSize() {
@@ -312,10 +277,9 @@ export class InterfaceLayer {
 			}
 		}
 		for(let row of this.buttons) {
-			for(let button of row.buttons) {
-				if(this.inButton(position, button)) {
-					return button.action;
-				}
+			const action = row.buttonAt(position);
+			if (action) {
+				return action;
 			}
 		}
 
@@ -323,23 +287,98 @@ export class InterfaceLayer {
 	}
 }
 
-
-export class ActionButton {
-	image: HTMLImageElement;
+export class ActionButton implements Button {
+	_image: HTMLImageElement;
 	action: Action;
 	hover: boolean = false;
 	position: Position = {x: 0, y: 0};
 	size: Size;
 
+	image: OffscreenCanvas;
+	context: OffscreenCanvasRenderingContext2D;
+	hoverImage: OffscreenCanvas;
+	hoverContext: OffscreenCanvasRenderingContext2D;
+
 	constructor(image: HTMLImageElement, action: Action, size: Size) {
-		this.image = image;
+		this._image = image;
 		this.action = action;
 		this.size = size;
+		this.image = new OffscreenCanvas(size.width, size.height);
+		this.context = this.image.getContext("2d")!; // TODO
+		this.hoverImage = new OffscreenCanvas(size.width, size.height);
+		this.hoverContext = this.hoverImage.getContext("2d")!; // TODO
+		this.drawImage();
+		this.drawHoverImage();
+	}
+
+	inButton(position: Position): boolean {
+		if(position.x < this.position.x || position.x > this.position.x + this.size.width) {
+			return false;
+		}
+		if(position.y < this.position.y || position.y > this.position.y + this.size.height) {
+			return false;
+		}
+		return true;
+	}
+
+	drawImage(): void {
+		this.context.drawImage(this._image, 0, 0, this.size.width, this.size.height);
+	}
+
+	drawHoverImage(): void {
+		this.hoverContext.filter = "brightness(140%)";
+		this.hoverContext.drawImage(this._image, 0, 0, this.size.width, this.size.height);
+	}
+
+	getClickAction(): Action | undefined {
+		return this.action;
+	}
+	
+	draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, hovered: boolean): void {
+		const image = hovered ? this.hoverImage : this.image;
+		context.drawImage(image, this.position.x, this.position.y, this.size.width, this.size.height);
 	}
 }
 
-export interface ButtonRow {
-	buttons: ActionButton[];
-	y: number;
+export class ButtonRow implements ButtonContainer {
+	buttons: Button[] = [];
+	y: number = 0;
+
+	constructor(y: number, buttons: Button[]) {
+		this.y = y;
+		this.buttons = buttons;
+	}
+
+	calculateButtonRow(menuWidth: number, canvasWidth: number) {
+		const gap = 20;
+		let size = 0;
+		for(let button of this.buttons) {
+			size += button.size.width;
+		}
+		size += (this.buttons.length - 1) * gap;
+		const padding = Math.floor((menuWidth - size)/2)
+		let x = padding + canvasWidth - menuWidth;
+		for(let button of this.buttons) {
+			button.position.x = x;
+			button.position.y = this.y;
+			x += button.size.width + gap;
+		}
+	}
+
+	draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, mousePosition: Position) {
+		for(let button of this.buttons) {
+			const hover = button.inButton(mousePosition);
+			button.draw(context, hover);
+		}
+	}
+
+	buttonAt(position: Position): Action | undefined {
+		for (let i=0; i<this.buttons.length; i++) {
+			if (this.buttons[i].inButton(position)) {
+				return this.buttons[i].getClickAction();
+			}
+		}
+		return undefined;
+	}
 }
 

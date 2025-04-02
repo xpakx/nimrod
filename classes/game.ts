@@ -727,46 +727,46 @@ export class Game {
 
 	addCityButtons() {
 		this.interf.buttons = [];
-		const menuRow: ButtonRow = {
-			y: this.interf.buildingMenuHeight + 50,	
-			buttons: [
+		const menuRow: ButtonRow = new ButtonRow(
+			this.interf.buildingMenuHeight + 50,	
+			[
 				new ActionButton(this.sprites.icons['road'], {action: "buildRoad", argument: undefined}, {width: 40, height: 40}),
 				new ActionButton(this.sprites.icons['delete'], {action: "delete", argument: undefined}, {width: 40, height: 40}),
 			]
-		};
+		);
 		this.interf.addButtonRow(menuRow);
 
-		const mapRow: ButtonRow = {
-			y: this.state.canvasSize.height - 80,	
-			buttons: [
+		const mapRow: ButtonRow = new ButtonRow(
+			this.state.canvasSize.height - 80,	
+			[
 				new ActionButton(this.sprites.icons['kingdom'], {action: "goTo", argument: "Kingdom"}, {width: 50, height: 50}),
 				new ActionButton(this.sprites.icons['world'], {action: "goTo", argument: "World"}, {width: 50, height: 50}),
 			]
-		};
+		);
 		this.interf.addButtonRow(mapRow);
 	}
 
 	addKingdomButtons() {
 		this.interf.buttons = [];
-		const mapRow: ButtonRow = {
-			y: this.state.canvasSize.height - 80,	
-			buttons: [
+		const mapRow: ButtonRow = new ButtonRow(
+			this.state.canvasSize.height - 80,	
+			[
 				new ActionButton(this.sprites.icons['city'], {action: "goTo", argument: "City"}, {width: 50, height: 50}),
 				new ActionButton(this.sprites.icons['world'], {action: "goTo", argument: "World"}, {width: 50, height: 50}),
 			]
-		};
+		);
 		this.interf.addButtonRow(mapRow);
 	}
 
 	addWorldButtons() {
 		this.interf.buttons = [];
-		const mapRow: ButtonRow = {
-			y: this.state.canvasSize.height - 80,	
-			buttons: [
+		const mapRow = new ButtonRow(
+			this.state.canvasSize.height - 80,	
+			[
 				new ActionButton(this.sprites.icons['city'], {action: "goTo", argument: "City"}, {width: 50, height: 50}),
 				new ActionButton(this.sprites.icons['kingdom'], {action: "goTo", argument: "Kingdom"}, {width: 50, height: 50}),
 			]
-		};
+		);
 		this.interf.addButtonRow(mapRow);
 	}
 
