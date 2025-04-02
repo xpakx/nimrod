@@ -505,16 +505,31 @@ export class BuildingInterface {
 
 
 		const imageSize = 80;
-		const imagePadding = 20;
+		const imagePadding = 10;
 		const rectSize = imageSize + 2*imagePadding;
-		const imageX =  + leftPadding;
+		const imageX = x + leftPadding;
 		const imageY = y + topPadding;
 		this.context.fillStyle = '#575757';
 		this.context.fillRect(imageX, imageY, rectSize, rectSize);
 		this.context.strokeStyle = '#fff';
 		this.context.strokeRect(imageX, imageY, rectSize, rectSize);
 
-		this.context.drawImage(building.sprite.image, imageX + imagePadding, imageY + imagePadding, imageSize, imageSize);
+
+		let buildingWidth = building.sprite.size.width;
+		let buildingHeight = building.sprite.size.height;
+
+		if(buildingWidth > buildingHeight) {
+			buildingHeight = buildingHeight*(imageSize/buildingWidth);
+			buildingWidth = imageSize;
+		} else {
+			buildingWidth = buildingWidth*(imageSize/buildingHeight);
+			buildingHeight = imageSize;
+		}
+		const paddingWidth = (imageSize - buildingWidth) / 2;
+		const paddingHeight = (imageSize - buildingHeight) / 2;
+
+
+		this.context.drawImage(building.sprite.image, imageX + paddingWidth + imagePadding, imageY + paddingHeight + imagePadding, buildingWidth, buildingHeight);
 
 		const nameX = imageX + imageSize + 2*imagePadding + 20;
 		const nameY = y + topPadding + lineHeight;
