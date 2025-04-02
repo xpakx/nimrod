@@ -1,5 +1,5 @@
 import { BuildingPrototype, BuildingSprite } from "../building/buildings.js";
-import { BuildingButton, BuildingTab } from "./interface.js";
+import { BuildingButton, BuildingTab } from "./building-tab.js";
 
 async function loadImage(url: string): Promise<any> {
     const image = new Image();

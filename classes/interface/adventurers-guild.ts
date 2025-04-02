@@ -1,7 +1,7 @@
 import { BattleActor, HeroRank } from "../battle/actor.js";
 import { Building, BuildingInterface } from "../building/buildings.js";
 import { GameState } from "../game-state.js";
-import { Action } from "../interface/interface.js";
+import { Action } from "../interface/actions.js";
 import { Button, ButtonContainer, ButtonPane } from "../interface/button.js";
 import { getLogger, Logger } from "../logger.js";
 import { Position, Size } from "../map-layer.js";

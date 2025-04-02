@@ -1,5 +1,6 @@
 import { GameState } from "./game-state.js";
-import { Action, ActionButton, ButtonRow, InterfaceLayer } from "./interface/interface.js";
+import { ActionButton, ButtonRow, InterfaceLayer } from "./interface/interface.js";
+import { Action } from "./interface/actions.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
 import { SpriteConfig, BuildingConfig, SpriteLibrary } from "./sprite-library.js";
 import { prepareTabs, SidebarConfig } from "./interface/sidebar.js";

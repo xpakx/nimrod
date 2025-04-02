@@ -1,4 +1,4 @@
-import { Action } from "./interface.js";
+import { Action } from "./actions.js";
 import { Position, Size } from "../map-layer.js";
 
 export interface Button {

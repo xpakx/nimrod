@@ -1,7 +1,7 @@
 import { Actor, ActorSprite } from "../actor.js";
 import { HouseLevel } from "./house.js";
 import { GameState } from "../game-state.js";
-import { Action } from "../interface/interface.js";
+import { Action } from "../interface/actions.js";
 import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position, Size } from "../map-layer.js";
 

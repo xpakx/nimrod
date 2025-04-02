@@ -22,7 +22,7 @@ Nimrod is an isometric city builder game inspired by *Zeus: Master of Olympus* w
 ## Technologies
 - TypeScript
 - HTML5 Canvas API
-— Jest for testing
+- Jest for testing
 
 ## Local Setup
 ```bash
