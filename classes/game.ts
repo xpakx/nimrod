@@ -53,7 +53,6 @@ export class Game {
 		this.interf.recalculateTabSize();
 		this.interf.calculateTabIcons();
 		this.addCityButtons();
-
 	}
 
 	onMouseLeftClick(_event: MouseEvent) {
@@ -380,6 +379,20 @@ export class Game {
 		});
 	}
 
+
+	getCurrentHoverableLayer(): undefined | HoverableLayer {
+		switch (this.state.view) {
+			case "City":
+			case "Battle":
+				return this.map;
+			case "Kingdom":
+				return this.quest;
+			case "World":
+			case "Menu":
+				return undefined;
+		}
+	}
+
 	onMouseMove(event: MouseEvent, canvas: HTMLCanvasElement) {
 		const rect = canvas.getBoundingClientRect();
 
@@ -387,7 +400,7 @@ export class Game {
 		const mouseY = event.clientY - rect.top;
 		this.state.playerMouse = {x: mouseX, y: mouseY};
 		if(!this.interf.mouseInsideInterface(this.state.playerMouse)) {
-			const layer = this.state.view == "Kingdom" ? this.quest : this.map;
+			const layer = this.getCurrentHoverableLayer();
 			this.onMouseMoveLayer(layer);
 		} 
 		this.interf.onMouse(this.state.playerMouse);
@@ -403,7 +416,8 @@ export class Game {
 		return pos1.x == pos2.x && pos1.y == pos2.y;
 	}
 
-	onMouseMoveLayer(layer: HoverableLayer) {
+	onMouseMoveLayer(layer: undefined | HoverableLayer) {
+		if (!layer) return;
 		const old = layer.copyMousePosition();
 		layer.updateMousePosition(this.state.playerMouse);
 
@@ -413,11 +427,14 @@ export class Game {
 	}
 
 	onMouseUp(_event: MouseEvent) {
-		this.map.isDragging = false;
+		const layer = this.getCurrentHoverableLayer();
+		if (layer) layer.isDragging = false;
 	}
 
 	onMouseWheel(event: WheelEvent) {
-		if(this.map.isDragging) {
+		const layer = this.getCurrentHoverableLayer();
+		if (!layer) return;
+		if(layer.isDragging) {
 			return;
 		}
 		if (event.deltaY < 0) {
@@ -930,6 +947,7 @@ interface UnplacedActorData {
 }
 
 interface HoverableLayer {
+	isDragging: boolean;
 	updateMousePosition(position: Position): void;
 	copyMousePosition(): Position;
 	getMousePosition(): Position;

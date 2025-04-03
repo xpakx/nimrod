@@ -9,6 +9,7 @@ export class QuestLayer {
 	playerMouse: Position = {x: 0, y: 0};
 	
 	markers: Button[] = [];
+	isDragging: boolean = false;
 
 	constructor(state: GameState) {
 		this.size = {
