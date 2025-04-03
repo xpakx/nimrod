@@ -549,8 +549,14 @@ export class Game {
 			if (!pedestrian.dead) {
 				this.state.insertPedestrian(pedestrian);
 			} else if ("settled" in pedestrian && pedestrian.settled) {
-				this.state.population += 1;
-				this.assignWorkers(); // TODO
+				const migrant = pedestrian as Migrant;
+				const house = migrant.targetHome;
+				const realBuilding = house ? this.map.getBuilding(house.position) : undefined;
+				// TODO
+				if (realBuilding && house == realBuilding) {
+					this.state.population += 1;
+					this.assignWorkers(); // TODO
+				}
 			}
 			if (pedestrian.dead) {
 				this.state.orders.onWorkerDeath(pedestrian);
