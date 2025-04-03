@@ -7,6 +7,7 @@ export const buildingSettings: BuildingConfig[] = [
 	{
 		sprite: "ziggurat", 
 		size: 4,
+		maxWorkers: 10,
 		interface: new AdventurersGuildInterface(), 
 		name: "ziggurat", 
 		visibleName: "Temple", 
@@ -33,6 +34,7 @@ export const buildingSettings: BuildingConfig[] = [
 	{
 		sprite: "tower",
 		size: 2,
+		maxWorkers: 4,
 		name: "tower",
 		visibleName: "Tower", 
 		cost: 24
@@ -40,6 +42,7 @@ export const buildingSettings: BuildingConfig[] = [
 	{
 		sprite: "well",
 		size: 2,
+		maxWorkers: 2,
 		name: "well",
 		visibleName: "Well", 
 		cost: 10,

@@ -13,9 +13,9 @@ export class CityLogicLayer {
 
 	onMouseLeftClick(game: Game) {
 		if(game.map.mode.action == "build") {
-			this.putBuilding(game.map, game.state, game.map.mode.prototype);
+			this.putBuilding(game.map, game.state, game.map.mode.prototype, game);
 		} else if(game.map.mode.action == "delete") {
-			this.deleteBuilding(game.map, game.state);
+			this.deleteBuilding(game.map, game.state, game);
 			this.deleteRoad(game.map);
 		} else if(game.map.mode.action == "buildRoad") {
 			this.putRoad(game.map, game.state, game.sprites);
@@ -33,7 +33,7 @@ export class CityLogicLayer {
 		map.updateAfterAddition(map.isoPlayerMouse); // TODO: optimize
 	}
 
-	putBuilding(map: MapLayer, state: GameState, building: BuildingPrototype) {
+	putBuilding(map: MapLayer, state: GameState, building: BuildingPrototype, game: Game) {
 		if (state.money < building.cost) return;
 		state.money -= building.cost;
 		map.putBuilding(map.isoPlayerMouse, building, false);
@@ -44,9 +44,10 @@ export class CityLogicLayer {
 			state.maxPopulation += house.maxPopulation;
 		}
 		state.orders.onBuildingCreation(map.getBuilding(map.isoPlayerMouse));
+		game.assignWorkers();
 	}
 
-	deleteBuilding(map: MapLayer, state: GameState) {
+	deleteBuilding(map: MapLayer, state: GameState, game: Game) {
 		const building = map.getBuilding(map.isoPlayerMouse);
 		if (!building) return;
 
@@ -58,6 +59,7 @@ export class CityLogicLayer {
 
 		state.orders.onBuildingDeletion(building);
 		building.onDeletion();
+		game.assignWorkers();
 	}
 
 	deleteRoad(map: MapLayer) {

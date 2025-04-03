@@ -8,6 +8,7 @@ export class House extends Building {
 	storage: { [key: string]: number } = { "water": 0, "food": 0 }; // TODO
 	qualities: { [key: string]: number } = { "water": 0, "food": 0 }; // TODO
 	population: number = 0;
+	employed: number = 0;
 	maxPopulation: number = 8;
 	resourceNeeds: HouseResourceNeeds[] = [];
 
@@ -42,6 +43,17 @@ export class House extends Building {
 			this.consume(need.resource, totalConsumption);
 			this.checkQuality(need);
 		}
+	}
+
+	getHappiness(): number {
+		const unemployed = this.population = this.employed;
+		const employmentEffect = this.employed * 10 - unemployed * 15;
+		//services
+		//tax effect
+		//employment effect
+		//event modifiers
+		//penalties (pollutions, etc)
+		return employmentEffect;
 	}
 
 	checkQuality(need: HouseResourceNeeds): boolean {

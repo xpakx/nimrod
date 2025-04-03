@@ -11,6 +11,7 @@ export interface BuildingPrototype {
 	name: string;
 	visibleName: string;
 	cost: number;
+	maxWorkers?: number;
 	workerOptions?: WorkerOptions;
 	houseOptions?: HouseOptions;
 	storageOptions?: StorageOptions;
@@ -80,6 +81,9 @@ export class Building {
 	accepts: Set<string>;
 	logger: Logger = getLogger("Building");
 
+	workers: number = 0;
+	maxWorkers: number = 0;
+
 	constructor(prototype: BuildingPrototype, position: Position, accepted: boolean = true) {
 		this.sprite =  prototype.sprite;
 		this.position = position;
@@ -87,6 +91,7 @@ export class Building {
 		this.underCursor = false;
 		this.name = prototype.name;
 		this.visibleName = prototype.visibleName;
+		this.maxWorkers = prototype.maxWorkers ?? 0;
 
 		const centerA = [Math.floor((position.x + position.x - this.sprite.baseSize + 1)/2), Math.floor((position.y + position.y - this.sprite.baseSize + 1)/2)]
 		this.diagonal = (centerA[0] + centerA[1]);
@@ -171,7 +176,7 @@ export class Building {
 	}
 
 	canSpawnWorker(): boolean {
-		return this.readyToSpawn && this.workerSpawn != undefined && this.worker != undefined;
+		return this.readyToSpawn && this.workerSpawn != undefined && this.worker != undefined && this.workers > 0;
 	}
 
 	spawnWorker(): BuildingWorker {

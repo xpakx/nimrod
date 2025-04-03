@@ -33,6 +33,7 @@ export interface BuildingConfig {
 	visibleName: string;
 	interface?: string | BuildingInterface;
 	cost: number;
+	maxWorkers?: number;
 	workerOptions?: WorkerConfig;
 	houseOptions?: HouseOptions;
 	storageOptions?: StorageOptions;
@@ -218,6 +219,7 @@ export class SpriteLibrary {
 			houseOptions: buildingConfig.houseOptions,
 			storageOptions: buildingConfig.storageOptions,
 			productionOptions: buildingConfig.productionOptions,
+			maxWorkers: buildingConfig.maxWorkers,
 		}
 		if (buildingConfig.workerOptions) {
 			const workerOptions: WorkerOptions = {
