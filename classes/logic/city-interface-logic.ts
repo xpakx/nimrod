@@ -9,9 +9,9 @@ export class CityInterfaceLogic {
 	logger: Logger = getLogger("CityInterfaceLogic");
 
 	updateCost(map: MapLayer, state: GameState) {
-		if(map.mode) {
-			map.tooCostly = state.money < map.mode.cost;
-		} else if (map.roadMode) {
+		if(map.mode.action == "build") {
+			map.tooCostly = state.money < map.mode.prototype.cost;
+		} else if (map.mode.action == "buildRoad") {
 			map.tooCostly = state.money < 2;
 		}
 	}

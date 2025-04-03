@@ -12,12 +12,12 @@ export class CityLogicLayer {
 	logger: Logger = getLogger("CityLogicLayer");
 
 	onMouseLeftClick(game: Game) {
-		if(game.map.mode) {
-			this.putBuilding(game.map, game.state, game.map.mode);
-		} else if(game.map.deleteMode) {
+		if(game.map.mode.action == "build") {
+			this.putBuilding(game.map, game.state, game.map.mode.prototype);
+		} else if(game.map.mode.action == "delete") {
 			this.deleteBuilding(game.map, game.state);
 			this.deleteRoad(game.map);
-		} else if(game.map.roadMode) {
+		} else if(game.map.mode.action == "buildRoad") {
 			this.putRoad(game.map, game.state, game.sprites);
 		} else {
 			this.openBuildingInterface(game.map, game.state, game.interf);
@@ -75,9 +75,9 @@ export class CityLogicLayer {
 	}
 
 	updateCost(map: MapLayer, state: GameState) {
-		if(map.mode) {
-			map.tooCostly = state.money < map.mode.cost;
-		} else if (map.roadMode) {
+		if(map.mode.action == "build") {
+			map.tooCostly = state.money < map.mode.prototype.cost;
+		} else if (map.mode.action == "buildRoad") {
 			map.tooCostly = state.money < 2;
 		}
 	}

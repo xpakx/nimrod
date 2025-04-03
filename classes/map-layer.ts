@@ -13,12 +13,11 @@ export class MapLayer {
 	canvasSize: Size = {width: 0, height: 0};
 
 	isoPlayerMouse: Position = {x: -1, y: -1};
-	isDragging: boolean = false;
+	isDragging: boolean = false
 	dragStart: Position = {x: 0, y: 0};
-	mode: BuildingPrototype | undefined = undefined;
 	tooCostly: boolean = false;
-	deleteMode: boolean = false;
-	roadMode: TilingSprite | undefined = undefined;
+
+	mode: Mode = { action: "none" };
 
 	map: string[][] = Array(100).fill(null).map(() => Array(50).fill('#97b106'));
 
@@ -52,8 +51,7 @@ export class MapLayer {
 		this.positionOffset = {x: 0, y: 0};
 		this.map = Array(size.height).fill(null).map(() => Array(size.width).fill('#97b106'));
 		this.isDragging = false;
-		this.deleteMode = false;
-		this.mode = undefined;
+		this.mode = {action: "none"};
 		this.roads = this.map.map(row => row.map(() => undefined))
 		this.costs = this.map.map(row => row.map(() => 1))
 		this.blocked = this.map.map(row => row.map(() => false));
@@ -106,8 +104,8 @@ export class MapLayer {
 					continue;
 				}
 				let color = this.map[y][x];
-				if(!this.mode && x == this.isoPlayerMouse.x && y == this.isoPlayerMouse.y) {
-					color = this.deleteMode ? '#FF5733' : "black";
+				if(this.mode.action != "build" && x == this.isoPlayerMouse.x && y == this.isoPlayerMouse.y) {
+					color = this.mode.action == "delete" ? '#FF5733' : "black";
 				}
 				this.drawTile(ctx, screenPos.x, screenPos.y, color);
 			}
@@ -231,7 +229,7 @@ export class MapLayer {
 				}
 				const road = this.roads[y][x];
 				if(road) {
-					if(this.deleteMode && y == this.isoPlayerMouse.y && x == this.isoPlayerMouse.x) {
+					if(this.mode.action == "delete" && y == this.isoPlayerMouse.y && x == this.isoPlayerMouse.x) {
 						ctx.save();
 						ctx.filter = "url('./img//red-filter.svg#red')";
 						this.drawRoad(ctx, {x: x, y: y}, road);
@@ -419,11 +417,12 @@ export class MapLayer {
 	}
 
 	renderBuildings(ctx: CanvasRenderingContext2D, pedestrians: Actor[]) {
-		const ghostCanBePlaced = this.mode ? this.canBePlaced(this.isoPlayerMouse, this.mode.sprite) : false;
+		const sprite = this.mode?.action == "build" ? this.mode.prototype.sprite : undefined;
+		const ghostCanBePlaced = sprite ? this.canBePlaced(this.isoPlayerMouse, sprite) : false;
 		ctx.save();
 		ctx.translate(this.canvasSize.width / 2, this.canvasSize.height / 2 - (this.tileSize.height/2));
 		let ghostDrawn = false;
-		const ghostDiagonal = this.getDiagonal(this.isoPlayerMouse, this.mode?.sprite);
+		const ghostDiagonal = this.getDiagonal(this.isoPlayerMouse, sprite);
 		let currentDiagonal = 0;
 		let pedestrianIndex = 0;
 		for (const building of this.buildings) {
@@ -444,9 +443,9 @@ export class MapLayer {
 				this.drawGhost(ctx);
 				ghostDrawn = true;
 			}
-			if(this.mode == undefined && building.underCursor) {
+			if(this.mode.action != "build" && building.underCursor) {
 				ctx.save();
-				ctx.filter = this.deleteMode ? "url('./img//red-filter.svg#red')" : "grayscale(40%)";
+				ctx.filter = this.mode.action == "delete" ? "url('./img//red-filter.svg#red')" : "grayscale(40%)";
 				this.drawBuilding(ctx, building.position, building.sprite);
 				ctx.restore();
 			} else if(building.accepted) {
@@ -463,17 +462,17 @@ export class MapLayer {
 			this.drawPedestrian(ctx, pedestrians[i]);
 		}
 
-		if(this.mode && !ghostDrawn) {
+		if(this.mode.action == "build" && !ghostDrawn) {
 			this.drawGhost(ctx, !ghostCanBePlaced);
 		}
 
-		const roadGhostCanBePlaced = this.roadMode ? this.roadCanBePlaced(this.isoPlayerMouse) : false; 
-		if(this.roadMode) {
+		const roadGhostCanBePlaced = this.mode.action == "buildRoad" ? this.roadCanBePlaced(this.isoPlayerMouse) : false; 
+		if(this.mode.action == "buildRoad") {
 			ctx.save();
 			ctx.filter = roadGhostCanBePlaced ? "grayscale(90%)" : "url('./img//red-filter.svg#red') opacity(0.75)";
 			ctx.globalAlpha = 0.75;
 			const dir = this.calculateRoadConnections(this.isoPlayerMouse, roadGhostCanBePlaced);
-			const ghost = new Road(this.roadMode, this.isoPlayerMouse, dir);
+			const ghost = new Road(this.mode.sprite, this.isoPlayerMouse, dir);
 			this.drawRoad(ctx, this.isoPlayerMouse, ghost);
 			ctx.restore();
 		}
@@ -481,40 +480,32 @@ export class MapLayer {
 	}
 
 	drawGhost(ctx: CanvasRenderingContext2D, red: boolean = false) {
-		if (!this.mode) {
+		if (this.mode.action != "build") {
 			return;
 		}
 		ctx.save();
 		ctx.filter = red ? "url('./img//red-filter.svg#red') opacity(0.75)" : "grayscale(90%)";
 		ctx.globalAlpha = 0.75;
 		let pos = this.isoToScreen(this.isoPlayerMouse);
-		const sprite = this.mode.sprite;
+		const sprite = this.mode.prototype.sprite;
 		ctx.drawImage(sprite.image, pos.x-sprite.size.width/2, pos.y-sprite.size.height+this.tileSize.height, sprite.size.width, sprite.size.height);
 		ctx.restore();
 	}
 
 	switchToDeleteMode() {
-		this.deleteMode = true;
-		this.roadMode = undefined;
-		this.mode = undefined;
+		this.mode = {action: "delete"};
 	}
 
 	switchToNormalMode() {
-		this.deleteMode = false;
-		this.roadMode = undefined;
-		this.mode = undefined;
+		this.mode = {action: "none"};
 	}
 
 	switchToRoadMode(sprite: TilingSprite) {
-		this.deleteMode = false;
-		this.roadMode = sprite;
-		this.mode = undefined;
+		this.mode = {action: "buildRoad", sprite: sprite};
 	}
 
 	switchToBuildMode(sprite: BuildingPrototype) {
-		this.deleteMode = false;
-		this.roadMode = undefined;
-		this.mode = sprite;
+		this.mode = {action: "build", prototype: sprite};
 	}
 
 	updateMousePosition(position: Position) {
@@ -1059,3 +1050,23 @@ export interface Position {
 	x: number,
 	y: number,
 }
+
+export interface BuildMode {
+	action: "build";
+	prototype: BuildingPrototype;
+}
+
+export interface RoadMode {
+	action: "buildRoad";
+	sprite: TilingSprite;
+}
+
+export interface DeleteMode {
+	action: "delete";
+}
+
+export interface NoneMode {
+	action: "none";
+}
+
+export type Mode = BuildMode | RoadMode | DeleteMode | NoneMode;
