@@ -6,7 +6,8 @@ import { Position, Size } from "./map-layer";
 export class QuestLayer {
 	size: Size;
 	pos: Position;
-
+	playerMouse: Position = {x: 0, y: 0};
+	
 	markers: Button[] = [];
 
 	constructor(state: GameState) {
@@ -18,18 +19,33 @@ export class QuestLayer {
 			x: 0,
 			y: state.topPanelHeight,
 		};
-		this.markers.push(new QuestMarker({x: 10, y: 15}, {width: 10, height: 15}));
-		this.markers.push(new QuestMarker({x: 100, y: 100}, {width: 10, height: 15}));
+		this.markers.push(new QuestMarker({x: 0, y: 0}, {width: 20, height: 30}));
+		this.markers.push(new QuestMarker({x: 100, y: 100}, {width: 20, height: 30}));
 	}
 
 	renderMap(context: CanvasRenderingContext2D, _deltaTime: number) {
 	    context.save();
 	    context.translate(this.pos.x, this.pos.y);
 	    for (let marker of this.markers) {
-		    marker.draw(context, false);
+		    const hovered = marker.inButton(this.playerMouse);
+		    marker.draw(context, hovered);
 	    }
 	    context.restore();
 	}
+
+	updateMousePosition(position: Position) {
+		this.playerMouse.x = position.x - this.pos.x;
+		this.playerMouse.y = position.y - this.pos.y;
+	}
+
+	copyMousePosition(): Position {
+		return { x: this.playerMouse.x, y: this.playerMouse.y }
+	}
+
+	getMousePosition(): Position {
+		return this.playerMouse;
+	}
+
 }
 
 export class QuestMarker implements Button {
@@ -61,10 +77,18 @@ export class QuestMarker implements Button {
 	    return undefined;
     }
 
-    draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, _hovered: boolean): void {
-	    context.fillStyle = "white";
+    draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, hovered: boolean): void {
+	    context.fillStyle = hovered ? "red" : "white";
 	    context.beginPath();
-	    context.ellipse(this.position.x, this.position.y, this.size.width, this.size.height, 0, 0, 2 * Math.PI);
+	    context.ellipse(
+		    this.position.x + this.size.width/2,
+		    this.position.y + this.size.height/2,
+		    this.size.width/2,
+		    this.size.height/2,
+		    0,
+		    0,
+		    2 * Math.PI
+	    );
 	    context.fill();
     }
 }

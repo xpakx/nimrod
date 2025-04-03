@@ -387,15 +387,8 @@ export class Game {
 		const mouseY = event.clientY - rect.top;
 		this.state.playerMouse = {x: mouseX, y: mouseY};
 		if(!this.interf.mouseInsideInterface(this.state.playerMouse)) {
-			const oldX = this.map.isoPlayerMouse.x;
-			const oldY = this.map.isoPlayerMouse.y;
-			this.map.updateMousePosition(this.state.playerMouse);
-			const newX = this.map.isoPlayerMouse.x;
-			const newY = this.map.isoPlayerMouse.y;
-			const isoChange = (oldX != newX || oldY != newY);
-			if (this.state.view == "Battle" || isoChange) {
-				this.battleMouseOver();
-			}
+			const layer = this.state.view == "Kingdom" ? this.quest : this.map;
+			this.onMouseMoveLayer(layer);
 		} 
 		this.interf.onMouse(this.state.playerMouse);
 
@@ -403,6 +396,19 @@ export class Game {
 			this.map.positionOffset.x = this.map.dragStart.x - event.clientX;
 			this.map.positionOffset.y = this.map.dragStart.y - event.clientY;
 			this.correctOffset();
+		}
+	}
+
+	comparePositions(pos1: Position, pos2: Position) {
+		return pos1.x == pos2.x && pos1.y == pos2.y;
+	}
+
+	onMouseMoveLayer(layer: HoverableLayer) {
+		const old = layer.copyMousePosition();
+		layer.updateMousePosition(this.state.playerMouse);
+
+		if (this.state.view == "Battle" && !this.comparePositions(old, layer.getMousePosition())) {
+			this.battleMouseOver();
 		}
 	}
 
@@ -921,4 +927,10 @@ interface UnplacedActorData {
 	type?: HeroType;
 	hp: number;
 	image: string;
+}
+
+interface HoverableLayer {
+	updateMousePosition(position: Position): void;
+	copyMousePosition(): Position;
+	getMousePosition(): Position;
 }

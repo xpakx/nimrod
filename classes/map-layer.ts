@@ -39,6 +39,14 @@ export class MapLayer {
 		return this.getBuilding(this.isoPlayerMouse);
 	}
 
+	copyMousePosition(): Position {
+		return {x: this.isoPlayerMouse.x, y: this.isoPlayerMouse.y};
+	}
+
+	getMousePosition(): Position {
+		return this.isoPlayerMouse;
+	}
+
 	resetMap(size: Size) {
 		this.buildings = [];
 		this.positionOffset = {x: 0, y: 0};
