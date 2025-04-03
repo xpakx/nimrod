@@ -9,8 +9,9 @@ import { BattleActor, HeroType } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
 import { getLogger, Logger, LoggerFactory } from "./logger.js";
 import { House, Migrant } from "./building/house.js";
-import { AdventurersGuildInterface } from "./interface/adventurers-guild.js";
 import { QuestLayer } from "./quest-layer.js";
+import { CityLogicLayer } from "./logic/city-logic.js";
+import { CityInterfaceLogic } from "./logic/city-interface-logic.js";
 
 export class Game {
 	state: GameState;
@@ -23,6 +24,8 @@ export class Game {
 	maxXOffset: number;
 	minuteCounter: number;
 	logger: Logger = getLogger("Game");
+	cityLogic: CityLogicLayer;
+	cityInterfaceLogic: CityInterfaceLogic;
 
 	constructor() {
 		this.state = new GameState();
@@ -30,6 +33,8 @@ export class Game {
 		this.quest = new QuestLayer(this.state);
 		this.interf = new InterfaceLayer(this.state.canvasSize, this.state.menuWidth, this.state.topPanelHeight);
 		this.sprites = new SpriteLibrary();
+		this.cityLogic = new CityLogicLayer();
+		this.cityInterfaceLogic = new CityInterfaceLogic();
 
 		this.maxYOffset = this.map.isoToScreen({x: this.map.map[0].length - 1, y: this.map.map.length - 1}).y + (this.map.tileSize.height/2);
 		this.minXOffset = this.map.isoToScreen({x: 0, y: this.map.map.length - 1}).x  - (this.map.tileSize.width/2);
@@ -69,7 +74,7 @@ export class Game {
 	leftMouseClickMain() {
 		switch (this.state.view) {
 			case "City":
-				this.leftMouseCity();
+				this.cityLogic.onMouseLeftClick(this);
 				break;
 			case "Battle":
 				if (this.state.currentBattle?.battleStarted) {
@@ -81,54 +86,6 @@ export class Game {
 		}
 	}
 
-	leftMouseCity() {
-		if(this.map.mode) {
-			if (this.state.money < this.map.mode.cost) return;
-			this.state.money -= this.map.mode.cost;
-			this.map.putBuilding(this.map.isoPlayerMouse, this.map.mode, false);
-			this.checkCost();
-			this.map.finalizeBuildingPlacement(this.map.isoPlayerMouse);
-			if (this.map.mode.houseOptions) {
-				const house = this.map.getBuilding(this.map.isoPlayerMouse) as House;
-				this.state.maxPopulation += house.maxPopulation;
-			}
-			this.state.orders.onBuildingCreation(this.map.getBuilding(this.map.isoPlayerMouse));
-		} else if(this.map.deleteMode) {
-			const building = this.map.getBuilding(this.map.isoPlayerMouse);
-			this.map.deleteBuilding(this.map.isoPlayerMouse);
-			if (building && building instanceof House) {
-				this.state.maxPopulation -=  building.maxPopulation;
-				this.state.population -=  building.population;
-			}
-			if (this.map.isRoad(this.map.isoPlayerMouse)) {
-				this.map.deleteRoad(this.map.isoPlayerMouse);
-				this.map.updateAfterDeletion(this.map.isoPlayerMouse); // TODO: optimize
-			}
-			this.state.orders.onBuildingDeletion(building);
-			if (building) building.onDeletion();
-		} else if(this.map.roadMode) {
-			if (this.state.money < 2) return;
-			this.state.money -= 2;
-			this.map.putRoad(this.map.isoPlayerMouse, this.sprites.getRoad());
-			this.checkCost();
-			this.map.updateAfterAddition(this.map.isoPlayerMouse); // TODO: optimize
-		} else {
-			const building = this.map.getCurrentBuilding();
-			if (building) {
-				this.interf.buildingInterface = building.interface;
-				building.interface.open(this.state, building);
-			}
-		}
-	}
-
-	checkCost() {
-		if(this.map.mode) {
-			this.map.tooCostly = this.state.money < this.map.mode.cost;
-		} else if (this.map.roadMode) {
-			this.map.tooCostly = this.state.money < 2;
-		}
-	}
-
 	leftMouseInterface() {
 		const clickResult = this.interf.click(this.state.playerMouse);
 		if (!clickResult) {
@@ -136,49 +93,9 @@ export class Game {
 		}
 		switch (this.state.view) {
 			case "City":
-				this.leftMouseCityInterface(clickResult, this.sprites, this.map);
+				this.cityInterfaceLogic.leftMouseCityInterface(clickResult, this);
 		}
 		this.leftMouseGeneric(clickResult);
-	}
-
-	leftMouseCityInterface(clickResult: Action, sprites: SpriteLibrary, map: MapLayer) {
-		if(clickResult.action == "build" && clickResult.argument != undefined) {
-			const clickedBuilding = sprites.buildings[clickResult.argument];
-			if (clickedBuilding) map.switchToBuildMode(clickedBuilding);
-			this.checkCost();
-		} else if(clickResult.action == "buildRoad") {
-			map.switchToRoadMode(sprites.getRoad());
-			this.checkCost();
-		} else if(clickResult.action == "delete") {
-			map.switchToDeleteMode();
-		} else if(clickResult.action == "removeHero") {
-			this.logger.debug("Removing hero from team");
-			const index = this.state.team.findIndex((hero) => hero === clickResult.hero);
-			this.state.team.splice(index, 1);
-			this.logger.debug("Team:", this.state.team);
-			const guild = this.interf.buildingInterface as (AdventurersGuildInterface | undefined);
-			if (guild) {
-				guild.prepareTeamButtons();
-				guild.renderInterface();
-			}
-		} else if(clickResult.action == "addHero") {
-			this.logger.debug("Adding hero to team");
-			const maxTeamSize = 6;
-			if (this.state.team.length >= maxTeamSize) {
-				return;
-			}
-			const hero = clickResult.hero;
-			if (this.state.team.includes(hero)) {
-				return;
-			}
-			this.state.team.push(hero);
-			this.logger.debug("Team:", this.state.team);
-			const guild = this.interf.buildingInterface as (AdventurersGuildInterface | undefined);
-			if (guild) {
-				guild.prepareTeamButtons();
-				guild.renderInterface();
-			}
-		}
 	}
 
 	leftMouseGeneric(clickResult: Action) {
@@ -508,7 +425,7 @@ export class Game {
 				break;
 			case '3':
 				this.state.money += 500;
-				this.checkCost();
+				this.cityLogic.updateCost(this.map, this.state);
 				break;
 			case 'c':
 				if (!this.state.debugMode) {
