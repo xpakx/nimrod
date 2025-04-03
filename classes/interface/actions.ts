@@ -26,5 +26,4 @@ export interface PageAction {
 	argument: "next" | "prev";
 }
 
-
 export type Action = NavAction | BuildAction | OpenBuilding | TeamAction | PageAction;

@@ -10,10 +10,12 @@ import { Battle } from "./battle/battle.js";
 import { getLogger, Logger, LoggerFactory } from "./logger.js";
 import { House, Migrant } from "./building/house.js";
 import { AdventurersGuildInterface } from "./interface/adventurers-guild.js";
+import { QuestLayer } from "./quest-layer.js";
 
 export class Game {
 	state: GameState;
 	map: MapLayer;
+	quest: QuestLayer;
 	interf: InterfaceLayer;
 	sprites: SpriteLibrary;
 	maxYOffset: number;
@@ -25,6 +27,7 @@ export class Game {
 	constructor() {
 		this.state = new GameState();
 		this.map = new MapLayer(this.state.canvasSize);
+		this.quest = new QuestLayer(this.state);
 		this.interf = new InterfaceLayer(this.state.canvasSize, this.state.menuWidth, this.state.topPanelHeight);
 		this.sprites = new SpriteLibrary();
 
@@ -654,6 +657,8 @@ export class Game {
 		context.clearRect(0, 0, this.state.canvasSize.width, this.state.canvasSize.height);
 		if (this.terrainView()) {
 			this.map.renderMap(context, this.state.pedestrians, deltaTime);
+		} else if (this.state.view == "Kingdom") {
+			this.quest.renderMap(context, deltaTime);
 		}
 		this.interf.renderInterface(context, deltaTime, this.state);
 		if (this.state.debugMode) {
