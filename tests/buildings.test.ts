@@ -111,6 +111,7 @@ describe('Building', () => {
 		building.setWorker(new ActorSprite({ width: 100, height: 200 } as HTMLImageElement, 1, { width: 50, height: 50 }));
 		building.workerSpawn = { x: 1, y: 1 };
 		building.readyToSpawn = true;
+		building.workers = 1;
 
 		expect(building.canSpawnWorker()).toBe(true);
 	});
