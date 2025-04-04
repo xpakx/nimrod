@@ -577,7 +577,13 @@ export class Game {
 	
 	spawnMigrants() {
 		this.logger.debug("Spawning migrants");
+
+		const happiness = this.getHouses().reduce((sum, b) => sum + b.getHappiness(), 0);
+		this.logger.debug(`Current happines: ${happiness}`);
 		// TODO
+		if (happiness < 0) {
+			return;
+		}
 		const freePlaces = this.state.maxPopulation - this.state.population;
 		const newMigrants = Math.min(20, freePlaces);
 		const emptyHouses = this.getEmptyHouses();

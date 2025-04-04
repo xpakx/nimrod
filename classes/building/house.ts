@@ -46,7 +46,7 @@ export class House extends Building {
 	}
 
 	getHappiness(): number {
-		const unemployed = this.population = this.employed;
+		const unemployed = this.population - this.employed;
 		const employmentEffect = this.employed * 10 - unemployed * 15;
 		//services
 		//tax effect
