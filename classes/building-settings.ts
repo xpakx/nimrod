@@ -61,6 +61,7 @@ export const buildingSettings: BuildingConfig[] = [
 	{
 		sprite: "inspector",
 		size: 2,
+		maxWorkers: 2,
 		name: "inspector",
 		visibleName: "Inspector Tower", 
 		cost: 15,
@@ -72,6 +73,7 @@ export const buildingSettings: BuildingConfig[] = [
 	{
 		sprite: "farm", 
 		size: 4,
+		maxWorkers: 6,
 		name: "farm", 
 		visibleName: "Wheat Farm", 
 		cost: 80,
@@ -86,6 +88,7 @@ export const buildingSettings: BuildingConfig[] = [
 	{
 		sprite: "bakery", 
 		size: 2,
+		maxWorkers: 4,
 		name: "bakery", 
 		visibleName: "Bakery", 
 		cost: 240,
@@ -100,6 +103,7 @@ export const buildingSettings: BuildingConfig[] = [
 	{
 		sprite: "granary", 
 		size: 4,
+		maxWorkers: 2,
 		interface: new StorageInterface(), 
 		name: "storage", 
 		visibleName: "Granary", 

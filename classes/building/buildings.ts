@@ -294,6 +294,9 @@ export class Building {
 	}
 
 	applyRecipe(recipe: Recipe) {
+		if (this.workers == 0 || this.workers == 1 && this.worker?.isAwayFromHome) {
+			return; // TODO: slow down production while employment isn't full
+		}
 		const resource = recipe.output.resource;
 		if (!this.isResourceProducible(resource)) return;
 		if (this.productionInProgress(resource) > 0) {
