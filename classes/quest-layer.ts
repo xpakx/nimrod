@@ -1,7 +1,9 @@
-import { GameState } from "./game-state";
-import { Action } from "./interface/actions";
-import { Button } from "./interface/button";
-import { Position, Size } from "./map-layer";
+import { Building, BuildingInterface } from "./building/buildings.js";
+import { GameState } from "./game-state.js";
+import { Game } from "./game.js";
+import { Action } from "./interface/actions.js";
+import { Button } from "./interface/button.js";
+import { Position, Size } from "./map-layer.js";
 
 export class QuestLayer {
 	size: Size;
@@ -20,8 +22,18 @@ export class QuestLayer {
 			x: 0,
 			y: state.topPanelHeight,
 		};
-		this.markers.push(new QuestMarker({x: 0, y: 0}, {width: 20, height: 30}));
-		this.markers.push(new QuestMarker({x: 100, y: 100}, {width: 20, height: 30}));
+		this.markers.push(
+			new QuestMarker(
+				{x: 0, y: 0}, 
+				{width: 20, height: 30},
+				"Quest 1"
+			));
+		this.markers.push(
+			new QuestMarker(
+				{x: 100, y: 100},
+				{width: 20, height: 30},
+				"Quest 2"
+			));
 	}
 
 	renderMap(context: CanvasRenderingContext2D, _deltaTime: number) {
@@ -47,17 +59,37 @@ export class QuestLayer {
 		return this.playerMouse;
 	}
 
+	// TODO: move to logic layer
+	onMouseLeftClick(game: Game) {
+		for (let marker of this.markers) {
+			if(marker.inButton(this.playerMouse)) {
+				const action = marker.getClickAction();
+				if (action && action.action == "open") {
+					console.log("opening");
+					const quest = action.interface as QuestInterface;
+					game.interf.buildingInterface = quest;
+					quest.openQuest(game.state);
+				}
+				break;
+			}
+		}
+	}
 }
 
 export class QuestMarker implements Button {
     position: Position;
     size: Size;
     locked: boolean;
+    name: string;
+    interf: QuestInterface;
 
-    constructor(position: Position, size: Size, locked: boolean = true) {
+    constructor(position: Position, size: Size, name: string, locked: boolean = true) {
 	    this.position = position;
 	    this.size = size;
 	    this.locked = locked;
+	    this.name = name;
+	    this.interf = new QuestInterface();
+	    this.interf.name = this.name;
     }
 
     inButton(position: Position): boolean {
@@ -75,7 +107,10 @@ export class QuestMarker implements Button {
     }
 
     getClickAction(): Action | undefined {
-	    return undefined;
+	    return { 
+		   action: "open",
+		   interface: this.interf,
+	    };
     }
 
     draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, hovered: boolean): void {
@@ -92,4 +127,47 @@ export class QuestMarker implements Button {
 	    );
 	    context.fill();
     }
+}
+
+
+export class QuestInterface extends BuildingInterface {
+	name: string = "";
+
+	renderInterface() { 
+		console.log("Opened");
+		const width = this.size.width;
+		const height = this.size.height;
+		const x = 0;
+		const y = 0;
+
+		this.offscreen = new OffscreenCanvas(this.size.width, this.size.height);
+		this.context = this.offscreen.getContext("2d")!;
+		this.context.fillStyle = '#444';
+		this.context.fillRect(x, y, width, height);
+
+		this.context.strokeStyle = '#fff';
+		this.context.strokeRect(x, y, width, height);
+
+		const nameX = 20;
+		const nameY = 40;
+
+		this.context.fillStyle = '#fff';
+		this.context.font = '24px Arial';
+		this.context.fillText(this.name, nameX, nameY);
+	}
+
+	// TODO: should probably make more general interface
+	openQuest(state: GameState) {
+		this.preRender(state);
+		this.renderInterface();
+	}
+
+	preRender(state: GameState) {
+		this.position.x = this.leftMargin;
+		this.size.width = state.canvasSize.width - 2*this.leftMargin - state.menuWidth;
+		this.size.height = 300;
+		const middleOfMap = (state.canvasSize.height - state.topPanelHeight) / 2  + state.topPanelHeight;
+		this.position.y = middleOfMap - this.size.height / 2;
+	}
+
 }

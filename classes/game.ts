@@ -84,6 +84,8 @@ export class Game {
 					this.leftMouseBattlePrep();
 				}
 				break;
+			case "Kingdom":
+				this.quest.onMouseLeftClick(this);
 		}
 	}
 
