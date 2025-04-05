@@ -114,6 +114,110 @@ export const buildingSettings: BuildingConfig[] = [
 			resources: ['flour', 'bread'],
 		},
 	},
+	{
+		sprite: "bakery",  //TODO
+		size: 2,
+		maxWorkers: 10,
+		name: "clay-pit", 
+		visibleName: "Clay Pit", 
+		cost: 60,
+		productionOptions: [
+			{
+				output: {resource: "clay", amount: 20},
+				ingredients: [],
+				time: 5,
+			}	
+		]
+	},
+	{
+		sprite: "bakery",  //TODO
+		size: 2,
+		maxWorkers: 4,
+		name: "pottery-workshop", 
+		visibleName: "Pottery Workshop", 
+		cost: 200,
+		productionOptions: [
+			{
+				output: {resource: "pot", amount: 5},
+				ingredients: [{resource: "clay", amount: 10}],
+				time: 5,
+			}	
+		]
+	},
+	{
+		sprite: "bakery",  //TODO
+		size: 4,
+		maxWorkers: 6,
+		name: "flax-farm", 
+		visibleName: "Flax Farm", 
+		cost: 70,
+		productionOptions: [
+			{
+				output: {resource: "flax", amount: 50},
+				ingredients: [],
+				time: 12,
+			}	
+		]
+	},
+	{
+		sprite: "bakery", // TODO
+		size: 2,
+		maxWorkers: 8,
+		name: "weaver", 
+		visibleName: "Weaver", 
+		cost: 250,
+		productionOptions: [
+			{
+				output: {resource: "cloth", amount: 1},
+				ingredients: [{resource: "flax", amount: 5}],
+				time: 5,
+			}	
+		]
+	},
+	{
+		sprite: "bakery",  //TODO
+		size: 4,
+		maxWorkers: 6,
+		name: "grove", 
+		visibleName: "Olive Grove", 
+		cost: 230,
+		productionOptions: [
+			{
+				output: {resource: "olives", amount: 50},
+				ingredients: [],
+				time: 12,
+			}	
+		]
+	},
+	{
+		sprite: "bakery", // TODO
+		size: 2,
+		maxWorkers: 10,
+		name: "olive-press", 
+		visibleName: "Olive Press", 
+		cost: 300,
+		productionOptions: [
+			{
+				output: {resource: "olive", amount: 5},
+				ingredients: [{resource: "olives", amount: 20}],
+				time: 5,
+			}	
+		]
+	},
+	{
+		sprite: "granary",  // TODO
+		size: 4,
+		maxWorkers: 2,
+		interface: new StorageInterface(), 
+		name: "storage2",  // TODO
+		visibleName: "Storage", 
+		cost: 120,
+		workerOptions: {sprite: 'delivery'},
+		storageOptions: {
+			capacity: 50,
+			resources: ['cloth', 'flax', 'clay', 'pot', 'olive', 'olives'],
+		},
+	},
 
 ];
 
@@ -173,7 +277,12 @@ export const tabSettings: SidebarConfig = {
 		},
 		{
 			icon: "agriculture",
-			buildings: ["farm", "bakery"]
+			buildings: [
+				"farm",
+				"bakery",
+				"flax-farm",
+				"grove",
+			]
 		},
 		{
 			icon: "science",
@@ -181,7 +290,14 @@ export const tabSettings: SidebarConfig = {
 		},
 		{
 			icon: "industry",
-			buildings: ["storage"]
+			buildings: [
+				"storage",
+				"storage2",
+				"clay-pit",
+				"pottery-workshop",
+				"weaver",
+				"olive-press",
+			]
 		},
 	]
 }
