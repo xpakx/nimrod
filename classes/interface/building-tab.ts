@@ -18,8 +18,8 @@ export class BuildingTab implements ButtonPane {
 	inactiveHoverIcon: OffscreenCanvas;
 	tabImg: HTMLImageElement;
 
-	position: Position = {x: 0, y: 0}; // TODO
-	size: Size = {width: 0, height: 0}; // TODO
+	position: Position = {x: 0, y: 0};
+	size: Size = {width: 0, height: 0};
 	buttonGap: number = 10;
 
 	buttons: Button[] = [];
@@ -87,69 +87,31 @@ export class BuildingTab implements ButtonPane {
 		ctx.drawImage(this._icon, 5, 5, this.icon.width - 10, this.icon.height - 10);
 	}
 
-	updateButtons(canvasSize: Size, menuWidth: number, tabEnd: number) {
-		const menuPadding = 20;
-		this.buttonSize = this.defaultButtonSize < menuWidth - menuPadding ? this.defaultButtonSize : menuWidth - menuPadding;
-
-		this.position.x = canvasSize.width - menuWidth + menuPadding;
-		this.position.y = 60;
-		this.size.width = menuWidth - 2*menuPadding;
-		this.size.height = tabEnd;
-		this.prepareButtons();
-	}
-
 	prepareButtons() {
-		let xStart = this.position.x;
-		let yStart = this.position.y;
 		let xMax = this.position.x + this.size.width;
 		let yMax = this.position.y + this.size.height;
-		let currentYOffset = 0;
-		let currentXOffset = 0;
 
 		this.nextPageButton = new NavButton({x: xMax - 50 - 10, y: yMax - 40}, "prev");
 		this.prevPageButton = new NavButton({x: xMax - 20 - 10, y: yMax - 40}, "next");
-		this.pageSize = -1;
 		if (this.buttons.length == 0) {
 			this.pages = 0;
 			return;
 		}
 
+		const buttonsPerRow = Math.floor(this.size.width / (this.buttonSize + this.buttonGap));
+		const rowsPerPage = Math.floor(this.size.height / (this.buttonSize + this.buttonGap));
+		this.pageSize = buttonsPerRow * rowsPerPage;
+		this.pages = Math.ceil(this.buttons.length / this.pageSize);
+		
 		for(let i = 0; i<this.buttons.length; i++) {
 			const currentButton = this.buttons[i];
 			currentButton.size.width = this.buttonSize;
 			currentButton.size.height = this.buttonSize;
-			const buttonWidth = currentButton.size.width;
-			const buttonHeight = currentButton.size.height;
-
-			let currentX = xStart + currentXOffset * (buttonWidth + this.buttonGap);
-			let currentY = yStart + currentYOffset * (buttonHeight + this.buttonGap);
-			if(currentX + buttonWidth >= xMax) {
-				currentXOffset = 0;
-				currentYOffset += 1;
-				currentX = xStart;
-				currentY = yStart + currentYOffset * (buttonHeight + this.buttonGap);
-				if (currentY + buttonHeight >= yMax) {
-					this.pageSize = i;
-					break;
-				}
-			}
-
-			currentButton.position.x = currentX;
-			currentButton.position.y = currentY;
-			
-			currentXOffset += 1;
-		}
-		if (this.pageSize < 0) {
-			this.pageSize = this.buttons.length;
-		}
-		this.pages = this.buttons.length % this.pageSize;
-		
-		for(let i = this.pageSize - 1; i<this.buttons.length; i++) {
-			const currentButton = this.buttons[i];
-			const relatedIndex = i % this.pageSize;
-			const relatedButton = this.buttons[relatedIndex];
-			currentButton.position.x = relatedButton.position.x;
-			currentButton.position.y = relatedButton.position.y;
+			const index = i % this.pageSize;
+			const column = index % buttonsPerRow;
+			const row = Math.floor(index / buttonsPerRow);
+			currentButton.position.x = this.position.x + (this.buttonSize + this.buttonGap) * column;
+			currentButton.position.y = this.position.y + (this.buttonSize + this.buttonGap) * row;
 		}
 	}
 

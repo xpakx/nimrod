@@ -56,7 +56,7 @@ export class Game {
 		this.interf.tabs = await prepareTabs(this.sprites.buildings, tabSettings);
 		this.interf.tab = 0;
 		this.interf.calculateIconsSize();
-		this.interf.recalculateTabSize();
+		this.interf.resizeTabs();
 		this.interf.calculateTabIcons();
 		this.addCityButtons();
 	}

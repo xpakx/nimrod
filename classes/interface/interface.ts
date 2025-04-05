@@ -73,11 +73,18 @@ export class InterfaceLayer {
 		}
 	}
 
-	recalculateTabSize() {
+	resizeTabs() {
 		this.buildingMenuHeight = 60 + Math.max(300, this.tabWidth * this.tabs.length);
-		if (this.tab  != undefined) {
-			const tab = this.tabs[this.tab];
-			tab.updateButtons(this.canvasSize, this.menuWidth - this.tabWidth, this.buildingMenuHeight);
+		for (let tab of this.tabs) {
+			const menuPadding = 20;
+			const menuWidth = this.menuWidth - this.tabWidth;
+			tab.buttonSize = tab.defaultButtonSize < menuWidth - menuPadding ? tab.defaultButtonSize : menuWidth - menuPadding;
+
+			tab.position.x = this.canvasSize.width - menuWidth + menuPadding;
+			tab.position.y = 60;
+			tab.size.width = menuWidth - 2*menuPadding;
+			tab.size.height = this.buildingMenuHeight;
+			tab.prepareButtons();
 		}
 	}
 
@@ -267,7 +274,6 @@ export class InterfaceLayer {
 		const tab = this.getTabUnderCursor(position);
 		if (tab != undefined) {
 			this.tab = tab;
-			this.recalculateTabSize();
 			return undefined;
 		}
 		if(this.tab != undefined) {
