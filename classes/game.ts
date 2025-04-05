@@ -398,23 +398,6 @@ export class Game {
 				this.state.debugMode = !this.state.debugMode;
 				LoggerFactory.getInstance().updateAllLevels(this.state.debugMode ? "debug" : "error");
 				break;
-			case 'F8':
-				this.toBattle();
-				break;
-			case 'F7':
-				this.map.floydWarshall();
-				break;
-			case 'F6':
-				if (!this.state.debugMode) {
-					break; 
-				}
-				if (this.map.isRoad(this.map.isoPlayerMouse)) {
-					this.state.pedestrians.push(new Actor(this.sprites.actors['test'], this.map.isoPlayerMouse));
-				} else if (this.map.isBuilding(this.map.isoPlayerMouse)) {
-					let building = this.map.getBuilding(this.map.isoPlayerMouse)!;
-					building.setWorker(this.sprites.actors['test']);
-				}
-				break;
 			case '1':
 				const mapData = this.serializeMap();
 				localStorage.setItem('savedMap', JSON.stringify(mapData));

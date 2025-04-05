@@ -1,4 +1,4 @@
-import { Building, BuildingInterface } from "./building/buildings.js";
+import { BuildingInterface } from "./building/buildings.js";
 import { GameState } from "./game-state.js";
 import { Game } from "./game.js";
 import { Action } from "./interface/actions.js";
@@ -26,13 +26,13 @@ export class QuestLayer {
 			new QuestMarker(
 				{x: 0, y: 0}, 
 				{width: 20, height: 30},
-				"Quest 1"
+				{name: "Quest 1", description: "", battle: { map: "battle.json" }},
 			));
 		this.markers.push(
 			new QuestMarker(
 				{x: 100, y: 100},
 				{width: 20, height: 30},
-				"Quest 2"
+				{name: "Quest 2", description: ""},
 			));
 	}
 
@@ -65,7 +65,6 @@ export class QuestLayer {
 			if(marker.inButton(this.playerMouse)) {
 				const action = marker.getClickAction();
 				if (action && action.action == "open") {
-					console.log("opening");
 					const quest = action.interface as QuestInterface;
 					game.interf.buildingInterface = quest;
 					quest.openQuest(game.state);
@@ -80,16 +79,13 @@ export class QuestMarker implements Button {
     position: Position;
     size: Size;
     locked: boolean;
-    name: string;
     interf: QuestInterface;
 
-    constructor(position: Position, size: Size, name: string, locked: boolean = true) {
+    constructor(position: Position, size: Size, quest: Quest, locked: boolean = true) {
 	    this.position = position;
 	    this.size = size;
 	    this.locked = locked;
-	    this.name = name;
-	    this.interf = new QuestInterface();
-	    this.interf.name = this.name;
+	    this.interf = new QuestInterface(quest);
     }
 
     inButton(position: Position): boolean {
@@ -129,12 +125,22 @@ export class QuestMarker implements Button {
     }
 }
 
-
 export class QuestInterface extends BuildingInterface {
-	name: string = "";
+	quest: Quest;
+	goButton: Button;
+
+	constructor(quest: Quest) {
+		super();
+		this.quest = quest;
+		let action: Action = { action: "goTo", argument: "City" }; // TODO
+		if (quest.battle) {
+			action = { action: "goTo", argument: "Battle" };  // TODO
+
+		}
+		this.goButton =  new GoButton({x: 100, y: 100}, action);
+	}
 
 	renderInterface() { 
-		console.log("Opened");
 		const width = this.size.width;
 		const height = this.size.height;
 		const x = 0;
@@ -153,7 +159,7 @@ export class QuestInterface extends BuildingInterface {
 
 		this.context.fillStyle = '#fff';
 		this.context.font = '24px Arial';
-		this.context.fillText(this.name, nameX, nameY);
+		this.context.fillText(this.quest.name, nameX, nameY);
 	}
 
 	// TODO: should probably make more general interface
@@ -168,6 +174,77 @@ export class QuestInterface extends BuildingInterface {
 		this.size.height = 300;
 		const middleOfMap = (state.canvasSize.height - state.topPanelHeight) / 2  + state.topPanelHeight;
 		this.position.y = middleOfMap - this.size.height / 2;
+		const goButtonMargin = 20;
+		this.goButton.position.x = this.position.x + this.size.width - goButtonMargin - this.goButton.size.width;
+		this.goButton.position.y = this.position.y + this.size.height - goButtonMargin - this.goButton.size.height;
 	}
 
+	drawInterface(context: CanvasRenderingContext2D, deltaTime: number, state: GameState) {
+		super.drawInterface(context, deltaTime, state);
+		this.goButton.draw(context, false);
+	}
+
+	click(position: Position): Action | undefined {
+		if (this.goButton.inButton(position)) {
+			return this.goButton.getClickAction();
+		}
+
+		return undefined;
+	}
+}
+
+
+export interface Quest {
+	name: string;
+	description: string;
+	battle?: BattleQuest;
+}
+
+export interface BattleQuest {
+	map: string;
+}
+
+export class GoButton implements Button {
+    image: OffscreenCanvas;
+    context: OffscreenCanvasRenderingContext2D;
+    hover: boolean;
+    position: Position;
+    size: Size;
+    action: Action;
+
+    constructor(position: Position, action: Action) {
+	    this.size = {width: 20, height: 20};
+	    this.image = new OffscreenCanvas(this.size.width, this.size.height);
+	    this.context = this.image.getContext("2d")!; // TODO
+	    this.position = position;
+	    this.hover = false;
+	    this.action = action;
+	    this.drawImage();
+    }
+
+    inButton(position: Position): boolean {
+	    if(position.x < this.position.x || position.x > this.position.x + this.size.width) {
+		    return false;
+	    }
+	    if(position.y < this.position.y || position.y > this.position.y + this.size.height) {
+		    return false;
+	    }
+	    return true;
+    }
+
+    drawImage(): void {
+	    this.context.fillStyle = '#dfd';
+	    this.context.beginPath();
+	    this.context.arc(this.size.width/2, this.size.width/2, this.size.width/2, 0, 2 * Math.PI);
+	    this.context.fill();
+    }
+
+    getClickAction(): Action | undefined {
+	    return this.action;
+    }
+
+
+    draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, _hovered: boolean): void {
+		context.drawImage(this.image, this.position.x, this.position.y);
+	}
 }
