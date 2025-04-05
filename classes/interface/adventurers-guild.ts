@@ -395,8 +395,7 @@ export class NavButton implements Button {
 	    };
     }
 
-
     draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, hovered: boolean): void {
 		context.drawImage(this.image, this.position.x, this.position.y);
-	}
+    }
 }

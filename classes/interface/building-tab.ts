@@ -1,15 +1,14 @@
 import { BuildingSprite } from "../building/buildings.js";
 import { Position, Size } from "../map-layer.js";
 import { Action } from "./actions.js";
-import { Button } from "./button.js";
+import { NavButton } from "./adventurers-guild.js";
+import { Button, ButtonPane } from "./button.js";
 
-export class BuildingTab {
+export class BuildingTab implements ButtonPane {
 	name: string;
-	buildings: Button[];
 	_icon: HTMLImageElement;
 	active: boolean = false;
 	itemOffset: number = 0;
-	activeButtons: Button[] = [];
 	defaultButtonSize = 125;
 	buttonSize = this.defaultButtonSize;
 	mousePosition: Position = {x: -1, y: -1};
@@ -19,9 +18,22 @@ export class BuildingTab {
 	inactiveHoverIcon: OffscreenCanvas;
 	tabImg: HTMLImageElement;
 
+	position: Position = {x: 0, y: 0}; // TODO
+	size: Size = {width: 0, height: 0}; // TODO
+	buttonGap: number = 10;
+
+	buttons: Button[] = [];
+
+	nextPageButton?: Button;
+	prevPageButton?: Button;
+
+	pageSize: number = 1;
+	page: number = 0;
+	pages: number = 0;
+
 	constructor(name: string, buildings: BuildingButton[], icon: HTMLImageElement, tab: HTMLImageElement) {
 		this.name = name;
-		this.buildings = buildings;
+		this.buttons = buildings;
 		this._icon = icon;
 		this.icon =  new OffscreenCanvas(100, 100);
 		this.inactiveIcon =  new OffscreenCanvas(100, 100);
@@ -75,65 +87,135 @@ export class BuildingTab {
 		ctx.drawImage(this._icon, 5, 5, this.icon.width - 10, this.icon.height - 10);
 	}
 
-	prepareButtons(canvasSize: Size, menuWidth: number, tabEnd: number) {
-		this.activeButtons = [];
+	updateButtons(canvasSize: Size, menuWidth: number, tabEnd: number) {
 		const menuPadding = 20;
 		this.buttonSize = this.defaultButtonSize < menuWidth - menuPadding ? this.defaultButtonSize : menuWidth - menuPadding;
-		const buttonMargin = 10;
 
-		let xStart = canvasSize.width - menuWidth + menuPadding;
-		let xMax = canvasSize.width - menuPadding;
+		this.position.x = canvasSize.width - menuWidth + menuPadding;
+		this.position.y = 60;
+		this.size.width = menuWidth - 2*menuPadding;
+		this.size.height = tabEnd;
+		this.prepareButtons();
+	}
+
+	prepareButtons() {
+		let xStart = this.position.x;
+		let yStart = this.position.y;
+		let xMax = this.position.x + this.size.width;
+		let yMax = this.position.y + this.size.height;
 		let currentYOffset = 0;
 		let currentXOffset = 0;
 
-		for(let i = this.itemOffset; i<this.buildings.length; i++) {
-			let currentX = xStart + currentXOffset * (this.buttonSize + buttonMargin);
-			let currentY = 60 + currentYOffset * (this.buttonSize + buttonMargin);
-			if(currentX + this.buttonSize >= xMax) {
+		this.nextPageButton = new NavButton({x: xMax - 50 - 10, y: yMax - 40}, "prev");
+		this.prevPageButton = new NavButton({x: xMax - 20 - 10, y: yMax - 40}, "next");
+		this.pageSize = -1;
+		if (this.buttons.length == 0) {
+			this.pages = 0;
+			return;
+		}
+
+		for(let i = 0; i<this.buttons.length; i++) {
+			const currentButton = this.buttons[i];
+			currentButton.size.width = this.buttonSize;
+			currentButton.size.height = this.buttonSize;
+			const buttonWidth = currentButton.size.width;
+			const buttonHeight = currentButton.size.height;
+
+			let currentX = xStart + currentXOffset * (buttonWidth + this.buttonGap);
+			let currentY = yStart + currentYOffset * (buttonHeight + this.buttonGap);
+			if(currentX + buttonWidth >= xMax) {
 				currentXOffset = 0;
 				currentYOffset += 1;
 				currentX = xStart;
-				currentY = 60 + currentYOffset * (this.buttonSize + buttonMargin);
-				if (currentY >= tabEnd) {
-					return;
+				currentY = yStart + currentYOffset * (buttonHeight + this.buttonGap);
+				if (currentY + buttonHeight >= yMax) {
+					this.pageSize = i;
+					break;
 				}
 			}
 
-			this.buildings[i].position.x = currentX;
-			this.buildings[i].position.y = currentY;
+			currentButton.position.x = currentX;
+			currentButton.position.y = currentY;
 			
-			this.activeButtons.push(this.buildings[i]);
-
 			currentXOffset += 1;
 		}
-	}
-
-	draw(context: CanvasRenderingContext2D) {
-		for(let button of this.activeButtons) {
-			let hover = this.inButton(this.mousePosition, button);
-			button.draw(context, hover);
+		if (this.pageSize < 0) {
+			this.pageSize = this.buttons.length;
+		}
+		this.pages = this.buttons.length % this.pageSize;
+		
+		for(let i = this.pageSize - 1; i<this.buttons.length; i++) {
+			const currentButton = this.buttons[i];
+			const relatedIndex = i % this.pageSize;
+			const relatedButton = this.buttons[relatedIndex];
+			currentButton.position.x = relatedButton.position.x;
+			currentButton.position.y = relatedButton.position.y;
 		}
 	}
 
-	onMouse(position: Position) {
-		this.mousePosition = position;
+	draw(context: CanvasRenderingContext2D, mousePosition: Position) {
+		const buttonEnd = Math.min(this.itemOffset + this.pageSize, this.buttons.length);
+		for (let i = this.itemOffset; i < buttonEnd; i++) {
+			const button = this.buttons[i];
+			const hovered = button.inButton(mousePosition);
+			button.draw(context, hovered);
+		}
+
+		if (this.pages <= 1) {
+			return;
+		}
+		if (this.prevPageButton) {
+			const hovered = this.prevPageButton.inButton(mousePosition);
+			this.prevPageButton.draw(context, hovered);
+		}
+		if (this.nextPageButton) {
+			const hovered = this.nextPageButton.inButton(mousePosition);
+			this.nextPageButton.draw(context, hovered);
+		}
 	}
 
-	inButton(position: Position, button: Button): boolean {
-		if(position.x < button.position.x || position.x > button.position.x + this.buttonSize) {
-			return false;
-		}
-		if(position.y < button.position.y || position.y > button.position.y + this.buttonSize) {
-			return false;
-		}
-		return true;
-	}
-
-	click(position: Position): Action | undefined { // TODO
-		for(let button of this.activeButtons) {
-			if(this.inButton(position, button)) {
+	buttonAt(position: Position): Action | undefined {
+		const buttonEnd = Math.min(this.itemOffset + this.pageSize, this.buttons.length);
+		for (let i = this.itemOffset; i < buttonEnd; i++) {
+			const button = this.buttons[i];
+			if(button.inButton(position)) {
 				return button.getClickAction();
 			}
+		}
+		return undefined;
+	}
+
+	hasPrevPage(): boolean {
+		return this.itemOffset > 0;
+	}
+
+	hasNextPage(): boolean {
+		const itemOffsetEnd = this.itemOffset + this.pageSize;
+		const lastItemIndex = this.buttons.length - 1;
+		return itemOffsetEnd < lastItemIndex;
+	}
+
+	toPrevPage() {
+		if (!this.hasPrevPage()) return;
+		this.page -= 1;
+		this.itemOffset = this.pageSize * this.page;
+	}
+
+	toNextPage() {
+		if (!this.hasNextPage()) return;
+		this.page += 1;
+		this.itemOffset = this.pageSize * this.page;
+	}
+
+	navButtonAt(position: Position): Action | undefined {
+		if (this.pages <= 1) {
+			return;
+		}
+		if (this.nextPageButton && this.nextPageButton.inButton(position)) {
+			return this.nextPageButton.getClickAction();
+		}
+		if (this.prevPageButton && this.prevPageButton.inButton(position)) {
+			return this.prevPageButton.getClickAction();
 		}
 		return undefined;
 	}
@@ -165,8 +247,14 @@ export class BuildingButton implements Button {
 		this.drawImage();
 	}
 
-	inButton(_position: Position): boolean {
-		return false;
+	inButton(position: Position): boolean {
+		if(position.x < this.position.x || position.x > this.position.x + this.buttonSize) {
+			return false;
+		}
+		if(position.y < this.position.y || position.y > this.position.y + this.buttonSize) {
+			return false;
+		}
+		return true;
 	}
 
 	drawImage(): void {

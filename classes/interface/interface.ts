@@ -3,7 +3,7 @@ import { GameState } from "../game-state.js";
 import { Position, Size } from "../map-layer.js";
 import { Action } from "./actions.js";
 import { BuildingTab } from "./building-tab.js";
-import { Button, ButtonContainer } from "./button.js";
+import { Button, ButtonContainer, ButtonPane } from "./button.js";
 import { Dialogue, DialogueParsed } from "./dialogue.js";
 
 export class InterfaceLayer {
@@ -33,9 +33,6 @@ export class InterfaceLayer {
 	}
 
 	onMouse(position: Position) {
-		if(this.tab != undefined) {
-			this.tabs[this.tab].onMouse(position);
-		}
 		this.mousePosition = position;
 	}
 
@@ -62,7 +59,7 @@ export class InterfaceLayer {
 		this.drawTabs(context);
 		this.renderDialogueBox(context, deltaTime);
 		if (this.tab  != undefined) {
-			this.tabs[this.tab].draw(context);
+			this.tabs[this.tab].draw(context, this.mousePosition);
 		}
 		if (this.buildingInterface) {
 			this.buildingInterface.drawInterface(context, deltaTime, state);
@@ -79,13 +76,15 @@ export class InterfaceLayer {
 	recalculateTabSize() {
 		this.buildingMenuHeight = 60 + Math.max(300, this.tabWidth * this.tabs.length);
 		if (this.tab  != undefined) {
-			this.tabs[this.tab].prepareButtons(this.canvasSize, this.menuWidth - this.tabWidth, this.buildingMenuHeight);
+			const tab = this.tabs[this.tab];
+			tab.updateButtons(this.canvasSize, this.menuWidth - this.tabWidth, this.buildingMenuHeight);
 		}
 	}
 
 	calculateTabIcons() {
 		for (let tab of this.tabs) {
-			tab.prepareIcon(this.tabWidth);
+			const buildingTab = tab;
+			buildingTab.prepareIcon(this.tabWidth);
 		}
 	}
 
@@ -219,14 +218,15 @@ export class InterfaceLayer {
 		for(let i = 0; i<this.tabs.length; i++) {
 			const hover = this.inTab(this.mousePosition, i);
 			const currentTab = i == this.tab;
-			let icon = this.tabs[i].icon;
+			const tab = this.tabs[i];
+			let icon = tab.icon;
 
 			if(hover && currentTab) {
-				icon = this.tabs[i].hoverIcon;
+				icon = tab.hoverIcon;
 			} else if(hover && !currentTab) {
-				icon = this.tabs[i].inactiveHoverIcon;
+				icon = tab.inactiveHoverIcon;
 			} else if(!currentTab) {
-				icon = this.tabs[i].inactiveIcon;
+				icon = tab.inactiveIcon;
 			} 
 			context.drawImage(icon, this.canvasSize.width - this.menuWidth, start + i*tabSize);
 		}
@@ -271,10 +271,20 @@ export class InterfaceLayer {
 			return undefined;
 		}
 		if(this.tab != undefined) {
-			let result = this.tabs[this.tab].click(position);
+			const tab = this.tabs[this.tab];
+			let result = tab.buttonAt(position);
 			if(result != undefined) {
 				return result;
 			}
+
+			const action = tab.navButtonAt(position);
+			if (action && action.action == "page") {
+				if (action.argument == "next") {
+					tab.toNextPage();
+				} else {
+					tab.toPrevPage();
+				}
+			} 
 		}
 		for(let row of this.buttons) {
 			const action = row.buttonAt(position);
