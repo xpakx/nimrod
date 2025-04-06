@@ -271,47 +271,30 @@ export class HeroButtonPane implements ButtonPane {
 		this.itemOffset = this.pageSize * this.page;
 	}
 
+
 	prepareButtons() {
-		let xStart = this.position.x;
-		let yStart = this.position.y;
 		let xMax = this.position.x + this.size.width;
 		let yMax = this.position.y + this.size.height;
-		let currentYOffset = 0;
-		let currentXOffset = 0;
 
 		this.nextPageButton = new NavButton({x: xMax - 50 - 10, y: yMax - 40}, "prev");
 		this.prevPageButton = new NavButton({x: xMax - 20 - 10, y: yMax - 40}, "next");
 
-		for(let i = 0; i<this.buttons.length; i++) {
-			const currentButton = this.buttons[i];
-			const buttonWidth = currentButton.size.width;
-			const buttonHeight = currentButton.size.height;
-
-			let currentX = xStart + currentXOffset * (buttonWidth + this.buttonGap);
-			let currentY = yStart + currentYOffset * (buttonHeight + this.buttonGap);
-			if(currentX + buttonWidth >= xMax) {
-				currentXOffset = 0;
-				currentYOffset += 1;
-				currentX = xStart;
-				currentY = yStart + currentYOffset * (buttonHeight + this.buttonGap);
-				if (currentY + buttonHeight >= yMax) {
-					this.pageSize = i;
-					break;
-				}
-			}
-
-			currentButton.position.x = currentX;
-			currentButton.position.y = currentY;
-			
-			currentXOffset += 1;
+		if (this.buttons.length == 0) {
+			return;
 		}
 
-		for(let i = this.pageSize - 1; i<this.buttons.length; i++) {
+		const buttonSize = this.buttons[0].size;
+		const buttonsPerRow = Math.floor(this.size.width / (buttonSize.width + this.buttonGap));
+		const rowsPerPage = Math.floor(this.size.height / (buttonSize.height + this.buttonGap));
+		this.pageSize = buttonsPerRow * rowsPerPage;
+		
+		for(let i = 0; i<this.buttons.length; i++) {
 			const currentButton = this.buttons[i];
-			const relatedIndex = i % this.pageSize;
-			const relatedButton = this.buttons[relatedIndex];
-			currentButton.position.x = relatedButton.position.x;
-			currentButton.position.y = relatedButton.position.y;
+			const index = i % this.pageSize;
+			const column = index % buttonsPerRow;
+			const row = Math.floor(index / buttonsPerRow);
+			currentButton.position.x = this.position.x + (buttonSize.width + this.buttonGap) * column;
+			currentButton.position.y = this.position.y + (buttonSize.height + this.buttonGap) * row;
 		}
 	}
 

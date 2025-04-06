@@ -3,7 +3,7 @@ import { GameState } from "../game-state.js";
 import { Position, Size } from "../map-layer.js";
 import { Action } from "./actions.js";
 import { BuildingTab } from "./building-tab.js";
-import { Button, ButtonContainer, ButtonPane } from "./button.js";
+import { Button, ButtonContainer } from "./button.js";
 import { Dialogue, DialogueParsed } from "./dialogue.js";
 
 export class InterfaceLayer {
