@@ -148,13 +148,11 @@ export class BuildingTab implements ButtonPane {
 	}
 
 	hasPrevPage(): boolean {
-		return this.itemOffset > 0;
+		return this.page > 0;
 	}
 
 	hasNextPage(): boolean {
-		const itemOffsetEnd = this.itemOffset + this.pageSize;
-		const lastItemIndex = this.buttons.length - 1;
-		return itemOffsetEnd < lastItemIndex;
+		return this.page < this.pages - 1;
 	}
 
 	toPrevPage() {
