@@ -184,10 +184,23 @@ export class Building {
 
 	tick(deltaTime: number) {
 		if(!this.worker || this.worker.isAwayFromHome || !this.workerSpawn) {
-			return false;
+			return;
 		}
 		this.worker.timeSinceLastReturn += deltaTime;
+
 		if(this.worker.timeSinceLastReturn >= this.worker.workStartTime) {
+			if(this.worker.resource) {
+				const amount = this.getResourceAmount(this.worker.resource);
+				if (amount == 0 && this.worker.inventory == 0) {
+					return;
+				}
+				const workerNeeds = this.worker.storage - this.worker.inventory;
+				const deliveryFactor = 10; // TODO: make this configurable
+				const maxToTake = Math.floor(workerNeeds/deliveryFactor);
+				const toTake = Math.min(maxToTake, amount);
+				this.storage[this.worker.resource] -= toTake;
+				this.worker.inventory += deliveryFactor * toTake;
+			}
 			this.worker.timeSinceLastReturn = 0;
 			this.worker.isAwayFromHome = true;
 			this.worker.dead = false;
@@ -196,7 +209,10 @@ export class Building {
 	}
 
 	canSpawnWorker(): boolean {
-		return this.readyToSpawn && this.workerSpawn != undefined && this.worker != undefined && this.workers > 0;
+		return this.readyToSpawn && 
+			this.workerSpawn != undefined && 
+			this.worker != undefined && 
+			this.workers > 0;
 	}
 
 	spawnWorker(): BuildingWorker {
@@ -345,7 +361,8 @@ export class BuildingWorker extends Actor {
 	timeSinceLastReturn: number = 0;
 	workStartTime: number = 10;
 	resource?: string;
-	inventory: number = 50;
+	inventory: number = 0;
+	storage: number = 50; // TODO
 	repairing: boolean;
 	resourceQuality?: number;
 
@@ -373,7 +390,6 @@ export class BuildingWorker extends Actor {
 		this.isAwayFromHome = false;
 		this.travelFinished = false;
 		this.traveledSquares = 0;
-		this.inventory = 50; // TODO
 		this.goal = undefined;
 	}
 
