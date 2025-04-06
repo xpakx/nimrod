@@ -15,6 +15,7 @@ export interface BuildingPrototype {
 	workerOptions?: WorkerOptions;
 	houseOptions?: HouseOptions;
 	storageOptions?: StorageOptions;
+	shopOptions?: ShopOptions;
 	productionOptions?: Recipe[];
 	workforceType?: WorkforceType;
 }
@@ -34,6 +35,10 @@ export interface HouseOptions {
 export interface StorageOptions {
 	resources?: string[];
 	capacity?: number;
+}
+
+export interface ShopOptions {
+	accepts: string[];
 }
 
 export class BuildingSprite {
@@ -81,6 +86,8 @@ export class Building {
 	recipes?: Recipe[];
 	accepts: Set<string>;
 	logger: Logger = getLogger("Building");
+	shopNeeds: string[] = [];
+	shop: boolean = false;
 
 	workers: number = 0;
 	maxWorkers: number = 0;
@@ -101,6 +108,7 @@ export class Building {
 		this.accepts = new Set<string>();
 		if(prototype.workerOptions) this.applyWorkerOptions(prototype.workerOptions);
 		if(prototype.productionOptions) this.applyProductionOptions(prototype.productionOptions);
+		if(prototype.shopOptions) this.applyShopOptions(prototype.shopOptions);
 		if(prototype.workforceType) this.workforce = prototype.workforceType;
 	}
 
@@ -120,6 +128,15 @@ export class Building {
 				this.storage[ingredient.resource] = 0;
 				this.accepts.add(ingredient.resource);
 			}
+		}
+	}
+
+	applyShopOptions(options: ShopOptions) {
+		this.shop = true;
+		this.shopNeeds = options.accepts;
+		for (let resource of this.shopNeeds) {
+			this.storage[resource] = 0;
+			this.accepts.add(resource);
 		}
 	}
 

@@ -218,7 +218,70 @@ export const buildingSettings: BuildingConfig[] = [
 			resources: ['cloth', 'flax', 'clay', 'pot', 'olive', 'olives'],
 		},
 	},
-
+	{
+		sprite: "well", // TODO
+		size: 2,
+		maxWorkers: 2,
+		name: "food-shop",
+		visibleName: "Food Shop", 
+		interface: new StorageInterface(), // TODO
+		cost: 15,
+		workerOptions: {
+			sprite: "test",
+			resource: "food"
+		},
+		shopOptions: {
+			accepts: ["bread"],
+		}
+	},
+	{
+		sprite: "well", // TODO
+		size: 2,
+		maxWorkers: 2,
+		name: "ceramic-shop",
+		visibleName: "Ceramics Shop", 
+		interface: new StorageInterface(), // TODO
+		cost: 15,
+		workerOptions: {
+			sprite: "test",
+			resource: "ceramics"
+		},
+		shopOptions: {
+			accepts: ["pot"],
+		}
+	},
+	{
+		sprite: "well", // TODO
+		size: 2,
+		maxWorkers: 2,
+		name: "textile-shop",
+		visibleName: "Textiles Shop", 
+		interface: new StorageInterface(), // TODO
+		cost: 15,
+		workerOptions: {
+			sprite: "test",
+			resource: "textiles"
+		},
+		shopOptions: {
+			accepts: ["cloth"],
+		}
+	},
+	{
+		sprite: "well", // TODO
+		size: 2,
+		maxWorkers: 2,
+		name: "olive-shop",
+		visibleName: "Olive Shop", 
+		interface: new StorageInterface(), // TODO
+		cost: 15,
+		workerOptions: {
+			sprite: "test",
+			resource: "olive"
+		},
+		shopOptions: {
+			accepts: ["olive"],
+		}
+	},
 ];
 
 
@@ -265,7 +328,15 @@ export const tabSettings: SidebarConfig = {
 	tabs: [
 		{
 			icon: "housing",
-			buildings: ["home", "well", "inspector"]
+			buildings: [
+				"home",
+				"well",
+				"inspector",
+				"food-shop",
+				"olive-shop",
+				"textile-shop",
+				"ceramic-shop",
+			]
 		},
 		{
 			icon: "religion",

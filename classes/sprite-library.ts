@@ -1,5 +1,5 @@
 import { ActorSprite } from "./actor.js";
-import { BuildingInterface, BuildingPrototype, BuildingSprite, HouseOptions, Recipe, StorageOptions, TilingSprite, WorkerOptions, WorkforceType } from "./building/buildings.js";
+import { BuildingInterface, BuildingPrototype, BuildingSprite, HouseOptions, Recipe, ShopOptions, StorageOptions, TilingSprite, WorkerOptions, WorkforceType } from "./building/buildings.js";
 import { getLogger, Logger } from "./logger.js";
 import { Size } from "./map-layer.js";
 
@@ -23,6 +23,8 @@ import { Size } from "./map-layer.js";
  *   If provided, the building will function as a housing building.
  * @property {StorageOptions} [storageOptions] - Configuration options for storage functionality (optional).
  *   If provided, the building will function as a storage facility, allowing resources to be stored and retrieved.
+ * @property {ShopOptions[]} [shopOptions] - Configuration options for shops (optional).
+ *   If provided, the building will function as a shop, delivering resources to houses. 
  * @property {Recipe[]} [productionOptions] - Configuration options for production capabilities (optional).
  *   If provided, the building will function as a production facility, converting input resources into output resources. 
  * @property {WorkforceType} [workforceType] - Type of workforce.
@@ -40,6 +42,7 @@ export interface BuildingConfig {
 	houseOptions?: HouseOptions;
 	storageOptions?: StorageOptions;
 	productionOptions?: Recipe[];
+	shopOptions?: ShopOptions;
 	workforceType?: WorkforceType;
 }
 
@@ -222,6 +225,7 @@ export class SpriteLibrary {
 			houseOptions: buildingConfig.houseOptions,
 			storageOptions: buildingConfig.storageOptions,
 			productionOptions: buildingConfig.productionOptions,
+			shopOptions: buildingConfig.shopOptions,
 			maxWorkers: buildingConfig.maxWorkers,
 		}
 		if (buildingConfig.workerOptions) {

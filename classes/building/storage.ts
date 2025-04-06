@@ -428,6 +428,7 @@ export class DeliveryScheduler {
 	onMinuteEnd(buildings: Building[]) {
 		for (let building of buildings) {
 			this.checkRecipes(building);
+			this.checkShopOrders(building);
 		}
 	}
 
@@ -436,6 +437,13 @@ export class DeliveryScheduler {
 		for (let recipe of building.recipes) {
 			this.prepareOutOrders(building, recipe);
 			this.prepareInOrders(building, recipe);
+		}
+	}
+
+	checkShopOrders(building: Building) {
+		if (!building.shop) return;
+		for (let resource of building.shopNeeds) {
+			this.prepareShopOrders(building, resource);
 		}
 	}
 
@@ -452,6 +460,14 @@ export class DeliveryScheduler {
 		const output = recipe.output.resource;
 		this.logger.debug(`Checking out order: ${output} (${amount})`);
 		if (amount >= building.capacity) this.prepareOrder(building, output, amount, "from");
+	}
+
+	prepareShopOrders(building: Building, resource: string) {
+		const amount = building.getResourceAmount(resource);
+		this.logger.debug(`Checking shop order: ${resource} (${amount})`);
+		if (amount < 10) {
+			this.prepareOrder(building, resource, building.capacity - amount, "to");
+		}
 	}
 
 	prepareOrder(building: Building, resource: string, amount: number, type: "to" | "from") {
