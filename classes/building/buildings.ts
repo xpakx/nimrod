@@ -182,30 +182,35 @@ export class Building {
 		this.updateWorkerHome()
 	}
 
+
+	updateDeliveryWorkerStorage(worker: BuildingWorker): boolean {
+		if(!worker.resource) return true;
+		const amount = this.getResourceAmount(worker.resource);
+		if (amount == 0 && worker.inventory == 0) {
+			return false;
+		}
+		const workerNeeds = worker.storage - worker.inventory;
+		const deliveryFactor = 10; // TODO: make this configurable
+		const maxToTake = Math.floor(workerNeeds/deliveryFactor);
+		const toTake = Math.min(maxToTake, amount);
+		this.storage[worker.resource] -= toTake;
+		worker.inventory += deliveryFactor * toTake;
+		return true;
+	}
+
 	tick(deltaTime: number) {
 		if(!this.worker || this.worker.isAwayFromHome || !this.workerSpawn) {
 			return;
 		}
 		this.worker.timeSinceLastReturn += deltaTime;
 
-		if(this.worker.timeSinceLastReturn >= this.worker.workStartTime) {
-			if(this.worker.resource) {
-				const amount = this.getResourceAmount(this.worker.resource);
-				if (amount == 0 && this.worker.inventory == 0) {
-					return;
-				}
-				const workerNeeds = this.worker.storage - this.worker.inventory;
-				const deliveryFactor = 10; // TODO: make this configurable
-				const maxToTake = Math.floor(workerNeeds/deliveryFactor);
-				const toTake = Math.min(maxToTake, amount);
-				this.storage[this.worker.resource] -= toTake;
-				this.worker.inventory += deliveryFactor * toTake;
-			}
-			this.worker.timeSinceLastReturn = 0;
-			this.worker.isAwayFromHome = true;
-			this.worker.dead = false;
-			this.readyToSpawn = true;
-		}
+		if(this.worker.timeSinceLastReturn < this.worker.workStartTime) return;
+		if (!this.updateDeliveryWorkerStorage(this.worker)) return;
+
+		this.worker.timeSinceLastReturn = 0;
+		this.worker.isAwayFromHome = true;
+		this.worker.dead = false;
+		this.readyToSpawn = true;
 	}
 
 	canSpawnWorker(): boolean {
