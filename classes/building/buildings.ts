@@ -16,6 +16,7 @@ export interface BuildingPrototype {
 	houseOptions?: HouseOptions;
 	storageOptions?: StorageOptions;
 	productionOptions?: Recipe[];
+	workforceType?: WorkforceType;
 }
 
 export interface WorkerOptions {
@@ -83,6 +84,7 @@ export class Building {
 
 	workers: number = 0;
 	maxWorkers: number = 0;
+	workforce: WorkforceType = "normal"; // TODO
 
 	constructor(prototype: BuildingPrototype, position: Position, accepted: boolean = true) {
 		this.sprite =  prototype.sprite;
@@ -99,6 +101,7 @@ export class Building {
 		this.accepts = new Set<string>();
 		if(prototype.workerOptions) this.applyWorkerOptions(prototype.workerOptions);
 		if(prototype.productionOptions) this.applyProductionOptions(prototype.productionOptions);
+		if(prototype.workforceType) this.workforce = prototype.workforceType;
 	}
 
 	applyWorkerOptions(options: WorkerOptions) {
@@ -597,3 +600,5 @@ interface Ingredient {
 	resource: string;
 	amount: number;
 }
+
+export type WorkforceType = "normal" | "elite" | "warrior";

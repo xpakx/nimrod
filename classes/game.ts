@@ -4,7 +4,6 @@ import { Action } from "./interface/actions.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
 import { SpriteConfig, BuildingConfig, SpriteLibrary } from "./sprite-library.js";
 import { prepareTabs, SidebarConfig } from "./interface/sidebar.js";
-import { Actor } from "./actor.js";
 import { BattleActor, HeroType } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
 import { getLogger, Logger, LoggerFactory } from "./logger.js";
@@ -413,6 +412,13 @@ export class Game {
 				this.state.money += 500;
 				this.cityLogic.updateCost(this.map, this.state);
 				break;
+			case '4':
+				let hero = new BattleActor(
+					this.sprites.actors['delivery'],
+					{x: 0, y: 0}
+				); 
+				hero.portrait = this.sprites.avatars['ratman'];
+				this.state.allHeroes.push(hero);
 			case 'c':
 				if (!this.state.debugMode) {
 					break; 
@@ -563,7 +569,7 @@ export class Game {
 	spawnMigrants() {
 		this.logger.debug("Spawning migrants");
 
-		const happiness = this.getHouses().reduce((sum, b) => sum + b.getHappiness(), 0);
+		const happiness = this.getNormalWorkforce().reduce((sum, b) => sum + b.getHappiness(), 0);
 		this.logger.debug(`Current happines: ${happiness}`);
 		// TODO
 		if (happiness < 0) {
@@ -810,22 +816,24 @@ export class Game {
 	}
 
 
-	getHouses(): House[] {
+	getNormalWorkforce(): House[] {
 		return this.map.buildings
 		.filter(x => x instanceof House)
+		.filter(x => x.workforce == "normal")
 		.filter(x => x.population > 0);
 	}
 
-	getBuildingsWithWorkers(): Building[] {
+	getBuildingsWithNormalWorkers(): Building[] {
 		return this.map.buildings
+		.filter(x => x.workforce == "normal")
 		.filter(x => x.maxWorkers > 0);
 	}
 
 	assignWorkers() {
 		// TODO: probably not all population should be available
 		const workforce = this.state.population;
-		const houses = this.getHouses();
-		const buildings = this.getBuildingsWithWorkers();
+		const houses = this.getNormalWorkforce();
+		const buildings = this.getBuildingsWithNormalWorkers();
 
 		const workersNeeded = buildings.reduce((sum, b) => sum + b.maxWorkers, 0);
 		this.logger.info(`Needed workers: ${workersNeeded}`)

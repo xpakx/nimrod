@@ -1,5 +1,5 @@
 import { ActorSprite } from "./actor.js";
-import { BuildingInterface, BuildingPrototype, BuildingSprite, HouseOptions, Recipe, StorageOptions, TilingSprite, WorkerOptions } from "./building/buildings.js";
+import { BuildingInterface, BuildingPrototype, BuildingSprite, HouseOptions, Recipe, StorageOptions, TilingSprite, WorkerOptions, WorkforceType } from "./building/buildings.js";
 import { getLogger, Logger } from "./logger.js";
 import { Size } from "./map-layer.js";
 
@@ -25,6 +25,8 @@ import { Size } from "./map-layer.js";
  *   If provided, the building will function as a storage facility, allowing resources to be stored and retrieved.
  * @property {Recipe[]} [productionOptions] - Configuration options for production capabilities (optional).
  *   If provided, the building will function as a production facility, converting input resources into output resources. 
+ * @property {WorkforceType} [workforceType] - Type of workforce.
+ *   If not provided, "normal" type would be used.
  */
 export interface BuildingConfig {
 	sprite: string;
@@ -38,6 +40,7 @@ export interface BuildingConfig {
 	houseOptions?: HouseOptions;
 	storageOptions?: StorageOptions;
 	productionOptions?: Recipe[];
+	workforceType?: WorkforceType;
 }
 
 /**

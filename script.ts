@@ -80,20 +80,6 @@ window.onload = async () => {
 		window.requestAnimationFrame(frame);
 	});
 
-	let hero = new BattleActor(game.sprites.actors['delivery'], {x: 0, y: 0}); 
-	let hero2 = new BattleActor(game.sprites.actors['delivery'], {x: 0, y: 0}); 
-	hero.portrait = game.sprites.avatars['ratman'];
-	hero2.portrait = game.sprites.avatars['ratman'];
-	hero2.rank = "rare";
-	game.state.team = [hero, hero2];
-	game.state.allHeroes = [
-		hero2, hero, hero, hero, hero, hero, hero, hero, hero, hero, hero, hero,
-		hero, hero2, hero, hero, hero, hero, hero, hero, hero, hero, hero, hero,
-		hero, hero, hero2, hero, hero, hero, hero, hero, hero, hero, hero, hero,
-		hero, hero, hero, hero2,
-	];
-
-
 	game.interf.setDialogue(context, {text: "Welcome to the game!", portrait: game.sprites.avatars['ratman']});
 	setTimeout(() => {
 		game.interf.closeDialogue();
