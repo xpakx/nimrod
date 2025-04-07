@@ -60,6 +60,7 @@ describe('Building', () => {
 		prototype = {
 			sprite: buildingSpriteMock,
 			interface: new BuildingInterface(),
+			workforceType: "normal",
 			name: 'test',
 			visibleName: 'Test Building',
 			cost: 100,
@@ -144,6 +145,7 @@ describe('Building supply logic', () => {
 		const prototype: BuildingPrototype = {
 			sprite: buildingSpriteMock,
 			interface: new BuildingInterface(),
+			workforceType: "normal",
 			name: 'test',
 			visibleName: 'Test Building',
 			cost: 100,
@@ -200,6 +202,7 @@ describe('Building repair logic', () => {
 			sprite: buildingSpriteMock,
 			interface: new BuildingInterface(),
 			name: 'test',
+			workforceType: "normal",
 			visibleName: 'Test Building',
 			cost: 100,
 		};
