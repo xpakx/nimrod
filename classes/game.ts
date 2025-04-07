@@ -515,6 +515,7 @@ export class Game {
 		this.calcBuildingsState(deltaTime, minuteEnded);
 		this.calcPedestriansState(deltaTime, minuteEnded);
 		this.calcOrdersState(deltaTime, minuteEnded);
+		this.spawnHeroes(deltaTime);
 	}
 
 	advanceMinuteCounter(deltaTime: number): boolean {
@@ -557,8 +558,13 @@ export class Game {
 				const realBuilding = house ? this.map.getBuilding(house.position) : undefined;
 				// TODO
 				if (realBuilding && house == realBuilding) {
-					this.state.population += 1;
-					this.assignWorkers(); // TODO
+					if (house.workforce != "warrior") {
+						this.state.population += 1;
+						this.assignWorkers(); // TODO
+					}
+					if (house.workforce == "warrior" && house.hero) {
+						this.state.allHeroes.push(house.hero);
+					}
 				}
 			}
 			if (pedestrian.dead) {
@@ -604,10 +610,39 @@ export class Game {
 		}
 	}
 
+	timeSinceLastHeroCheck: number = 0;
+	heroSpawnFrequencyInSeconds: number = 5;
+	spawnHeroes(deltaTime: number) {
+		this.timeSinceLastHeroCheck += deltaTime;
+		if(this.timeSinceLastHeroCheck < this.heroSpawnFrequencyInSeconds) return;
+		this.timeSinceLastHeroCheck = 0;
+		this.logger.debug("Spawning heroes");
+
+		const houses = this.getEmptyHeroHouses();
+		for (let house of houses) {
+			this.logger.debug(`Spawning ${house.hero!.name}`);
+			const migrant = new Migrant(house.hero!.sprite, {x: 0, y: 0});
+			const path = this.map.shortestMigrantPath(migrant.positionSquare, house);
+			if (path.length > 0) {
+				migrant.setHome(house, path);
+				this.state.insertPedestrian(migrant);
+			}
+		}
+	}
+
 	getEmptyHouses(): House[] {
 		return this.map.buildings
 		.filter(x => x instanceof House)
 		.filter(x => x.workforce == "normal")
+		.filter(x => x.population < x.maxPopulation);
+	}
+
+	getEmptyHeroHouses(): House[] {
+		return this.map.buildings
+		.filter(x => x instanceof House)
+		.filter(x => x.workforce == "warrior")
+		.filter(x => x.constructed)
+		.filter(x => x.hero != undefined)
 		.filter(x => x.population < x.maxPopulation);
 	}
 

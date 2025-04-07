@@ -53,8 +53,18 @@ export class CityLogicLayer {
 
 		map.deleteBuilding(map.isoPlayerMouse);
 		if (building instanceof House) {
-			state.maxPopulation -=  building.maxPopulation;
-			state.population -=  building.population;
+			if (building.workforce != "warrior") {
+				state.maxPopulation -=  building.maxPopulation;
+				state.population -=  building.population;
+			}
+
+			if (building.workforce == "warrior" && building.hero) {
+				const indexAll = state.allHeroes.indexOf(building.hero);
+				if (indexAll !== -1) state.allHeroes.splice(indexAll, 1);
+
+				const indexTeam = state.team.indexOf(building.hero);
+				if (indexTeam !== -1) state.team.splice(indexTeam, 1);
+			}
 		}
 
 		state.orders.onBuildingDeletion(building);

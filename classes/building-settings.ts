@@ -309,6 +309,7 @@ export const buildingSettings: BuildingConfig[] = [
 		},
 		heroOptions: {
 			name: "Warrior",
+			sprite: "warrior",
 			baseHp: 20,
 		}
 	}

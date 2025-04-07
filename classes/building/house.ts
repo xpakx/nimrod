@@ -3,6 +3,7 @@ import { Building, BuildingPrototype, BuildingWorker, HouseOptions } from "./bui
 import { GameState } from "../game-state.js";
 import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position } from "../map-layer.js";
+import { BattleActor, HeroPrototype } from "../battle/actor.js";
 
 export class House extends Building {
 	storage: { [key: string]: number } = { "water": 0, "food": 0 }; // TODO
@@ -11,12 +12,14 @@ export class House extends Building {
 	employed: number = 0;
 	maxPopulation: number = 8;
 	resourceNeeds: HouseResourceNeeds[] = [];
+	hero?: BattleActor;
 
 	constructor(prototype: BuildingPrototype, position: Position, accepted: boolean = true) {
 		super(prototype, position, accepted);
 		if (prototype.houseOptions !== undefined) {
 			this.initializeHouse(prototype.houseOptions);
 		}
+		if (prototype.heroOptions) this.applyHeroOptions(prototype.heroOptions);
 	}
 
 	initializeHouse(options: HouseOptions) {
@@ -32,6 +35,10 @@ export class House extends Building {
 				}
 			}
 		}
+	}
+	
+	applyHeroOptions(options: HeroPrototype) {
+		this.hero = new BattleActor(options.sprite, {x: 0, y: 0});
 	}
 
 	onMinuteEnd(state: GameState) {

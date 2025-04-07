@@ -1,4 +1,4 @@
-import { Actor } from "../actor.js";
+import { Actor, ActorSprite } from "../actor.js";
 import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position } from "../map-layer.js";
 
@@ -75,6 +75,7 @@ export type HeroType = "normal" | "fire" | "water" |
 // TODO
 export interface HeroPrototype {
 	name: string;
+	sprite: ActorSprite;
 	movement?: number;
 	type?: HeroType;
 	baseHp: number;

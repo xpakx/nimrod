@@ -46,7 +46,7 @@ export interface BuildingConfig {
 	shopOptions?: ShopOptions;
 	workforceType?: WorkforceType;
 	constructionOptions?: ConstructionOptions; // TODO: documentation
-	heroOptions?: HeroPrototype; // TODO: documentation
+	heroOptions?: HeroConfig; // TODO: documentation
 }
 
 /**
@@ -84,6 +84,12 @@ export interface WorkerConfig {
 export interface SpriteConfig {
     name: string;
     sprite: string;
+}
+
+export interface HeroConfig {
+	name: string;
+	sprite: string;
+	baseHp: number;
 }
 
 /**
@@ -231,7 +237,6 @@ export class SpriteLibrary {
 			shopOptions: buildingConfig.shopOptions,
 			maxWorkers: buildingConfig.maxWorkers,
 			constructionOptions: buildingConfig.constructionOptions,
-			heroOptions: buildingConfig.heroOptions, // TODO
 			workforceType: buildingConfig.workforceType ?? "normal",
 		}
 		if (buildingConfig.workerOptions) {
@@ -244,6 +249,14 @@ export class SpriteLibrary {
 			};
 			building.workerOptions = workerOptions;
 
+		}
+		if (buildingConfig.heroOptions) {
+			const heroOptions: HeroPrototype = {
+				sprite: this.actors[buildingConfig.heroOptions.sprite],
+				name: buildingConfig.heroOptions.name,
+				baseHp: buildingConfig.heroOptions.baseHp,
+			};
+			building.heroOptions = heroOptions;
 		}
 
 		this.buildings[buildingConfig.name] = building;
@@ -327,6 +340,10 @@ export class SpriteLibrary {
 		this.actors['delivery'] = new ActorSprite(await loadImage("./img/house.svg"), 2, tileSize);
 		this.actors['delivery'].fillStyle = "blue";
 		this.actors['delivery'].refreshSize(tileSize);
+
+		this.actors['warrior'] = new ActorSprite(await loadImage("./img/portraits/ratman.svg"), 2, tileSize);
+		this.actors['warrior'].fillStyle = "green";
+		this.actors['warrior'].refreshSize(tileSize);
 		return true;
 	}
 
