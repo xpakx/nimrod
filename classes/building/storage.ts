@@ -347,6 +347,10 @@ export class DeliveryScheduler {
 
 	onBuildingCreation(building: Building | undefined) {
 		if (!building) return;
+		if (!building.constructed) {
+			this.checkRequirements(building);
+			return;
+		}
 		if (!building.recipes) return;
 		this.checkRecipes(building);
 	}
@@ -439,6 +443,14 @@ export class DeliveryScheduler {
 			this.prepareInOrders(building, recipe);
 		}
 	}
+	
+	checkRequirements(building: Building) {
+		if (!building.constructionManager) return;
+		for (let resource in building.constructionManager.needs) {
+			const amount = building.constructionManager.needs[resource];
+			this.prepareConstructionOrders(building, resource, amount);
+		}
+	}
 
 	checkShopOrders(building: Building) {
 		if (!building.shop) return;
@@ -468,6 +480,11 @@ export class DeliveryScheduler {
 		if (amount < 10) {
 			this.prepareOrder(building, resource, building.capacity - amount, "to");
 		}
+	}
+
+	prepareConstructionOrders(building: Building, resource: string, amount: number) {
+		this.logger.debug(`Checking construction order: ${resource} (${amount})`);
+		this.prepareOrder(building, resource, amount, "to");
 	}
 
 	prepareOrder(building: Building, resource: string, amount: number, type: "to" | "from") {

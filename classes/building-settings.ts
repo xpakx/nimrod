@@ -304,7 +304,7 @@ export const buildingSettings: BuildingConfig[] = [
 		constructionOptions: {
 			requirements: [
 				{resource: "weapons", amount: 10}, // TODO
-				{resource: "olive", amount: 50},
+				{resource: "wood", amount: 50},
 			],
 		},
 		heroOptions: {

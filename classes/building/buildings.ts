@@ -5,6 +5,7 @@ import { Action } from "../interface/actions.js";
 import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position, Size } from "../map-layer.js";
 import { HeroPrototype } from "../battle/actor.js";
+import { ConstructionManager } from "./construction-manager.js";
 
 export interface BuildingPrototype {
 	sprite: BuildingSprite;
@@ -36,7 +37,7 @@ export interface HouseOptions {
 }
 
 export interface ConstructionOptions {
-	requirements?: ConstructionRequirements[];
+	requirements: ConstructionRequirements[];
 }
 
 interface ConstructionRequirements {
@@ -106,6 +107,9 @@ export class Building {
 	maxWorkers: number = 0;
 	workforce: WorkforceType = "normal"; // TODO
 
+	constructed: boolean = true;
+	constructionManager?: ConstructionManager;
+
 	constructor(prototype: BuildingPrototype, position: Position, accepted: boolean = true) {
 		this.sprite =  prototype.sprite;
 		this.position = position;
@@ -123,6 +127,7 @@ export class Building {
 		if(prototype.productionOptions) this.applyProductionOptions(prototype.productionOptions);
 		if(prototype.shopOptions) this.applyShopOptions(prototype.shopOptions);
 		if(prototype.workforceType) this.workforce = prototype.workforceType;
+		if(prototype.constructionOptions) this.applyConstructionOptions(prototype.constructionOptions);
 	}
 
 	applyWorkerOptions(options: WorkerOptions) {
@@ -151,6 +156,11 @@ export class Building {
 			this.storage[resource] = 0;
 			this.accepts.add(resource);
 		}
+	}
+
+	applyConstructionOptions(options: ConstructionOptions) {
+		this.constructed = false;
+		this.constructionManager = new ConstructionManager(options);
 	}
 
 	setWorker(sprite: ActorSprite) {
@@ -212,7 +222,7 @@ export class Building {
 	}
 
 	tick(deltaTime: number) {
-		if(!this.worker || this.worker.isAwayFromHome || !this.workerSpawn) {
+		if(!this.worker || this.worker.isAwayFromHome || !this.workerSpawn || !this.constructed) {
 			return;
 		}
 		this.worker.timeSinceLastReturn += deltaTime;
@@ -251,6 +261,7 @@ export class Building {
 	storage: { [key: string]: number } = {}; // TODO
 	capacity: number = 20;
 	supply(worker: BuildingWorker, resource: string, inventory: number): number {
+		if(!this.constructed && this.constructionManager) return this.constructionManager.supply(this, worker, resource, inventory);
 		if (!this.accepts.has(resource)) return 0;
 		const inStock = this.getResourceAmount(resource);
 		if (resource in this.storage && inventory > 0 && inStock < this.capacity) {
@@ -264,6 +275,7 @@ export class Building {
 	}
 
 	getResources(worker: BuildingWorker, resource: string, inventory: number): number {
+		if(!this.constructed) return 0;
 		if (this.storage.hasOwnProperty(resource) && inventory > 0 && this.storage[resource] > 0) {
 			const amount = Math.min(inventory, this.storage[resource]);
 			this.storage[resource] -= amount;
@@ -279,6 +291,7 @@ export class Building {
 	}
 
 	onMinuteEnd(_state: GameState) {
+		if(!this.constructed) return;
 		this.health = Math.max(this.health - 2, 0);
 		this.logger.debug(`${this.name} health is ${this.health} at (${this.position.x}, ${this.position.y})`);
 
@@ -288,6 +301,7 @@ export class Building {
 	}
 
 	consume(resource: string, amount: number) {
+		if(!this.constructed) return;
 		this.storage[resource] = Math.max(this.storage[resource] - amount, 0);
 		this.logger.debug(`${this.name} ${resource} is ${this.storage[resource]} at (${this.position.x}, ${this.position.y})`);
 	}
@@ -367,10 +381,14 @@ export class Building {
 		if (this.worker) this.worker.dead = true;
 	}
 
-
 	info() {
 		this.logger.info(`Building of type ${this.name} at position (${this.position.x}, ${this.position.y})`);
 		this.logger.info("Storage", this.storage);
+	}
+
+	finishConstruction() {
+		this.constructed = true;
+		this.constructionManager = undefined;
 	}
 }
 

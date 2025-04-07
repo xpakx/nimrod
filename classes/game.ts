@@ -419,15 +419,26 @@ export class Game {
 				); 
 				hero.portrait = this.sprites.avatars['ratman'];
 				this.state.allHeroes.push(hero);
+			case '5':
+				if (!this.state.debugMode) {
+					break; 
+				}
+				if (this.map.isBuilding(this.map.isoPlayerMouse)) {
+					let building = this.map.getBuilding(this.map.isoPlayerMouse)!;
+					building.storage['wood'] = 100;
+					building.storage['weapons'] = 100;
+					building.accepts.add('wood');
+					building.accepts.add('weapons');
+				}
+				break;
 			case 'c':
 				if (!this.state.debugMode) {
 					break; 
 				}
 				if (this.map.isBuilding(this.map.isoPlayerMouse)) {
 					let building = this.map.getBuilding(this.map.isoPlayerMouse)!;
-					for (let item in building.storage) {
-						building.storage[item] = 0;
-					}
+					console.log(building.constructed);
+					console.log(building.constructionManager ? building.constructionManager.needs : building.storage);
 				}
 				break;
 			case 'a':

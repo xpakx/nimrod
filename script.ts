@@ -1,7 +1,6 @@
 import { BattleMapData, Game } from "./classes/game.js";
 import { LoggerFactory } from "./classes/logger.js";
 import { avatarSettings, buildingSettings, iconSettings, tabSettings } from "./classes/building-settings.js";
-import { BattleActor } from "./classes/battle/actor.js";
 
 let game = new Game();
 
@@ -41,7 +40,7 @@ function registerKeyboardEvents() {
 
 window.onload = async () => {
 	const loggerFactory = LoggerFactory.getInstance();
-	loggerFactory.enable(["Game", "AdventurersGuildInterface"]);
+	loggerFactory.enable(["Game", "DeliveryScheduler", "ConstructionManager"]);
 	const logger = loggerFactory.getLogger("Script");
 
 	logger.debug('Started app');
