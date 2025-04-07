@@ -228,7 +228,8 @@ export const buildingSettings: BuildingConfig[] = [
 		cost: 15,
 		workerOptions: {
 			sprite: "test",
-			resource: "food"
+			resource: "food",
+			from: ["bread"],
 		},
 		shopOptions: {
 			accepts: ["bread"],
@@ -244,7 +245,8 @@ export const buildingSettings: BuildingConfig[] = [
 		cost: 15,
 		workerOptions: {
 			sprite: "test",
-			resource: "ceramics"
+			resource: "ceramics",
+			from: ["pot"],
 		},
 		shopOptions: {
 			accepts: ["pot"],
@@ -260,7 +262,8 @@ export const buildingSettings: BuildingConfig[] = [
 		cost: 15,
 		workerOptions: {
 			sprite: "test",
-			resource: "textiles"
+			resource: "textiles",
+			from: ["cloth"],
 		},
 		shopOptions: {
 			accepts: ["cloth"],

@@ -30,6 +30,7 @@ export interface WorkerOptions {
 	resource?: string;
 	inventory?: number;
 	workerStartTime?: number;
+	from?: string[];
 }
 
 export interface HouseOptions {
@@ -106,6 +107,7 @@ export class Building {
 	workers: number = 0;
 	maxWorkers: number = 0;
 	workforce: WorkforceType = "normal"; // TODO
+	transformForWorker?: string[];
 
 	constructed: boolean = true;
 	constructionManager?: ConstructionManager;
@@ -136,6 +138,7 @@ export class Building {
 		if (options.resource) this.worker!.resource = options.resource;
 		if (options.inventory) this.worker!.inventory = options.inventory;
 		if (options.workerStartTime) this.worker!.workStartTime = options.workerStartTime;
+		if (options.from) this.transformForWorker = options.from;
 	}
 
 	applyProductionOptions(options: Recipe[]) {
@@ -208,7 +211,12 @@ export class Building {
 
 	updateDeliveryWorkerStorage(worker: BuildingWorker): boolean {
 		if(!worker.resource) return true;
-		const amount = this.getResourceAmount(worker.resource);
+		let resourceToGet = worker.resource;
+		if (this.transformForWorker && this.transformForWorker.length > 0) {
+			// TODO: multiple potential resources to transform
+			resourceToGet = this.transformForWorker[0]; 
+		}
+		const amount = this.getResourceAmount(resourceToGet);
 		if (amount == 0 && worker.inventory == 0) {
 			return false;
 		}
@@ -216,7 +224,7 @@ export class Building {
 		const deliveryFactor = 10; // TODO: make this configurable
 		const maxToTake = Math.floor(workerNeeds/deliveryFactor);
 		const toTake = Math.min(maxToTake, amount);
-		this.storage[worker.resource] -= toTake;
+		this.storage[resourceToGet] -= toTake;
 		worker.inventory += deliveryFactor * toTake;
 		return true;
 	}

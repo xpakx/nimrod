@@ -71,6 +71,7 @@ export interface WorkerConfig {
 	resource?: string;
 	inventory?: number;
 	workerStartTime?: number;
+	from?: string[]; // TODO: docs
 }
 
 /**
@@ -86,6 +87,7 @@ export interface SpriteConfig {
     sprite: string;
 }
 
+// TODO: documentation
 export interface HeroConfig {
 	name: string;
 	sprite: string;
@@ -246,6 +248,7 @@ export class SpriteLibrary {
 				resource: buildingConfig.workerOptions.resource,
 				inventory: buildingConfig.workerOptions.inventory,
 				workerStartTime: buildingConfig.workerOptions.workerStartTime,
+				from: buildingConfig.workerOptions.from,
 			};
 			building.workerOptions = workerOptions;
 
