@@ -19,7 +19,7 @@ export interface BuildingPrototype {
 	storageOptions?: StorageOptions;
 	shopOptions?: ShopOptions;
 	productionOptions?: Recipe[];
-	workforceType?: WorkforceType;
+	workforceType: WorkforceType;
 	constructionOptions?: ConstructionOptions;
 	heroOptions?: HeroPrototype;
 }

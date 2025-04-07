@@ -439,6 +439,7 @@ export class Game {
 					let building = this.map.getBuilding(this.map.isoPlayerMouse)!;
 					console.log(building.constructed);
 					console.log(building.constructionManager ? building.constructionManager.needs : building.storage);
+					console.log(building.workforce);
 				}
 				break;
 			case 'a':

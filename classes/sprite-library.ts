@@ -232,6 +232,7 @@ export class SpriteLibrary {
 			maxWorkers: buildingConfig.maxWorkers,
 			constructionOptions: buildingConfig.constructionOptions,
 			heroOptions: buildingConfig.heroOptions, // TODO
+			workforceType: buildingConfig.workforceType ?? "normal",
 		}
 		if (buildingConfig.workerOptions) {
 			const workerOptions: WorkerOptions = {
