@@ -564,6 +564,8 @@ export class Game {
 					}
 					if (house.workforce == "warrior" && house.hero) {
 						this.state.allHeroes.push(house.hero);
+						const indexAll = this.state.spawnedHeroes.indexOf(house.hero);
+						if (indexAll !== -1) this.state.spawnedHeroes.splice(indexAll, 1);
 					}
 				}
 			}
@@ -622,10 +624,13 @@ export class Game {
 		for (let house of houses) {
 			this.logger.debug(`Spawning ${house.hero!.name}`);
 			const migrant = new Migrant(house.hero!.sprite, {x: 0, y: 0});
+			const index = this.state.spawnedHeroes.indexOf(house.hero!);
+			if (index != -1) continue;
 			const path = this.map.shortestMigrantPath(migrant.positionSquare, house);
 			if (path.length > 0) {
 				migrant.setHome(house, path);
 				this.state.insertPedestrian(migrant);
+				this.state.spawnedHeroes.push(house.hero!);
 			}
 		}
 	}

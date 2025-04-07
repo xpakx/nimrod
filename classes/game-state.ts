@@ -30,6 +30,7 @@ export class GameState {
 
 	public team: BattleActor[] = [];
 	public allHeroes: BattleActor[] = [];
+	public spawnedHeroes: BattleActor[] = [];
 	public orders: DeliveryScheduler = new DeliveryScheduler();
 
 	menuWidth = 420; // ???
