@@ -282,6 +282,36 @@ export const buildingSettings: BuildingConfig[] = [
 			accepts: ["olive"],
 		}
 	},
+	{
+		sprite: "house", // TODO
+		size: 2,
+		name: "warrior-house",
+		workforceType: "warrior",
+		visibleName: "Warrior House", 
+		cost: 120,
+		houseOptions: {
+			levels: [
+				{
+					maxPopulation: 1, 
+					needs: [
+						{resource: "water", consumptionPerPerson: 1},
+						{resource: "food", consumptionPerPerson: 2},
+						{resource: "olive", consumptionPerPerson: 1}
+					]
+				}
+			]
+		},
+		constructionOptions: {
+			requirements: [
+				{resource: "weapons", amount: 10}, // TODO
+				{resource: "olive", amount: 50},
+			],
+		},
+		heroOptions: {
+			name: "Warrior",
+			baseHp: 20,
+		}
+	}
 ];
 
 
@@ -344,7 +374,10 @@ export const tabSettings: SidebarConfig = {
 		},
 		{
 			icon: "military",
-			buildings: ["tower"]
+			buildings: [
+				"tower",
+				"warrior-house",
+			]
 		},
 		{
 			icon: "agriculture",

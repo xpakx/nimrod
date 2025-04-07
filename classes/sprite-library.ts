@@ -1,5 +1,6 @@
 import { ActorSprite } from "./actor.js";
-import { BuildingInterface, BuildingPrototype, BuildingSprite, HouseOptions, Recipe, ShopOptions, StorageOptions, TilingSprite, WorkerOptions, WorkforceType } from "./building/buildings.js";
+import { HeroPrototype } from "./battle/actor.js";
+import { BuildingInterface, BuildingPrototype, BuildingSprite, ConstructionOptions, HouseOptions, Recipe, ShopOptions, StorageOptions, TilingSprite, WorkerOptions, WorkforceType } from "./building/buildings.js";
 import { getLogger, Logger } from "./logger.js";
 import { Size } from "./map-layer.js";
 
@@ -44,6 +45,8 @@ export interface BuildingConfig {
 	productionOptions?: Recipe[];
 	shopOptions?: ShopOptions;
 	workforceType?: WorkforceType;
+	constructionOptions?: ConstructionOptions; // TODO: documentation
+	heroOptions?: HeroPrototype; // TODO: documentation
 }
 
 /**
@@ -227,6 +230,8 @@ export class SpriteLibrary {
 			productionOptions: buildingConfig.productionOptions,
 			shopOptions: buildingConfig.shopOptions,
 			maxWorkers: buildingConfig.maxWorkers,
+			constructionOptions: buildingConfig.constructionOptions,
+			heroOptions: buildingConfig.heroOptions, // TODO
 		}
 		if (buildingConfig.workerOptions) {
 			const workerOptions: WorkerOptions = {

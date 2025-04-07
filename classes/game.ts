@@ -595,6 +595,7 @@ export class Game {
 	getEmptyHouses(): House[] {
 		return this.map.buildings
 		.filter(x => x instanceof House)
+		.filter(x => x.workforce == "normal")
 		.filter(x => x.population < x.maxPopulation);
 	}
 

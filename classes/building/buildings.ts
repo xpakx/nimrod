@@ -4,6 +4,7 @@ import { GameState } from "../game-state.js";
 import { Action } from "../interface/actions.js";
 import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position, Size } from "../map-layer.js";
+import { HeroPrototype } from "../battle/actor.js";
 
 export interface BuildingPrototype {
 	sprite: BuildingSprite;
@@ -18,6 +19,8 @@ export interface BuildingPrototype {
 	shopOptions?: ShopOptions;
 	productionOptions?: Recipe[];
 	workforceType?: WorkforceType;
+	constructionOptions?: ConstructionOptions;
+	heroOptions?: HeroPrototype;
 }
 
 export interface WorkerOptions {
@@ -30,6 +33,16 @@ export interface WorkerOptions {
 
 export interface HouseOptions {
 	levels?: HouseLevel[];
+}
+
+export interface ConstructionOptions {
+	requirements?: ConstructionRequirements[];
+}
+
+interface ConstructionRequirements {
+	resource: string;
+	amount: number;
+	quality?: number;
 }
 
 export interface StorageOptions {
