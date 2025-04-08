@@ -103,6 +103,7 @@ export class Game {
 	leftMouseGeneric(clickResult: Action) {
 		if(clickResult.action == "goTo") {
 			this.logger.debug("Go to: " + clickResult.argument);
+			this.interf.buildingInterface = undefined;
 			switch (clickResult.argument) {
 				case "World":
 					this.toWorld(); break;
