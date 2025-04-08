@@ -4,6 +4,7 @@ import { Game } from "./game.js";
 import { Action } from "./interface/actions.js";
 import { Button } from "./interface/button.js";
 import { Position, Size } from "./map-layer.js";
+import { SpriteLibrary } from "./sprite-library.js";
 
 export class QuestLayer {
 	size: Size;
@@ -22,18 +23,6 @@ export class QuestLayer {
 			x: 0,
 			y: state.topPanelHeight,
 		};
-		this.markers.push(
-			new QuestMarker(
-				{x: 0, y: 0}, 
-				{width: 20, height: 30},
-				{name: "Quest 1", description: "", battle: { map: "battle.json" }},
-			));
-		this.markers.push(
-			new QuestMarker(
-				{x: 100, y: 100},
-				{width: 20, height: 30},
-				{name: "Quest 2", description: ""},
-			));
 	}
 
 	renderMap(context: CanvasRenderingContext2D, _deltaTime: number) {
@@ -73,6 +62,49 @@ export class QuestLayer {
 			}
 		}
 	}
+
+	applyCampaign(data: CampaignData, _sprites: SpriteLibrary) {
+		for (let marker of data.questMarkers) {
+			const quest: Quest = {
+				name: marker.visibleName,
+				description: marker.description,
+			};
+			if (marker.questType == "skirmish") {
+				quest.battle =  { map: "battle.json" };
+					
+			}
+			const questMarker = new QuestMarker(
+				marker.position, 
+				marker.size,
+				quest
+			);
+			this.markers.push(questMarker);
+		}
+	}
+}
+
+export interface CampaignData {
+	map: string;
+	visibleName: string;
+	questMarkers: QuestMarkerConfig[];
+	quests: QuestConfig[];
+}
+
+export interface QuestConfig {
+	id: string;
+	visibleName: string;
+	description: string;
+	questType: "skirmish" | "economic"; // TODO
+	// activate, check
+	onCompletion?: (game: Game) => null;
+	onFailure?: (game: Game) => null;
+}
+
+export interface QuestMarkerConfig extends QuestConfig {
+	position: Position;
+	size: Size;
+	icon: string;
+	interface?: QuestInterface | string;
 }
 
 export class QuestMarker implements Button {

@@ -8,7 +8,7 @@ import { BattleActor, HeroType } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
 import { getLogger, Logger, LoggerFactory } from "./logger.js";
 import { House, Migrant } from "./building/house.js";
-import { QuestLayer } from "./quest-layer.js";
+import { CampaignData, QuestLayer } from "./quest-layer.js";
 import { CityLogicLayer } from "./logic/city-logic.js";
 import { CityInterfaceLogic } from "./logic/city-interface-logic.js";
 import { Building } from "./building/buildings.js";
@@ -956,6 +956,10 @@ export class Game {
 				this.logger.info(`${house.employed}/${house.population} employed in ${house.name} at (${house.position.x}, ${house.position.y})`);
 			}
 		}
+	}
+
+	loadCampaign(campaign: CampaignData) {
+		this.quest.applyCampaign(campaign, this.sprites);
 	}
 }
 
