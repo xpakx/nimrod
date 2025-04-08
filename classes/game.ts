@@ -588,6 +588,7 @@ export class Game {
 	}
 	
 	spawnMigrants() {
+		if (this.state.view != "City") return;
 		this.logger.debug("Spawning migrants");
 
 		const happiness = this.getNormalWorkforce().reduce((sum, b) => sum + b.getHappiness(), 0);
@@ -616,6 +617,7 @@ export class Game {
 	timeSinceLastHeroCheck: number = 0;
 	heroSpawnFrequencyInSeconds: number = 5;
 	spawnHeroes(deltaTime: number) {
+		if (this.state.view != "City") return;
 		this.timeSinceLastHeroCheck += deltaTime;
 		if(this.timeSinceLastHeroCheck < this.heroSpawnFrequencyInSeconds) return;
 		this.timeSinceLastHeroCheck = 0;
