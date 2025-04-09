@@ -1,10 +1,10 @@
 import { GameState } from "./game-state.js";
 import { ActionButton, ButtonRow, InterfaceLayer } from "./interface/interface.js";
 import { Action } from "./interface/actions.js";
-import { MapLayer, Position, Size } from "./map-layer.js";
+import { MapLayer, Position } from "./map-layer.js";
 import { SpriteConfig, BuildingConfig, SpriteLibrary } from "./sprite-library.js";
 import { prepareTabs, SidebarConfig } from "./interface/sidebar.js";
-import { BattleActor, HeroType } from "./battle/actor.js";
+import { BattleActor } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
 import { getLogger, Logger, LoggerFactory } from "./logger.js";
 import { House, Migrant } from "./building/house.js";
@@ -12,6 +12,7 @@ import { CampaignData, QuestLayer } from "./quest-layer.js";
 import { CityLogicLayer } from "./logic/city-logic.js";
 import { CityInterfaceLogic } from "./logic/city-interface-logic.js";
 import { Building } from "./building/buildings.js";
+import { SaveManager } from "./save-manager.js";
 
 export class Game {
 	state: GameState;
@@ -19,6 +20,7 @@ export class Game {
 	quest: QuestLayer;
 	interf: InterfaceLayer;
 	sprites: SpriteLibrary;
+	saveManager: SaveManager;
 	maxYOffset: number;
 	minXOffset: number;
 	maxXOffset: number;
@@ -35,6 +37,7 @@ export class Game {
 		this.sprites = new SpriteLibrary();
 		this.cityLogic = new CityLogicLayer();
 		this.cityInterfaceLogic = new CityInterfaceLogic();
+		this.saveManager = new SaveManager();
 
 		this.maxYOffset = this.map.isoToScreen({x: this.map.map[0].length - 1, y: this.map.map.length - 1}).y + (this.map.tileSize.height/2);
 		this.minXOffset = this.map.isoToScreen({x: 0, y: this.map.map.length - 1}).x  - (this.map.tileSize.width/2);
@@ -156,150 +159,6 @@ export class Game {
 		this.sprites.rescaleSprites(this.map.tileSize);
 	}
 
-	applyMap(data: MapData, updateDistances: boolean = false) {
-		this.logger.debug("Applying map", data);
-		this.map.resetMap(data.size);
-		this.state.orders.updateDimensions(data.size);
-
-		for (let pos of data.roads) {
-			this.map.putRoad({x: pos.x, y: pos.y}, this.sprites.getRoad(), true);
-		}
-
-		for (let building of data.buildings) {
-			this.map.putBuilding({x: building.x, y: building.y}, this.sprites.buildings[building.type]);
-			this.state.orders.onBuildingCreation(this.map.getBuilding({x: building.x, y: building.y}));
-		}
-
-		for (let terrain of data.terrain) {
-			if (terrain.cost) {
-				this.map.costs[terrain.x][terrain.y] = terrain.cost;
-			}
-			if (terrain.color) {
-				this.map.map[terrain.x][terrain.y] = terrain.color;
-			}
-		}
-
-		this.state.pedestrians = [];
-		if (updateDistances) this.map.floydWarshall();
-		for (let building of this.map.buildings) {
-			if (building instanceof House) {
-				this.state.population += building.population;
-				this.state.maxPopulation += building.maxPopulation;
-			}
-		}
-	}
-
-	serializeMap(): MapData {
-		const roads: RoadData[] = [];
-		const buildings: BuildingData[] = [];
-		const terrain: TerrainData[] = [];
-
-		for (let x = 0; x < this.map.roads.length; x++) {
-			for (let y = 0; y < this.map.roads[0].length; y++) {
-				if (this.map.roads[x][y]) {
-					roads.push({ y: x, x: y }); // TODO: fix indexing for roads
-				}
-			}
-		}
-
-		for (const building of this.map.buildings) {
-			buildings.push({
-				x: building.position.x,
-				y: building.position.y,
-				type: building.name,
-			});
-		}
-
-		for (let x = 0; x < this.map.map.length; x++) {
-			for (let y = 0; y < this.map.map[0].length; y++) {
-				if (this.map.costs[x][y] || this.map.map[x][y]) {
-					terrain.push({
-						x,
-						y,
-						cost: this.map.costs[x][y],
-						color: this.map.map[x][y],
-					});
-				}
-			}
-		}
-
-		return {
-			size: { width: this.map.map.length, height: this.map.map[0].length },
-			roads,
-			buildings,
-			terrain,
-			actors: [],
-		};
-	}
-
-	isPlacedActor(obj: UnplacedActorData): obj is ActorData {
-		return 'x' in obj && 'y' in obj;
-	}
-
-	applyBattle(data: BattleMapData) {
-		if (!this.state.currentBattle) {
-			return;
-		}
-		this.state.currentBattle.enemies  = [];
-		this.state.currentBattle.heroes  = [];
-
-		if (data.actors) {
-			for (let actor of data.actors) {
-				const sprite = this.sprites.actors[actor.image];
-				let [x, y] = [0, 0];
-				let toPlace = false;
-				if (this.isPlacedActor(actor)) {
-					[x, y] = [actor.x, actor.y];
-					toPlace = true;
-				} 
-				let pedestrian = new BattleActor(sprite, {x: x, y: y}); 
-				if (actor.enemy === false || actor.enemy === undefined) {
-					pedestrian.enemy = false;
-				} else {
-					pedestrian.enemy = true;
-				}
-				pedestrian.name = actor.name;
-				pedestrian.movement = actor.movement;
-				pedestrian.hp = actor.hp;
-				if (actor.type) {
-					pedestrian.type = actor.type;
-				}
-				if(pedestrian.enemy) {
-					this.state.pedestrians.push(pedestrian);
-					this.state.currentBattle.enemies.push(pedestrian);
-				} else {
-					this.state.currentBattle.heroes.push(pedestrian);
-					if (toPlace) {
-						pedestrian.placed = true;
-						this.state.pedestrians.push(pedestrian);
-					}
-				}
-
-			}
-		}
-
-		this.state.currentBattle.playerSpawns = [];
-		if (data.spawns) {
-			this.state.currentBattle.playerSpawns = data.spawns;
-		}
-	}
-
-	loadMap(filename: string, updateDistances: boolean = false) {
-		fetch(`maps/${filename}`)
-		.then(response => {
-			if (!response.ok) {
-				throw new Error(`HTTP error while loading a map! status: ${response.status}`);
-			}
-			return response.json();
-		})
-		.then((data: MapData) => this.applyMap(data, updateDistances))
-		.catch(error => {
-			this.logger.error(error);
-			throw new Error(`Error loading the JSON file: ${error}`);
-		});
-	}
-
-
 	getCurrentHoverableLayer(): undefined | HoverableLayer {
 		switch (this.state.view) {
 			case "City":
@@ -399,15 +258,10 @@ export class Game {
 				LoggerFactory.getInstance().updateAllLevels(this.state.debugMode ? "debug" : "error");
 				break;
 			case '1':
-				const mapData = this.serializeMap();
-				localStorage.setItem('savedMap', JSON.stringify(mapData));
+				this.saveManager.saveMap(this.map, "savedMap");
 				break;
 			case '2':
-				const savedMapJson = localStorage.getItem('savedMap');
-				if (savedMapJson) {
-				  const savedMap = JSON.parse(savedMapJson);
-				  this.applyMap(savedMap);
-				}
+				this.saveManager.loadSave(this, "savedMap")
 				break;
 			case '3':
 				this.state.money += 500;
@@ -722,8 +576,8 @@ export class Game {
 		const battle = new Battle();
 		this.state.currentBattle = battle;
 		this.state.view = "Battle";
-		this.applyMap(this.state.tempBattleData!);
-		this.applyBattle(this.state.tempBattleData!);
+		this.saveManager.applyMap(this, this.state.tempBattleData!);
+		this.saveManager.applyBattle(this, this.state.tempBattleData!);
 		for(let hero of this.state.team) {
 			battle.addHero(hero);
 		}
@@ -964,58 +818,6 @@ export class Game {
 	loadCampaign(campaign: CampaignData) {
 		this.quest.applyCampaign(campaign, this.sprites);
 	}
-}
-
-export type MapData = CityMapData | BattleMapData;
-
-export interface CityMapData {
-	size: Size;
-	roads: RoadData[];
-	buildings: BuildingData[];
-	terrain: TerrainData[];
-	actors: ActorData[];
-}
-
-export interface BattleMapData {
-	size: Size;
-	roads: RoadData[];
-	buildings: BuildingData[];
-	terrain: TerrainData[];
-	actors: (ActorData | UnplacedActorData)[];
-	spawns: Position[] | undefined;
-}
-
-interface RoadData {
-	x: number;
-	y: number;
-}
-
-interface BuildingData {
-	x: number;
-	y: number;
-	type: string;
-}
-
-interface TerrainData {
-	x: number;
-	y: number;
-	color?: string;
-	cost?: number;
-}
-
-interface ActorData extends UnplacedActorData {
-	x: number;
-	y: number;
-}
-
-
-interface UnplacedActorData {
-	enemy?: boolean;
-	name: string;
-	movement: number;
-	type?: HeroType;
-	hp: number;
-	image: string;
 }
 
 interface HoverableLayer {

@@ -1,6 +1,7 @@
-import { BattleMapData, Game } from "./classes/game.js";
+import { Game } from "./classes/game.js";
 import { LoggerFactory } from "./classes/logger.js";
 import { avatarSettings, buildingSettings, campaignSettings, iconSettings, tabSettings } from "./classes/building-settings.js";
+import { BattleMapData } from "./classes/save-manager.js";
 
 let game = new Game();
 
@@ -61,7 +62,7 @@ window.onload = async () => {
 	await game.prepareAssets(buildingSettings, avatarSettings, iconSettings, tabSettings);
 
 	logger.debug('Loading map');
-	game.loadMap("test.json", true);
+	game.saveManager.loadMap(game, "test.json", true);
 
 	const battle = await fetch("maps/battle001.json"); 
 	const battleJson = await battle.json() as BattleMapData;

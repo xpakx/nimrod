@@ -2,7 +2,7 @@ import { Actor } from "./actor.js";
 import { BattleActor } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
 import { DeliveryScheduler } from "./building/storage.js";
-import { BattleMapData } from "./game.js";
+import { BattleMapData } from "./save-manager.js";
 import { Position, Size } from "./map-layer.js";
 
 export type View = "City" | "World" | "Battle" | "Kingdom" | "Menu";
