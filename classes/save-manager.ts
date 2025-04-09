@@ -9,12 +9,47 @@ export class SaveManager {
 
 	// TODO: save game.state, pedestrians, battle…
 	saveState(game: Game, key: string) {
-		this.saveMapToStorage(game.map, key);
+		const data: SaveData = {
+			version: 1,
+			map: this.serializeMap(game.map),
+			floydWarshall: {
+				// TODO: those are too long to store as is, 
+				// but would be probably nice to compress them for
+				// much quicker load
+				dist: [], //game.map.dist,
+				pred: [], //game.map.pred,
+			}
+			
+		}
+		localStorage.setItem(key, JSON.stringify(data));
 	}
+
 
 	// TODO: load game.state, pedestrians, battle…
 	loadState(game: Game, key: string): boolean {
-		return this.loadMapFromStorage(game, key, true);
+		const savedMapJson = localStorage.getItem(key);
+		if (savedMapJson) {
+			const savedMap = JSON.parse(savedMapJson);
+
+			//version 0
+			if (!("version" in savedMap)) {
+				this.applyMap(game, savedMap, true);
+				return true; 
+			}
+
+			const map = savedMap as SaveData;
+
+			//version 1
+			if (map.version == 1) {
+				this.applyMap(game, map.map, true);
+				// TODO: apply floydWarshall data
+				return true;
+			}
+
+			//wrong version
+			return false;
+		}
+		return false;
 	}
 
 	saveMapToStorage(map: MapLayer, key: string) {
@@ -180,6 +215,28 @@ export class SaveManager {
 }
 
 
+export interface SaveData {
+	version: number;
+	map: MapData;
+	floydWarshall: DistanceData;
+}
+
+export interface DistanceData {
+	dist: DistData[];
+	pred: PredData[];
+}
+
+export interface DistData {
+	i: number;
+	j: number;
+	dist: number;
+}
+
+export interface PredData {
+	i: number;
+	j: number;
+	pred: number;
+}
 
 export type MapData = CityMapData | BattleMapData;
 
