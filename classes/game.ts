@@ -258,10 +258,10 @@ export class Game {
 				LoggerFactory.getInstance().updateAllLevels(this.state.debugMode ? "debug" : "error");
 				break;
 			case '1':
-				this.saveManager.saveMap(this.map, "savedMap");
+				this.saveManager.saveMapToStorage(this.map, "savedMap");
 				break;
 			case '2':
-				this.saveManager.loadSave(this, "savedMap")
+				this.saveManager.loadMapFromStorage(this, "savedMap")
 				break;
 			case '3':
 				this.state.money += 500;
@@ -371,6 +371,7 @@ export class Game {
 		this.calcPedestriansState(deltaTime, minuteEnded);
 		this.calcOrdersState(deltaTime, minuteEnded);
 		this.spawnHeroes(deltaTime);
+		if (minuteEnded) this.saveManager.saveState(this, "quicksave");
 	}
 
 	advanceMinuteCounter(deltaTime: number): boolean {

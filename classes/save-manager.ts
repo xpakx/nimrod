@@ -7,20 +7,32 @@ import { MapLayer, Position, Size } from "./map-layer.js";
 export class SaveManager {
 	logger: Logger = getLogger("SaveManager");
 
-	saveMap(map: MapLayer, key: string) {
+	// TODO: save game.state, pedestrians, battle…
+	saveState(game: Game, key: string) {
+		this.saveMapToStorage(game.map, key);
+	}
+
+	// TODO: load game.state, pedestrians, battle…
+	loadState(game: Game, key: string): boolean {
+		return this.loadMapFromStorage(game, key, true);
+	}
+
+	saveMapToStorage(map: MapLayer, key: string) {
 		const mapData = this.serializeMap(map);
 		localStorage.setItem(key, JSON.stringify(mapData));
 	}
 
-	loadSave(game: Game, key: string) {
+	loadMapFromStorage(game: Game, key: string, updateDistances: boolean = false): boolean {
 		const savedMapJson = localStorage.getItem(key);
 		if (savedMapJson) {
 			const savedMap = JSON.parse(savedMapJson);
-			this.applyMap(game, savedMap);
+			this.applyMap(game, savedMap, updateDistances);
+			return true;
 		}
+		return false;
 	}
 
-	loadMap(game: Game, filename: string, updateDistances: boolean = false) {
+	loadMapFromUrl(game: Game, filename: string, updateDistances: boolean = false) {
 		fetch(`maps/${filename}`)
 		.then(response => {
 			if (!response.ok) {

@@ -62,7 +62,11 @@ window.onload = async () => {
 	await game.prepareAssets(buildingSettings, avatarSettings, iconSettings, tabSettings);
 
 	logger.debug('Loading map');
-	game.saveManager.loadMap(game, "test.json", true);
+	const saveLoaded = game.saveManager.loadState(game, "quicksave");
+	if (!saveLoaded) {
+		game.saveManager.loadMapFromUrl(game, "test.json", true);
+	}
+
 
 	const battle = await fetch("maps/battle001.json"); 
 	const battleJson = await battle.json() as BattleMapData;
@@ -70,6 +74,7 @@ window.onload = async () => {
 
 	registerMouseEvents(canvas);
 	registerKeyboardEvents();
+
 
 	const frame = (timestamp: number) => {
 		game.nextFrame(context, timestamp);
