@@ -106,7 +106,7 @@ export class SaveManager {
 
 		for (let x = 0; x < map.map.length; x++) {
 			for (let y = 0; y < map.map[0].length; y++) {
-				if (map.costs[x][y] || map.map[x][y]) {
+				if (map.costs[x][y] != 1 || map.map[x][y] != map.defaultColor) {
 					terrain.push({
 						x,
 						y,
@@ -255,7 +255,7 @@ export class SaveManager {
 
 		for (let x = 0; x < map.map.length; x++) {
 			for (let y = 0; y < map.map[0].length; y++) {
-				if (map.costs[x][y] || map.map[x][y]) {
+				if (map.costs[x][y] != 1 || map.map[x][y] != map.defaultColor) {
 					terrain.push({
 						x,
 						y,

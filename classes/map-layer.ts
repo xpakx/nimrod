@@ -16,10 +16,11 @@ export class MapLayer {
 	isDragging: boolean = false
 	dragStart: Position = {x: 0, y: 0};
 	tooCostly: boolean = false;
+	defaultColor: string = '#97b106';
 
 	mode: Mode = { action: "none" };
 
-	map: string[][] = Array(100).fill(null).map(() => Array(50).fill('#97b106'));
+	map: string[][] = Array(100).fill(null).map(() => Array(50).fill(this.defaultColor));
 
 	buildingMap: (Building | undefined)[][] = this.map.map(row => row.map(() => undefined)); // for quicker lookup
 	buildings: Building[] = [];
@@ -49,7 +50,7 @@ export class MapLayer {
 	resetMap(size: Size) {
 		this.buildings = [];
 		this.positionOffset = {x: 0, y: 0};
-		this.map = Array(size.height).fill(null).map(() => Array(size.width).fill('#97b106'));
+		this.map = Array(size.height).fill(null).map(() => Array(size.width).fill(this.defaultColor));
 		this.isDragging = false;
 		this.mode = {action: "none"};
 		this.roads = this.map.map(row => row.map(() => undefined))
