@@ -12,7 +12,7 @@ export class SaveManager {
 	saveState(game: Game, key: string) {
 		const data: SaveData = {
 			version: 2,
-			map: this.serializeMap(game.map),
+			map: this.serializeMapWithState(game.map),
 			state: {
 				view: game.state.view,
 				money: game.state.money,
@@ -20,7 +20,6 @@ export class SaveManager {
 		}
 		localStorage.setItem(key, JSON.stringify(data));
 	}
-
 
 	// TODO: load game.state, pedestrians, battle…
 	loadState(game: Game, key: string): boolean {
@@ -128,6 +127,7 @@ export class SaveManager {
 	}
 
 
+
 	applyMap(game: Game, data: MapData, updateDistances: boolean = false) {
 		this.logger.debug("Applying map", data);
 		game.map.resetMap(data.size);
@@ -214,12 +214,72 @@ export class SaveManager {
 			game.state.currentBattle.playerSpawns = data.spawns;
 		}
 	}
+
+	serializeMapWithState(map: MapLayer): MapDataWithState {
+		const roads: RoadData[] = [];
+		const buildings: BuildingDataWithState[] = [];
+		const terrain: TerrainData[] = [];
+
+		for (let x = 0; x < map.roads.length; x++) {
+			for (let y = 0; y < map.roads[0].length; y++) {
+				if (map.roads[x][y]) {
+					roads.push({ y: x, x: y }); // TODO: fix indexing for roads
+				}
+			}
+		}
+
+		for (const building of map.buildings) {
+			let buildingData: BuildingDataWithState = {
+				x: building.position.x,
+				y: building.position.y,
+				type: building.name,
+				accepted: building.accepted,
+				health: building.health,
+				readyToSpawn: building.readyToSpawn,
+				workers: building.workers,
+				maxWorkers: building.maxWorkers,
+				constructed: building.constructed,
+				storage: building.storage,
+			} ;
+			if (building instanceof House) {
+				buildingData.houseData = {
+					qualities: building.qualities,
+					population: building.population,
+					maxPopulation: building.maxPopulation,
+					employed: building.employed,
+				};
+			}
+		
+			buildings.push(buildingData);
+		}
+
+		for (let x = 0; x < map.map.length; x++) {
+			for (let y = 0; y < map.map[0].length; y++) {
+				if (map.costs[x][y] || map.map[x][y]) {
+					terrain.push({
+						x,
+						y,
+						cost: map.costs[x][y],
+						color: map.map[x][y],
+					});
+				}
+			}
+		}
+
+		return {
+			size: { width: map.map.length, height: map.map[0].length },
+			roads,
+			buildings,
+			terrain,
+			actors: [],
+		};
+	}
 }
 
 
 export interface SaveData {
 	version: number;
-	map: MapData;
+	map: MapDataWithState;
 	state: StateData;
 }
 
@@ -280,3 +340,34 @@ interface UnplacedActorData {
 	image: string;
 }
 
+
+
+
+export interface MapDataWithState {
+	size: Size;
+	roads: RoadData[];
+	buildings: BuildingDataWithState[];
+	terrain: TerrainData[];
+	actors: ActorData[];
+}
+
+interface BuildingDataWithState {
+	x: number;
+	y: number;
+	accepted: boolean;
+	type: string;
+	health: number;
+	readyToSpawn: boolean;
+	workers: number;
+	maxWorkers: number;
+	constructed: boolean;
+	storage: { [key: string]: number };
+	houseData?: HouseData;
+}
+
+interface HouseData {
+	qualities: { [key: string]: number };
+	population: number;
+	employed: number;
+	maxPopulation: number;
+}
