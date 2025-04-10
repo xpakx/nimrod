@@ -422,7 +422,10 @@ export const campaignSettings: CampaignData = {
 			description: "",
 			position: {x: 0, y: 0},
 			size: {width: 20, height: 30},
-			questType: "skirmish",
+			questType: {
+				type: "skirmish",
+				map: "battle001.json",
+			},
 		},
 		{
 			id: "quest2",
@@ -431,7 +434,9 @@ export const campaignSettings: CampaignData = {
 			description: "",
 			position: {x: 100, y: 100},
 			size: {width: 20, height: 30},
-			questType: "economic",
+			questType: {
+				type: "economic",
+			},
 		}
 	],
 	quests: [],

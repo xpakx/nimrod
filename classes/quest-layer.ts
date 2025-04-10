@@ -69,8 +69,8 @@ export class QuestLayer {
 				name: marker.visibleName,
 				description: marker.description,
 			};
-			if (marker.questType == "skirmish") {
-				quest.battle =  { map: "battle.json" };
+			if (marker.questType.type == "skirmish") {
+				quest.battle =  { map: marker.questType.map };
 					
 			}
 			const questMarker = new QuestMarker(
@@ -94,7 +94,7 @@ export interface QuestConfig {
 	id: string;
 	visibleName: string;
 	description: string;
-	questType: "skirmish" | "economic"; // TODO
+	questType: QuestType;
 	// activate, check
 	onCompletion?: (game: Game) => null;
 	onFailure?: (game: Game) => null;
@@ -106,6 +106,17 @@ export interface QuestMarkerConfig extends QuestConfig {
 	icon: string;
 	interface?: QuestInterface | string;
 }
+
+export interface QuestSkirmish {
+	type: "skirmish";
+	map: string;
+}
+
+export interface QuestEconomic {
+	type: "economic";
+}
+
+export type QuestType = QuestSkirmish | QuestEconomic;
 
 export class QuestMarker implements Button {
     position: Position;
