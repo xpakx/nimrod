@@ -1,5 +1,6 @@
 import { BattleActor, HeroType } from "./battle/actor.js";
 import { House } from "./building/house.js";
+import { View } from "./game-state.js";
 import { Game } from "./game.js";
 import { getLogger, Logger } from "./logger.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
@@ -10,16 +11,12 @@ export class SaveManager {
 	// TODO: save game.state, pedestrians, battle…
 	saveState(game: Game, key: string) {
 		const data: SaveData = {
-			version: 1,
+			version: 2,
 			map: this.serializeMap(game.map),
-			floydWarshall: {
-				// TODO: those are too long to store as is, 
-				// but would be probably nice to compress them for
-				// much quicker load
-				dist: [], //game.map.dist,
-				pred: [], //game.map.pred,
+			state: {
+				view: game.state.view,
+				money: game.state.money,
 			}
-			
 		}
 		localStorage.setItem(key, JSON.stringify(data));
 	}
@@ -39,10 +36,15 @@ export class SaveManager {
 
 			const map = savedMap as SaveData;
 
-			//version 1
 			if (map.version == 1) {
 				this.applyMap(game, map.map, true);
-				// TODO: apply floydWarshall data
+				return true;
+			}
+
+			if (map.version == 2) {
+				this.applyMap(game, map.map, true);
+				game.state.view = map.state.view;
+				game.state.money = map.state.money;
 				return true;
 			}
 
@@ -218,24 +220,12 @@ export class SaveManager {
 export interface SaveData {
 	version: number;
 	map: MapData;
-	floydWarshall: DistanceData;
+	state: StateData;
 }
 
-export interface DistanceData {
-	dist: DistData[];
-	pred: PredData[];
-}
-
-export interface DistData {
-	i: number;
-	j: number;
-	dist: number;
-}
-
-export interface PredData {
-	i: number;
-	j: number;
-	pred: number;
+export interface StateData {
+	view: View;
+	money: number;
 }
 
 export type MapData = CityMapData | BattleMapData;
