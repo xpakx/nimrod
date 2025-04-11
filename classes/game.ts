@@ -370,7 +370,7 @@ export class Game {
 		this.calcBuildingsState(deltaTime, minuteEnded);
 		this.calcPedestriansState(deltaTime, minuteEnded);
 		this.calcOrdersState(deltaTime, minuteEnded);
-		this.spawnHeroes(deltaTime);
+		this.cityLogic.spawnHeroes(this, deltaTime);
 		if (minuteEnded) this.saveManager.saveState(this, "quicksave");
 	}
 
@@ -412,11 +412,10 @@ export class Game {
 				const migrant = pedestrian as Migrant;
 				const house = migrant.targetHome;
 				const realBuilding = house ? this.map.getBuilding(house.position) : undefined;
-				// TODO
 				if (realBuilding && house == realBuilding) {
 					if (house.workforce != "warrior") {
 						this.state.population += 1;
-						this.assignWorkers(); // TODO
+						this.assignWorkers();
 					}
 					if (house.workforce == "warrior" && house.hero) {
 						this.state.allHeroes.push(house.hero);
@@ -431,7 +430,7 @@ export class Game {
 		}
 
 		if(minuteEnded) {
-			this.spawnMigrants();
+			this.cityLogic.spawnMigrants(this);
 		}
 	}
 
@@ -440,73 +439,6 @@ export class Game {
 			this.state.orders.onMinuteEnd(this.map.buildings);
 		}
 		this.state.orders.tick(deltaTime, this.map.buildings, this.map);
-	}
-	
-	spawnMigrants() {
-		if (this.state.view != "City") return;
-		this.logger.debug("Spawning migrants");
-
-		const happiness = this.getNormalWorkforce().reduce((sum, b) => sum + b.getHappiness(), 0);
-		this.logger.debug(`Current happines: ${happiness}`);
-		// TODO
-		if (happiness < 0) {
-			return;
-		}
-		const freePlaces = this.state.maxPopulation - this.state.population;
-		const newMigrants = Math.min(20, freePlaces);
-		const emptyHouses = this.getEmptyHouses();
-		if (emptyHouses.length == 0) return;
-		for (let i=0; i<newMigrants; i++) {
-			const migrant = new Migrant(this.sprites.actors["test"], {x: 0, y: 0});
-			const randomIndex = Math.floor(Math.random() * emptyHouses.length);
-			const emptyHouse = emptyHouses[randomIndex];
-			const path = this.map.shortestMigrantPath(migrant.positionSquare, emptyHouse);
-			if (path.length > 0) {
-				this.logger.debug("Path for migrant:", path);
-				migrant.setHome(emptyHouse, path);
-				this.state.insertPedestrian(migrant);
-			}
-		}
-	}
-
-	timeSinceLastHeroCheck: number = 0;
-	heroSpawnFrequencyInSeconds: number = 5;
-	spawnHeroes(deltaTime: number) {
-		if (this.state.view != "City") return;
-		this.timeSinceLastHeroCheck += deltaTime;
-		if(this.timeSinceLastHeroCheck < this.heroSpawnFrequencyInSeconds) return;
-		this.timeSinceLastHeroCheck = 0;
-		this.logger.debug("Spawning heroes");
-
-		const houses = this.getEmptyHeroHouses();
-		for (let house of houses) {
-			this.logger.debug(`Spawning ${house.hero!.name}`);
-			const migrant = new Migrant(house.hero!.sprite, {x: 0, y: 0});
-			const index = this.state.spawnedHeroes.indexOf(house.hero!);
-			if (index != -1) continue;
-			const path = this.map.shortestMigrantPath(migrant.positionSquare, house);
-			if (path.length > 0) {
-				migrant.setHome(house, path);
-				this.state.insertPedestrian(migrant);
-				this.state.spawnedHeroes.push(house.hero!);
-			}
-		}
-	}
-
-	getEmptyHouses(): House[] {
-		return this.map.buildings
-		.filter(x => x instanceof House)
-		.filter(x => x.workforce == "normal")
-		.filter(x => x.population < x.maxPopulation);
-	}
-
-	getEmptyHeroHouses(): House[] {
-		return this.map.buildings
-		.filter(x => x instanceof House)
-		.filter(x => x.workforce == "warrior")
-		.filter(x => x.constructed)
-		.filter(x => x.hero != undefined)
-		.filter(x => x.population < x.maxPopulation);
 	}
 
 	renderGame(context: CanvasRenderingContext2D, deltaTime: number) {
@@ -687,7 +619,6 @@ export class Game {
 
 	battleProcessAction(from: Position, to: Position, actor: BattleActor | undefined) {
 		if (!actor || actor.enemy) {
-			// TODO
 			this.map.clearPath();
 			return;
 		}
@@ -699,7 +630,7 @@ export class Game {
 		}
 	}
 
-	tempBattleIndex: number = 0; // TODO
+	tempBattleIndex: number = 0; // TODO: improve placing and move to battle logic
 	leftMouseBattlePrep() {
 		if (!this.state.currentBattle) {
 			return;

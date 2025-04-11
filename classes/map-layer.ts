@@ -1,6 +1,7 @@
 import { Actor } from "./actor.js";
 import { createBuilding } from "./building/building-factory.js";
 import { Building, BuildingPrototype, BuildingSprite, Road, TilingSprite } from "./building/buildings.js";
+import { House } from "./building/house.js";
 import { getLogger, Logger } from "./logger.js";
 
 export class MapLayer {
@@ -968,6 +969,22 @@ export class MapLayer {
 			cameFrom[position.x][position.y] = next.pos;
 		}
 		queue.enqueue(new Node(position, end, cost));
+	}
+
+	getEmptyHouses(): House[] {
+		return this.buildings
+		.filter(x => x instanceof House)
+		.filter(x => x.workforce == "normal")
+		.filter(x => x.population < x.maxPopulation);
+	}
+
+	getEmptyHeroHouses(): House[] {
+		return this.buildings
+		.filter(x => x instanceof House)
+		.filter(x => x.workforce == "warrior")
+		.filter(x => x.constructed)
+		.filter(x => x.hero != undefined)
+		.filter(x => x.population < x.maxPopulation);
 	}
 }
 
