@@ -30,6 +30,10 @@ import { Size } from "./map-layer.js";
  *   If provided, the building will function as a production facility, converting input resources into output resources. 
  * @property {WorkforceType} [workforceType] - Type of workforce.
  *   If not provided, "normal" type would be used.
+ * @property {ConstructionOptions} [constructionOptions] - Configuration for building construction requirements (optional).
+ *   If provided, specifies prerequisites like required resources needed to construct this building.
+ * @property {HeroConfig} [heroOptions] - Configuration for heroes associated with this building (optional).
+ *   If provided, allows the building to spawn or house hero character with special abilities.
  */
 export interface BuildingConfig {
 	sprite: string;
@@ -45,8 +49,8 @@ export interface BuildingConfig {
 	productionOptions?: Recipe[];
 	shopOptions?: ShopOptions;
 	workforceType?: WorkforceType;
-	constructionOptions?: ConstructionOptions; // TODO: documentation
-	heroOptions?: HeroConfig; // TODO: documentation
+	constructionOptions?: ConstructionOptions;
+	heroOptions?: HeroConfig;
 }
 
 /**
@@ -61,9 +65,13 @@ export interface BuildingConfig {
  *   If provided, the worker will distribute this resource to buildings (e.g., houses) while walking through the city.
  * @property {number} [inventory] - The worker's inventory capacity (optional).
  *   This determines how much of the resource the worker can carry at a time. If not provided, a default value will be used.
- * * @property {number} [workerStartTime] - The delay (in seconds) between the worker returning to the building
+ * @property {number} [workerStartTime] - The delay (in seconds) between the worker returning to the building
  *   and starting their next walk in the city (optional). 
  *   This controls how long the worker rests before resuming their tasks.
+ * @property {string[]} [from] - Defines base resources that should be transformed into this worker's resource type (optional).
+ *   When specified, the worker will aggregate raw materials from these production buildings and convert them into the `resource` type for delivery.
+ *   Example: A worker with `resource: "food"` and `from: ["bakery", "farm"]` would convert bread (bakery) and carrots (farm) into generic food deliveries.
+ *   When omitted, workers will deliver the base `resource` directly without transformation (e.g., delivering plain bread from a bakery).
  */
 export interface WorkerConfig {
 	sprite: string;
@@ -71,7 +79,7 @@ export interface WorkerConfig {
 	resource?: string;
 	inventory?: number;
 	workerStartTime?: number;
-	from?: string[]; // TODO: docs
+	from?: string[];
 }
 
 /**
@@ -87,7 +95,15 @@ export interface SpriteConfig {
     sprite: string;
 }
 
-// TODO: documentation
+/**
+ * Represents the configuration for a hero character.
+ * This interface defines properties for hero characters including their visual representation,
+ * base stats, and identification.
+ * 
+ * @property {string} name - The unique identifier for the hero type.
+ * @property {string} sprite - The filename of the hero's sprite image (without extension).
+ * @property {number} baseHp - The initial hit points for the hero before any modifiers.
+ */
 export interface HeroConfig {
 	name: string;
 	sprite: string;
