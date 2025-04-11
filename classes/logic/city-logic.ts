@@ -6,6 +6,7 @@ import { MapLayer } from "../map-layer.js";
 import { SpriteLibrary } from "../sprite-library.js";
 import { BuildingPrototype } from "../building/buildings.js";
 import { InterfaceLayer } from "../interface/interface.js";
+import { DeliveryScheduler } from "../building/storage.js";
 
 export class CityLogicLayer {
 	static roadCost: number = 2;
@@ -13,6 +14,8 @@ export class CityLogicLayer {
 
 	timeSinceLastHeroCheck: number = 0;
 	heroSpawnFrequencyInSeconds: number = 5;
+
+	public orders: DeliveryScheduler = new DeliveryScheduler();
 
 	onMouseLeftClick(game: Game) {
 		if(game.map.mode.action == "build") {
@@ -46,7 +49,7 @@ export class CityLogicLayer {
 			const house = map.getBuilding(map.isoPlayerMouse) as House;
 			state.maxPopulation += house.maxPopulation;
 		}
-		state.orders.onBuildingCreation(map.getBuilding(map.isoPlayerMouse));
+		this.orders.onBuildingCreation(map.getBuilding(map.isoPlayerMouse));
 		game.assignWorkers();
 	}
 
@@ -70,7 +73,7 @@ export class CityLogicLayer {
 			}
 		}
 
-		state.orders.onBuildingDeletion(building);
+		this.orders.onBuildingDeletion(building);
 		building.onDeletion();
 		game.assignWorkers();
 	}
@@ -146,5 +149,13 @@ export class CityLogicLayer {
 				game.state.spawnedHeroes.push(house.hero!);
 			}
 		}
+	}
+
+
+	calcOrdersState(map: MapLayer, deltaTime: number, minuteEnded: boolean) {
+		if(minuteEnded) {
+			this.orders.onMinuteEnd(map.buildings);
+		}
+		this.orders.tick(deltaTime, map.buildings, map);
 	}
 }

@@ -36,6 +36,7 @@ export class SaveManager {
 			const map = savedMap as SaveData;
 
 			if (map.version == 1) {
+				const map = savedMap as SaveData;
 				this.applyMap(game, map.map, true);
 				return true;
 			}
@@ -131,7 +132,7 @@ export class SaveManager {
 	applyMap(game: Game, data: MapData, updateDistances: boolean = false) {
 		this.logger.debug("Applying map", data);
 		game.map.resetMap(data.size);
-		game.state.orders.updateDimensions(data.size);
+		game.cityLogic.orders.updateDimensions(data.size);
 
 		for (let pos of data.roads) {
 			game.map.putRoad({x: pos.x, y: pos.y}, game.sprites.getRoad(), true);
@@ -139,7 +140,7 @@ export class SaveManager {
 
 		for (let building of data.buildings) {
 			game.map.putBuilding({x: building.x, y: building.y}, game.sprites.buildings[building.type]);
-			game.state.orders.onBuildingCreation(game.map.getBuilding({x: building.x, y: building.y}));
+			game.cityLogic.orders.onBuildingCreation(game.map.getBuilding({x: building.x, y: building.y}));
 		}
 
 		for (let terrain of data.terrain) {

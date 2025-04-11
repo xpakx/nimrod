@@ -1,7 +1,6 @@
 import { Actor } from "./actor.js";
 import { BattleActor } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
-import { DeliveryScheduler } from "./building/storage.js";
 import { BattleMapData } from "./save-manager.js";
 import { Position, Size } from "./map-layer.js";
 
@@ -31,7 +30,6 @@ export class GameState {
 	public team: BattleActor[] = [];
 	public allHeroes: BattleActor[] = [];
 	public spawnedHeroes: BattleActor[] = [];
-	public orders: DeliveryScheduler = new DeliveryScheduler();
 
 	menuWidth = 420; // ???
 	topPanelHeight = 50; // ????

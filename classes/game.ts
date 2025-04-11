@@ -369,7 +369,7 @@ export class Game {
 		const minuteEnded = this.advanceMinuteCounter(deltaTime);
 		this.calcBuildingsState(deltaTime, minuteEnded);
 		this.calcPedestriansState(deltaTime, minuteEnded);
-		this.calcOrdersState(deltaTime, minuteEnded);
+		this.cityLogic.calcOrdersState(this.map, deltaTime, minuteEnded);
 		this.cityLogic.spawnHeroes(this, deltaTime);
 		if (minuteEnded) this.saveManager.saveState(this, "quicksave");
 	}
@@ -425,20 +425,13 @@ export class Game {
 				}
 			}
 			if (pedestrian.dead) {
-				this.state.orders.onWorkerDeath(pedestrian);
+				this.cityLogic.orders.onWorkerDeath(pedestrian);
 			}
 		}
 
 		if(minuteEnded) {
 			this.cityLogic.spawnMigrants(this);
 		}
-	}
-
-	calcOrdersState(deltaTime: number, minuteEnded: boolean) {
-		if(minuteEnded) {
-			this.state.orders.onMinuteEnd(this.map.buildings);
-		}
-		this.state.orders.tick(deltaTime, this.map.buildings, this.map);
 	}
 
 	renderGame(context: CanvasRenderingContext2D, deltaTime: number) {
