@@ -99,8 +99,6 @@ export class CityLogicLayer {
 		}
 	}
 
-
-
 	calcOrdersState(map: MapLayer, deltaTime: number, minuteEnded: boolean) {
 		if(minuteEnded) {
 			this.orders.onMinuteEnd(map.buildings);

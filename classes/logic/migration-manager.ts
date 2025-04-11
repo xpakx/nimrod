@@ -1,4 +1,4 @@
-import { Migrant } from "../building/house.js";
+import { House, Migrant } from "../building/house.js";
 import { Game } from "../game.js";
 import { getLogger, Logger } from "../logger.js";
 
@@ -45,15 +45,36 @@ export class MigrationManager {
 
 		const houses = game.map.getEmptyHeroHouses();
 		for (let house of houses) {
-			this.logger.debug(`Spawning ${house.hero!.name}`);
-			const migrant = new Migrant(house.hero!.sprite, {x: 0, y: 0});
-			const index = game.state.spawnedHeroes.indexOf(house.hero!);
-			if (index != -1) continue;
-			const path = game.map.shortestMigrantPath(migrant.positionSquare, house);
-			if (path.length > 0) {
-				migrant.setHome(house, path);
-				game.state.insertPedestrian(migrant);
-				game.state.spawnedHeroes.push(house.hero!);
+			this.spawnHeroForHouse(game, house);
+		}
+	}
+
+	spawnHeroForHouse(game: Game, house: House) {
+		if (!house.hero) return;
+		this.logger.debug(`Spawning ${house.hero.name}`);
+		const migrant = new Migrant(house.hero.sprite, {x: 0, y: 0});
+		const index = game.state.spawnedHeroes.indexOf(house.hero!);
+		if (index != -1) return;
+		const path = game.map.shortestMigrantPath(migrant.positionSquare, house);
+		if (path.length > 0) {
+			migrant.setHome(house, path);
+			game.state.insertPedestrian(migrant);
+			game.state.spawnedHeroes.push(house.hero!);
+		}
+	}
+
+	settleMigrant(game: Game, migrant: Migrant) {
+		const house = migrant.targetHome;
+		const realBuilding = house ? game.map.getBuilding(house.position) : undefined;
+		if (realBuilding && house == realBuilding) {
+			if (house.workforce != "warrior") {
+				game.state.population += 1;
+				game.assignWorkers();
+			}
+			if (house.workforce == "warrior" && house.hero) {
+				game.state.allHeroes.push(house.hero);
+				const indexAll = game.state.spawnedHeroes.indexOf(house.hero);
+				if (indexAll !== -1) game.state.spawnedHeroes.splice(indexAll, 1);
 			}
 		}
 	}

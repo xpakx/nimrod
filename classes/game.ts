@@ -409,20 +409,7 @@ export class Game {
 			if (!pedestrian.dead) {
 				this.state.insertPedestrian(pedestrian);
 			} else if ("settled" in pedestrian && pedestrian.settled) {
-				const migrant = pedestrian as Migrant;
-				const house = migrant.targetHome;
-				const realBuilding = house ? this.map.getBuilding(house.position) : undefined;
-				if (realBuilding && house == realBuilding) {
-					if (house.workforce != "warrior") {
-						this.state.population += 1;
-						this.assignWorkers();
-					}
-					if (house.workforce == "warrior" && house.hero) {
-						this.state.allHeroes.push(house.hero);
-						const indexAll = this.state.spawnedHeroes.indexOf(house.hero);
-						if (indexAll !== -1) this.state.spawnedHeroes.splice(indexAll, 1);
-					}
-				}
+				this.cityLogic.migrations.settleMigrant(this, pedestrian as Migrant);
 			}
 			if (pedestrian.dead) {
 				this.cityLogic.orders.onWorkerDeath(pedestrian);
