@@ -370,7 +370,7 @@ export class Game {
 		this.calcBuildingsState(deltaTime, minuteEnded);
 		this.calcPedestriansState(deltaTime, minuteEnded);
 		this.cityLogic.calcOrdersState(this.map, deltaTime, minuteEnded);
-		this.cityLogic.spawnHeroes(this, deltaTime);
+		this.cityLogic.migrations.spawnHeroes(this, deltaTime);
 		if (minuteEnded) this.saveManager.saveState(this, "quicksave");
 	}
 
@@ -430,7 +430,7 @@ export class Game {
 		}
 
 		if(minuteEnded) {
-			this.cityLogic.spawnMigrants(this);
+			this.cityLogic.migrations.spawnMigrants(this);
 		}
 	}
 
