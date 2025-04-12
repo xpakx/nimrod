@@ -106,7 +106,7 @@ export class Building {
 
 	workers: number = 0;
 	maxWorkers: number = 0;
-	workforce: WorkforceType = "normal"; // TODO
+	workforce: WorkforceType = "normal";
 	transformForWorker?: string[];
 
 	constructed: boolean = true;

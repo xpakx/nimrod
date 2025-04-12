@@ -1,4 +1,5 @@
 import { BattleActor, HeroType } from "./battle/actor.js";
+import { buildingSettings } from "./building-settings.js";
 import { House } from "./building/house.js";
 import { View } from "./game-state.js";
 import { Game } from "./game.js";
@@ -45,6 +46,27 @@ export class SaveManager {
 				this.applyMap(game, map.map, true);
 				game.state.view = map.state.view;
 				game.state.money = map.state.money;
+
+				for (let buildingData of map.map.buildings) {
+					const pos: Position = { x: buildingData.x, y: buildingData.y };
+					const building = game.map.getBuilding(pos);
+					if (!building) continue;
+					building.accepted = buildingData.accepted;
+					building.health = buildingData.health;
+					building.readyToSpawn = buildingData.readyToSpawn;
+					building.workers = buildingData.workers;
+					building.maxWorkers = buildingData.maxWorkers;
+					building.constructed = buildingData.constructed;
+					if (buildingData.constructed) building.constructionManager = undefined;
+					building.storage = buildingData.storage;
+
+					if (building instanceof House && buildingData.houseData) {
+						building.qualities = buildingData.houseData.qualities;
+						building.population = buildingData.houseData.population;
+						building.maxPopulation = buildingData.houseData.maxPopulation;
+						building.employed = buildingData.houseData.employed;
+					}
+				}
 				return true;
 			}
 
