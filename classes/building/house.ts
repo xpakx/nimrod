@@ -6,8 +6,8 @@ import { MapLayer, Position } from "../map-layer.js";
 import { BattleActor, HeroPrototype } from "../battle/actor.js";
 
 export class House extends Building {
-	storage: { [key: string]: number } = { "water": 0, "food": 0 }; // TODO
-	qualities: { [key: string]: number } = { "water": 0, "food": 0 }; // TODO
+	storage: { [key: string]: number } = {};
+	qualities: { [key: string]: number } = {};
 	population: number = 0;
 	employed: number = 0;
 	maxPopulation: number = 8;
@@ -30,6 +30,7 @@ export class House extends Building {
 			for (let need of options.levels[0].needs) {
 				if ("resource" in need) {
 					this.storage[need.resource] = 0;
+					this.qualities[need.resource] = 0;
 					this.resourceNeeds.push(need);
 					this.accepts.add(need.resource);
 				}
@@ -52,6 +53,7 @@ export class House extends Building {
 		}
 	}
 
+	// TODO: calculate happiness
 	getHappiness(): number {
 		const unemployed = this.population - this.employed;
 		const employmentEffect = this.employed * 10 - unemployed * 15;
@@ -67,8 +69,8 @@ export class House extends Building {
 		if (!need.quality) {
 			return true;
 		}
-		const qualityCorrect = need.quality <= this.qualities[need.resource];
-		this.qualities[need.resource] = Math.max(this.qualities[need.resource] - 1, 1); // TODO
+		const qualityCorrect = need.quality <= this.qualities[need.resource]; 
+		this.qualities[need.resource] = Math.max(this.qualities[need.resource] - 1, 1);
 		return qualityCorrect;
 	}
 
