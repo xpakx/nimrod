@@ -13,6 +13,7 @@ import { CityLogicLayer } from "./logic/city-logic.js";
 import { CityInterfaceLogic } from "./logic/city-interface-logic.js";
 import { Building } from "./building/buildings.js";
 import { SaveManager } from "./save-manager.js";
+import { BattleLogicLayer } from "./logic/battle-logic.js";
 
 export class Game {
 	state: GameState;
@@ -26,8 +27,11 @@ export class Game {
 	maxXOffset: number;
 	minuteCounter: number;
 	logger: Logger = getLogger("Game");
+
 	cityLogic: CityLogicLayer;
 	cityInterfaceLogic: CityInterfaceLogic;
+
+	battleLogic: BattleLogicLayer;
 
 	constructor() {
 		this.state = new GameState();
@@ -37,6 +41,7 @@ export class Game {
 		this.sprites = new SpriteLibrary();
 		this.cityLogic = new CityLogicLayer();
 		this.cityInterfaceLogic = new CityInterfaceLogic();
+		this.battleLogic = new BattleLogicLayer();
 		this.saveManager = new SaveManager();
 
 		this.maxYOffset = this.map.isoToScreen({x: this.map.map[0].length - 1, y: this.map.map.length - 1}).y + (this.map.tileSize.height/2);
@@ -80,11 +85,7 @@ export class Game {
 				this.cityLogic.onMouseLeftClick(this);
 				break;
 			case "Battle":
-				if (this.state.currentBattle?.battleStarted) {
-					this.leftMouseBattle();
-				} else {
-					this.leftMouseBattlePrep();
-				}
+				this.battleLogic.onMouseLeftClick(this);
 				break;
 			case "Kingdom":
 				this.quest.onMouseLeftClick(this);
@@ -201,7 +202,7 @@ export class Game {
 		layer.updateMousePosition(this.state.playerMouse);
 
 		if (this.state.view == "Battle" && !this.comparePositions(old, layer.getMousePosition())) {
-			this.battleMouseOver();
+			this.battleLogic.battleMouseOver(this);
 		}
 	}
 
@@ -542,101 +543,6 @@ export class Game {
 		);
 		this.interf.addButtonRow(mapRow);
 	}
-
-	battleMouseOver() {
-		if (!this.state.currentBattle) {
-			return;
-		}
-		const battle = this.state.currentBattle;
-		if (!battle.selectedTile) {
-			return;
-		}
-		const start = battle.selectedTile;
-		if (!this.map.isTileOnMap(this.map.isoPlayerMouse)) {
-			return;
-		}
-
-		if (battle.selectedActor) {
-			const dist = this.map.shortestPath(start, this.map.isoPlayerMouse, this.sprites.getArrow());
-			this.map.pathCorrect =  dist <= battle.selectedActor.movement;
-		}
-	}
-
-        isMouseOverPedestrian(): BattleActor | undefined {
-		const mouse = this.map.isoPlayerMouse;
-		for (let pedestrian of this.state.pedestrians) {
-			const pos = pedestrian.positionSquare;
-			if(pos.x == mouse.x && pos.y == mouse.y) {
-				return pedestrian as BattleActor;
-			}
-		}
-		return undefined;
-	}
-
-	leftMouseBattle() {
-		if (!this.state.currentBattle) {
-			return;
-		}
-		if (!this.map.isTileOnMap(this.map.isoPlayerMouse)) {
-			return;
-		}
-		const battle = this.state.currentBattle;
-		const x = this.map.isoPlayerMouse.x;
-		const y = this.map.isoPlayerMouse.y;
-
-		if (battle.selectedTile) {
-			this.battleProcessAction(battle.selectedTile, {x: x, y: y}, battle.selectedActor);
-			battle.selectedTile = undefined;
-			battle.selectedActor = undefined;
-			return;
-		}
-
-		battle.selectedTile = {x: x, y: y};
-		battle.selectedActor = this.isMouseOverPedestrian();
-		this.logger.debug("Selected actor", battle.selectedActor);
-		this.logger.debug("Selected tile", battle.selectedTile);
-	}
-
-	battleProcessAction(from: Position, to: Position, actor: BattleActor | undefined) {
-		if (!actor || actor.enemy) {
-			this.map.clearPath();
-			return;
-		}
-		const dist = this.map.shortestPath(from, to, this.sprites.getArrow());
-		let path = this.map.path;
-		this.map.clearPath();
-		if (dist <= actor.movement && path) {
-			actor.setPath(path.map((x) => x.position));
-		}
-	}
-
-	tempBattleIndex: number = 0; // TODO: improve placing and move to battle logic
-	leftMouseBattlePrep() {
-		if (!this.state.currentBattle) {
-			return;
-		}
-		if (!this.map.isTileOnMap(this.map.isoPlayerMouse)) {
-			return;
-		}
-		if (this.map.isBlocked(this.map.isoPlayerMouse)) {
-			return;
-		}
-		const battle = this.state.currentBattle;
-		const x = this.map.isoPlayerMouse.x;
-		const y = this.map.isoPlayerMouse.y;
-		while(battle.heroes[this.tempBattleIndex].placed) {
-			this.tempBattleIndex += 1;
-		}
-		const placed = battle.placeHero(this.tempBattleIndex, {x: x, y: y});
-		if (!placed) {
-			return;
-		}
-		this.state.pedestrians.push(battle.heroes[this.tempBattleIndex]);
-
-		battle.finishPlacement();
-		this.logger.debug(`current index: ${this.tempBattleIndex}, started: ${this.state.currentBattle.battleStarted}`);
-	}
-
 
 	getNormalWorkforce(): House[] {
 		return this.map.buildings

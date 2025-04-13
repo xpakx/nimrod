@@ -12,7 +12,7 @@ export class SaveManager {
 	// TODO: save game.state, pedestrians, battle…
 	saveState(game: Game, key: string) {
 		const data: SaveData = {
-			version: 2,
+			version: 3,
 			map: this.serializeMapWithState(game.map),
 			state: {
 				view: game.state.view,

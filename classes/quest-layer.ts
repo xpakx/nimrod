@@ -174,10 +174,11 @@ export class QuestInterface extends BuildingInterface {
 
 	constructor(quest: Quest) {
 		super();
-		this.quest = quest;
-		let action: Action = { action: "goTo", argument: "City" }; // TODO
+		this.quest = quest; 
+		// TODO: correctly apply actions
+		let action: Action = { action: "goTo", argument: "City" };
 		if (quest.battle) {
-			action = { action: "goTo", argument: "Battle" };  // TODO
+			action = { action: "goTo", argument: "Battle" };
 
 		}
 		this.goButton =  new GoButton({x: 100, y: 100}, action);

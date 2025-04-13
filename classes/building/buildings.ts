@@ -112,6 +112,9 @@ export class Building {
 	constructed: boolean = true;
 	constructionManager?: ConstructionManager;
 
+	storage: { [key: string]: number } = {};
+	capacity: number = 20;
+
 	constructor(prototype: BuildingPrototype, position: Position, accepted: boolean = true) {
 		this.sprite =  prototype.sprite;
 		this.position = position;
@@ -266,8 +269,6 @@ export class Building {
 		this.worker.home = this.workerSpawn;
 	}
 
-	storage: { [key: string]: number } = {}; // TODO
-	capacity: number = 20;
 	supply(worker: BuildingWorker, resource: string, inventory: number): number {
 		if(!this.constructed && this.constructionManager) return this.constructionManager.supply(this, worker, resource, inventory);
 		if (!this.accepts.has(resource)) return 0;
