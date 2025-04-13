@@ -8,6 +8,7 @@ import { BuildingPrototype } from "../building/buildings.js";
 import { InterfaceLayer } from "../interface/interface.js";
 import { DeliveryScheduler } from "../building/storage.js";
 import { MigrationManager } from "./migration-manager.js";
+import { WorkforceManager } from "./workforce-manager.js";
 
 export class CityLogicLayer {
 	static roadCost: number = 2;
@@ -15,6 +16,7 @@ export class CityLogicLayer {
 
 	public orders: DeliveryScheduler = new DeliveryScheduler();
 	public migrations: MigrationManager = new MigrationManager();
+	public workforce: WorkforceManager = new WorkforceManager();
 
 	onMouseLeftClick(game: Game) {
 		if(game.map.mode.action == "build") {
@@ -49,7 +51,7 @@ export class CityLogicLayer {
 			state.maxPopulation += house.maxPopulation;
 		}
 		this.orders.onBuildingCreation(map.getBuilding(map.isoPlayerMouse));
-		game.assignWorkers();
+		this.workforce.assignWorkers(game);
 	}
 
 	deleteBuilding(map: MapLayer, state: GameState, game: Game) {
@@ -74,7 +76,7 @@ export class CityLogicLayer {
 
 		this.orders.onBuildingDeletion(building);
 		building.onDeletion();
-		game.assignWorkers();
+		this.workforce.assignWorkers(game);
 	}
 
 	deleteRoad(map: MapLayer) {

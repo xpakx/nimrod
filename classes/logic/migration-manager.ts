@@ -69,7 +69,7 @@ export class MigrationManager {
 		if (realBuilding && house == realBuilding) {
 			if (house.workforce != "warrior") {
 				game.state.population += 1;
-				game.assignWorkers();
+				game.cityLogic.workforce.assignWorkers(game);
 			}
 			if (house.workforce == "warrior" && house.hero) {
 				game.state.allHeroes.push(house.hero);
