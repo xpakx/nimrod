@@ -1,4 +1,4 @@
-import { House } from "../building/house.js";
+import { House, Migrant } from "../building/house.js";
 import { Game } from "../game.js";
 import { GameState } from "../game-state.js";
 import { getLogger, Logger } from "../logger.js";
@@ -106,5 +106,50 @@ export class CityLogicLayer {
 			this.orders.onMinuteEnd(map.buildings);
 		}
 		this.orders.tick(deltaTime, map.buildings, map);
+	}
+
+	calcBuildingsState(game: Game, deltaTime: number, minuteEnded: boolean) {
+		for(let building of game.map.buildings) {
+			building.tick(deltaTime);
+			if(building.canSpawnWorker()) {
+				const worker = building.spawnWorker();
+				game.state.insertPedestrian(worker);
+			}
+			if(minuteEnded) building.onMinuteEnd(game.state);
+		}
+	}
+
+	calcPedestriansState(game: Game, deltaTime: number, minuteEnded: boolean) {
+		const dTime = deltaTime > 0.5 ? 0.5 : deltaTime;
+		let randMap = [
+			Math.floor(Math.random() * 2),
+			Math.floor(Math.random() * 3),
+			Math.floor(Math.random() * 4),
+		];
+
+		let pedestrians = game.state.pedestrians;
+		game.state.pedestrians = [];
+		for(let pedestrian of pedestrians) {
+			pedestrian.tick(dTime, game.map, randMap);
+			if (!pedestrian.dead) {
+				game.state.insertPedestrian(pedestrian);
+			} else if ("settled" in pedestrian && pedestrian.settled) {
+				this.migrations.settleMigrant(game, pedestrian as Migrant);
+			}
+			if (pedestrian.dead) {
+				this.orders.onWorkerDeath(pedestrian);
+			}
+		}
+
+		if(minuteEnded) {
+			this.migrations.spawnMigrants(game);
+		}
+	}
+
+	calcState(game: Game, deltaTime: number, minuteEnded: boolean) {
+		this.calcBuildingsState(game, deltaTime, minuteEnded);
+		this.calcPedestriansState(game, deltaTime, minuteEnded);
+		this.calcOrdersState(game.map, deltaTime, minuteEnded);
+		this.migrations.spawnHeroes(game, deltaTime);
 	}
 }

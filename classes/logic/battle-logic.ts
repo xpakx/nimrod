@@ -110,4 +110,28 @@ export class BattleLogicLayer {
 		battle.finishPlacement();
 		this.logger.debug(`current index: ${this.tempBattleIndex}, started: ${game.state.currentBattle.battleStarted}`);
 	}
+
+	calcBuildingsState(game: Game, deltaTime: number) {
+		for(let building of game.map.buildings) {
+			building.tick(deltaTime);
+		}
+	}
+
+	calcPedestriansState(game: Game, deltaTime: number) {
+		const dTime = deltaTime > 0.5 ? 0.5 : deltaTime;
+
+		let pedestrians = game.state.pedestrians;
+		game.state.pedestrians = [];
+		for(let pedestrian of pedestrians) {
+			pedestrian.tick(dTime, game.map, []);
+			if (!pedestrian.dead) {
+				game.state.insertPedestrian(pedestrian);
+			} 
+		}
+	}
+
+	calcState(game: Game, deltaTime: number, _minuteEnded: boolean) {
+		this.calcBuildingsState(game, deltaTime);
+		this.calcPedestriansState(game, deltaTime);
+	}
 }

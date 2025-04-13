@@ -368,10 +368,8 @@ export class Game {
 
 	calcState(deltaTime: number) {
 		const minuteEnded = this.advanceMinuteCounter(deltaTime);
-		this.calcBuildingsState(deltaTime, minuteEnded);
-		this.calcPedestriansState(deltaTime, minuteEnded);
-		this.cityLogic.calcOrdersState(this.map, deltaTime, minuteEnded);
-		this.cityLogic.migrations.spawnHeroes(this, deltaTime);
+		if (this.state.view == "City") this.cityLogic.calcState(this, deltaTime, minuteEnded);
+		else this.battleLogic.calcState(this, deltaTime, minuteEnded);
 		if (minuteEnded) this.saveManager.saveState(this, "quicksave");
 	}
 
@@ -382,44 +380,6 @@ export class Game {
 			return true;
 		}
 		return false;
-	}
-
-	calcBuildingsState(deltaTime: number, minuteEnded: boolean) {
-		for(let building of this.map.buildings) {
-			building.tick(deltaTime);
-			if(building.canSpawnWorker()) {
-				const worker = building.spawnWorker();
-				this.state.insertPedestrian(worker);
-			}
-			if(minuteEnded) building.onMinuteEnd(this.state);
-		}
-	}
-
-	calcPedestriansState(deltaTime: number, minuteEnded: boolean) {
-		const dTime = deltaTime > 0.5 ? 0.5 : deltaTime;
-		let randMap = [
-			Math.floor(Math.random() * 2),
-			Math.floor(Math.random() * 3),
-			Math.floor(Math.random() * 4),
-		];
-
-		let pedestrians = this.state.pedestrians;
-		this.state.pedestrians = [];
-		for(let pedestrian of pedestrians) {
-			pedestrian.tick(dTime, this.map, randMap);
-			if (!pedestrian.dead) {
-				this.state.insertPedestrian(pedestrian);
-			} else if ("settled" in pedestrian && pedestrian.settled) {
-				this.cityLogic.migrations.settleMigrant(this, pedestrian as Migrant);
-			}
-			if (pedestrian.dead) {
-				this.cityLogic.orders.onWorkerDeath(pedestrian);
-			}
-		}
-
-		if(minuteEnded) {
-			this.cityLogic.migrations.spawnMigrants(this);
-		}
 	}
 
 	renderGame(context: CanvasRenderingContext2D, deltaTime: number) {

@@ -1,5 +1,4 @@
 import { BattleActor, HeroType } from "./battle/actor.js";
-import { buildingSettings } from "./building-settings.js";
 import { House } from "./building/house.js";
 import { View } from "./game-state.js";
 import { Game } from "./game.js";
@@ -12,7 +11,7 @@ export class SaveManager {
 	// TODO: save game.state, pedestrians, battle…
 	saveState(game: Game, key: string) {
 		const data: SaveData = {
-			version: 3,
+			version: 2,
 			map: this.serializeMapWithState(game.map),
 			state: {
 				view: game.state.view,
