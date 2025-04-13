@@ -64,6 +64,7 @@ export class SaveManager {
 						building.population = buildingData.houseData.population;
 						building.maxPopulation = buildingData.houseData.maxPopulation;
 						building.employed = buildingData.houseData.employed;
+						game.state.population += building.population;
 					}
 				}
 				return true;
