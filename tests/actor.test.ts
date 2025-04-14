@@ -31,7 +31,7 @@ describe('ActorSprite', () => {
 	test('should initialize with correct properties', () => {
 		const size = 2;
 		const tileSize: Size = { width: 50, height: 50 };
-		const actorSprite = new ActorSprite(imageMock, size, tileSize);
+		const actorSprite = new ActorSprite(imageMock, size, tileSize, "test");
 
 		expect(actorSprite.image).toBe(imageMock);
 		expect(actorSprite.baseSize).toBe(size);
@@ -42,7 +42,7 @@ describe('ActorSprite', () => {
 	test('refreshSize should calculate size correctly', () => {
 		const size = 2;
 		const tileSize: Size = { width: 50, height: 50 };
-		const actorSprite = new ActorSprite(imageMock, size, tileSize);
+		const actorSprite = new ActorSprite(imageMock, size, tileSize, "test");
 
 		tileSize.width = 60;
 		actorSprite.refreshSize(tileSize);
@@ -57,7 +57,7 @@ describe('Actor', () => {
 	let position: Position;
 
 	beforeEach(() => {
-		spriteMock = new ActorSprite({ width: 100, height: 200 } as HTMLImageElement, 2, { width: 50, height: 50 });
+		spriteMock = new ActorSprite({ width: 100, height: 200 } as HTMLImageElement, 2, { width: 50, height: 50 }, "test");
 		position = { x: 1, y: 1 };
 		OffscreenCanvas =  OffscreenCanvasMock
 	});
@@ -69,7 +69,7 @@ describe('Actor', () => {
 		} as HTMLImageElement;
 
 		const tileSize: Size = { width: 50, height: 50 };
-		const actorSprite = new ActorSprite(mockImage, 1, tileSize);
+		const actorSprite = new ActorSprite(mockImage, 1, tileSize, "test");
 		const position: Position = { x: 5, y: 10 };
 
 		const actor = new Actor(actorSprite, position);
