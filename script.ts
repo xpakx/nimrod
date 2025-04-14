@@ -41,7 +41,8 @@ function registerKeyboardEvents() {
 
 window.onload = async () => {
 	const loggerFactory = LoggerFactory.getInstance();
-	loggerFactory.enable(["Game", "DeliveryScheduler", "ConstructionManager"]);
+	loggerFactory.updateAllLevels("debug");
+	loggerFactory.enable(["Game", "SaveManager"]);
 	const logger = loggerFactory.getLogger("Script");
 
 	logger.debug('Started app');

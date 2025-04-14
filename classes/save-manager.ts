@@ -1,6 +1,7 @@
 import { BattleActor, HeroType } from "./battle/actor.js";
-import { House } from "./building/house.js";
-import { View } from "./game-state.js";
+import { BuildingWorker } from "./building/buildings.js";
+import { House, Migrant } from "./building/house.js";
+import { GameState, View } from "./game-state.js";
 import { Game } from "./game.js";
 import { getLogger, Logger } from "./logger.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
@@ -11,8 +12,8 @@ export class SaveManager {
 	// TODO: save game.state, pedestrians, battle…
 	saveState(game: Game, key: string) {
 		const data: SaveData = {
-			version: 2,
-			map: this.serializeMapWithState(game.map),
+			version: 3,
+			map: this.serializeMapWithState(game.map, game.state),
 			state: {
 				view: game.state.view,
 				money: game.state.money,
@@ -33,40 +34,29 @@ export class SaveManager {
 				return true; 
 			}
 
-			const map = savedMap as SaveData;
+			const version = savedMap.version as number;
+			this.logger.debug(`Save version: ${version}`);
 
-			if (map.version == 1) {
-				const map = savedMap as SaveData;
+			if (version == 1) {
+				const map = savedMap as OldSaveData;
 				this.applyMap(game, map.map, true);
 				return true;
 			}
 
-			if (map.version == 2) {
+			if (version == 2) {
+				const map = savedMap as OldSaveData;
 				this.applyMap(game, map.map, true);
 				game.state.view = map.state.view;
 				game.state.money = map.state.money;
+				this.applyBuildingData(game, map.map.buildings);
+				return true;
+			}
 
-				for (let buildingData of map.map.buildings) {
-					const pos: Position = { x: buildingData.x, y: buildingData.y };
-					const building = game.map.getBuilding(pos);
-					if (!building) continue;
-					building.accepted = buildingData.accepted;
-					building.health = buildingData.health;
-					building.readyToSpawn = buildingData.readyToSpawn;
-					building.workers = buildingData.workers;
-					building.maxWorkers = buildingData.maxWorkers;
-					building.constructed = buildingData.constructed;
-					if (buildingData.constructed) building.constructionManager = undefined;
-					building.storage = buildingData.storage;
-
-					if (building instanceof House && buildingData.houseData) {
-						building.qualities = buildingData.houseData.qualities;
-						building.population = buildingData.houseData.population;
-						building.maxPopulation = buildingData.houseData.maxPopulation;
-						building.employed = buildingData.houseData.employed;
-						game.state.population += building.population;
-					}
-				}
+			if (version == 3) {
+				const map = savedMap as SaveData;
+				this.applySave(game, map.map, true);
+				game.state.view = map.state.view;
+				game.state.money = map.state.money;
 				return true;
 			}
 
@@ -238,9 +228,10 @@ export class SaveManager {
 		}
 	}
 
-	serializeMapWithState(map: MapLayer): MapDataWithState {
+	serializeMapWithState(map: MapLayer, state: GameState): MapDataWithState {
 		const roads: RoadData[] = [];
 		const buildings: BuildingDataWithState[] = [];
+		const pedestrians: PedestrianDataWithState[] = [];
 		const terrain: TerrainData[] = [];
 
 		for (let x = 0; x < map.roads.length; x++) {
@@ -276,6 +267,45 @@ export class SaveManager {
 			buildings.push(buildingData);
 		}
 
+		for (const pedestrian of state.pedestrians) {
+			let pedestrianData: PedestrianDataWithState = {
+				x: pedestrian.positionSquare.x,
+				y: pedestrian.positionSquare.y,
+				dead: pedestrian.dead,
+				name: "",
+				directionMask: pedestrian.directionMask,
+				direction: pedestrian.direction,
+				traveledSquares: pedestrian.traveledSquares,
+				maxTravel: pedestrian.maxTravel,
+				travelFinished: pedestrian.travelFinished,
+				home: {x: pedestrian.home.x, y: pedestrian.home.y}, 
+				goal: pedestrian.goal,
+			};
+
+			if (pedestrian instanceof Migrant) {
+				pedestrianData.migrant = {
+					path: pedestrian.path,
+					targetHome: pedestrian.targetHome?.position,
+					settled: pedestrian.settled,
+				};
+			}
+
+			if (pedestrian instanceof BuildingWorker) {
+				pedestrianData.worker = {
+					isAwayFromHome: pedestrian.isAwayFromHome,
+					timeSinceLastReturn: pedestrian.timeSinceLastReturn,
+					workStartTime: pedestrian.workStartTime,
+					resource: pedestrian.resource,
+					inventory: pedestrian.inventory,
+					storage: pedestrian.storage,
+					repairing: pedestrian.repairing,
+					resourceQuality: pedestrian.resourceQuality,
+				};
+			}
+
+			pedestrians.push(pedestrianData);
+		}
+
 		for (let x = 0; x < map.map.length; x++) {
 			for (let y = 0; y < map.map[0].length; y++) {
 				if (map.costs[x][y] != 1 || map.map[x][y] != map.defaultColor) {
@@ -294,11 +324,76 @@ export class SaveManager {
 			roads,
 			buildings,
 			terrain,
-			actors: [],
+			actors: pedestrians,
 		};
 	}
+
+	applyBuildingData(game: Game, data: BuildingDataWithState[]) {
+		for (let buildingData of data) {
+			const pos: Position = { x: buildingData.x, y: buildingData.y };
+			const building = game.map.getBuilding(pos);
+			if (!building) continue;
+			building.accepted = buildingData.accepted;
+			building.health = buildingData.health;
+			building.readyToSpawn = buildingData.readyToSpawn;
+			building.workers = buildingData.workers;
+			building.maxWorkers = buildingData.maxWorkers;
+			building.constructed = buildingData.constructed;
+			if (buildingData.constructed) building.constructionManager = undefined;
+			building.storage = buildingData.storage;
+
+			if (building instanceof House && buildingData.houseData) {
+				building.qualities = buildingData.houseData.qualities;
+				building.population = buildingData.houseData.population;
+				building.maxPopulation = buildingData.houseData.maxPopulation;
+				building.employed = buildingData.houseData.employed;
+				game.state.population += building.population;
+			}
+		}
+	}
+
+	applySave(game: Game, data: MapDataWithState, updateDistances: boolean = false) {
+		this.logger.debug("Applying save", data);
+		game.map.resetMap(data.size);
+		game.cityLogic.orders.updateDimensions(data.size);
+
+		for (let pos of data.roads) {
+			game.map.putRoad({x: pos.x, y: pos.y}, game.sprites.getRoad(), true);
+		}
+
+		for (let building of data.buildings) {
+			game.map.putBuilding({x: building.x, y: building.y}, game.sprites.buildings[building.type]);
+			game.cityLogic.orders.onBuildingCreation(game.map.getBuilding({x: building.x, y: building.y}));
+		}
+		this.applyBuildingData(game, data.buildings);
+
+
+		for (let terrain of data.terrain) {
+			if (terrain.cost) {
+				game.map.costs[terrain.x][terrain.y] = terrain.cost;
+			}
+			if (terrain.color) {
+				game.map.map[terrain.x][terrain.y] = terrain.color;
+			}
+		}
+
+		game.state.pedestrians = [];
+		if (updateDistances) game.map.floydWarshall();
+		for (let building of game.map.buildings) {
+			if (building instanceof House) {
+				game.state.population += building.population;
+				game.state.maxPopulation += building.maxPopulation;
+			}
+		}
+	}
+
 }
 
+export interface OldSaveData {
+	version: number;
+	map: OldMapDataWithState;
+	state: StateData;
+}
 
 export interface SaveData {
 	version: number;
@@ -365,6 +460,13 @@ interface UnplacedActorData {
 
 
 
+export interface OldMapDataWithState {
+	size: Size;
+	roads: RoadData[];
+	buildings: BuildingDataWithState[];
+	terrain: TerrainData[];
+	actors: ActorData[];
+}
 
 export interface MapDataWithState {
 	size: Size;
@@ -395,7 +497,7 @@ interface HouseData {
 	maxPopulation: number;
 }
 
-interface PedestrianDataWithState extends UnplacedActorData {
+interface PedestrianDataWithState {
 	x: number;
 	y: number;
 	dead: boolean;
@@ -406,15 +508,15 @@ interface PedestrianDataWithState extends UnplacedActorData {
 	maxTravel: number;
 	travelFinished: boolean;
 	home: Position;
-	goal: Position;
-	migrant: MigrantData;
-	worker: BuildingWorkerData;
+	goal?: Position;
+	migrant?: MigrantData;
+	worker?: BuildingWorkerData;
 	// TODO: battle?
 }
 
 interface MigrantData {
-	path: Position[];
-	targetHome: Position;
+	path?: Position[];
+	targetHome?: Position;
 	settled: boolean;
 }
 
