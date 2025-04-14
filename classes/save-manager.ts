@@ -167,12 +167,6 @@ export class SaveManager {
 
 		game.state.pedestrians = [];
 		if (updateDistances) game.map.floydWarshall();
-		for (let building of game.map.buildings) {
-			if (building instanceof House) {
-				game.state.population += building.population;
-				game.state.maxPopulation += building.maxPopulation;
-			}
-		}
 	}
 
 
@@ -238,10 +232,15 @@ export class SaveManager {
 		for (let x = 0; x < map.roads.length; x++) {
 			for (let y = 0; y < map.roads[0].length; y++) {
 				if (map.roads[x][y]) {
-					roads.push({ y: x, x: y }); // TODO: fix indexing for roads
+					roads.push({ y: x, x: y });
 				}
 			}
 		}
+
+
+		let workersMap: Map<BuildingWorker, Position> = new Map();
+
+
 
 		for (const building of map.buildings) {
 			let buildingData: BuildingDataWithState = {
@@ -263,6 +262,9 @@ export class SaveManager {
 					maxPopulation: building.maxPopulation,
 					employed: building.employed,
 				};
+			}
+			if (building.worker) {
+				workersMap.set(building.worker, building.position);
 			}
 		
 			buildings.push(buildingData);
@@ -293,6 +295,8 @@ export class SaveManager {
 			}
 
 			if (pedestrian instanceof BuildingWorker) {
+				let homePosition: undefined | Position;
+				if (workersMap.has(pedestrian)) homePosition = workersMap.get(pedestrian);
 				pedestrianData.worker = {
 					isAwayFromHome: pedestrian.isAwayFromHome,
 					timeSinceLastReturn: pedestrian.timeSinceLastReturn,
@@ -302,6 +306,7 @@ export class SaveManager {
 					storage: pedestrian.storage,
 					repairing: pedestrian.repairing,
 					resourceQuality: pedestrian.resourceQuality,
+					homePosition: homePosition,
 				};
 			}
 
@@ -350,6 +355,7 @@ export class SaveManager {
 				building.maxPopulation = buildingData.houseData.maxPopulation;
 				building.employed = buildingData.houseData.employed;
 				game.state.population += building.population;
+				game.state.maxPopulation += building.maxPopulation;
 			}
 		}
 	}
@@ -404,6 +410,11 @@ export class SaveManager {
 				pedestrian.storage = pedestrianData.worker.storage;
 				pedestrian.repairing = pedestrianData.worker.repairing;
 				pedestrian.resourceQuality = pedestrianData.worker.resourceQuality;
+
+				if (pedestrianData.worker.homePosition) {
+					const building = game.map.getBuilding(pedestrianData.worker.homePosition);
+					if (building) building.worker = pedestrian;
+				}
 			} else {
 				pedestrian = new Actor(sprite, position);
 			}
@@ -429,12 +440,6 @@ export class SaveManager {
 
 
 		if (updateDistances) game.map.floydWarshall();
-		for (let building of game.map.buildings) {
-			if (building instanceof House) {
-				game.state.population += building.population;
-				game.state.maxPopulation += building.maxPopulation;
-			}
-		}
 	}
 
 }
@@ -580,5 +585,6 @@ interface BuildingWorkerData {
 	storage: number;
 	repairing: boolean;
 	resourceQuality?: number;
+	homePosition?: Position;
 }
 
