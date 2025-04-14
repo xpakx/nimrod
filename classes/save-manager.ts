@@ -270,8 +270,8 @@ export class SaveManager {
 
 		for (const pedestrian of state.pedestrians) {
 			let pedestrianData: PedestrianDataWithState = {
-				x: pedestrian.positionSquare.x,
-				y: pedestrian.positionSquare.y,
+				x: pedestrian.position.x,
+				y: pedestrian.position.y,
 				dead: pedestrian.dead,
 				name: pedestrian.name.toString(),
 				sprite: pedestrian.sprite.key,
