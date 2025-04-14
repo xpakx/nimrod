@@ -355,12 +355,12 @@ export class SpriteLibrary {
 	async prepareActorSprites(tileSize: Size): Promise<boolean> {
 		// Placeholder: Using house.svg as a temporary image for actors.
 		// TODO: Replace with actual actor sprites
-		this.actors['test'] = new ActorSprite(await loadImage("./img/house.svg"), 2, tileSize);
-		this.actors['delivery'] = new ActorSprite(await loadImage("./img/house.svg"), 2, tileSize);
+		this.actors['test'] = new ActorSprite(await loadImage("./img/house.svg"), 2, tileSize, "test");
+		this.actors['delivery'] = new ActorSprite(await loadImage("./img/house.svg"), 2, tileSize, "delivery");
 		this.actors['delivery'].fillStyle = "blue";
 		this.actors['delivery'].refreshSize(tileSize);
 
-		this.actors['warrior'] = new ActorSprite(await loadImage("./img/portraits/ratman.svg"), 2, tileSize);
+		this.actors['warrior'] = new ActorSprite(await loadImage("./img/portraits/ratman.svg"), 2, tileSize, "warrior");
 		this.actors['warrior'].fillStyle = "green";
 		this.actors['warrior'].refreshSize(tileSize);
 		return true;

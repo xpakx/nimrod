@@ -8,12 +8,14 @@ export class ActorSprite {
 	baseSize: number;
 	offscreen: OffscreenCanvas;
 	fillStyle: "red" | "blue" | "green" = "red";
+	key: string;
 
-	constructor(image: HTMLImageElement, size: number, tileSize: Size) {
+	constructor(image: HTMLImageElement, size: number, tileSize: Size, key: string) {
 		this.image = image;
 		this.baseSize = size;
 		this.offscreen =  new OffscreenCanvas(100, 100);
 		this.refreshSize(tileSize);
+		this.key = key;
 	}
 
 	refreshSize(tileSize: Size) {

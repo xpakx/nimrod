@@ -1,3 +1,4 @@
+import { Actor } from "./actor.js";
 import { BattleActor, HeroType } from "./battle/actor.js";
 import { BuildingWorker } from "./building/buildings.js";
 import { House, Migrant } from "./building/house.js";
@@ -272,7 +273,8 @@ export class SaveManager {
 				x: pedestrian.positionSquare.x,
 				y: pedestrian.positionSquare.y,
 				dead: pedestrian.dead,
-				name: "",
+				name: pedestrian.name.toString(),
+				sprite: pedestrian.sprite.key,
 				directionMask: pedestrian.directionMask,
 				direction: pedestrian.direction,
 				traveledSquares: pedestrian.traveledSquares,
@@ -378,6 +380,54 @@ export class SaveManager {
 		}
 
 		game.state.pedestrians = [];
+
+		for (let pedestrianData of data.actors) {
+			let pedestrian;
+			const sprite = game.sprites.actors[pedestrianData.sprite];
+			const position = {x: pedestrianData.x, y: pedestrianData.y};
+			if (pedestrianData.migrant) {
+				pedestrian = new Migrant(sprite, position);
+				pedestrian.path = pedestrianData.migrant.path;
+				pedestrian.settled = pedestrianData.migrant.settled;
+				if (pedestrianData.migrant.targetHome) {
+					const building = game.map.getBuilding(pedestrianData.migrant.targetHome);
+					if (building && building instanceof House) pedestrian.targetHome = building;
+					
+				}
+			} else if (pedestrianData.worker) {
+				pedestrian = new BuildingWorker(sprite, position);
+				pedestrian.isAwayFromHome = pedestrianData.worker.isAwayFromHome;
+				pedestrian.timeSinceLastReturn = pedestrianData.worker.timeSinceLastReturn;
+				pedestrian.workStartTime = pedestrianData.worker.workStartTime;
+				pedestrian.resource = pedestrianData.worker.resource;
+				pedestrian.inventory = pedestrianData.worker.inventory;
+				pedestrian.storage = pedestrianData.worker.storage;
+				pedestrian.repairing = pedestrianData.worker.repairing;
+				pedestrian.resourceQuality = pedestrianData.worker.resourceQuality;
+			} else {
+				pedestrian = new Actor(sprite, position);
+			}
+
+			pedestrian.dead = pedestrianData.dead;
+			pedestrian.name = pedestrianData.name;
+			pedestrian.directionMask = pedestrianData.directionMask;
+			pedestrian.direction = pedestrianData.direction;
+			pedestrian.traveledSquares = pedestrianData.traveledSquares;
+			pedestrian.maxTravel = pedestrianData.maxTravel;
+			pedestrian.travelFinished = pedestrianData.travelFinished;
+			pedestrian.home = pedestrianData.home;
+			pedestrian.position = {x: pedestrianData.x, y: pedestrianData.y}; 
+			pedestrian.goal = pedestrianData.goal;
+
+			pedestrian.positionSquare = {x: Math.floor(pedestrian.position.x), y: Math.floor(pedestrian.position.y)};
+			pedestrian.diagonal = pedestrian.positionSquare.x + pedestrian.positionSquare.y;
+
+			game.state.pedestrians.push(pedestrian);
+		}
+		game.state.sortPedestrians();
+		this.logger.debug("Pedestrians", game.state.pedestrians);
+
+
 		if (updateDistances) game.map.floydWarshall();
 		for (let building of game.map.buildings) {
 			if (building instanceof House) {
@@ -502,6 +552,7 @@ interface PedestrianDataWithState {
 	y: number;
 	dead: boolean;
 	name: string;
+	sprite: string;
 	directionMask: number;
 	direction: Position;
 	traveledSquares: number;
