@@ -371,7 +371,7 @@ export interface MapDataWithState {
 	roads: RoadData[];
 	buildings: BuildingDataWithState[];
 	terrain: TerrainData[];
-	actors: ActorData[];
+	actors: PedestrianDataWithState[];
 }
 
 interface BuildingDataWithState {
@@ -394,3 +394,38 @@ interface HouseData {
 	employed: number;
 	maxPopulation: number;
 }
+
+interface PedestrianDataWithState extends UnplacedActorData {
+	x: number;
+	y: number;
+	dead: boolean;
+	name: string;
+	directionMask: number;
+	direction: Position;
+	traveledSquares: number;
+	maxTravel: number;
+	travelFinished: boolean;
+	home: Position;
+	goal: Position;
+	migrant: MigrantData;
+	worker: BuildingWorkerData;
+	// TODO: battle?
+}
+
+interface MigrantData {
+	path: Position[];
+	targetHome: Position;
+	settled: boolean;
+}
+
+interface BuildingWorkerData {
+	isAwayFromHome: boolean;
+	timeSinceLastReturn: number;
+	workStartTime: number;
+	resource?: string;
+	inventory: number;
+	storage: number;
+	repairing: boolean;
+	resourceQuality?: number;
+}
+

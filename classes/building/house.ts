@@ -123,6 +123,7 @@ export class Migrant extends Actor {
 	path?: Position[]
 	targetHome?: House;
 	settled: boolean = false;
+	moving: boolean = false;
 
 	canMove(_map: MapLayer): boolean {
 	    return true;
@@ -138,8 +139,6 @@ export class Migrant extends Actor {
 		this.direction.y = this.goal!.y - this.positionSquare.y; 
 		this.logger.debug("Ultimate goal:", this.path[0]);
 	}
-
-	moving: boolean = false;
 
 	tick(deltaTime: number, map: MapLayer, _randMap: number[]): boolean {
 		return this.move(deltaTime, map);
