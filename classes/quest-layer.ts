@@ -66,14 +66,8 @@ export class QuestLayer {
 
 	applyCampaign(data: CampaignData, _sprites: SpriteLibrary) {
 		for (let marker of data.questMarkers) {
-			const quest: Quest = {
-				name: marker.visibleName,
-				description: marker.description,
-			};
-			if (marker.questType.type == "skirmish") {
-				quest.battle =  { map: marker.questType.map };
-					
-			}
+			let quest: Quest;
+			quest = marker.questDefinition;
 			const questMarker = new QuestMarker(
 				marker.position, 
 				marker.size,
@@ -143,7 +137,7 @@ export class QuestInterface extends BuildingInterface {
 		this.quest = quest; 
 		// TODO: correctly apply actions
 		let action: Action = { action: "goTo", argument: "City" };
-		if (quest.battle) {
+		if (quest.type == "battle") {
 			action = { action: "goTo", argument: "Battle" };
 
 		}

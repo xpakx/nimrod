@@ -7,13 +7,14 @@ import { prepareTabs, SidebarConfig } from "./interface/sidebar.js";
 import { BattleActor } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
 import { getLogger, Logger, LoggerFactory } from "./logger.js";
-import { House, Migrant } from "./building/house.js";
-import { CampaignData, QuestLayer } from "./quest-layer.js";
+import { House } from "./building/house.js";
+import { QuestLayer } from "./quest-layer.js";
 import { CityLogicLayer } from "./logic/city-logic.js";
 import { CityInterfaceLogic } from "./logic/city-interface-logic.js";
 import { Building } from "./building/buildings.js";
 import { SaveManager } from "./save-manager.js";
 import { BattleLogicLayer } from "./logic/battle-logic.js";
+import { CampaignData } from "./quest.js";
 
 export class Game {
 	state: GameState;

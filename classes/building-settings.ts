@@ -1,7 +1,7 @@
 import { AdventurersGuildInterface } from "./interface/adventurers-guild.js";
 import { SidebarConfig } from "./interface/sidebar.js";
 import { StorageInterface } from "./interface/storage.js";
-import { CampaignData } from "./quest-layer.js";
+import { CampaignData } from "./quest.js";
 import { SpriteConfig, BuildingConfig } from "./sprite-library.js";
 
 export const buildingSettings: BuildingConfig[] = [
@@ -419,23 +419,30 @@ export const campaignSettings: CampaignData = {
 			id: "quest1",
 			icon: "",
 			visibleName: "Quest 1",
-			description: "",
 			position: {x: 0, y: 0},
 			size: {width: 20, height: 30},
-			questType: {
-				type: "skirmish",
+			questDefinition: {
+				type: "battle",
+				name: "",
+				description: "",
+				subtype: "skirmish",
 				map: "battle001.json",
+				objectives: [
+					{type: "rout"}
+				],
 			},
 		},
 		{
 			id: "quest2",
 			icon: "",
 			visibleName: "Quest 2",
-			description: "",
 			position: {x: 100, y: 100},
 			size: {width: 20, height: 30},
-			questType: {
+			questDefinition: {
 				type: "economic",
+				name: "",
+				description: "",
+				objectives: [],
 			},
 		}
 	],
