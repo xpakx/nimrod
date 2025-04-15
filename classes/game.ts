@@ -121,6 +121,11 @@ export class Game {
 			}
 		} else if(clickResult.action == "open") {
 			this.interf.buildingInterface = clickResult.interface;
+		} else if(clickResult.action == "registerQuest") {
+			this.interf.buildingInterface = undefined;
+			if (clickResult.map == "city") {
+				this.cityLogic.quests.registerQuest(clickResult.quest);
+			}
 		}
 	}
 

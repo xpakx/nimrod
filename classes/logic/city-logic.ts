@@ -9,6 +9,7 @@ import { InterfaceLayer } from "../interface/interface.js";
 import { DeliveryScheduler } from "../building/storage.js";
 import { MigrationManager } from "./migration-manager.js";
 import { WorkforceManager } from "./workforce-manager.js";
+import { QuestManager } from "../quest-layer.js";
 
 export class CityLogicLayer {
 	static roadCost: number = 2;
@@ -17,6 +18,7 @@ export class CityLogicLayer {
 	public orders: DeliveryScheduler = new DeliveryScheduler();
 	public migrations: MigrationManager = new MigrationManager();
 	public workforce: WorkforceManager = new WorkforceManager();
+	public quests: QuestManager = new QuestManager();
 
 	onMouseLeftClick(game: Game) {
 		if(game.map.mode.action == "build") {
@@ -151,5 +153,6 @@ export class CityLogicLayer {
 		this.calcPedestriansState(game, deltaTime, minuteEnded);
 		this.calcOrdersState(game.map, deltaTime, minuteEnded);
 		this.migrations.spawnHeroes(game, deltaTime);
+		this.quests.checkAll(game, deltaTime);
 	}
 }

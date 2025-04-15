@@ -16,7 +16,10 @@ export class QuestManager {
 	checkFrequencyInSeconds: number = 5;
 
 	registerQuest(quest: Quest) {
+		this.logger.debug(`Trying to register a quest`, quest);
+		if (quest.objectives.length == 0) return;
 		this.registeredQuests.push(quest);
+		this.logger.debug(`New quest registered`, quest);
 	}
 
 	removeQuest(quest: Quest) {
@@ -177,10 +180,16 @@ export class QuestInterface extends BuildingInterface {
 		super();
 		this.quest = quest; 
 		// TODO: correctly apply actions
-		let action: Action = { action: "goTo", argument: "City" };
+		let action: Action;
 		if (quest.type == "battle") {
 			action = { action: "goTo", argument: "Battle" };
 
+		} else {
+			action = { 
+				action: "registerQuest",
+				map: "city",
+				quest: this.quest,
+			};
 		}
 		this.goButton =  new GoButton({x: 100, y: 100}, action);
 	}
