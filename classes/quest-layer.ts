@@ -3,9 +3,50 @@ import { GameState } from "./game-state.js";
 import { Game } from "./game.js";
 import { Action } from "./interface/actions.js";
 import { Button } from "./interface/button.js";
+import { getLogger, Logger } from "./logger.js";
 import { Position, Size } from "./map-layer.js";
 import { CampaignData, Quest } from "./quest.js";
 import { SpriteLibrary } from "./sprite-library.js";
+
+
+export class QuestManager {
+	logger: Logger = getLogger("QuestManager");
+	registeredQuests: Quest[] = [];
+	timeSinceLastCheck: number = 0;
+	checkFrequencyInSeconds: number = 5;
+
+	registerQuest(quest: Quest) {
+		this.registeredQuests.push(quest);
+	}
+
+	removeQuest(quest: Quest) {
+		const index = this.registeredQuests.indexOf(quest);
+		if (index !== -1) this.registeredQuests.splice(index, 1);
+	}
+
+	checkAll(game: Game, deltaTime: number) {
+		this.timeSinceLastCheck += deltaTime;
+		if(this.timeSinceLastCheck < this.checkFrequencyInSeconds) return;
+		this.timeSinceLastCheck = 0;
+
+		for (let quest of this.registeredQuests) {
+			const finished = this.checkQuest(game, quest);
+			if (finished) {
+				this.removeQuest(quest);
+				// TODO: rewards
+				// TODO: post-actions
+				// TODO: show info
+			}
+		}
+	}
+
+	checkQuest(game: Game, quest: Quest): boolean {
+		for (let objective of quest.objectives) {
+			// TODO: check all objective types
+		}
+		return false;
+	}
+}
 
 export class QuestLayer {
 	size: Size;
