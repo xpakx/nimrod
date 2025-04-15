@@ -6,7 +6,7 @@ import { Position } from "../map-layer";
 export class BattleLogicLayer {
 	logger: Logger = getLogger("BattleLogicLayer");
 
-	tempBattleIndex: number = 0; // TODO: improve placing and move to battle logic
+	tempBattleIndex: number = 0; // TODO: improve placing
 
 
 	onMouseLeftClick(game: Game) {

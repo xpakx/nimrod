@@ -10,7 +10,7 @@ import { MapLayer, Position, Size } from "./map-layer.js";
 export class SaveManager {
 	logger: Logger = getLogger("SaveManager");
 
-	// TODO: save game.state, pedestrians, battle…
+	// TODO: save battle state
 	saveState(game: Game, key: string) {
 		const data: SaveData = {
 			version: 3,
@@ -23,7 +23,7 @@ export class SaveManager {
 		localStorage.setItem(key, JSON.stringify(data));
 	}
 
-	// TODO: load game.state, pedestrians, battle…
+	// TODO: load battle state
 	loadState(game: Game, key: string): boolean {
 		const savedMapJson = localStorage.getItem(key);
 		if (savedMapJson) {
@@ -61,7 +61,7 @@ export class SaveManager {
 				return true;
 			}
 
-			//wrong version
+			//unsupported version
 			return false;
 		}
 		return false;
@@ -105,7 +105,9 @@ export class SaveManager {
 		for (let x = 0; x < map.roads.length; x++) {
 			for (let y = 0; y < map.roads[0].length; y++) {
 				if (map.roads[x][y]) {
-					roads.push({ y: x, x: y }); // TODO: fix indexing for roads
+					// TODO: fix indexing for roads
+					// TEMPORARY: Due to a legacy issue, roads are indexed [y][x] in MapLayer. Swap x/y for compatibility.
+					roads.push({ y: x, x: y });
 				}
 			}
 		}
@@ -140,8 +142,6 @@ export class SaveManager {
 		};
 	}
 
-
-
 	applyMap(game: Game, data: MapData, updateDistances: boolean = false) {
 		this.logger.debug("Applying map", data);
 		game.map.resetMap(data.size);
@@ -169,11 +169,9 @@ export class SaveManager {
 		if (updateDistances) game.map.floydWarshall();
 	}
 
-
 	isPlacedActor(obj: UnplacedActorData): obj is ActorData {
 		return 'x' in obj && 'y' in obj;
 	}
-
 
 	applyBattle(game: Game, data: BattleMapData) {
 		if (!game.state.currentBattle) {
@@ -232,15 +230,14 @@ export class SaveManager {
 		for (let x = 0; x < map.roads.length; x++) {
 			for (let y = 0; y < map.roads[0].length; y++) {
 				if (map.roads[x][y]) {
+					// TODO: fix indexing for roads
+					// TEMPORARY: Due to a legacy issue, roads are indexed [y][x] in MapLayer. Swap x/y for compatibility.
 					roads.push({ y: x, x: y });
 				}
 			}
 		}
 
-
 		let workersMap: Map<BuildingWorker, Position> = new Map();
-
-
 
 		for (const building of map.buildings) {
 			let buildingData: BuildingDataWithState = {
@@ -297,6 +294,7 @@ export class SaveManager {
 			if (pedestrian instanceof BuildingWorker) {
 				let homePosition: undefined | Position;
 				if (workersMap.has(pedestrian)) homePosition = workersMap.get(pedestrian);
+
 				pedestrianData.worker = {
 					isAwayFromHome: pedestrian.isAwayFromHome,
 					timeSinceLastReturn: pedestrian.timeSinceLastReturn,
@@ -437,7 +435,6 @@ export class SaveManager {
 		}
 		game.state.sortPedestrians();
 		this.logger.debug("Pedestrians", game.state.pedestrians);
-
 
 		if (updateDistances) game.map.floydWarshall();
 	}

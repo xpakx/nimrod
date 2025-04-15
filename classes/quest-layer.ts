@@ -4,6 +4,7 @@ import { Game } from "./game.js";
 import { Action } from "./interface/actions.js";
 import { Button } from "./interface/button.js";
 import { Position, Size } from "./map-layer.js";
+import { CampaignData, Quest } from "./quest.js";
 import { SpriteLibrary } from "./sprite-library.js";
 
 export class QuestLayer {
@@ -82,41 +83,6 @@ export class QuestLayer {
 		}
 	}
 }
-
-export interface CampaignData {
-	map: string;
-	visibleName: string;
-	questMarkers: QuestMarkerConfig[];
-	quests: QuestConfig[];
-}
-
-export interface QuestConfig {
-	id: string;
-	visibleName: string;
-	description: string;
-	questType: QuestType;
-	// activate, check
-	onCompletion?: (game: Game) => null;
-	onFailure?: (game: Game) => null;
-}
-
-export interface QuestMarkerConfig extends QuestConfig {
-	position: Position;
-	size: Size;
-	icon: string;
-	interface?: QuestInterface | string;
-}
-
-export interface QuestSkirmish {
-	type: "skirmish";
-	map: string;
-}
-
-export interface QuestEconomic {
-	type: "economic";
-}
-
-export type QuestType = QuestSkirmish | QuestEconomic;
 
 export class QuestMarker implements Button {
     position: Position;
@@ -235,17 +201,6 @@ export class QuestInterface extends BuildingInterface {
 
 		return undefined;
 	}
-}
-
-
-export interface Quest {
-	name: string;
-	description: string;
-	battle?: BattleQuest;
-}
-
-export interface BattleQuest {
-	map: string;
 }
 
 export class GoButton implements Button {
