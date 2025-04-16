@@ -10,7 +10,7 @@ import { Position, Size } from "./map-layer.js";
 import { BuildingObjective, CampaignData, EconomicObjectives, PopulationInHousesObjective, PopulationObjective, ProductionObjective, ProfitObjective, Quest, StoragesObjective, TreasuryObjective } from "./quest.js";
 import { SpriteLibrary } from "./sprite-library.js";
 
-interface QuestSnapshot {
+export interface QuestSnapshot {
 		houseMap: Map<string, Map<number, number>>;
 		buildingMap: Map<string, Map<number, number>>;
 		resourceMap: Map<string, number>;
@@ -27,9 +27,6 @@ export class QuestManager {
 	monthLengthInChecks: number = 4;
 	checksInMonth: number = 0;
 	month: number = 0;
-
-	lastMonthSnapshot?: QuestSnapshot;
-	lastYearSnapshot?: QuestSnapshot;
 
 	private handlers: Record<string, ObjectiveChecker> = {};
 
@@ -128,11 +125,11 @@ export class QuestManager {
 		if (this.checksInMonth < this.monthLengthInChecks) return;
 		this.checksInMonth = 0;
 		this.month += 1;
-		this.lastMonthSnapshot = snapshot;
+		game.state.lastMonthSnapshot = snapshot;
 
 		if (this.month < 12) return;
 		this.month = 0;
-		this.lastYearSnapshot = snapshot;
+		game.state.lastYearSnapshot = snapshot;
 	}
 
 	checkQuest(game: Game, quest: Quest, snapshot: QuestSnapshot): boolean {
@@ -153,10 +150,6 @@ export class QuestManager {
 		}
 		this.logger.debug("Quest finished");
 		return true;
-	}
-
-	getSnapshot(period: "year" | "month"): undefined | QuestSnapshot {
-		return period == "month" ? this.lastMonthSnapshot : this.lastYearSnapshot;
 	}
 }
 
@@ -459,7 +452,7 @@ class ProductionChecker implements ObjectiveChecker {
 	type: string = "production";
 
 	check(game: Game, snapshot: QuestSnapshot, objective: ProductionObjective): boolean {
-		const oldSnapshot = game.cityLogic.quests.getSnapshot(objective.time);
+		const oldSnapshot = game.state.getSnapshot(objective.time);
 		if (!oldSnapshot) return false;
 		const resources = snapshot.resourceMap.get(objective.resource) || 0;
 		const oldResources = oldSnapshot.resourceMap.get(objective.resource) || 0;
@@ -472,7 +465,7 @@ class ProfitChecker implements ObjectiveChecker {
 	type: string = "profit";
 
 	check(game: Game, snapshot: QuestSnapshot, objective: ProfitObjective): boolean {
-		const oldSnapshot = game.cityLogic.quests.getSnapshot(objective.time);
+		const oldSnapshot = game.state.getSnapshot(objective.time);
 		if (!oldSnapshot) return false;
 		const profit = snapshot.money - oldSnapshot.money;
 		return profit >= objective.amount;

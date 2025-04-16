@@ -3,6 +3,7 @@ import { BattleActor } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
 import { BattleMapData } from "./save-manager.js";
 import { Position, Size } from "./map-layer.js";
+import { QuestSnapshot } from "./quest-layer.js";
 
 export type View = "City" | "World" | "Battle" | "Kingdom" | "Menu";
 
@@ -34,6 +35,9 @@ export class GameState {
 	menuWidth = 420; // ???
 	topPanelHeight = 50; // ????
 
+	lastMonthSnapshot?: QuestSnapshot;
+	lastYearSnapshot?: QuestSnapshot;
+
 	sortPedestrians() {
 		this.pedestrians.sort((a, b) => {
 			return a.diagonal - b.diagonal;
@@ -51,5 +55,9 @@ export class GameState {
 			}
 		}
 		this.pedestrians.splice(low, 0, pedestrian);
+	}
+
+	getSnapshot(period: "year" | "month"): undefined | QuestSnapshot {
+		return period == "month" ? this.lastMonthSnapshot : this.lastYearSnapshot;
 	}
 }
