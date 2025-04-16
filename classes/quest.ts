@@ -1,6 +1,6 @@
 import { Game } from "./game.js";
 import { Position, Size } from "./map-layer.js";
-import { QuestInterface } from "./quest-layer";
+import { QuestInterface } from "./quest-layer.js";
 
 // Quest config
 export interface CampaignData {
@@ -167,3 +167,8 @@ export interface SpecialObjective {
 	turns?: number;
 	testFunc: (game: Game) => boolean;
 }
+
+type GetType<T> = T extends { type: infer U } ? U : never;
+type EconomicObjectiveTypes = GetType<EconomicObjectives>;
+type BattleObjectiveTypes = GetType<BattleObjectives>;
+export type ObjectiveType = EconomicObjectiveTypes | BattleObjectiveTypes;

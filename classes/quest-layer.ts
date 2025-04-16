@@ -7,7 +7,7 @@ import { Action } from "./interface/actions.js";
 import { Button } from "./interface/button.js";
 import { getLogger, Logger } from "./logger.js";
 import { Position, Size } from "./map-layer.js";
-import { BuildingObjective, CampaignData, EconomicObjectives, PopulationInHousesObjective, PopulationObjective, ProductionObjective, ProfitObjective, Quest, StoragesObjective, TreasuryObjective } from "./quest.js";
+import { BuildingObjective, CampaignData, EconomicObjectives, PopulationInHousesObjective, PopulationObjective, ProductionObjective, ProfitObjective, Quest, ObjectiveType, StoragesObjective, TreasuryObjective } from "./quest.js";
 import { SpriteLibrary } from "./sprite-library.js";
 
 export interface QuestSnapshot {
@@ -395,20 +395,20 @@ export class GoButton implements Button {
 }
 
 interface ObjectiveChecker {
-	type: string;
+	type: ObjectiveType;
 	check(game: Game, snapshot: QuestSnapshot, objective: EconomicObjectives): boolean;
 }
 
 class PopulationChecker implements ObjectiveChecker {
-    type: string = "population";
+	type: ObjectiveType = "population";
 
-    check(_game: Game, snapshot: QuestSnapshot, objective: PopulationObjective): boolean {
-	    return snapshot.population >= objective.amount;
-    }
+	check(_game: Game, snapshot: QuestSnapshot, objective: PopulationObjective): boolean {
+		return snapshot.population >= objective.amount;
+	}
 }
 
 class PopulationInHousesChecker implements ObjectiveChecker {
-	type: string = "populationInHouses";
+	type: ObjectiveType = "populationInHouses";
 
 	check(_game: Game, snapshot: QuestSnapshot, objective: PopulationInHousesObjective): boolean {
 		const houseTypeMap = snapshot.houseMap.get(objective.buildingType);
@@ -419,7 +419,7 @@ class PopulationInHousesChecker implements ObjectiveChecker {
 }
 
 class BuildingChecker implements ObjectiveChecker {
-	type: string = "buildings";
+	type: ObjectiveType = "buildings";
 
 	check(_game: Game, snapshot: QuestSnapshot, objective: BuildingObjective): boolean {
 		const level = objective.level || 0;
@@ -432,7 +432,7 @@ class BuildingChecker implements ObjectiveChecker {
 }
 
 class TreasuryChecker implements ObjectiveChecker {
-	type: string = "treasury";
+	type: ObjectiveType = "treasury";
 
 	check(_game: Game, snapshot: QuestSnapshot, objective: TreasuryObjective): boolean {
 		return snapshot.money >= objective.amount;
@@ -440,7 +440,7 @@ class TreasuryChecker implements ObjectiveChecker {
 }
 
 class StoragesChecker implements ObjectiveChecker {
-	type: string = "storages";
+	type: ObjectiveType = "storages";
 
 	check(_game: Game, snapshot: QuestSnapshot, objective: StoragesObjective): boolean {
 		const resources = snapshot.resourceMap.get(objective.resource) || 0;
@@ -449,7 +449,7 @@ class StoragesChecker implements ObjectiveChecker {
 }
 
 class ProductionChecker implements ObjectiveChecker {
-	type: string = "production";
+	type: ObjectiveType = "production";
 
 	check(game: Game, snapshot: QuestSnapshot, objective: ProductionObjective): boolean {
 		const oldSnapshot = game.state.getSnapshot(objective.time);
@@ -462,7 +462,7 @@ class ProductionChecker implements ObjectiveChecker {
 }
 
 class ProfitChecker implements ObjectiveChecker {
-	type: string = "profit";
+	type: ObjectiveType = "profit";
 
 	check(game: Game, snapshot: QuestSnapshot, objective: ProfitObjective): boolean {
 		const oldSnapshot = game.state.getSnapshot(objective.time);
