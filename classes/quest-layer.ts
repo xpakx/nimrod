@@ -7,13 +7,15 @@ import { Action } from "./interface/actions.js";
 import { Button } from "./interface/button.js";
 import { getLogger, Logger } from "./logger.js";
 import { Position, Size } from "./map-layer.js";
-import { BuildingObjective, CampaignData, PopulationInHousesObjective, PopulationObjective, Quest, StoragesObjective, TreasuryObjective } from "./quest.js";
+import { BuildingObjective, CampaignData, PopulationInHousesObjective, PopulationObjective, ProductionObjective, ProfitObjective, Quest, StoragesObjective, TreasuryObjective } from "./quest.js";
 import { SpriteLibrary } from "./sprite-library.js";
 
 interface QuestSnapshot {
 		houseMap: Map<string, Map<number, number>>;
 		buildingMap: Map<string, Map<number, number>>;
 		resourceMap: Map<string, number>;
+		money: number,
+		population: number,
 }
 
 export class QuestManager {
@@ -21,6 +23,13 @@ export class QuestManager {
 	registeredQuests: Quest[] = [];
 	timeSinceLastCheck: number = 0;
 	checkFrequencyInSeconds: number = 5;
+
+	monthLengthInChecks: number = 4;
+	checksInMonth: number = 0;
+	month: number = 0;
+
+	lastMonthSnapshot?: QuestSnapshot;
+	lastYearSnapshot?: QuestSnapshot;
 
 	registerQuest(quest: Quest) {
 		this.logger.debug(`Trying to register a quest`, quest);
@@ -72,6 +81,8 @@ export class QuestManager {
 			houseMap: new Map(),
 			buildingMap: new Map(),
 			resourceMap: new Map(),
+			money: game.state.money,
+			population: game.state.population,
 		};
 
 		for (const building of game.map.buildings) {
@@ -89,6 +100,16 @@ export class QuestManager {
 				// TODO: show info
 			}
 		}
+
+		this.checksInMonth += 1;
+		if (this.checksInMonth < this.monthLengthInChecks) return;
+		this.checksInMonth = 0;
+		this.month += 1;
+		this.lastMonthSnapshot = snapshot;
+
+		if (this.month < 12) return;
+		this.month = 0;
+		this.lastYearSnapshot = snapshot;
 	}
 
 	checkQuest(game: Game, quest: Quest, snapshot: QuestSnapshot): boolean {
@@ -96,13 +117,13 @@ export class QuestManager {
 		for (let objective of quest.objectives) {
 			this.logger.debug(`Checking objective of type ${objective.type}`, objective);
 			if (objective.type == "population") {
-				if (!this.checkPopulation(game, objective)) return false;
+				if (!this.checkPopulation(snapshot, objective)) return false;
 			}
 			if (objective.type == "special") {
 				if (!objective.testFunc(game)) return false;
 			}
 			if (objective.type == "treasury") {
-				if (!this.checkTreasury(game, objective)) return false;
+				if (!this.checkTreasury(snapshot, objective)) return false;
 			}
 			if (objective.type == "populationInHouses") {
 				if (!this.checkHousedPopulation(snapshot, objective)) return false;
@@ -113,17 +134,17 @@ export class QuestManager {
 			if (objective.type == "storages") {
 				if (!this.checkStorages(snapshot, objective)) return false;
 			}
-			// TODO: check other objective types
 			if (objective.type == "production") {
+				if (!this.checkProduction(snapshot, objective)) return false;
+			}
+			if (objective.type == "profit") {
+				if (!this.checkProfit(snapshot, objective)) return false;
+			}
+			// TODO: check other objective types
+			if (objective.type == "militaryPower") {
 				return false;
 			}
 			if (objective.type == "tradingPartners") {
-				return false;
-			}
-			if (objective.type == "profit") {
-				return false;
-			}
-			if (objective.type == "militaryPower") {
 				return false;
 			}
 		}
@@ -131,8 +152,8 @@ export class QuestManager {
 		return true;
 	}
 
-	checkPopulation(game: Game, objective: PopulationObjective): boolean {
-		return game.state.population >= objective.amount;
+	checkPopulation(snapshot: QuestSnapshot, objective: PopulationObjective): boolean {
+		return snapshot.population >= objective.amount;
 	}
 
 	checkHousedPopulation(snapshot: QuestSnapshot, objective: PopulationInHousesObjective): boolean {
@@ -151,13 +172,29 @@ export class QuestManager {
 		return buildings >= amount;
 	}
 
-	checkTreasury(game: Game, objective: TreasuryObjective): boolean {
-		return game.state.money >= objective.amount;
+	checkTreasury(snapshot: QuestSnapshot, objective: TreasuryObjective): boolean {
+		return snapshot.money >= objective.amount;
 	}
 
 	checkStorages(snapshot: QuestSnapshot, objective: StoragesObjective): boolean {
 		const resources = snapshot.resourceMap.get(objective.resource) || 0;
 		return resources >= objective.amount;
+	}
+
+	checkProduction(snapshot: QuestSnapshot, objective: ProductionObjective): boolean {
+		const oldSnapshot = objective.time == "month" ? this.lastMonthSnapshot : this.lastYearSnapshot;
+		if (!oldSnapshot) return false;
+		const resources = snapshot.resourceMap.get(objective.resource) || 0;
+		const oldResources = oldSnapshot.resourceMap.get(objective.resource) || 0;
+		const production = resources - oldResources;
+		return production >= objective.amount;
+	}
+
+	checkProfit(snapshot: QuestSnapshot, objective: ProfitObjective): boolean {
+		const oldSnapshot = objective.time == "month" ? this.lastMonthSnapshot : this.lastYearSnapshot;
+		if (!oldSnapshot) return false;
+		const profit = snapshot.money - oldSnapshot.money;
+		return profit >= objective.amount;
 	}
 }
 
