@@ -7,7 +7,7 @@ import { Action } from "./interface/actions.js";
 import { Button } from "./interface/button.js";
 import { getLogger, Logger } from "./logger.js";
 import { Position, Size } from "./map-layer.js";
-import { BuildingObjective, CampaignData, PopulationInHousesObjective, PopulationObjective, ProductionObjective, ProfitObjective, Quest, StoragesObjective, TreasuryObjective } from "./quest.js";
+import { BuildingObjective, CampaignData, EconomicObjectives, PopulationInHousesObjective, PopulationObjective, ProductionObjective, ProfitObjective, Quest, StoragesObjective, TreasuryObjective } from "./quest.js";
 import { SpriteLibrary } from "./sprite-library.js";
 
 interface QuestSnapshot {
@@ -31,6 +31,23 @@ export class QuestManager {
 	lastMonthSnapshot?: QuestSnapshot;
 	lastYearSnapshot?: QuestSnapshot;
 
+	private handlers: Record<string, ObjectiveChecker> = {};
+
+	constructor() {
+		this.registerChecker(new PopulationChecker());
+		this.registerChecker(new PopulationInHousesChecker());
+		this.registerChecker(new BuildingChecker());
+		this.registerChecker(new TreasuryChecker());
+		this.registerChecker(new StoragesChecker());
+		this.registerChecker(new ProductionChecker());
+		this.registerChecker(new ProfitChecker());
+		// TODO: military power, trading partners
+	}
+
+	registerChecker(handler: ObjectiveChecker) {
+		this.handlers[handler.type] = handler;
+	}
+
 	registerQuest(quest: Quest) {
 		this.logger.debug(`Trying to register a quest`, quest);
 		if (quest.objectives.length == 0) return;
@@ -48,6 +65,8 @@ export class QuestManager {
 				houseMap.set(building.name, new Map());
 		}
 		let houseData = houseMap.get(building.name)!;
+
+		// TODO: see updateBuildingMap
 		for (let i = building.level; i >=0; i--) {
 			const amount = houseData.get(i) || 0;
 			houseData.set(i, amount + building.population);
@@ -56,13 +75,17 @@ export class QuestManager {
 
 	updateBuildingMap(building: Building, houseMap: Map<string, Map<number, number>>) {
 		if (!houseMap.has(building.name)) {
-				houseMap.set(building.name, new Map());
-			}
-			let houseData = houseMap.get(building.name)!;
-			for (let i = building.level; i >=0; i--) {
-				const amount = houseData.get(i) || 0;
-				houseData.set(i, amount + 1);
-			}
+			houseMap.set(building.name, new Map());
+		}
+		let houseData = houseMap.get(building.name)!;
+
+		// TODO: probably better to store only exact levels here,
+		// and calculate cumulative levels only after all buildings
+		// are processed
+		for (let i = building.level; i >=0; i--) {
+			const amount = houseData.get(i) || 0;
+			houseData.set(i, amount + 1);
+		}
 	}
 
 	updateResourceMap(building: Storage, resourceMap: Map<string, number>) {
@@ -116,85 +139,24 @@ export class QuestManager {
 		this.logger.debug(`Checking quest ${quest.name}`, quest);
 		for (let objective of quest.objectives) {
 			this.logger.debug(`Checking objective of type ${objective.type}`, objective);
-			if (objective.type == "population") {
-				if (!this.checkPopulation(snapshot, objective)) return false;
-			}
+
 			if (objective.type == "special") {
 				if (!objective.testFunc(game)) return false;
 			}
-			if (objective.type == "treasury") {
-				if (!this.checkTreasury(snapshot, objective)) return false;
-			}
-			if (objective.type == "populationInHouses") {
-				if (!this.checkHousedPopulation(snapshot, objective)) return false;
-			}
-			if (objective.type == "buildings") {
-				if (!this.checkBuildings(snapshot, objective)) return false;
-			}
-			if (objective.type == "storages") {
-				if (!this.checkStorages(snapshot, objective)) return false;
-			}
-			if (objective.type == "production") {
-				if (!this.checkProduction(snapshot, objective)) return false;
-			}
-			if (objective.type == "profit") {
-				if (!this.checkProfit(snapshot, objective)) return false;
-			}
-			// TODO: check other objective types
-			if (objective.type == "militaryPower") {
+
+			const handler = this.handlers[objective.type];
+			if (!handler) {
+				this.logger.error(`No handler for objective type: ${objective.type}`);
 				return false;
 			}
-			if (objective.type == "tradingPartners") {
-				return false;
-			}
+			if (!handler.check(game, snapshot, objective as EconomicObjectives)) return false;
 		}
 		this.logger.debug("Quest finished");
 		return true;
 	}
 
-	checkPopulation(snapshot: QuestSnapshot, objective: PopulationObjective): boolean {
-		return snapshot.population >= objective.amount;
-	}
-
-	checkHousedPopulation(snapshot: QuestSnapshot, objective: PopulationInHousesObjective): boolean {
-		const houseTypeMap = snapshot.houseMap.get(objective.buildingType);
-		if (!houseTypeMap) return false;
-		const population = houseTypeMap.get(objective.level) || 0;
-		return population >= objective.amount;
-	}
-
-	checkBuildings(snapshot: QuestSnapshot, objective: BuildingObjective): boolean {
-		const level = objective.level || 0;
-		const amount = objective.amount || 1;
-		const buildingsMap = snapshot.buildingMap.get(objective.buildingType);
-		if (!buildingsMap) return false;
-		const buildings = buildingsMap.get(level) || 0;
-		return buildings >= amount;
-	}
-
-	checkTreasury(snapshot: QuestSnapshot, objective: TreasuryObjective): boolean {
-		return snapshot.money >= objective.amount;
-	}
-
-	checkStorages(snapshot: QuestSnapshot, objective: StoragesObjective): boolean {
-		const resources = snapshot.resourceMap.get(objective.resource) || 0;
-		return resources >= objective.amount;
-	}
-
-	checkProduction(snapshot: QuestSnapshot, objective: ProductionObjective): boolean {
-		const oldSnapshot = objective.time == "month" ? this.lastMonthSnapshot : this.lastYearSnapshot;
-		if (!oldSnapshot) return false;
-		const resources = snapshot.resourceMap.get(objective.resource) || 0;
-		const oldResources = oldSnapshot.resourceMap.get(objective.resource) || 0;
-		const production = resources - oldResources;
-		return production >= objective.amount;
-	}
-
-	checkProfit(snapshot: QuestSnapshot, objective: ProfitObjective): boolean {
-		const oldSnapshot = objective.time == "month" ? this.lastMonthSnapshot : this.lastYearSnapshot;
-		if (!oldSnapshot) return false;
-		const profit = snapshot.money - oldSnapshot.money;
-		return profit >= objective.amount;
+	getSnapshot(period: "year" | "month"): undefined | QuestSnapshot {
+		return period == "month" ? this.lastMonthSnapshot : this.lastYearSnapshot;
 	}
 }
 
@@ -436,5 +398,83 @@ export class GoButton implements Button {
 
     draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, _hovered: boolean): void {
 		context.drawImage(this.image, this.position.x, this.position.y);
+	}
+}
+
+interface ObjectiveChecker {
+	type: string;
+	check(game: Game, snapshot: QuestSnapshot, objective: EconomicObjectives): boolean;
+}
+
+class PopulationChecker implements ObjectiveChecker {
+    type: string = "population";
+
+    check(_game: Game, snapshot: QuestSnapshot, objective: PopulationObjective): boolean {
+	    return snapshot.population >= objective.amount;
+    }
+}
+
+class PopulationInHousesChecker implements ObjectiveChecker {
+	type: string = "populationInHouses";
+
+	check(_game: Game, snapshot: QuestSnapshot, objective: PopulationInHousesObjective): boolean {
+		const houseTypeMap = snapshot.houseMap.get(objective.buildingType);
+		if (!houseTypeMap) return false;
+		const population = houseTypeMap.get(objective.level) || 0;
+		return population >= objective.amount;
+	}
+}
+
+class BuildingChecker implements ObjectiveChecker {
+	type: string = "buildings";
+
+	check(_game: Game, snapshot: QuestSnapshot, objective: BuildingObjective): boolean {
+		const level = objective.level || 0;
+		const amount = objective.amount || 1;
+		const buildingsMap = snapshot.buildingMap.get(objective.buildingType);
+		if (!buildingsMap) return false;
+		const buildings = buildingsMap.get(level) || 0;
+		return buildings >= amount;
+	}
+}
+
+class TreasuryChecker implements ObjectiveChecker {
+	type: string = "treasury";
+
+	check(_game: Game, snapshot: QuestSnapshot, objective: TreasuryObjective): boolean {
+		return snapshot.money >= objective.amount;
+	}
+}
+
+class StoragesChecker implements ObjectiveChecker {
+	type: string = "storages";
+
+	check(_game: Game, snapshot: QuestSnapshot, objective: StoragesObjective): boolean {
+		const resources = snapshot.resourceMap.get(objective.resource) || 0;
+		return resources >= objective.amount;
+	}
+}
+
+class ProductionChecker implements ObjectiveChecker {
+	type: string = "production";
+
+	check(game: Game, snapshot: QuestSnapshot, objective: ProductionObjective): boolean {
+		const oldSnapshot = game.cityLogic.quests.getSnapshot(objective.time);
+		if (!oldSnapshot) return false;
+		const resources = snapshot.resourceMap.get(objective.resource) || 0;
+		const oldResources = oldSnapshot.resourceMap.get(objective.resource) || 0;
+		const production = resources - oldResources;
+		return production >= objective.amount;
+	}
+}
+
+class ProfitChecker implements ObjectiveChecker {
+	type: string = "profit";
+
+	check(game: Game, snapshot: QuestSnapshot, objective: ProfitObjective): boolean {
+		const oldSnapshot = game.cityLogic.quests.getSnapshot(objective.time);
+		if (!oldSnapshot) return false;
+		const profit = snapshot.money - oldSnapshot.money;
+		return profit >= objective.amount;
 	}
 }
