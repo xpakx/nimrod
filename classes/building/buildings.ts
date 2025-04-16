@@ -115,6 +115,8 @@ export class Building {
 	storage: { [key: string]: number } = {};
 	capacity: number = 20;
 
+	level: number = 0; // TODO: use level in code
+
 	constructor(prototype: BuildingPrototype, position: Position, accepted: boolean = true) {
 		this.sprite =  prototype.sprite;
 		this.position = position;

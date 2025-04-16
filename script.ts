@@ -41,7 +41,6 @@ function registerKeyboardEvents() {
 
 window.onload = async () => {
 	const loggerFactory = LoggerFactory.getInstance();
-	loggerFactory.updateAllLevels("debug");
 	loggerFactory.enable(["Game", "QuestManager"]);
 	const logger = loggerFactory.getLogger("Script");
 

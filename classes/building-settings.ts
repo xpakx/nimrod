@@ -442,7 +442,9 @@ export const campaignSettings: CampaignData = {
 				type: "economic",
 				name: "",
 				description: "",
-				objectives: [],
+				objectives: [
+					{type: "storages", resource: "flour", amount: 20},
+				],
 			},
 		}
 	],

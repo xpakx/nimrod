@@ -5,7 +5,7 @@ import { Action } from "./interface/actions.js";
 import { Button } from "./interface/button.js";
 import { getLogger, Logger } from "./logger.js";
 import { Position, Size } from "./map-layer.js";
-import { CampaignData, Quest } from "./quest.js";
+import { BuildingObjective, CampaignData, PopulationInHousesObjective, PopulationObjective, Quest, StoragesObjective, TreasuryObjective } from "./quest.js";
 import { SpriteLibrary } from "./sprite-library.js";
 
 
@@ -44,10 +44,70 @@ export class QuestManager {
 	}
 
 	checkQuest(game: Game, quest: Quest): boolean {
+		this.logger.debug(`Checking quest ${quest.name}`, quest);
 		for (let objective of quest.objectives) {
-			// TODO: check all objective types
+			this.logger.debug(`Checking objective of type ${objective.type}`, objective);
+			if (objective.type == "population") {
+				if (!this.checkPopulation(game, objective)) return false;
+			}
+			if (objective.type == "special") {
+				if (!objective.testFunc(game)) return false;
+			}
+			if (objective.type == "treasury") {
+				if (!this.checkTreasury(game, objective)) return false;
+			}
+			if (objective.type == "populationInHouses") {
+				if (!this.checkHousedPopulation(game, objective)) return false;
+			}
+			if (objective.type == "buildings") {
+				if (!this.checkBuildings(game, objective)) return false;
+			}
+			if (objective.type == "storages") {
+				if (!this.checkStorages(game, objective)) return false;
+			}
+			// TODO: check other objective types
+			if (objective.type == "production") {
+				return false;
+			}
+			if (objective.type == "tradingPartners") {
+				return false;
+			}
+			if (objective.type == "profit") {
+				return false;
+			}
+			if (objective.type == "militaryPower") {
+				return false;
+			}
 		}
-		return false;
+		this.logger.debug("Quest finished");
+		return true;
+	}
+
+	checkPopulation(game: Game, objective: PopulationObjective): boolean {
+		return game.state.population >= objective.amount;
+	}
+
+	checkHousedPopulation(game: Game, objective: PopulationInHousesObjective): boolean {
+		const buildings = game.map.getHousesOfType(objective.buildingType, objective.level);
+		const population = buildings.reduce((sum, b) => sum + b.population, 0);
+		return population >= objective.amount;
+	}
+
+	checkBuildings(game: Game, objective: BuildingObjective): boolean {
+		const level = objective.level || 0;
+		const amount = objective.amount || 1;
+		const buildings = game.map.getBuildingsOfType(objective.buildingType, level);
+		return buildings.length >= amount;
+	}
+
+	checkTreasury(game: Game, objective: TreasuryObjective): boolean {
+		return game.state.money >= objective.amount;
+	}
+
+	checkStorages(game: Game, objective: StoragesObjective): boolean {
+		const buildings = game.map.getStorages();
+		const resource = buildings.reduce((sum, b) => sum + b.getResourceAmount(objective.resource), 0);
+		return resource >= objective.amount;
 	}
 }
 

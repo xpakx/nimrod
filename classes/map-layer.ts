@@ -2,6 +2,7 @@ import { Actor } from "./actor.js";
 import { createBuilding } from "./building/building-factory.js";
 import { Building, BuildingPrototype, BuildingSprite, Road, TilingSprite } from "./building/buildings.js";
 import { House } from "./building/house.js";
+import { Storage } from "./building/storage.js";
 import { getLogger, Logger } from "./logger.js";
 
 export class MapLayer {
@@ -985,6 +986,24 @@ export class MapLayer {
 		.filter(x => x.constructed)
 		.filter(x => x.hero != undefined)
 		.filter(x => x.population < x.maxPopulation);
+	}
+	
+	getHousesOfType(type: string, minLevel: number = 0): House[] {
+		return this.buildings
+		.filter(x => x instanceof House)
+		.filter(x => x.name == type)
+		.filter(x => x.level >= minLevel);
+	}
+
+	getBuildingsOfType(type: string, minLevel: number = 0): Building[] {
+		return this.buildings
+		.filter(x => x.name == type)
+		.filter(x => x.level >= minLevel);
+	}
+
+	getStorages(): Storage[] {
+		return this.buildings
+		.filter(x => x instanceof Storage);
 	}
 }
 
