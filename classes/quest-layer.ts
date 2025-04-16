@@ -1,4 +1,6 @@
-import { BuildingInterface } from "./building/buildings.js";
+import { Building, BuildingInterface } from "./building/buildings.js";
+import { House } from "./building/house.js";
+import { Storage } from "./building/storage.js";
 import { GameState } from "./game-state.js";
 import { Game } from "./game.js";
 import { Action } from "./interface/actions.js";
@@ -8,6 +10,11 @@ import { Position, Size } from "./map-layer.js";
 import { BuildingObjective, CampaignData, PopulationInHousesObjective, PopulationObjective, Quest, StoragesObjective, TreasuryObjective } from "./quest.js";
 import { SpriteLibrary } from "./sprite-library.js";
 
+interface QuestSnapshot {
+		houseMap: Map<string, Map<number, number>>;
+		buildingMap: Map<string, Map<number, number>>;
+		resourceMap: Map<string, number>;
+}
 
 export class QuestManager {
 	logger: Logger = getLogger("QuestManager");
@@ -27,13 +34,54 @@ export class QuestManager {
 		if (index !== -1) this.registeredQuests.splice(index, 1);
 	}
 
+	updateHouseMap(building: House, houseMap: Map<string, Map<number, number>>) {
+		if (!houseMap.has(building.name)) {
+				houseMap.set(building.name, new Map());
+		}
+		let houseData = houseMap.get(building.name)!;
+		for (let i = building.level; i >=0; i--) {
+			const amount = houseData.get(i) || 0;
+			houseData.set(i, amount + building.population);
+		}
+	}
+
+	updateBuildingMap(building: Building, houseMap: Map<string, Map<number, number>>) {
+		if (!houseMap.has(building.name)) {
+				houseMap.set(building.name, new Map());
+			}
+			let houseData = houseMap.get(building.name)!;
+			for (let i = building.level; i >=0; i--) {
+				const amount = houseData.get(i) || 0;
+				houseData.set(i, amount + 1);
+			}
+	}
+
+	updateResourceMap(building: Storage, resourceMap: Map<string, number>) {
+		for (let resource in building.storage) {
+			const amount = resourceMap.get(resource) || 0;
+			resourceMap.set(resource, amount + building.storage[resource]);
+		}
+	}
+
 	checkAll(game: Game, deltaTime: number) {
 		this.timeSinceLastCheck += deltaTime;
 		if(this.timeSinceLastCheck < this.checkFrequencyInSeconds) return;
 		this.timeSinceLastCheck = 0;
 
+		const snapshot: QuestSnapshot = {
+			houseMap: new Map(),
+			buildingMap: new Map(),
+			resourceMap: new Map(),
+		};
+
+		for (const building of game.map.buildings) {
+			this.updateBuildingMap(building, snapshot.buildingMap);
+			if (building instanceof House) this.updateHouseMap(building, snapshot.houseMap);
+			if (building instanceof Storage) this.updateResourceMap(building, snapshot.resourceMap);
+		}
+
 		for (let quest of this.registeredQuests) {
-			const finished = this.checkQuest(game, quest);
+			const finished = this.checkQuest(game, quest, snapshot);
 			if (finished) {
 				this.removeQuest(quest);
 				// TODO: rewards
@@ -43,7 +91,7 @@ export class QuestManager {
 		}
 	}
 
-	checkQuest(game: Game, quest: Quest): boolean {
+	checkQuest(game: Game, quest: Quest, snapshot: QuestSnapshot): boolean {
 		this.logger.debug(`Checking quest ${quest.name}`, quest);
 		for (let objective of quest.objectives) {
 			this.logger.debug(`Checking objective of type ${objective.type}`, objective);
@@ -57,13 +105,13 @@ export class QuestManager {
 				if (!this.checkTreasury(game, objective)) return false;
 			}
 			if (objective.type == "populationInHouses") {
-				if (!this.checkHousedPopulation(game, objective)) return false;
+				if (!this.checkHousedPopulation(snapshot, objective)) return false;
 			}
 			if (objective.type == "buildings") {
-				if (!this.checkBuildings(game, objective)) return false;
+				if (!this.checkBuildings(snapshot, objective)) return false;
 			}
 			if (objective.type == "storages") {
-				if (!this.checkStorages(game, objective)) return false;
+				if (!this.checkStorages(snapshot, objective)) return false;
 			}
 			// TODO: check other objective types
 			if (objective.type == "production") {
@@ -87,27 +135,29 @@ export class QuestManager {
 		return game.state.population >= objective.amount;
 	}
 
-	checkHousedPopulation(game: Game, objective: PopulationInHousesObjective): boolean {
-		const buildings = game.map.getHousesOfType(objective.buildingType, objective.level);
-		const population = buildings.reduce((sum, b) => sum + b.population, 0);
+	checkHousedPopulation(snapshot: QuestSnapshot, objective: PopulationInHousesObjective): boolean {
+		const houseTypeMap = snapshot.houseMap.get(objective.buildingType);
+		if (!houseTypeMap) return false;
+		const population = houseTypeMap.get(objective.level) || 0;
 		return population >= objective.amount;
 	}
 
-	checkBuildings(game: Game, objective: BuildingObjective): boolean {
+	checkBuildings(snapshot: QuestSnapshot, objective: BuildingObjective): boolean {
 		const level = objective.level || 0;
 		const amount = objective.amount || 1;
-		const buildings = game.map.getBuildingsOfType(objective.buildingType, level);
-		return buildings.length >= amount;
+		const buildingsMap = snapshot.buildingMap.get(objective.buildingType);
+		if (!buildingsMap) return false;
+		const buildings = buildingsMap.get(level) || 0;
+		return buildings >= amount;
 	}
 
 	checkTreasury(game: Game, objective: TreasuryObjective): boolean {
 		return game.state.money >= objective.amount;
 	}
 
-	checkStorages(game: Game, objective: StoragesObjective): boolean {
-		const buildings = game.map.getStorages();
-		const resource = buildings.reduce((sum, b) => sum + b.getResourceAmount(objective.resource), 0);
-		return resource >= objective.amount;
+	checkStorages(snapshot: QuestSnapshot, objective: StoragesObjective): boolean {
+		const resources = snapshot.resourceMap.get(objective.resource) || 0;
+		return resources >= objective.amount;
 	}
 }
 
