@@ -17,6 +17,7 @@ export interface QuestConfig {
 	// activate, check
 	onCompletion?: (game: Game) => null;
 	onFailure?: (game: Game) => null;
+	rewards?: RewardConfig;
 }
 
 export interface QuestMarkerConfig extends QuestConfig {
@@ -172,3 +173,34 @@ type GetType<T> = T extends { type: infer U } ? U : never;
 type EconomicObjectiveTypes = GetType<EconomicObjectives>;
 type BattleObjectiveTypes = GetType<BattleObjectives>;
 export type ObjectiveType = EconomicObjectiveTypes | BattleObjectiveTypes;
+
+
+// Quest rewards
+type RewardConfig = {
+	// Guaranteed and probabilistic rewards that can be stacked.
+	// All drops in this section will be awarded to the player:
+	// - Guaranteed rewards 
+	// - Probabilistic rewards (resources with drop chances)
+	drops?: DropEntry[];
+	coins?: number;
+
+	// Exclusive reward pools where only one item will be randomly selected.
+	// The selection uses the following rules:
+	// - If entries have chance values: Uses weighted probability
+	// - If no chances specified: Uniform distribution across all entries
+	// - If chance omitted: Entry is considered guaranteed (100% chance)
+	dropPools?: DropPool[];
+};
+
+type DropPool = {
+	drops: DropEntry[];
+	chance?: number;
+}
+
+type DropEntry = {
+  id: string;
+  type: "resource" | "blueprint" | "crystal";
+  count: number;
+  chance?: number;
+};
+
