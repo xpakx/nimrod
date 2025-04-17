@@ -176,7 +176,7 @@ export type ObjectiveType = EconomicObjectiveTypes | BattleObjectiveTypes;
 
 
 // Quest rewards
-type RewardConfig = {
+export type RewardConfig = {
 	// Guaranteed and probabilistic rewards that can be stacked.
 	// All drops in this section will be awarded to the player:
 	// - Guaranteed rewards 
@@ -192,12 +192,12 @@ type RewardConfig = {
 	dropPools?: DropPool[];
 };
 
-type DropPool = {
+export type DropPool = {
 	drops: DropEntry[];
 	chance?: number;
 }
 
-type DropEntry = {
+export type DropEntry = {
   id: string;
   type: "resource" | "blueprint" | "crystal";
   count: number;

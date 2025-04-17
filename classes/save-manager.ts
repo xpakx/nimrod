@@ -6,6 +6,7 @@ import { GameState, View } from "./game-state.js";
 import { Game } from "./game.js";
 import { getLogger, Logger } from "./logger.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
+import { RewardConfig } from "./quest.js";
 
 export class SaveManager {
 	logger: Logger = getLogger("SaveManager");
@@ -475,6 +476,15 @@ export interface BattleMapData {
 	terrain: TerrainData[];
 	actors: (ActorData | UnplacedActorData)[];
 	spawns: Position[] | undefined;
+
+	// Reward configurations mapped by enemy type names
+	// @example [{name: "goblin", rewards: {gold: 50}}]
+	rewards?: TypeRewardConfig[];
+}
+
+export interface TypeRewardConfig {
+	name: string;
+	rewards?: RewardConfig;
 }
 
 interface RoadData {
@@ -500,7 +510,6 @@ interface ActorData extends UnplacedActorData {
 	y: number;
 }
 
-
 interface UnplacedActorData {
 	enemy?: boolean;
 	name: string;
@@ -508,8 +517,10 @@ interface UnplacedActorData {
 	type?: HeroType;
 	hp: number;
 	image: string;
-}
 
+	// Instance-specific rewards (overrides type rewards if present)
+	rewards?: RewardConfig;
+}
 
 
 export interface OldMapDataWithState {
