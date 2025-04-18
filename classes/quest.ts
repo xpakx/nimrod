@@ -13,7 +13,7 @@ export interface CampaignData {
 export interface QuestConfig {
 	id: string;
 	visibleName: string;
-	questDefinition: Quest;
+	questDefinition: QuestDefinition;
 	// activate, check
 	onCompletion?: (game: Game) => null;
 	onFailure?: (game: Game) => null;
@@ -29,7 +29,16 @@ export interface QuestMarkerConfig extends QuestConfig {
 
 // Quest 
 
-export type Quest = BattleQuest | EconomicQuest;
+export type QuestDefinition = BattleQuest | EconomicQuest;
+
+export interface Quest {
+	id: string;
+	visibleName: string;
+	questDefinition: QuestDefinition;
+	onCompletion?: (game: Game) => null;
+	onFailure?: (game: Game) => null;
+	rewards?: Reward; 
+}
 
 export interface EconomicQuest {
 	type: "economic";
@@ -176,31 +185,50 @@ export type ObjectiveType = EconomicObjectiveTypes | BattleObjectiveTypes;
 
 
 // Quest rewards
-export type RewardConfig = {
+export interface RewardConfig {
 	// Guaranteed and probabilistic rewards that can be stacked.
 	// All drops in this section will be awarded to the player:
 	// - Guaranteed rewards 
 	// - Probabilistic rewards (resources with drop chances)
-	drops?: DropEntry[];
-	coins?: number;
+	drops?: DropEntryConfig[],
+	coins?: number,
 
 	// Exclusive reward pools where only one item will be randomly selected.
 	// The selection uses the following rules:
 	// - If entries have chance values: Uses weighted probability
 	// - If no chances specified: Uniform distribution across all entries
 	// - If chance omitted: Entry is considered guaranteed (100% chance)
-	dropPools?: DropPool[];
+	dropPools?: DropPoolConfig[],
 };
 
-export type DropPool = {
+export interface DropPoolConfig {
+	drops: DropEntryConfig[];
+	chance?: number;
+}
+
+export interface DropEntryConfig {
+	id: string;
+	sprite?: string; // if not specified uses id
+	type: "resource" | "blueprint" | "crystal";
+	count: number;
+	chance?: number;
+};
+
+export interface Reward {
+	drops?: DropEntry[],
+	coins?: number,
+	dropPools?: DropPool[],
+}
+
+export interface DropPool {
 	drops: DropEntry[];
 	chance?: number;
 }
 
-export type DropEntry = {
-  id: string;
-  type: "resource" | "blueprint" | "crystal";
-  count: number;
-  chance?: number;
+export interface DropEntry {
+	id: string;
+	sprite: HTMLImageElement;
+	type: "resource" | "blueprint" | "crystal";
+	count: number;
+	chance?: number;
 };
-

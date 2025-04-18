@@ -7,7 +7,7 @@ import { Action } from "./interface/actions.js";
 import { Button } from "./interface/button.js";
 import { getLogger, Logger } from "./logger.js";
 import { Position, Size } from "./map-layer.js";
-import { BuildingObjective, CampaignData, EconomicObjectives, PopulationInHousesObjective, PopulationObjective, ProductionObjective, ProfitObjective, Quest, ObjectiveType, StoragesObjective, TreasuryObjective } from "./quest.js";
+import { BuildingObjective, CampaignData, EconomicObjectives, PopulationInHousesObjective, PopulationObjective, ProductionObjective, ProfitObjective, Quest, ObjectiveType, StoragesObjective, TreasuryObjective, Reward, QuestConfig, RewardConfig, DropEntryConfig, DropEntry, DropPool } from "./quest.js";
 import { SpriteLibrary } from "./sprite-library.js";
 
 export interface QuestSnapshot {
@@ -47,7 +47,7 @@ export class QuestManager {
 
 	registerQuest(quest: Quest) {
 		this.logger.debug(`Trying to register a quest`, quest);
-		if (quest.objectives.length == 0) return;
+		if (quest.questDefinition.objectives.length == 0) return;
 		this.registeredQuests.push(quest);
 		this.logger.debug(`New quest registered`, quest);
 	}
@@ -133,8 +133,8 @@ export class QuestManager {
 	}
 
 	checkQuest(game: Game, quest: Quest, snapshot: QuestSnapshot): boolean {
-		this.logger.debug(`Checking quest ${quest.name}`, quest);
-		for (let objective of quest.objectives) {
+		this.logger.debug(`Checking quest ${quest.questDefinition.name}`, quest);
+		for (let objective of quest.questDefinition.objectives) {
 			this.logger.debug(`Checking objective of type ${objective.type}`, objective);
 
 			if (objective.type == "special") {
@@ -210,16 +210,63 @@ export class QuestLayer {
 		}
 	}
 
-	applyCampaign(data: CampaignData, _sprites: SpriteLibrary) {
+	applyCampaign(data: CampaignData, sprites: SpriteLibrary) {
 		for (let marker of data.questMarkers) {
-			let quest: Quest;
-			quest = marker.questDefinition;
+			let quest: Quest = {
+				id: marker.id,
+				visibleName: marker.visibleName,
+				questDefinition: marker.questDefinition,
+				onCompletion: marker.onCompletion,
+				onFailure: marker.onFailure,
+				rewards: this.applyRewards(marker.rewards, sprites),
+			};
 			const questMarker = new QuestMarker(
 				marker.position, 
 				marker.size,
 				quest
 			);
 			this.markers.push(questMarker);
+		}
+	}
+
+	dropEntryConfigToDropEntry(config: DropEntryConfig, sprites: SpriteLibrary): DropEntry {
+		const spriteName = config.sprite || config.id;
+		const sprite = sprites.icons[spriteName];
+		return {
+			id: config.id,
+			type: config.type,
+			count: config.count,
+			sprite: sprite,
+		}
+	}
+
+	applyRewards(data: RewardConfig | undefined, sprites: SpriteLibrary): Reward | undefined {
+		if (!data) return;
+		let drops: DropEntry[] = [];
+		if (data.drops) {
+			for (let dropConfig of data.drops) {
+				drops.push(this.dropEntryConfigToDropEntry(dropConfig, sprites));
+			}
+		}
+
+		let pools: DropPool[] = [];
+		if (data.dropPools) {
+			for (let poolConfig of data.dropPools) {
+
+				let poolDrops: DropEntry[] = [];
+				if (data.drops) {
+					for (let dropConfig of poolConfig.drops) {
+						poolDrops.push(this.dropEntryConfigToDropEntry(dropConfig, sprites));
+					}
+				}
+				pools.push({chance: poolConfig.chance, drops: poolDrops});
+			}
+		}
+
+		return {
+			coins: data.coins,
+			drops: drops,
+			dropPools: pools,
 		}
 	}
 }
@@ -283,7 +330,7 @@ export class QuestInterface extends BuildingInterface {
 		this.quest = quest; 
 		// TODO: correctly apply actions
 		let action: Action;
-		if (quest.type == "battle") {
+		if (quest.questDefinition.type == "battle") {
 			action = { action: "goTo", argument: "Battle" };
 
 		} else {
@@ -315,7 +362,7 @@ export class QuestInterface extends BuildingInterface {
 
 		this.context.fillStyle = '#fff';
 		this.context.font = '24px Arial';
-		this.context.fillText(this.quest.name, nameX, nameY);
+		this.context.fillText(this.quest.visibleName, nameX, nameY);
 	}
 
 	// TODO: should probably make more general interface
