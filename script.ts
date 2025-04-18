@@ -58,6 +58,7 @@ window.onload = async () => {
 	canvas.width = game.state.canvasSize.width;
 	canvas.height = game.state.canvasSize.height;
 	logger.debug('Preparing assets');
+	game.setContext(context);
 
 	await game.prepareAssets(buildingSettings, avatarSettings, iconSettings, tabSettings);
 

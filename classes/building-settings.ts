@@ -1,7 +1,8 @@
+import { Game } from "./game.js";
 import { AdventurersGuildInterface } from "./interface/adventurers-guild.js";
 import { SidebarConfig } from "./interface/sidebar.js";
 import { StorageInterface } from "./interface/storage.js";
-import { CampaignData } from "./quest.js";
+import { CampaignData, Quest } from "./quest.js";
 import { SpriteConfig, BuildingConfig } from "./sprite-library.js";
 
 export const buildingSettings: BuildingConfig[] = [
@@ -445,6 +446,13 @@ export const campaignSettings: CampaignData = {
 				objectives: [
 					{type: "storages", resource: "flour", amount: 20},
 				],
+			},
+			onCompletion: (game: Game, _quest: Quest) => {
+				if (!game.context) return;
+				game.interf.setDialogue(game.context, {text: "Quest finished!", portrait: game.sprites.avatars['ratman']});
+				setTimeout(() => {
+					game.interf.closeDialogue();
+				}, 3000);
 			},
 		}
 	],

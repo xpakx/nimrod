@@ -7,7 +7,7 @@ import { Action } from "./interface/actions.js";
 import { Button } from "./interface/button.js";
 import { getLogger, Logger } from "./logger.js";
 import { Position, Size } from "./map-layer.js";
-import { BuildingObjective, CampaignData, EconomicObjectives, PopulationInHousesObjective, PopulationObjective, ProductionObjective, ProfitObjective, Quest, ObjectiveType, StoragesObjective, TreasuryObjective, Reward, QuestConfig, RewardConfig, DropEntryConfig, DropEntry, DropPool } from "./quest.js";
+import { BuildingObjective, CampaignData, EconomicObjectives, PopulationInHousesObjective, PopulationObjective, ProductionObjective, ProfitObjective, Quest, ObjectiveType, StoragesObjective, TreasuryObjective, Reward, RewardConfig, DropEntryConfig, DropEntry, DropPool } from "./quest.js";
 import { SpriteLibrary } from "./sprite-library.js";
 
 export interface QuestSnapshot {
@@ -115,9 +115,11 @@ export class QuestManager {
 			const finished = this.checkQuest(game, quest, snapshot);
 			if (finished) {
 				this.removeQuest(quest);
-				// TODO: rewards
-				// TODO: post-actions
-				// TODO: show info
+				if (quest.rewards) this.applyRewards(game, quest.rewards);
+				if (quest.onCompletion != undefined) {
+					quest.onCompletion(game, quest);
+				}
+				// TODO: show info?
 			}
 		}
 
@@ -150,6 +152,10 @@ export class QuestManager {
 		}
 		this.logger.debug("Quest finished");
 		return true;
+	}
+
+	applyRewards(game: Game, rewards: Reward) {
+		// TODO
 	}
 }
 

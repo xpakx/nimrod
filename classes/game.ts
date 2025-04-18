@@ -34,6 +34,8 @@ export class Game {
 
 	battleLogic: BattleLogicLayer;
 
+	context?: CanvasRenderingContext2D;
+
 	constructor() {
 		this.state = new GameState();
 		this.map = new MapLayer(this.state.canvasSize);
@@ -526,6 +528,10 @@ export class Game {
 
 	loadCampaign(campaign: CampaignData) {
 		this.quest.applyCampaign(campaign, this.sprites);
+	}
+
+	setContext(context: CanvasRenderingContext2D) {
+		this.context = context;
 	}
 }
 

@@ -15,8 +15,8 @@ export interface QuestConfig {
 	visibleName: string;
 	questDefinition: QuestDefinition;
 	// activate, check
-	onCompletion?: (game: Game) => null;
-	onFailure?: (game: Game) => null;
+	onCompletion?: (game: Game, quest: Quest) => void;
+	onFailure?: (game: Game, quest: Quest) => void;
 	rewards?: RewardConfig;
 }
 
@@ -35,8 +35,8 @@ export interface Quest {
 	id: string;
 	visibleName: string;
 	questDefinition: QuestDefinition;
-	onCompletion?: (game: Game) => null;
-	onFailure?: (game: Game) => null;
+	onCompletion?: (game: Game, quest: Quest) => void;
+	onFailure?: (game: Game, quest: Quest) => void;
 	rewards?: Reward; 
 }
 
