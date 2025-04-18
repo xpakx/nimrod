@@ -155,7 +155,28 @@ export class QuestManager {
 	}
 
 	applyRewards(game: Game, rewards: Reward) {
-		// TODO
+		if (rewards.coins) game.state.money += rewards.coins;
+		if (rewards.drops) this.applyRewardDrops(game, rewards.drops);
+		// TODO: apply rewards from drop pools
+	}
+
+	applyRewardDrops(game: Game, rewards: DropEntry[]) {
+		for (let entry of rewards) {
+			let applyReward = false;
+			if (!entry.chance) {
+				applyReward = true;
+			} else {
+				const random = Math.random();
+				applyReward = random < entry.chance;
+			}
+
+			if (applyReward) this.applyReward(game, entry);
+		}
+	}
+
+	applyReward(_game: Game, entry: DropEntry) {
+		// TODO: move rewards to city
+		this.logger.debug(`reward: ${entry.count} of ${entry.id}`);
 	}
 }
 
