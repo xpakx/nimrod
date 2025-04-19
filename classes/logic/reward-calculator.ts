@@ -17,20 +17,16 @@ export class RewardCalculator {
 		return result;
 	}
 
+	randomizeChance(entry: ItemWithChance) {
+		if (!entry.chance) return true;
+		return Math.random() < entry.chance;
+	}
+
 	getRewardDrops(rewards: DropEntry[]): DropEntry[] {
 		let result: DropEntry[] = [];
 		for (let entry of rewards) {
-			let applyReward = false;
-			if (!entry.chance) {
-				applyReward = true;
-			} else {
-				const random = Math.random();
-				applyReward = random < entry.chance;
-			}
-
-			if (applyReward) {
-				result.push(entry);
-			}
+			const applyReward = this.randomizeChance(entry);
+			if (applyReward) result.push(entry);
 		}
 		return result;
 	}
@@ -38,15 +34,9 @@ export class RewardCalculator {
 	getRewardDropPools(pools: DropPool[]): DropEntry[] {
 		let result: DropEntry[] = [];
 		for (const pool of pools) {
-			let applyPool = false;
-			if (!pool.chance) {
-				applyPool = true;
-			} else {
-				const random = Math.random();
-				applyPool = random < pool.chance;
-			}
-
+			const applyPool = this.randomizeChance(pool);
 			if (!applyPool) continue;
+
 			const entry = this.selectFromPool(pool.drops);
 			if (entry) result.push(entry);
 		}
@@ -77,4 +67,9 @@ export class RewardCalculator {
 		const entries =  pool.drops.filter((x) => !ignoreItems.has(x.id));
 		return this.selectFromPool(entries);
 	}
+}
+
+
+interface ItemWithChance {
+	chance?: number;
 }
