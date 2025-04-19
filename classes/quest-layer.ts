@@ -157,7 +157,7 @@ export class QuestManager {
 	applyRewards(game: Game, rewards: Reward) {
 		if (rewards.coins) game.state.money += rewards.coins;
 		if (rewards.drops) this.applyRewardDrops(game, rewards.drops);
-		// TODO: apply rewards from drop pools
+		if (rewards.dropPools) this.applyRewardDropPools(game, rewards.dropPools);
 	}
 
 	applyRewardDrops(game: Game, rewards: DropEntry[]) {
@@ -177,6 +177,44 @@ export class QuestManager {
 	applyReward(_game: Game, entry: DropEntry) {
 		// TODO: move rewards to city
 		this.logger.debug(`reward: ${entry.count} of ${entry.id}`);
+	}
+
+	applyRewardDropPools(game: Game, pools: DropPool[]) {
+		for (const pool of pools) {
+			let applyPool = false;
+			if (!pool.chance) {
+				applyPool = true;
+			} else {
+				const random = Math.random();
+				applyPool = random < pool.chance;
+			}
+
+			if (applyPool) {
+				this.selectAndApplyFromPool(game, pool);
+			}
+		}
+	}
+
+	selectAndApplyFromPool(game: Game, pool: DropPool) {
+		const entries = pool.drops;
+		if (entries.length === 0) return; 
+		
+		const sum = entries.reduce((total, entry) => total + (entry.chance ?? 1.0), 0);
+		if (sum <= 0) return;
+
+		let selector = Math.random() * sum;
+
+		for (const entry of entries) {
+			const entryChance = entry.chance ?? 1.0;
+			if (selector < entryChance) {
+				this.applyReward(game, entry);
+				return;
+			}
+			selector -= entryChance;
+		}
+
+		// in case of floating-point precision issues (?)
+		this.applyReward(game, entries[entries.length - 1]);
 	}
 }
 
