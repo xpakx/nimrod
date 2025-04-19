@@ -6,6 +6,7 @@ import { Game } from "./game.js";
 import { Action } from "./interface/actions.js";
 import { Button } from "./interface/button.js";
 import { getLogger, Logger } from "./logger.js";
+import { RewardCalculator } from "./logic/reward-calculator.js";
 import { Position, Size } from "./map-layer.js";
 import { BuildingObjective, CampaignData, EconomicObjectives, PopulationInHousesObjective, PopulationObjective, ProductionObjective, ProfitObjective, Quest, ObjectiveType, StoragesObjective, TreasuryObjective, Reward, RewardConfig, DropEntryConfig, DropEntry, DropPool } from "./quest.js";
 import { SpriteLibrary } from "./sprite-library.js";
@@ -29,6 +30,8 @@ export class QuestManager {
 	month: number = 0;
 
 	private handlers: Record<string, ObjectiveChecker> = {};
+
+	rewardCalculator: RewardCalculator = new RewardCalculator();
 
 	constructor() {
 		this.registerChecker(new PopulationChecker());
@@ -156,66 +159,23 @@ export class QuestManager {
 
 	applyRewards(game: Game, rewards: Reward) {
 		if (rewards.coins) game.state.money += rewards.coins;
-		if (rewards.drops) this.applyRewardDrops(game, rewards.drops);
-		if (rewards.dropPools) this.applyRewardDropPools(game, rewards.dropPools);
-	}
+		let result: DropEntry[] = [];
+		if (rewards.drops) {
+			const drops = this.rewardCalculator.getRewardDrops(rewards.drops);
+			result.push(...drops);
+		}
+		if (rewards.dropPools) {
+			const drops = this.rewardCalculator.getRewardDropPools(rewards.dropPools);
+			result.push(...drops);
+		}
 
-	applyRewardDrops(game: Game, rewards: DropEntry[]) {
-		for (let entry of rewards) {
-			let applyReward = false;
-			if (!entry.chance) {
-				applyReward = true;
-			} else {
-				const random = Math.random();
-				applyReward = random < entry.chance;
-			}
-
-			if (applyReward) this.applyReward(game, entry);
+		if (result.length == 0) this.logger.debug("No rewards applied!");
+		for (let entry of result) {
+			// TODO: move rewards to city
+			this.logger.debug(`reward: ${entry.count} of ${entry.id}`);
 		}
 	}
 
-	applyReward(_game: Game, entry: DropEntry) {
-		// TODO: move rewards to city
-		this.logger.debug(`reward: ${entry.count} of ${entry.id}`);
-	}
-
-	applyRewardDropPools(game: Game, pools: DropPool[]) {
-		for (const pool of pools) {
-			let applyPool = false;
-			if (!pool.chance) {
-				applyPool = true;
-			} else {
-				const random = Math.random();
-				applyPool = random < pool.chance;
-			}
-
-			if (applyPool) {
-				this.selectAndApplyFromPool(game, pool);
-			}
-		}
-	}
-
-	selectAndApplyFromPool(game: Game, pool: DropPool) {
-		const entries = pool.drops;
-		if (entries.length === 0) return; 
-		
-		const sum = entries.reduce((total, entry) => total + (entry.chance ?? 1.0), 0);
-		if (sum <= 0) return;
-
-		let selector = Math.random() * sum;
-
-		for (const entry of entries) {
-			const entryChance = entry.chance ?? 1.0;
-			if (selector < entryChance) {
-				this.applyReward(game, entry);
-				return;
-			}
-			selector -= entryChance;
-		}
-
-		// in case of floating-point precision issues (?)
-		this.applyReward(game, entries[entries.length - 1]);
-	}
 }
 
 export class QuestLayer {
