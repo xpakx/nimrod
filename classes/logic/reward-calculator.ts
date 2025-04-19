@@ -46,16 +46,14 @@ export class RewardCalculator {
 				applyPool = random < pool.chance;
 			}
 
-			if (applyPool) {
-				const entry = this.selectFromPool(pool);
-				if (entry) result.push(entry);
-			}
+			if (!applyPool) continue;
+			const entry = this.selectFromPool(pool.drops);
+			if (entry) result.push(entry);
 		}
 		return result;
 	}
 
-	selectFromPool(pool: DropPool): DropEntry | undefined {
-		const entries = pool.drops;
+	selectFromPool(entries: DropEntry[]): DropEntry | undefined {
 		if (entries.length === 0) return; 
 		
 		const sum = entries.reduce((total, entry) => total + (entry.chance ?? 1.0), 0);
@@ -73,5 +71,10 @@ export class RewardCalculator {
 
 		// in case of floating-point precision issues (?)
 		return entries[entries.length - 1];
+	}
+
+	selectNewFromPool(pool: DropPool, ignoreItems: Set<string>): DropEntry | undefined {
+		const entries =  pool.drops.filter((x) => !ignoreItems.has(x.id));
+		return this.selectFromPool(entries);
 	}
 }
