@@ -685,63 +685,108 @@ export class MapLayer {
 	}
 
 
-	dist: number[][] = [];
+	dist: Map<number, number> = new Map();
 	pred: (number | undefined)[][] = [];
 
+	getDistanceOrDefault(startIndex: number, targetIndex: number): number {
+		if (startIndex == targetIndex) return 0;
+		const key = this.getDistKey(startIndex, targetIndex);
+		const distance = this.dist.get(key);
+		if (distance != undefined) return distance;
+		return Infinity;
+	}
+	
+	setDistance(startIndex: number, targetIndex: number, value: number) {
+		const key = this.getDistKey(startIndex, targetIndex);
+		this.dist.set(key, value);
+	}
+
+	deleteDistance(startIndex: number, targetIndex: number) {
+		const key = this.getDistKey(startIndex, targetIndex);
+		this.dist.delete(key);
+	}
+
+	// maps shouldn't be bigger than 256 x 256
+	getDistKey(startIndex: number, targetIndex: number): number {
+		return (startIndex << 16) | targetIndex; // indices < 65536
+	}
+
+	printDistMap() {
+		const columns = this.roads[0].length;
+		function fromIndex(index: number): Position {
+			return { y: Math.floor(index / columns), x: index % columns };
+		}
+		function decodeKey(encodedKey: number) {
+			const inNode = encodedKey >> 16;
+			const outNode = encodedKey & 0xFFFF;
+			return { in: inNode, out: outNode };
+		}
+
+		this.dist.forEach((value, encodedKey) => {
+			const { in: inIndex, out: outIndex } = decodeKey(encodedKey);
+			const inNode = fromIndex(inIndex);
+			const outNode = fromIndex(outIndex);
+			console.log(`(${inNode.x}, ${inNode.y}) -> (${outNode.x}, ${outNode.y}): ${value}`);
+		});
+	}
+
 	floydWarshall(): void {
-	   const rows = this.roads.length;
-	   const columns = this.roads[0].length;
-	   const size = rows * columns;
-	   const dist = new Array(size).fill(null).map(() => new Array(size).fill(Infinity));
-	   const pred = new Array(size).fill(null).map(() => new Array(size).fill(null));
+		const rows = this.roads.length;
+		const columns = this.roads[0].length;
+		const size = rows * columns;
+		// const dist = new Array(size).fill(null).map(() => new Array(size).fill(Infinity));
+		this.dist.clear();
+		const pred = new Array(size).fill(null).map(() => new Array(size).fill(null));
 
-	   for (let i = 0; i < size; i++) {
-		   dist[i][i] = 0;
-	   }
+		function toIndex(x: number, y: number) {
+			return x * columns + y;
+		}
 
-	   function toIndex(x: number, y: number) {
-		   return x * columns + y;
-	   }
+		for (let x = 0; x < rows; x++) {
+			for (let y = 0; y < columns; y++) {
+				if (this.roads[x][y]) {
+					const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+					for (const [dx, dy] of directions) {
+						const nx = x + dx;
+						const ny = y + dy;
+						if (nx >= 0 && nx < rows && ny >= 0 && ny < columns && this.roads[nx][ny]) {
+							const u = toIndex(x, y);
+							const v = toIndex(nx, ny);
+							/// dist[u][v] = 1; // TODO: cost?
+							this.setDistance(v, u, 1);
+							pred[u][v] = u; // to, from -> next step
+						}
+					}
+				}
+			}
+		}
+		let roadsToCheck = [];
+		for (let x = 0; x < rows; x++) {
+			for (let y = 0; y < columns; y++) {
+				if (this.roads[x][y]) {
+					const u = toIndex(x, y);
+					roadsToCheck.push(u);
+				}
+			}
+		}
 
-	   for (let x = 0; x < rows; x++) {
-		   for (let y = 0; y < columns; y++) {
-			   if (this.roads[x][y]) {
-				   const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
-				   for (const [dx, dy] of directions) {
-					   const nx = x + dx;
-					   const ny = y + dy;
-					   if (nx >= 0 && nx < rows && ny >= 0 && ny < columns && this.roads[nx][ny]) {
-						   const u = toIndex(x, y);
-						   const v = toIndex(nx, ny);
-						   dist[u][v] = 1; // TODO: cost?
-						   pred[u][v] = u; // to, from -> next step
-					   }
-				   }
-			   }
-		   }
-	   }
-	   let roadsToCheck = [];
-	   for (let x = 0; x < rows; x++) {
-		   for (let y = 0; y < columns; y++) {
-			   if (this.roads[x][y]) {
-				   const u = toIndex(x, y);
-				   roadsToCheck.push(u);
-			   }
-		   }
-	   }
+		for (let k of roadsToCheck) {
+			for (let i of roadsToCheck) {
+				for (let j of roadsToCheck) {
+					const distFromKToI = this.getDistanceOrDefault(k, i);
+					const distFromJToK = this.getDistanceOrDefault(j, k);
+					const distanceThroughK = distFromJToK + distFromKToI;
 
-	   for (let k of roadsToCheck) {
-		   for (let i of roadsToCheck) {
-			   for (let j of roadsToCheck) {
-				   if (dist[i][k] + dist[k][j] < dist[i][j]) {
-					   dist[i][j] = dist[i][k] + dist[k][j];
-					   pred[i][j] = pred[k][j];
-				   }
-			   }
-		   }
-	   }
-	   this.dist = dist;
-	   this.pred = pred;
+					const distFromJToI = this.getDistanceOrDefault(j, i);
+					if (distanceThroughK < distFromJToI) {
+						this.setDistance(j, i, distanceThroughK);
+						pred[i][j] = pred[k][j];
+					}
+				}
+			}
+		}
+		this.printDistMap();
+		this.pred = pred;
 	}
 
 	updateAfterDeletion(pos: Position) {
@@ -767,25 +812,40 @@ export class MapLayer {
 		for (let u of roadsToCheck) {
 			for (let v of roadsToCheck) {
 				if (u === k || v === k) {
-					this.dist[u][v] = Infinity; // no path through deleted node
+					// this.dist[u][v] = Infinity;
+					this.deleteDistance(v, u); // no path through deleted node
 					this.pred[u][v] = undefined;
 					this.logger.debug(`invalidated path (${u}, ${v})`);
+					continue;
 				} 
-				else if (this.dist[u][v] === this.dist[u][k] + this.dist[k][v]) {
+
+				const distFromVToK = this.getDistanceOrDefault(v, k);
+				const distFromKToU = this.getDistanceOrDefault(k, u);
+				const distanceThroughK = distFromVToK + distFromKToU;
+
+				const distFromVToU = this.getDistanceOrDefault(v, u);
+				if (distFromVToU === distanceThroughK) {
 					roadsToUpdate.push([u,v]);
-					this.dist[u][v] = Infinity;
+					// this.dist[u][v] = Infinity;
+					this.deleteDistance(v, u);
 					this.pred[u][v] = undefined;
 				}
 			}
 		}
-		this.dist[k][k] = 0;
+
 		roadsToCheck.pop();
 		for (let road of roadsToUpdate) {
 			let [u, v] = road;
 			this.logger.debug(`recomputing path (${u}, ${v})`); // debug
 			for (let w of roadsToCheck) {
-				if (this.dist[u][w] + this.dist[w][v] < this.dist[u][v]) {
-					this.dist[u][v] = this.dist[u][w] + this.dist[w][v];
+				const distFromVToW = this.getDistanceOrDefault(v, w);
+				const distFromWToU = this.getDistanceOrDefault(w, u);
+				const distanceThroughW = distFromVToW + distFromWToU;
+
+				const distFromVToU = this.getDistanceOrDefault(v, u);
+				if (distanceThroughW < distFromVToU) {
+					// this.dist[u][v] = this.dist[u][w] + this.dist[w][v];
+					this.setDistance(v, u, distanceThroughW);
 					this.pred[u][v] = this.pred[w][v];
 					this.logger.debug(`updated path (${u}, ${v}) via ${w}`); // debug
 				}
@@ -818,25 +878,48 @@ export class MapLayer {
 			if (nx >= 0 && nx < rows && ny >= 0 && ny < columns && this.roads[nx][ny]) {
 				const u = k;
 				const v = toIndex(nx, ny);
-				this.dist[u][v] = 1;
+				// this.dist[u][v] = 1;
+				this.setDistance(v, u, 1);
 				this.pred[u][v] = u;
-				this.dist[v][u] = 1;
+				// this.dist[v][u] = 1;
+				this.setDistance(u, v, 1);
 				this.pred[v][u] = v;
 			}
 		}
 
 		for (let u of roadsToCheck) {
 			for (let v of roadsToCheck) {
-				if (this.dist[u][k] + this.dist[k][v] < this.dist[u][v]) {
-					this.dist[u][v] = this.dist[u][k] + this.dist[k][v];
+				let distFromVToK = this.getDistanceOrDefault(v, k);
+				let distFromKToU = this.getDistanceOrDefault(k, u);
+				let distanceThroughK = distFromVToK + distFromKToU;
+
+				let distFromVToU = this.getDistanceOrDefault(v, u);
+				if (distanceThroughK < distFromVToU) {
+					// this.dist[u][v] = this.dist[u][k] + this.dist[k][v];
+					this.setDistance(v, u, distanceThroughK);
 					this.pred[u][v] = this.pred[k][v];
 				}
-				if (this.dist[k][u] + this.dist[u][v] < this.dist[k][v]) {
-					this.dist[k][v] = this.dist[k][u] + this.dist[u][v];
+
+				distFromVToU = this.getDistanceOrDefault(v, u);
+				let distFromUToK = this.getDistanceOrDefault(u, k);
+				let distanceThroughU = distFromVToU + distFromUToK;
+
+				distFromVToK = this.getDistanceOrDefault(v, k);
+				if (distanceThroughU < distFromVToK) {
+					// this.dist[k][v] = this.dist[k][u] + this.dist[u][v];
+					this.setDistance(v, k, distanceThroughU);
 					this.pred[k][v] = this.pred[u][v];
 				}
-				if (this.dist[u][v] + this.dist[v][k] < this.dist[u][k]) {
-					this.dist[u][k] = this.dist[u][v] + this.dist[v][k];
+
+				const distFromKToV = this.getDistanceOrDefault(k, v);
+				distFromVToU = this.getDistanceOrDefault(v, u);
+				let distanceThroughV = distFromKToV + distFromVToU;
+
+				distFromKToU = this.getDistanceOrDefault(k, u);
+
+				if (distanceThroughV < distFromKToU) {
+					// this.dist[u][k] = this.dist[u][v] + this.dist[v][k];
+					this.setDistance(k, u, distanceThroughV);
 					this.pred[u][k] = this.pred[v][k];
 				}
 			}
@@ -867,7 +950,9 @@ export class MapLayer {
 		}
 		const startIndex = toIndex(start.x, start.y);
 		const targetIndex = toIndex(target.x, target.y);
-		return this.dist[targetIndex][startIndex];
+
+		return this.getDistanceOrDefault(startIndex, targetIndex);
+		// return this.dist[targetIndex][startIndex];
 	}
 
 	shortestMigrantPath(start: Position, building: Building): Position[] {
@@ -1107,3 +1192,9 @@ export interface NoneMode {
 }
 
 export type Mode = BuildMode | RoadMode | DeleteMode | NoneMode;
+
+export interface Pair {
+	in: number,
+	out: number,
+}
+
