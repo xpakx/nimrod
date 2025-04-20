@@ -755,14 +755,10 @@ export class MapLayer {
 	}
 
 	floydWarshall(): void {
-		// const startTime = performance.now()
 		const rows = this.roads.length;
 		const columns = this.roads[0].length;
-		// const dist = new Array(size).fill(null).map(() => new Array(size).fill(Infinity));
 		this.dist.clear();
-		// const pred = new Array(size).fill(null).map(() => new Array(size).fill(null));
 		this.pred.clear();
-		// const postDeclaration = performance.now()
 
 		function toIndex(x: number, y: number) {
 			return x * columns + y;
@@ -778,9 +774,7 @@ export class MapLayer {
 						if (nx >= 0 && nx < rows && ny >= 0 && ny < columns && this.roads[nx][ny]) {
 							const u = toIndex(x, y);
 							const v = toIndex(nx, ny);
-							/// dist[u][v] = 1; // TODO: cost?
 							this.setDistance(v, u, 1);
-							// pred[u][v] = u; // to, from -> next step
 							this.setPred(v, u, u);
 						}
 					}
@@ -800,25 +794,22 @@ export class MapLayer {
 		for (let k of roadsToCheck) {
 			for (let i of roadsToCheck) {
 				for (let j of roadsToCheck) {
-					const distFromKToI = this.getDistanceOrDefault(k, i);
-					const distFromJToK = this.getDistanceOrDefault(j, k);
-					const distanceThroughK = distFromJToK + distFromKToI;
-
-					const distFromJToI = this.getDistanceOrDefault(j, i);
-					if (distanceThroughK < distFromJToI) {
-						this.setDistance(j, i, distanceThroughK);
-						// pred[i][j] = pred[k][j];
-						this.setPred(j, i, this.getPredOrDefault(j, k))
-					}
+					this.updateDistanceThrough(j, i, k);
 				}
 			}
 		}
-		// this.printDistMap();
+	}
 
-		// const postFloydWarshall = performance.now()
-		// console.log(`Array declaration took ${postDeclaration - startTime} milliseconds`)
-		// console.log(`Floyd-Warshall took ${postFloydWarshall - postDeclaration} milliseconds`)
+	updateDistanceThrough(from: number, to: number, through: number) {
+		const toN = this.getDistanceOrDefault(from, through);
+		const fromN = this.getDistanceOrDefault(through, to);
+		const oldDistance = this.getDistanceOrDefault(from, to);
+		const distanceThroughN = toN + fromN;
 
+		if (distanceThroughN < oldDistance) {
+			this.setDistance(from, to, distanceThroughN);
+			this.setPred(from, to, this.getPredOrDefault(from, through))
+		}
 	}
 
 	updateAfterDeletion(pos: Position) {
@@ -844,9 +835,7 @@ export class MapLayer {
 		for (let u of roadsToCheck) {
 			for (let v of roadsToCheck) {
 				if (u === k || v === k) {
-					// this.dist[u][v] = Infinity;
 					this.deleteDistance(v, u); // no path through deleted node
-					// this.pred[u][v] = undefined;
 					this.deletePred(v, u);
 					this.logger.debug(`invalidated path (${u}, ${v})`);
 					continue;
@@ -859,9 +848,7 @@ export class MapLayer {
 				const distFromVToU = this.getDistanceOrDefault(v, u);
 				if (distFromVToU === distanceThroughK) {
 					roadsToUpdate.push([u,v]);
-					// this.dist[u][v] = Infinity;
 					this.deleteDistance(v, u);
-					// this.pred[u][v] = undefined;
 					this.deletePred(v, u);
 				}
 			}
@@ -872,18 +859,7 @@ export class MapLayer {
 			let [u, v] = road;
 			this.logger.debug(`recomputing path (${u}, ${v})`); // debug
 			for (let w of roadsToCheck) {
-				const distFromVToW = this.getDistanceOrDefault(v, w);
-				const distFromWToU = this.getDistanceOrDefault(w, u);
-				const distanceThroughW = distFromVToW + distFromWToU;
-
-				const distFromVToU = this.getDistanceOrDefault(v, u);
-				if (distanceThroughW < distFromVToU) {
-					// this.dist[u][v] = this.dist[u][w] + this.dist[w][v];
-					this.setDistance(v, u, distanceThroughW);
-					// this.pred[u][v] = this.pred[w][v];
-					this.setPred(v, u, this.getPredOrDefault(v, w));
-					this.logger.debug(`updated path (${u}, ${v}) via ${w}`); // debug
-				}
+				this.updateDistanceThrough(v, u, w);
 			}
 		}
 	}
@@ -913,58 +889,20 @@ export class MapLayer {
 			if (nx >= 0 && nx < rows && ny >= 0 && ny < columns && this.roads[nx][ny]) {
 				const u = k;
 				const v = toIndex(nx, ny);
-				// this.dist[u][v] = 1;
 				this.setDistance(v, u, 1);
-				// this.pred[u][v] = u;
 				this.setPred(v, u, u);
-				// this.dist[v][u] = 1;
 				this.setDistance(u, v, 1);
-				// this.pred[v][u] = v;
 				this.setPred(u, v, v);
 			}
 		}
 
 		for (let u of roadsToCheck) {
 			for (let v of roadsToCheck) {
-				let distFromVToK = this.getDistanceOrDefault(v, k);
-				let distFromKToU = this.getDistanceOrDefault(k, u);
-				let distanceThroughK = distFromVToK + distFromKToU;
-
-				let distFromVToU = this.getDistanceOrDefault(v, u);
-				if (distanceThroughK < distFromVToU) {
-					// this.dist[u][v] = this.dist[u][k] + this.dist[k][v];
-					this.setDistance(v, u, distanceThroughK);
-					// this.pred[u][v] = this.pred[k][v];
-					this.setPred(v, u, this.getPredOrDefault(v, k));
-				}
-
-				distFromVToU = this.getDistanceOrDefault(v, u);
-				let distFromUToK = this.getDistanceOrDefault(u, k);
-				let distanceThroughU = distFromVToU + distFromUToK;
-
-				distFromVToK = this.getDistanceOrDefault(v, k);
-				if (distanceThroughU < distFromVToK) {
-					// this.dist[k][v] = this.dist[k][u] + this.dist[u][v];
-					this.setDistance(v, k, distanceThroughU);
-					// this.pred[k][v] = this.pred[u][v];
-					this.setPred(v, k, this.getPredOrDefault(v, u));
-				}
-
-				const distFromKToV = this.getDistanceOrDefault(k, v);
-				distFromVToU = this.getDistanceOrDefault(v, u);
-				let distanceThroughV = distFromKToV + distFromVToU;
-
-				distFromKToU = this.getDistanceOrDefault(k, u);
-
-				if (distanceThroughV < distFromKToU) {
-					// this.dist[u][k] = this.dist[u][v] + this.dist[v][k];
-					this.setDistance(k, u, distanceThroughV);
-					// this.pred[u][k] = this.pred[v][k];
-					this.setPred(k, u, this.getPredOrDefault(k, v));
-				}
+				this.updateDistanceThrough(v, u, k);
+				this.updateDistanceThrough(v, k, u);
+				this.updateDistanceThrough(k, u, v);
 			}
 		}
-		// this.logger.debug("Updated predecessor table", this.pred);
 	}
 
 
