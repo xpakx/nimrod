@@ -706,7 +706,6 @@ export class MapLayer {
 		this.dist.delete(key);
 	}
 
-	// maps shouldn't be bigger than 256 x 256
 	getDistKey(startIndex: number, targetIndex: number): number {
 		return (startIndex << 16) | targetIndex; // indices < 65536
 	}
@@ -754,11 +753,23 @@ export class MapLayer {
 		this.pred.delete(key);
 	}
 
+	canUseInt32(): boolean {
+		const biggestX = this.roads.length - 1;
+		const columns = this.roads[0].length;
+		const biggestY = columns - 1;
+
+		const biggestIndex = biggestX * columns + biggestY;
+		return biggestIndex < 65536;
+	}
+
 	floydWarshall(): void {
 		const rows = this.roads.length;
 		const columns = this.roads[0].length;
 		this.dist.clear();
 		this.pred.clear();
+
+		if (!this.canUseInt32()) this.logger.warn("Indices too long!");
+		// TODO: use strings for keys otherwise (?)
 
 		function toIndex(x: number, y: number) {
 			return x * columns + y;
