@@ -6,6 +6,7 @@ import { GameState, View } from "./game-state.js";
 import { Game } from "./game.js";
 import { getLogger, Logger } from "./logger.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
+import { QuestManager, QuestSnapshot } from "./quest-layer.js";
 import { RewardConfig } from "./quest.js";
 
 export class SaveManager {
@@ -14,12 +15,13 @@ export class SaveManager {
 	// TODO: save battle state
 	saveState(game: Game, key: string) {
 		const data: SaveData = {
-			version: 3,
+			version: 4,
 			map: this.serializeMapWithState(game.map, game.state),
 			state: {
 				view: game.state.view,
 				money: game.state.money,
-			}
+			},
+			quest: this.serializeQuestData(game.cityLogic.quests, game.state),
 		}
 		localStorage.setItem(key, JSON.stringify(data));
 	}
@@ -54,7 +56,7 @@ export class SaveManager {
 				return true;
 			}
 
-			if (version == 3) {
+			if (version == 3 || version == 4) {
 				const map = savedMap as SaveData;
 				this.applySave(game, map.map, true);
 				game.state.view = map.state.view;
@@ -440,6 +442,17 @@ export class SaveManager {
 		if (updateDistances) game.map.floydWarshall();
 	}
 
+	serializeQuestData(questManager: QuestManager, state: GameState): QuestData {
+		return {
+			lastYearSnapshot: state.lastYearSnapshot,
+			lastMonthSnapshot: state.lastMonthSnapshot,
+			timeSinceLastCheck: questManager.timeSinceLastCheck,
+			checksInMonth: questManager.checksInMonth,
+			month: questManager.month,
+			quests: questManager.registeredQuests.map((quest) => quest.id),
+		};
+	}
+
 }
 
 export interface OldSaveData {
@@ -452,6 +465,7 @@ export interface SaveData {
 	version: number;
 	map: MapDataWithState;
 	state: StateData;
+	quest?: QuestData;
 }
 
 export interface StateData {
@@ -596,3 +610,11 @@ interface BuildingWorkerData {
 	homePosition?: Position;
 }
 
+interface QuestData {
+	lastMonthSnapshot?: QuestSnapshot;
+	lastYearSnapshot?: QuestSnapshot;
+	timeSinceLastCheck: number;
+	checksInMonth: number;
+	month: number;
+	quests: string[];
+}

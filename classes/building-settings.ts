@@ -417,7 +417,7 @@ export const campaignSettings: CampaignData = {
 	visibleName: "Campaign",
 	questMarkers: [
 		{
-			id: "quest1",
+			id: "quest_military_test_001",
 			icon: "",
 			visibleName: "Quest 1",
 			position: {x: 0, y: 0},
@@ -434,7 +434,7 @@ export const campaignSettings: CampaignData = {
 			},
 		},
 		{
-			id: "quest2",
+			id: "quest_economic_test_001",
 			icon: "",
 			visibleName: "Quest 2",
 			position: {x: 100, y: 100},
