@@ -171,9 +171,23 @@ export class QuestManager {
 
 		if (result.length == 0) this.logger.debug("No rewards applied!");
 		for (let entry of result) {
-			// TODO: move rewards to city
+			// Current MVP implementation:
+			// - All rewards are converted into coins.
+			// - Item rewards (drops/dropPools) are logged but not transferred to the city.
+			// 
+			// Notes / future direction:
+			// - In the full system, rewards should be physically transferred to the city.
+			// - This introduces complexity: What if storage buildings are full?
+			// - Ideally, this would involve a Transportation Portal building.
+			//   - Rewards would be queued there and physically moved by workers.
+			// - Until that system is in place, we're avoiding partial implementations and
+			//   treating everything as coin value to keep the MVP clean and deterministic.
+			// TODO: move rewards to city storage, possibly via a "Transportation Portal".
 			this.logger.debug(`reward: ${entry.count} of ${entry.id}`);
 		}
+		// TODO: remove 
+		const dropValue = result.reduce((sum, entry) => sum + (entry.count * 100), 0);
+		game.state.money += dropValue;
 	}
 
 }
@@ -466,7 +480,7 @@ export class GoButton implements Button {
 	}
 }
 
-interface ObjectiveChecker {
+export interface ObjectiveChecker {
 	type: ObjectiveType;
 	check(game: Game, snapshot: QuestSnapshot, objective: EconomicObjectives): boolean;
 }
