@@ -265,6 +265,26 @@ export class QuestLayer {
 				quest
 			);
 			this.markers.push(questMarker);
+
+			// TODO:
+			// In the future, this logic should be replaced by an algorithm that:
+			// 1. Loads the battle map.
+			// 2. Retrieves information about enemies from the map.
+			// 3. Selects a few of the strongest enemies.
+			// 4. Uses them in the quest marker.
+			if (marker.enemyPortraits) {
+				for (let portrait in marker.enemyPortraits) {
+					if (!(portrait in sprites.avatars)) continue;
+					questMarker.addPortrait(sprites.avatars[portrait]);
+				}
+			}
+
+			if (marker.itemInfo) {
+				for (let item in marker.itemInfo) {
+					if (!(item in sprites.icons)) continue;
+					questMarker.addIcon(sprites.icons[item]);
+				}
+			}
 		}
 	}
 
@@ -311,58 +331,69 @@ export class QuestLayer {
 }
 
 export class QuestMarker implements Button {
-    position: Position;
-    size: Size;
-    locked: boolean;
-    interf: QuestInterface;
+	position: Position;
+	size: Size;
+	locked: boolean;
+	interf: QuestInterface;
 
-    constructor(position: Position, size: Size, quest: Quest, locked: boolean = true) {
-	    this.position = position;
-	    this.size = size;
-	    this.locked = locked;
-	    this.interf = new QuestInterface(quest);
-    }
+	constructor(position: Position, size: Size, quest: Quest, locked: boolean = true) {
+		this.position = position;
+		this.size = size;
+		this.locked = locked;
+		this.interf = new QuestInterface(quest);
+	}
 
-    inButton(position: Position): boolean {
-	    if(position.x < this.position.x || position.x > this.position.x + this.size.width) {
-		    return false;
-	    }
-	    if(position.y < this.position.y || position.y > this.position.y + this.size.height) {
-		    return false;
-	    }
-	    return true;
-    }
+	addPortrait(portrait: HTMLImageElement) {
+		this.interf.enemyIcons.push(portrait);
+	}
 
-    drawImage(): void {
-	    throw new Error("Method not implemented.");
-    }
+	addIcon(portrait: HTMLImageElement) {
+		this.interf.dropIcons.push(portrait);
+	}
 
-    getClickAction(): Action | undefined {
-	    return { 
-		   action: "open",
-		   interface: this.interf,
-	    };
-    }
+	inButton(position: Position): boolean {
+		if(position.x < this.position.x || position.x > this.position.x + this.size.width) {
+			return false;
+		}
+		if(position.y < this.position.y || position.y > this.position.y + this.size.height) {
+			return false;
+		}
+		return true;
+	}
 
-    draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, hovered: boolean): void {
-	    context.fillStyle = hovered ? "red" : "white";
-	    context.beginPath();
-	    context.ellipse(
-		    this.position.x + this.size.width/2,
-		    this.position.y + this.size.height/2,
-		    this.size.width/2,
-		    this.size.height/2,
-		    0,
-		    0,
-		    2 * Math.PI
-	    );
-	    context.fill();
-    }
+	drawImage(): void {
+		throw new Error("Method not implemented.");
+	}
+
+	getClickAction(): Action | undefined {
+		return { 
+			action: "open",
+			interface: this.interf,
+		};
+	}
+
+	draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, hovered: boolean): void {
+		context.fillStyle = hovered ? "red" : "white";
+		context.beginPath();
+		context.ellipse(
+			this.position.x + this.size.width/2,
+			this.position.y + this.size.height/2,
+			this.size.width/2,
+			this.size.height/2,
+			0,
+			0,
+			2 * Math.PI
+		);
+		context.fill();
+	}
 }
 
 export class QuestInterface extends BuildingInterface {
 	quest: Quest;
 	goButton: Button;
+
+	enemyIcons: HTMLImageElement[] = [];
+	dropIcons: HTMLImageElement[] = [];
 
 	constructor(quest: Quest) {
 		super();
@@ -436,46 +467,46 @@ export class QuestInterface extends BuildingInterface {
 }
 
 export class GoButton implements Button {
-    image: OffscreenCanvas;
-    context: OffscreenCanvasRenderingContext2D;
-    hover: boolean;
-    position: Position;
-    size: Size;
-    action: Action;
+	image: OffscreenCanvas;
+	context: OffscreenCanvasRenderingContext2D;
+	hover: boolean;
+	position: Position;
+	size: Size;
+	action: Action;
 
-    constructor(position: Position, action: Action) {
-	    this.size = {width: 20, height: 20};
-	    this.image = new OffscreenCanvas(this.size.width, this.size.height);
-	    this.context = this.image.getContext("2d")!; // TODO
-	    this.position = position;
-	    this.hover = false;
-	    this.action = action;
-	    this.drawImage();
-    }
+	constructor(position: Position, action: Action) {
+		this.size = {width: 20, height: 20};
+		this.image = new OffscreenCanvas(this.size.width, this.size.height);
+		this.context = this.image.getContext("2d")!; // TODO
+		this.position = position;
+		this.hover = false;
+		this.action = action;
+		this.drawImage();
+	}
 
-    inButton(position: Position): boolean {
-	    if(position.x < this.position.x || position.x > this.position.x + this.size.width) {
-		    return false;
-	    }
-	    if(position.y < this.position.y || position.y > this.position.y + this.size.height) {
-		    return false;
-	    }
-	    return true;
-    }
+	inButton(position: Position): boolean {
+		if(position.x < this.position.x || position.x > this.position.x + this.size.width) {
+			return false;
+		}
+		if(position.y < this.position.y || position.y > this.position.y + this.size.height) {
+			return false;
+		}
+		return true;
+	}
 
-    drawImage(): void {
-	    this.context.fillStyle = '#dfd';
-	    this.context.beginPath();
-	    this.context.arc(this.size.width/2, this.size.width/2, this.size.width/2, 0, 2 * Math.PI);
-	    this.context.fill();
-    }
+	drawImage(): void {
+		this.context.fillStyle = '#dfd';
+		this.context.beginPath();
+		this.context.arc(this.size.width/2, this.size.width/2, this.size.width/2, 0, 2 * Math.PI);
+		this.context.fill();
+	}
 
-    getClickAction(): Action | undefined {
-	    return this.action;
-    }
+	getClickAction(): Action | undefined {
+		return this.action;
+	}
 
 
-    draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, _hovered: boolean): void {
+	draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, _hovered: boolean): void {
 		context.drawImage(this.image, this.position.x, this.position.y);
 	}
 }
