@@ -91,5 +91,5 @@ window.onload = async () => {
 		game.interf.closeDialogue();
 	}, 3000);
 
-	game.loadCampaign(campaignSettings);
+	await game.loadCampaign(campaignSettings);
 }

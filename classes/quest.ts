@@ -25,8 +25,8 @@ export interface QuestMarkerConfig extends QuestConfig {
 	size: Size;
 	icon: string;
 	interface?: QuestInterface | string;
-	enemyPortraits?: string[];
 	itemInfo?: string[];
+	map?: string;
 }
 
 // Quest 

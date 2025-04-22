@@ -9,6 +9,7 @@ import { getLogger, Logger } from "./logger.js";
 import { RewardCalculator } from "./logic/reward-calculator.js";
 import { Position, Size } from "./map-layer.js";
 import { BuildingObjective, CampaignData, EconomicObjectives, PopulationInHousesObjective, PopulationObjective, ProductionObjective, ProfitObjective, Quest, ObjectiveType, StoragesObjective, TreasuryObjective, Reward, RewardConfig, DropEntryConfig, DropEntry, DropPool } from "./quest.js";
+import { BattleMapData } from "./save-manager.js";
 import { SpriteLibrary } from "./sprite-library.js";
 
 export interface QuestSnapshot {
@@ -249,7 +250,7 @@ export class QuestLayer {
 		}
 	}
 
-	applyCampaign(data: CampaignData, sprites: SpriteLibrary) {
+	async applyCampaign(data: CampaignData, game: Game) {
 		for (let marker of data.questMarkers) {
 			let quest: Quest = {
 				id: marker.id,
@@ -257,7 +258,7 @@ export class QuestLayer {
 				questDefinition: marker.questDefinition,
 				onCompletion: marker.onCompletion,
 				onFailure: marker.onFailure,
-				rewards: this.applyRewards(marker.rewards, sprites),
+				rewards: this.applyRewards(marker.rewards, game.sprites),
 			};
 			const questMarker = new QuestMarker(
 				marker.position, 
@@ -266,25 +267,35 @@ export class QuestLayer {
 			);
 			this.markers.push(questMarker);
 
-			// TODO:
-			// In the future, this logic should be replaced by an algorithm that:
-			// 1. Loads the battle map.
-			// 2. Retrieves information about enemies from the map.
-			// 3. Selects a few of the strongest enemies.
-			// 4. Uses them in the quest marker.
-			if (marker.enemyPortraits) {
-				for (let portrait in marker.enemyPortraits) {
-					if (!(portrait in sprites.avatars)) continue;
-					questMarker.addPortrait(sprites.avatars[portrait]);
-				}
+
+			if (marker.map) {
+				const battle = await fetch(`maps/${marker.map}.json`);
+				questMarker.battleMap = await battle.json() as BattleMapData;
+				this.prepareQuestMarkerPortraits(questMarker, game);
 			}
 
+			// TODO: use drops from rewards
 			if (marker.itemInfo) {
 				for (let item in marker.itemInfo) {
-					if (!(item in sprites.icons)) continue;
-					questMarker.addIcon(sprites.icons[item]);
+					if (!(item in game.sprites.icons)) continue;
+					questMarker.addIcon(game.sprites.icons[item]);
 				}
 			}
+		}
+	}
+
+	prepareQuestMarkerPortraits(marker: QuestMarker, game: Game) {
+		// TODO:
+		// 1. Retrieves information about enemies from the map.
+		// 2. Selects a few of the strongest enemies.
+		const actors = marker.battleMap?.actors;
+		if (!actors) return;
+		const sprites = actors
+			.filter((actor) => actor.name in game.sprites.avatars)
+			.map((actor) => game.sprites.avatars[actor.name])
+			.slice(0, 5);
+		for (const sprite of sprites) {
+			marker.addPortrait(sprite);
 		}
 	}
 
@@ -335,6 +346,7 @@ export class QuestMarker implements Button {
 	size: Size;
 	locked: boolean;
 	interf: QuestInterface;
+	battleMap?: BattleMapData;
 
 	constructor(position: Position, size: Size, quest: Quest, locked: boolean = true) {
 		this.position = position;

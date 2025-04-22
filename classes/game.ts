@@ -529,8 +529,8 @@ export class Game {
 	}
 
 
-	loadCampaign(campaign: CampaignData) {
-		this.quest.applyCampaign(campaign, this.sprites);
+	async loadCampaign(campaign: CampaignData) {
+		await this.quest.applyCampaign(campaign, this);
 	}
 
 	setContext(context: CanvasRenderingContext2D) {
