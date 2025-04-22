@@ -15,6 +15,7 @@ import { Building } from "./building/buildings.js";
 import { SaveManager } from "./save-manager.js";
 import { BattleLogicLayer } from "./logic/battle-logic.js";
 import { CampaignData } from "./quest.js";
+import { HeroLibrary } from "./battle/hero-library.js";
 
 export class Game {
 	state: GameState;
@@ -22,6 +23,7 @@ export class Game {
 	quest: QuestLayer;
 	interf: InterfaceLayer;
 	sprites: SpriteLibrary;
+	heroes: HeroLibrary;
 	saveManager: SaveManager;
 	maxYOffset: number;
 	minXOffset: number;
@@ -42,6 +44,7 @@ export class Game {
 		this.quest = new QuestLayer(this.state);
 		this.interf = new InterfaceLayer(this.state.canvasSize, this.state.menuWidth, this.state.topPanelHeight);
 		this.sprites = new SpriteLibrary();
+		this.heroes = new HeroLibrary();
 		this.cityLogic = new CityLogicLayer();
 		this.cityInterfaceLogic = new CityInterfaceLogic();
 		this.battleLogic = new BattleLogicLayer();

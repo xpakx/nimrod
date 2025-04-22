@@ -1,4 +1,4 @@
-import { Actor } from "./actor.js";
+import { Actor, ActorSprite } from "./actor.js";
 import { BattleActor, HeroType } from "./battle/actor.js";
 import { BuildingWorker } from "./building/buildings.js";
 import { House, Migrant } from "./building/house.js";
@@ -172,8 +172,47 @@ export class SaveManager {
 		if (updateDistances) game.map.floydWarshall();
 	}
 
-	isPlacedActor(obj: UnplacedActorData): obj is ActorData {
+	isPlacedActor(obj: UnplacedActorData | UnplacedLibHeroData): obj is ActorData {
 		return 'x' in obj && 'y' in obj;
+	}
+
+	isLibActor(obj: UnplacedActorData | UnplacedLibHeroData): obj is UnplacedLibHeroData {
+		return !('movement' in obj);
+	}
+
+	getSpriteFromHeroData(game: Game, heroData: UnplacedActorData | UnplacedLibHeroData): ActorSprite | undefined {
+		if (this.isLibActor(heroData)) {
+			return game.heroes.heroes.get(heroData.name)?.sprite;
+		}
+		return game.sprites.actors[heroData.image]
+	}
+
+	getMovementFromHeroData(game: Game, heroData: UnplacedActorData | UnplacedLibHeroData): number {
+		if (this.isLibActor(heroData)) {
+			const hero = game.heroes.heroes.get(heroData.name);
+			if (!hero) return 0;
+			return hero.movement;
+		}
+		return heroData.movement;
+	}
+
+	getHpFromHeroData(game: Game, heroData: UnplacedActorData | UnplacedLibHeroData): number {
+		if (this.isLibActor(heroData)) {
+			const hero = game.heroes.heroes.get(heroData.name);
+			if (!hero) return 1;
+			return hero.hp;
+		}
+		return heroData.hp;
+	}
+
+
+	getTypeFromHeroData(game: Game, heroData: UnplacedActorData | UnplacedLibHeroData): HeroType {
+		if (this.isLibActor(heroData)) {
+			const hero = game.heroes.heroes.get(heroData.name);
+			if (!hero) return "normal";
+			return hero.type;
+		}
+		return heroData.type || "normal";
 	}
 
 	applyBattle(game: Game, data: BattleMapData) {
@@ -185,7 +224,11 @@ export class SaveManager {
 
 		if (data.actors) {
 			for (let actor of data.actors) {
-				const sprite = game.sprites.actors[actor.image];
+				const sprite = this.getSpriteFromHeroData(game, actor);
+				if (!sprite) {
+					this.logger.warn(`Sprite for hero with id ${actor.name} undefined`);
+					continue;
+				}
 				let [x, y] = [0, 0];
 				let toPlace = false;
 				if (this.isPlacedActor(actor)) {
@@ -199,11 +242,9 @@ export class SaveManager {
 					pedestrian.enemy = true;
 				}
 				pedestrian.name = actor.name;
-				pedestrian.movement = actor.movement;
-				pedestrian.hp = actor.hp;
-				if (actor.type) {
-					pedestrian.type = actor.type;
-				}
+				pedestrian.movement = this.getMovementFromHeroData(game, actor);
+				pedestrian.hp = this.getHpFromHeroData(game, actor);
+				pedestrian.type = this.getTypeFromHeroData(game, actor);
 				if(pedestrian.enemy) {
 					game.state.pedestrians.push(pedestrian);
 					game.state.currentBattle.enemies.push(pedestrian);
@@ -488,7 +529,7 @@ export interface BattleMapData {
 	roads: RoadData[];
 	buildings: BuildingData[];
 	terrain: TerrainData[];
-	actors: (ActorData | UnplacedActorData)[];
+	actors: (UnplacedLibHeroData | UnplacedActorData)[];
 	spawns: Position[] | undefined;
 
 	// Reward configurations mapped by enemy type names
@@ -517,6 +558,17 @@ interface TerrainData {
 	y: number;
 	color?: string;
 	cost?: number;
+}
+
+interface UnplacedLibHeroData {
+	name: string,
+	level?: number;
+	enemy?: boolean;
+}
+
+interface LibHeroData extends UnplacedLibHeroData {
+	x: number;
+	y: number;
 }
 
 interface ActorData extends UnplacedActorData {
