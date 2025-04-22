@@ -9,7 +9,7 @@ import { getLogger, Logger } from "./logger.js";
 import { RewardCalculator } from "./logic/reward-calculator.js";
 import { Position, Size } from "./map-layer.js";
 import { BuildingObjective, CampaignData, EconomicObjectives, PopulationInHousesObjective, PopulationObjective, ProductionObjective, ProfitObjective, Quest, ObjectiveType, StoragesObjective, TreasuryObjective, Reward, RewardConfig, DropEntryConfig, DropEntry, DropPool } from "./quest.js";
-import { BattleMapData } from "./save-manager.js";
+import { BattleMapData, HeroPortraitData } from "./save-manager.js";
 import { SpriteLibrary } from "./sprite-library.js";
 
 export interface QuestSnapshot {
@@ -285,17 +285,15 @@ export class QuestLayer {
 	}
 
 	prepareQuestMarkerPortraits(marker: QuestMarker, game: Game) {
-		// TODO:
-		// 1. Retrieves information about enemies from the map.
-		// 2. Selects a few of the strongest enemies.
 		const actors = marker.battleMap?.actors;
 		if (!actors) return;
-		const sprites = actors
-			.filter((actor) => actor.name in game.sprites.avatars)
-			.map((actor) => game.sprites.avatars[actor.name])
+		const portraitData = actors
+			.map((actor) => game.saveManager.transformActorToPortraitData(game, actor))
+			.filter((actor) => actor !== undefined)
+			.sort((a, b) => b.strength - a.strength)
 			.slice(0, 5);
-		for (const sprite of sprites) {
-			marker.addPortrait(sprite);
+		for (const portrait of portraitData) {
+			marker.addPortrait(portrait);
 		}
 	}
 
@@ -355,7 +353,7 @@ export class QuestMarker implements Button {
 		this.interf = new QuestInterface(quest);
 	}
 
-	addPortrait(portrait: HTMLImageElement) {
+	addPortrait(portrait: HeroPortraitData) {
 		this.interf.enemyIcons.push(portrait);
 	}
 
@@ -404,7 +402,7 @@ export class QuestInterface extends BuildingInterface {
 	quest: Quest;
 	goButton: Button;
 
-	enemyIcons: HTMLImageElement[] = [];
+	enemyIcons: HeroPortraitData[] = [];
 	dropIcons: HTMLImageElement[] = [];
 
 	constructor(quest: Quest) {

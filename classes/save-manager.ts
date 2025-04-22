@@ -494,6 +494,29 @@ export class SaveManager {
 		};
 	}
 
+	transformActorToPortraitData(game: Game, actor: (UnplacedLibHeroData | UnplacedActorData)): HeroPortraitData | undefined {
+		if (this.isLibActor(actor)) {
+			const hero = game.heroes.heroes.get(actor.name);
+			if (!hero) return undefined;
+
+			return {
+				name: hero.name,
+				visibleName: hero.visibleName,
+				visibleTitle: hero.visibleTitle,
+				level: actor.level || 1,
+				strength: hero.hp, // TODO: calculate strength
+				type: hero.type,
+			};
+		}
+
+		return {
+			name: actor.name,
+			visibleName: actor.name,
+			level: 1,
+			strength: actor.hp,
+			type: actor.type || "normal",
+		};
+	}
 }
 
 export interface OldSaveData {
@@ -669,4 +692,13 @@ interface QuestData {
 	checksInMonth: number;
 	month: number;
 	quests: string[];
+}
+
+export interface HeroPortraitData {
+	name: string,
+	visibleName: string,
+	visibleTitle?: string,
+	level: number;
+	type: HeroType;
+	strength: number;
 }
