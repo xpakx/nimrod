@@ -6,7 +6,7 @@ import { GameState } from "./game-state.js";
 import { Game } from "./game.js";
 import { Action } from "./interface/actions.js";
 import { HeroButton, HeroButtonRow } from "./interface/adventurers-guild.js";
-import { Button, ButtonContainer } from "./interface/button.js";
+import { Button, ButtonContainer, CircularButton, drawCircularIcon, isPositionInArea } from "./interface/button.js";
 import { getLogger, Logger } from "./logger.js";
 import { RewardCalculator } from "./logic/reward-calculator.js";
 import { Position, Size } from "./map-layer.js";
@@ -501,6 +501,7 @@ export class QuestInterface extends BuildingInterface {
 			this.heroPortraits.buttons.push(heroButton);
 			heroX += 10 + portraitSize;
 		}
+		
 	}
 }
 
@@ -627,7 +628,7 @@ class ProfitChecker implements ObjectiveChecker {
 	}
 }
 
-export class HeroIcon implements Button {
+export class HeroIcon implements CircularButton {
 	_image: HTMLImageElement;
 	image: OffscreenCanvas;
 	context: OffscreenCanvasRenderingContext2D;
@@ -653,13 +654,7 @@ export class HeroIcon implements Button {
 	}
 
 	inButton(position: Position): boolean {
-		if(position.x < this.position.x || position.x > this.position.x + this.size.width) {
-			return false;
-		}
-		if(position.y < this.position.y || position.y > this.position.y + this.size.height) {
-			return false;
-		}
-		return true;
+		return isPositionInArea(position, this.position, this.size);
 	}
 
 	getFillColor(): string { 
@@ -675,33 +670,13 @@ export class HeroIcon implements Button {
 	}
 
 	drawImage() {
-		this.context.fillStyle = this.getFillColor();
-		this.context.beginPath();
-		this.context.arc(this.size.width/2, this.size.width/2, this.size.width/2, 0, 2 * Math.PI);
-		this.context.fill();
-
-		this.context.drawImage(this._image, this.imagePadding, this.imagePadding, this.size.width - 2*this.imagePadding, this.size.height - 2*this.imagePadding);
-
-		this.context.strokeStyle = this.getBorderColor();
-		this.context.beginPath();
-		this.context.arc(this.size.width/2, this.size.width/2, this.size.width/2, 0, 2 * Math.PI);
-		this.context.stroke();
+		drawCircularIcon(this.context, this._image, this);
 	}
 
 	drawHoverImage() {
 		this.hoverContext.save();
 		this.hoverContext.filter = "grayscale(80%)"; 
-		this.hoverContext.fillStyle = this.getFillColor();
-		this.hoverContext.beginPath();
-		this.hoverContext.arc(this.size.width/2, this.size.width/2, this.size.width/2, 0, 2 * Math.PI);
-		this.hoverContext.fill();
-
-		this.hoverContext.drawImage(this._image, this.imagePadding, this.imagePadding, this.size.width - 2*this.imagePadding, this.size.height - 2*this.imagePadding);
-
-		this.hoverContext.strokeStyle = this.getBorderColor();
-		this.hoverContext.beginPath();
-		this.hoverContext.arc(this.size.width/2, this.size.width/2, this.size.width/2, 0, 2 * Math.PI);
-		this.hoverContext.stroke();
+		drawCircularIcon(this.hoverContext, this._image, this);
 		this.hoverContext.restore();
 	}
 
