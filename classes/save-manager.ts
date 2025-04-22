@@ -506,6 +506,7 @@ export class SaveManager {
 				level: actor.level || 1,
 				strength: hero.hp, // TODO: calculate strength
 				type: hero.type,
+				image: hero.sprite.image, // TODO
 			};
 		}
 
@@ -515,6 +516,7 @@ export class SaveManager {
 			level: 1,
 			strength: actor.hp,
 			type: actor.type || "normal",
+			image: actor.name in game.sprites.avatars ? game.sprites.avatars[actor.name] : undefined,
 		};
 	}
 }
@@ -701,4 +703,5 @@ export interface HeroPortraitData {
 	level: number;
 	type: HeroType;
 	strength: number;
+	image?: HTMLImageElement;
 }

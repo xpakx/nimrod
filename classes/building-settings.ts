@@ -422,6 +422,7 @@ export const campaignSettings: CampaignData = {
 			visibleName: "Quest 1",
 			position: {x: 0, y: 0},
 			size: {width: 20, height: 30},
+			map: "battle001",
 			questDefinition: {
 				type: "battle",
 				name: "",

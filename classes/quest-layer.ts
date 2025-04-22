@@ -1,10 +1,12 @@
+import { HeroRank } from "./battle/actor.js";
 import { Building, BuildingInterface } from "./building/buildings.js";
 import { House } from "./building/house.js";
 import { Storage } from "./building/storage.js";
 import { GameState } from "./game-state.js";
 import { Game } from "./game.js";
 import { Action } from "./interface/actions.js";
-import { Button } from "./interface/button.js";
+import { HeroButton, HeroButtonRow } from "./interface/adventurers-guild.js";
+import { Button, ButtonContainer } from "./interface/button.js";
 import { getLogger, Logger } from "./logger.js";
 import { RewardCalculator } from "./logic/reward-calculator.js";
 import { Position, Size } from "./map-layer.js";
@@ -290,6 +292,7 @@ export class QuestLayer {
 		const portraitData = actors
 			.map((actor) => game.saveManager.transformActorToPortraitData(game, actor))
 			.filter((actor) => actor !== undefined)
+			.filter((actor) => actor.image !== undefined)
 			.sort((a, b) => b.strength - a.strength)
 			.slice(0, 5);
 		for (const portrait of portraitData) {
@@ -405,6 +408,8 @@ export class QuestInterface extends BuildingInterface {
 	enemyIcons: HeroPortraitData[] = [];
 	dropIcons: HTMLImageElement[] = [];
 
+	heroPortraits: ButtonContainer = new HeroButtonRow();
+
 	constructor(quest: Quest) {
 		super();
 		this.quest = quest; 
@@ -449,6 +454,7 @@ export class QuestInterface extends BuildingInterface {
 	openQuest(state: GameState) {
 		this.preRender(state);
 		this.renderInterface();
+		this.prepareEnemyIcons();
 	}
 
 	preRender(state: GameState) {
@@ -465,6 +471,7 @@ export class QuestInterface extends BuildingInterface {
 	drawInterface(context: CanvasRenderingContext2D, deltaTime: number, state: GameState) {
 		super.drawInterface(context, deltaTime, state);
 		this.goButton.draw(context, false);
+		this.heroPortraits.draw(context, state.playerMouse);
 	}
 
 	click(position: Position): Action | undefined {
@@ -473,6 +480,27 @@ export class QuestInterface extends BuildingInterface {
 		}
 
 		return undefined;
+	}
+
+	prepareEnemyIcons() {
+		const portraitSize = 60;
+		const width = this.size.width;
+		const y =  this.position.y + 10 + portraitSize;
+		const heroWidth = this.enemyIcons.length*portraitSize + (this.enemyIcons.length - 1)*10
+		let heroY = y;
+		let heroX = this.position.x + width/2 - heroWidth/2;
+		this.heroPortraits.buttons = [];
+		for (let enemy of this.enemyIcons) {
+			if (!enemy.image) continue; // TODO
+			const heroButton = new HeroIcon(
+				enemy.image,
+				{width: portraitSize, height: portraitSize},
+				{x: heroX, y: heroY},
+				"common",
+			);
+			this.heroPortraits.buttons.push(heroButton);
+			heroX += 10 + portraitSize;
+		}
 	}
 }
 
@@ -596,5 +624,93 @@ class ProfitChecker implements ObjectiveChecker {
 		if (!oldSnapshot) return false;
 		const profit = snapshot.money - oldSnapshot.money;
 		return profit >= objective.amount;
+	}
+}
+
+export class HeroIcon implements Button {
+	_image: HTMLImageElement;
+	image: OffscreenCanvas;
+	context: OffscreenCanvasRenderingContext2D;
+	hoverImage: OffscreenCanvas;
+	hoverContext: OffscreenCanvasRenderingContext2D;
+	hover: boolean = false;
+	position: Position;
+	size: Size;
+	rank: HeroRank;
+	imagePadding: number = 5;
+
+	constructor(image: HTMLImageElement, size: Size, position: Position, rank: HeroRank) {
+		this._image = image;
+		this.image = new OffscreenCanvas(size.width, size.height);
+		this.context = this.image.getContext("2d")!; // TODO
+		this.hoverImage = new OffscreenCanvas(size.width, size.height);
+		this.hoverContext = this.hoverImage.getContext("2d")!; // TODO
+		this.size = size;
+		this.position = position;
+		this.rank = rank;
+		this.drawImage();
+		this.drawHoverImage();
+	}
+
+	inButton(position: Position): boolean {
+		if(position.x < this.position.x || position.x > this.position.x + this.size.width) {
+			return false;
+		}
+		if(position.y < this.position.y || position.y > this.position.y + this.size.height) {
+			return false;
+		}
+		return true;
+	}
+
+	getFillColor(): string { 
+		if (this.rank == "common") return '#575757';
+		else if (this.rank == "rare") return '#676755';
+		return '#000';
+	}
+
+	getBorderColor(): string { 
+		if (this.rank == "common") return '#fff';
+		else if (this.rank == "rare") return '#dd1';
+		return '#000';
+	}
+
+	drawImage() {
+		this.context.fillStyle = this.getFillColor();
+		this.context.beginPath();
+		this.context.arc(this.size.width/2, this.size.width/2, this.size.width/2, 0, 2 * Math.PI);
+		this.context.fill();
+
+		this.context.drawImage(this._image, this.imagePadding, this.imagePadding, this.size.width - 2*this.imagePadding, this.size.height - 2*this.imagePadding);
+
+		this.context.strokeStyle = this.getBorderColor();
+		this.context.beginPath();
+		this.context.arc(this.size.width/2, this.size.width/2, this.size.width/2, 0, 2 * Math.PI);
+		this.context.stroke();
+	}
+
+	drawHoverImage() {
+		this.hoverContext.save();
+		this.hoverContext.filter = "grayscale(80%)"; 
+		this.hoverContext.fillStyle = this.getFillColor();
+		this.hoverContext.beginPath();
+		this.hoverContext.arc(this.size.width/2, this.size.width/2, this.size.width/2, 0, 2 * Math.PI);
+		this.hoverContext.fill();
+
+		this.hoverContext.drawImage(this._image, this.imagePadding, this.imagePadding, this.size.width - 2*this.imagePadding, this.size.height - 2*this.imagePadding);
+
+		this.hoverContext.strokeStyle = this.getBorderColor();
+		this.hoverContext.beginPath();
+		this.hoverContext.arc(this.size.width/2, this.size.width/2, this.size.width/2, 0, 2 * Math.PI);
+		this.hoverContext.stroke();
+		this.hoverContext.restore();
+	}
+
+	getClickAction(): Action | undefined {
+		return undefined;
+	}
+
+	draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, hovered: boolean): void {
+		const image = hovered ? this.hoverImage : this.image;
+		context.drawImage(image, this.position.x, this.position.y);
 	}
 }
