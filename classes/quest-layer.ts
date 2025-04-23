@@ -448,6 +448,24 @@ export class QuestInterface extends BuildingInterface {
 		this.context.fillStyle = '#fff';
 		this.context.font = '24px Arial';
 		this.context.fillText(this.quest.visibleName, nameX, nameY);
+
+		if (this.quest.questDefinition.type == "battle") {
+			this.context.fillStyle = '#ff6b6b';
+			this.context.font = '17px Arial';
+			const enemiesTextWidth = this.context.measureText("Enemies").width;
+			const enemiesX = (width - enemiesTextWidth) / 2;
+			const enemiesY = 120;
+			this.context.fillText("Enemies", enemiesX, enemiesY);
+
+			const portraitSize = 60;
+
+			this.context.fillStyle = '#a5d6a7';
+			const lootTextWidth = this.context.measureText("Rewards").width;
+			const lootX = (width - lootTextWidth) / 2;
+			const lootY = enemiesY + portraitSize + 50;
+
+			this.context.fillText("Rewards", lootX, lootY);
+		}
 	}
 
 	// TODO: should probably make more general interface
@@ -485,7 +503,7 @@ export class QuestInterface extends BuildingInterface {
 	prepareEnemyIcons() {
 		const portraitSize = 60;
 		const width = this.size.width;
-		const y =  this.position.y + 10 + portraitSize;
+		const y =  this.position.y + 120 + 15;
 		const heroWidth = this.enemyIcons.length*portraitSize + (this.enemyIcons.length - 1)*10
 		let heroY = y;
 		let heroX = this.position.x + width/2 - heroWidth/2;
