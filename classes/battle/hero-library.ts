@@ -9,10 +9,17 @@ export class HeroLibrary {
 		const hero: HeroDefinition = {
 			name: config.name,
 			visibleName: config.name,
-			hp: config.baseHp,
+			baseHp: config.baseHp,
 			sprite: sprites.actors[config.name],
 			movement: 5,
 			type: "normal",
+			strength: { base: 10, growth: 0 },
+			agility: { base: 10, growth: 0 },
+			intelligence: { base: 10, growth: 0 },
+			defence: { base: 10, growth: 0 },
+			resistance: { base: 10, growth: 0 },
+			luck: { base: 10, growth: 0 },
+			speed: { base: 10, growth: 0 },
 		};
 
 		this.heroes.set(config.name, hero);
@@ -32,7 +39,21 @@ export interface HeroDefinition {
 	movement: number;
 	type: HeroType;
 
-	hp: number;
+	baseHp: number;
+
+	strength: HeroStat;
+	agility: HeroStat;
+	intelligence: HeroStat;
+	defence: HeroStat;
+	resistance: HeroStat;
+	luck: HeroStat;
+	speed: HeroStat;
+	
+	typeAttackBonus?: HeroStat;
+	typeResistanceBonus?: HeroStat;
 }
 
-
+export interface HeroStat {
+	base: number;
+	growth: number;
+}

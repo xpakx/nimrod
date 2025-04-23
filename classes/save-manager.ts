@@ -200,7 +200,7 @@ export class SaveManager {
 		if (this.isLibActor(heroData)) {
 			const hero = game.heroes.heroes.get(heroData.name);
 			if (!hero) return 1;
-			return hero.hp;
+			return hero.baseHp;
 		}
 		return heroData.hp;
 	}
@@ -504,7 +504,7 @@ export class SaveManager {
 				visibleName: hero.visibleName,
 				visibleTitle: hero.visibleTitle,
 				level: actor.level || 1,
-				strength: hero.hp, // TODO: calculate strength
+				strength: hero.baseHp, // TODO: calculate strength
 				type: hero.type,
 				image: hero.sprite.image, // TODO
 			};
