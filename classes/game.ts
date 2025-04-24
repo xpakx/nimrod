@@ -121,10 +121,9 @@ export class Game {
 					this.toKingdom(); break;
 				case "City":
 					this.toCity(); break;
-				case "Battle":
-					if (clickResult.map) this.toBattle(clickResult.map); 
-					break;
 			}
+		} else if(clickResult.action == "openBattle") {
+			this.toBattle(clickResult.map); 
 		} else if(clickResult.action == "open") {
 			this.interf.buildingInterface = clickResult.interface;
 		} else if(clickResult.action == "registerQuest") {
@@ -459,6 +458,9 @@ export class Game {
 	}
 
 	toBattle(map: BattleMapData) {
+		this.logger.debug("Go to: battle");
+		this.interf.buildingInterface = undefined;
+
 		const battle = new Battle();
 		this.state.currentBattle = battle;
 		this.state.view = "Battle";

@@ -10,8 +10,13 @@ export interface BuildAction {
 
 export interface NavAction {
 	action: "goTo";
-	argument: "World" | "Kingdom" | "City" | "Battle";
+	argument: "World" | "Kingdom" | "City";
 	map?: BattleMapData;
+}
+
+export interface OpenBattleAction {
+	action: "openBattle";
+	map: BattleMapData;
 }
 
 export interface OpenBuilding {
@@ -35,5 +40,5 @@ export interface RegisterQuestAction {
 	quest: Quest;
 }
 
-export type Action = NavAction | BuildAction | OpenBuilding | TeamAction | PageAction
+export type Action = NavAction | OpenBattleAction | BuildAction | OpenBuilding | TeamAction | PageAction
 | RegisterQuestAction;

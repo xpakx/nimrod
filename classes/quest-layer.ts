@@ -422,8 +422,8 @@ export class QuestInterface extends BuildingInterface {
 		this.battleMap = battleMap;
 		// TODO: correctly apply actions
 		let action: Action;
-		if (quest.questDefinition.type == "battle") {
-			action = { action: "goTo", argument: "Battle", map: battleMap };
+		if (quest.questDefinition.type == "battle" && battleMap) {
+			action = { action: "openBattle", map: battleMap };
 
 		} else {
 			action = { 
