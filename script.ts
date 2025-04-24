@@ -68,14 +68,8 @@ window.onload = async () => {
 		game.saveManager.loadMapFromUrl(game, "test.json", true);
 	}
 
-
-	const battle = await fetch("maps/battle001.json"); 
-	const battleJson = await battle.json() as BattleMapData;
-	game.state.tempBattleData = battleJson;
-
 	registerMouseEvents(canvas);
 	registerKeyboardEvents();
-
 
 	const frame = (timestamp: number) => {
 		game.nextFrame(context, timestamp);

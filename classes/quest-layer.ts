@@ -5,7 +5,7 @@ import { Storage } from "./building/storage.js";
 import { GameState } from "./game-state.js";
 import { Game } from "./game.js";
 import { Action } from "./interface/actions.js";
-import { HeroButton, HeroButtonRow } from "./interface/adventurers-guild.js";
+import { HeroButtonRow } from "./interface/adventurers-guild.js";
 import { Button, ButtonContainer, CircularButton, drawCircularIcon, isPositionInArea } from "./interface/button.js";
 import { getLogger, Logger } from "./logger.js";
 import { RewardCalculator } from "./logic/reward-calculator.js";
@@ -15,11 +15,11 @@ import { BattleMapData, HeroPortraitData } from "./save-manager.js";
 import { SpriteLibrary } from "./sprite-library.js";
 
 export interface QuestSnapshot {
-		houseMap: Map<string, Map<number, number>>;
-		buildingMap: Map<string, Map<number, number>>;
-		resourceMap: Map<string, number>;
-		money: number,
-		population: number,
+	houseMap: Map<string, Map<number, number>>;
+	buildingMap: Map<string, Map<number, number>>;
+	resourceMap: Map<string, number>;
+	money: number,
+	population: number,
 }
 
 export class QuestManager {
@@ -262,19 +262,22 @@ export class QuestLayer {
 				onFailure: marker.onFailure,
 				rewards: this.applyRewards(marker.rewards, game.sprites),
 			};
+
+			let battleMap: BattleMapData | undefined = undefined;;
+			if (marker.map) {
+				const battle = await fetch(`maps/${marker.map}.json`);
+				battleMap = await battle.json() as BattleMapData;
+			} 
 			const questMarker = new QuestMarker(
 				marker.position, 
 				marker.size,
-				quest
+				quest,
+				true,
+				battleMap
 			);
 			this.markers.push(questMarker);
 
-
-			if (marker.map) {
-				const battle = await fetch(`maps/${marker.map}.json`);
-				questMarker.battleMap = await battle.json() as BattleMapData;
-				this.prepareQuestMarkerPortraits(questMarker, game);
-			}
+			if (marker.map) this.prepareQuestMarkerPortraits(questMarker, game);
 
 			// TODO: use drops from rewards
 			if (marker.itemInfo) {
@@ -349,11 +352,12 @@ export class QuestMarker implements Button {
 	interf: QuestInterface;
 	battleMap?: BattleMapData;
 
-	constructor(position: Position, size: Size, quest: Quest, locked: boolean = true) {
+	constructor(position: Position, size: Size, quest: Quest, locked: boolean = true, battleMap?: BattleMapData) {
 		this.position = position;
 		this.size = size;
 		this.locked = locked;
-		this.interf = new QuestInterface(quest);
+		this.battleMap = battleMap;
+		this.interf = new QuestInterface(quest, battleMap);
 	}
 
 	addPortrait(portrait: HeroPortraitData) {
@@ -410,13 +414,16 @@ export class QuestInterface extends BuildingInterface {
 
 	heroPortraits: ButtonContainer = new HeroButtonRow();
 
-	constructor(quest: Quest) {
+	battleMap?: BattleMapData;
+
+	constructor(quest: Quest, battleMap?: BattleMapData) {
 		super();
 		this.quest = quest; 
+		this.battleMap = battleMap;
 		// TODO: correctly apply actions
 		let action: Action;
 		if (quest.questDefinition.type == "battle") {
-			action = { action: "goTo", argument: "Battle" };
+			action = { action: "goTo", argument: "Battle", map: battleMap };
 
 		} else {
 			action = { 

@@ -1,7 +1,6 @@
 import { Actor } from "./actor.js";
 import { BattleActor } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
-import { BattleMapData } from "./save-manager.js";
 import { Position, Size } from "./map-layer.js";
 import { QuestSnapshot } from "./quest-layer.js";
 
@@ -25,8 +24,6 @@ export class GameState {
 	public population: number = 0;
 	public maxPopulation: number = 0;
 	public currentBattle?: Battle;
-
-	public tempBattleData?: BattleMapData;
 
 	public team: BattleActor[] = [];
 	public allHeroes: BattleActor[] = [];

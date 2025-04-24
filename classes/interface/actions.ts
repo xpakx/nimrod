@@ -1,6 +1,7 @@
 import { BattleActor } from "../battle/actor.js";
 import { BuildingInterface } from "../building/buildings.js";
 import { Quest } from "../quest.js";
+import { BattleMapData } from "../save-manager.js";
 
 export interface BuildAction {
 	action: "build" | "buildRoad" | "delete";
@@ -10,6 +11,7 @@ export interface BuildAction {
 export interface NavAction {
 	action: "goTo";
 	argument: "World" | "Kingdom" | "City" | "Battle";
+	map?: BattleMapData;
 }
 
 export interface OpenBuilding {
@@ -27,11 +29,11 @@ export interface PageAction {
 	argument: "next" | "prev";
 }
 
-export interface RegiestQuestAction {
+export interface RegisterQuestAction {
 	action: "registerQuest";
 	map: "city" | "battle";
 	quest: Quest;
 }
 
 export type Action = NavAction | BuildAction | OpenBuilding | TeamAction | PageAction
-| RegiestQuestAction;
+| RegisterQuestAction;

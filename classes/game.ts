@@ -12,7 +12,7 @@ import { QuestLayer } from "./quest-layer.js";
 import { CityLogicLayer } from "./logic/city-logic.js";
 import { CityInterfaceLogic } from "./logic/city-interface-logic.js";
 import { Building } from "./building/buildings.js";
-import { SaveManager } from "./save-manager.js";
+import { BattleMapData, SaveManager } from "./save-manager.js";
 import { BattleLogicLayer } from "./logic/battle-logic.js";
 import { CampaignData } from "./quest.js";
 import { HeroLibrary } from "./battle/hero-library.js";
@@ -122,7 +122,8 @@ export class Game {
 				case "City":
 					this.toCity(); break;
 				case "Battle":
-					this.toBattle(); break;
+					if (clickResult.map) this.toBattle(clickResult.map); 
+					break;
 			}
 		} else if(clickResult.action == "open") {
 			this.interf.buildingInterface = clickResult.interface;
@@ -457,12 +458,12 @@ export class Game {
 		this.state.view = "Menu";
 	}
 
-	toBattle() {
+	toBattle(map: BattleMapData) {
 		const battle = new Battle();
 		this.state.currentBattle = battle;
 		this.state.view = "Battle";
-		this.saveManager.applyMap(this, this.state.tempBattleData!);
-		this.saveManager.applyBattle(this, this.state.tempBattleData!);
+		this.saveManager.applyMap(this, map);
+		this.saveManager.applyBattle(this, map);
 		for(let hero of this.state.team) {
 			battle.addHero(hero);
 		}
