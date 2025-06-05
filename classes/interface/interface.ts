@@ -59,7 +59,7 @@ export class InterfaceLayer {
 	renderCurrentTab(context: CanvasRenderingContext2D, _deltaTime: number) {
 		if (this.tab == undefined) return;
 		const tabs = this.battleMode ? this.battleTabs : this.tabs;
-		if (this.tab <= tabs.length) return;
+		if (this.tab >= tabs.length) return;
 		tabs[this.tab].draw(context, this.mousePosition);
 	}
 
