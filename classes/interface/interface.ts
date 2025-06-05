@@ -26,6 +26,9 @@ export class InterfaceLayer {
 
 	buildingInterface: BuildingInterface | undefined = undefined;
 
+	battleTabs: BuildingTab[] = [];
+	battleMode: boolean = false;
+
 	constructor(canvasSize: Size, menuWidth: number,  topPanelHeight: number) {
 		this.canvasSize = canvasSize;
 		this.menuWidth = menuWidth;
@@ -53,14 +56,20 @@ export class InterfaceLayer {
 		}
 	}
 
+	renderCurrentTab(context: CanvasRenderingContext2D, _deltaTime: number) {
+		if (this.tab == undefined) return;
+		if (this.battleMode) {
+			this.battleTabs[this.tab].draw(context, this.mousePosition);
+		}
+		this.tabs[this.tab].draw(context, this.mousePosition);
+	}
+
 	renderInterface(context: CanvasRenderingContext2D, deltaTime: number, state: GameState) {
 		this.drawTopPanel(context, state);
 		this.drawMenu(context);
 		this.drawTabs(context);
 		this.renderDialogueBox(context, deltaTime);
-		if (this.tab  != undefined) {
-			this.tabs[this.tab].draw(context, this.mousePosition);
-		}
+		this.renderCurrentTab(context, deltaTime);
 		if (this.buildingInterface) {
 			this.buildingInterface.drawInterface(context, deltaTime, state);
 		}
@@ -220,12 +229,13 @@ export class InterfaceLayer {
 	}
 
 	drawTabs(context: CanvasRenderingContext2D) {
+		const tabs = this.battleMode ? this.battleTabs : this.tabs;
 		const start = 60;
 		const tabSize = this.tabWidth;
 		for(let i = 0; i<this.tabs.length; i++) {
 			const hover = this.inTab(this.mousePosition, i);
 			const currentTab = i == this.tab;
-			const tab = this.tabs[i];
+			const tab = tabs[i];
 			let icon = tab.icon;
 
 			if(hover && currentTab) {
