@@ -58,10 +58,9 @@ export class InterfaceLayer {
 
 	renderCurrentTab(context: CanvasRenderingContext2D, _deltaTime: number) {
 		if (this.tab == undefined) return;
-		if (this.battleMode) {
-			this.battleTabs[this.tab].draw(context, this.mousePosition);
-		}
-		this.tabs[this.tab].draw(context, this.mousePosition);
+		const tabs = this.battleMode ? this.battleTabs : this.tabs;
+		if (this.tab <= tabs.length) return;
+		tabs[this.tab].draw(context, this.mousePosition);
 	}
 
 	renderInterface(context: CanvasRenderingContext2D, deltaTime: number, state: GameState) {
@@ -232,7 +231,7 @@ export class InterfaceLayer {
 		const tabs = this.battleMode ? this.battleTabs : this.tabs;
 		const start = 60;
 		const tabSize = this.tabWidth;
-		for(let i = 0; i<this.tabs.length; i++) {
+		for(let i = 0; i<tabs.length; i++) {
 			const hover = this.inTab(this.mousePosition, i);
 			const currentTab = i == this.tab;
 			const tab = tabs[i];
