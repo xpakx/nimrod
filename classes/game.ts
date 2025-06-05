@@ -114,6 +114,7 @@ export class Game {
 		if(clickResult.action == "goTo") {
 			this.logger.debug("Go to: " + clickResult.argument);
 			this.interf.buildingInterface = undefined;
+			this.interf.toMapMode();
 			switch (clickResult.argument) {
 				case "World":
 					this.toWorld(); break;
@@ -471,6 +472,7 @@ export class Game {
 		}
 
 		this.logger.debug("Heroes", this.state.pedestrians);
+		this.interf.toBattleMode()
 	}
 
 	addCityButtons() {

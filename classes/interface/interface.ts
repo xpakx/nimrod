@@ -310,6 +310,18 @@ export class InterfaceLayer {
 
 		return undefined;
 	}
+
+	toBattleMode() {
+		console.log("Battle mode activated")
+		this.battleMode = true;
+		this.tab = 0;
+	}
+	
+	toMapMode() {
+		console.log("Map mode activated")
+		this.battleMode = false;
+		this.tab = 0;
+	}
 }
 
 export class ActionButton implements Button {
