@@ -249,7 +249,8 @@ export class InterfaceLayer {
 	}
 
 	getTabUnderCursor(position: Position): number | undefined {
-		for(let i = 0; i<this.tabs.length; i++) {
+		const tabs = this.battleMode ? this.battleTabs : this.tabs;
+		for(let i = 0; i<tabs.length; i++) {
 			if(this.inTab(position, i)) {
 				return i;
 			}
@@ -286,7 +287,8 @@ export class InterfaceLayer {
 			return undefined;
 		}
 		if(this.tab != undefined) {
-			const tab = this.tabs[this.tab];
+			const tabs = this.battleMode ? this.battleTabs : this.tabs;
+			const tab = tabs[this.tab];
 			let result = tab.buttonAt(position);
 			if(result != undefined) {
 				return result;
