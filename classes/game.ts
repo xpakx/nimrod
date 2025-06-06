@@ -472,7 +472,7 @@ export class Game {
 		}
 
 		this.logger.debug("Heroes", this.state.pedestrians);
-		this.interf.toBattleMode()
+		this.interf.toBattleMode(this.state.team, this.sprites.icons)
 	}
 
 	addCityButtons() {

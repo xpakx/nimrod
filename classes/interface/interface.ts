@@ -1,7 +1,9 @@
+import { BattleActor } from "../battle/actor.js";
 import { BuildingInterface } from "../building/buildings.js";
 import { GameState } from "../game-state.js";
 import { Position, Size } from "../map-layer.js";
 import { Action } from "./actions.js";
+import { BattleTab } from "./battle-tab.js";
 import { BuildingTab } from "./building-tab.js";
 import { Button, ButtonContainer } from "./button.js";
 import { Dialogue, DialogueParsed } from "./dialogue.js";
@@ -26,7 +28,7 @@ export class InterfaceLayer {
 
 	buildingInterface: BuildingInterface | undefined = undefined;
 
-	battleTabs: BuildingTab[] = [];
+	battleTabs: BattleTab[] = [];
 	battleMode: boolean = false;
 
 	constructor(canvasSize: Size, menuWidth: number,  topPanelHeight: number) {
@@ -313,12 +315,18 @@ export class InterfaceLayer {
 		return undefined;
 	}
 
-	toBattleMode() {
+	toBattleMode(heroes: BattleActor[], icons: any) {
+		// TODO: populate main tab with heroes
 		console.log("Battle mode activated")
+		const icon = icons["kingdom"]; // TODO: add icon
+		const tabIcon = icons["tab"];
+		
+		this.battleTabs[0] = new BattleTab("Heroes", icon, tabIcon);
+		this.battleTabs[0].setHeroes(heroes);
 		this.battleMode = true;
 		this.tab = 0;
 	}
-	
+
 	toMapMode() {
 		console.log("Map mode activated")
 		this.battleMode = false;
