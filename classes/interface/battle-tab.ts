@@ -1,6 +1,5 @@
 import { BattleActor } from "../battle/actor.js";
 import { Position, Size } from "../map-layer.js";
-import { HeroIcon } from "../quest-layer.js";
 import { Action } from "./actions.js";
 import { HeroButton, NavButton } from "./adventurers-guild.js";
 import { Button, ButtonPane } from "./button.js";
@@ -184,9 +183,8 @@ export class BattleTab implements ButtonPane {
 	setHeroes(heroes: BattleActor[]) {
 		this.buttons = [];
 		for (let hero of heroes) {
-			if (!hero.portrait) continue;
 			const button = new HeroButton(
-				hero.portrait,
+				hero.portrait || hero.sprite.image,
 				{width: this.buttonSize, height: this.buttonSize},
 				{x: 0, y: 0},
 				hero,
