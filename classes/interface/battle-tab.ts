@@ -9,7 +9,7 @@ export class BattleTab implements ButtonPane {
 	_icon: HTMLImageElement;
 	active: boolean = false;
 	itemOffset: number = 0;
-	defaultButtonSize = 125;
+	defaultButtonSize = 60;
 	buttonSize = this.defaultButtonSize;
 	mousePosition: Position = {x: -1, y: -1};
 	icon: OffscreenCanvas;
