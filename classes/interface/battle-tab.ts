@@ -192,6 +192,5 @@ export class BattleTab implements ButtonPane {
 			);
 			this.buttons.push(button);
 		}
-		this.prepareButtons();
 	}
 }
