@@ -322,6 +322,7 @@ export class InterfaceLayer {
 		const tabIcon = icons["tab"];
 		
 		this.battleTabs[0] = new BattleTab("Heroes", icon, tabIcon);
+		this.resizeBattleTabs();
 		this.battleTabs[0].setHeroes(heroes);
 		this.battleMode = true;
 		this.tab = 0;
@@ -331,6 +332,21 @@ export class InterfaceLayer {
 		console.log("Map mode activated")
 		this.battleMode = false;
 		this.tab = 0;
+	}
+
+	resizeBattleTabs() {
+		this.buildingMenuHeight = 60 + Math.max(300, this.tabWidth * this.tabs.length);
+		for (let tab of this.battleTabs) {
+			const menuPadding = 20;
+			const menuWidth = this.menuWidth - this.tabWidth;
+			tab.buttonSize = tab.defaultButtonSize < menuWidth - menuPadding ? tab.defaultButtonSize : menuWidth - menuPadding;
+
+			tab.position.x = this.canvasSize.width - menuWidth + menuPadding;
+			tab.position.y = 60;
+			tab.size.width = menuWidth - 2*menuPadding;
+			tab.size.height = this.buildingMenuHeight;
+			tab.prepareButtons();
+		}
 	}
 }
 
