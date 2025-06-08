@@ -109,7 +109,7 @@ export class AdventurersGuildInterface extends BuildingInterface {
 	}
 }
 
-type HeroActionType = "delete" | "add";
+type HeroActionType = "delete" | "add" | "select";
 
 export class HeroButton implements Button {
 	_image: HTMLImageElement;
@@ -199,6 +199,9 @@ export class HeroButton implements Button {
 		}
 		if (this.action == "add") {
 			return {"action": "addHero", hero: this.hero};
+		}
+		if (this.action == "select") {
+			return {"action": "selectHero", hero: this.hero};
 		}
 		return undefined;
 	}

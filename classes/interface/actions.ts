@@ -40,5 +40,10 @@ export interface RegisterQuestAction {
 	quest: Quest;
 }
 
+export interface BattleHeroAction {
+	action: "selectHero";
+	hero: BattleActor;
+}
+
 export type Action = NavAction | OpenBattleAction | BuildAction | OpenBuilding | TeamAction | PageAction
-| RegisterQuestAction;
+| RegisterQuestAction | BattleHeroAction;

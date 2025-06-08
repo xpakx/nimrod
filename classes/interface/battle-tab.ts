@@ -188,7 +188,7 @@ export class BattleTab implements ButtonPane {
 				{width: this.buttonSize, height: this.buttonSize},
 				{x: 0, y: 0},
 				hero,
-				"add"
+				"select"
 			);
 			this.buttons.push(button);
 		}
