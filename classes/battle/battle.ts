@@ -35,17 +35,16 @@ export class Battle {
 		return true;
 	}
 
-	placeHero(num: number, pos: Position): boolean {
+	placeHero(hero: BattleActor, pos: Position): boolean {
 		if(this.battleStarted) {
-			return false;
-		}
-		if (num < 0 || num >= this.heroes.length) {
 			return false;
 		}
 		if (!this.isInSpawn(pos)) {
 			return false;
 		}
-		let hero = this.heroes[num];
+		if (this.heroes.indexOf(hero) < 0) {
+			return false;
+		}
 		hero.setPosition(pos);
 		hero.placed = true;
 		return true;

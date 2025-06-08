@@ -132,6 +132,8 @@ export class Game {
 			if (clickResult.map == "city") {
 				this.cityLogic.quests.registerQuest(clickResult.quest);
 			}
+		} else if(clickResult.action == "selectHero") {
+			this.battleLogic.selectHero(clickResult.hero);
 		}
 	}
 
@@ -472,7 +474,7 @@ export class Game {
 		}
 
 		this.logger.debug("Heroes", this.state.pedestrians);
-		this.interf.toBattleMode(this.state.team, this.sprites.icons)
+		this.interf.toBattleMode(this.state.currentBattle.heroes, this.sprites.icons)
 	}
 
 	addCityButtons() {

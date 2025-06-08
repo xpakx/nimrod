@@ -7,6 +7,7 @@ export class BattleLogicLayer {
 	logger: Logger = getLogger("BattleLogicLayer");
 
 	tempBattleIndex: number = 0; // TODO: improve placing
+	currentHero?: BattleActor;
 
 
 	onMouseLeftClick(game: Game) {
@@ -98,17 +99,20 @@ export class BattleLogicLayer {
 		const battle = game.state.currentBattle;
 		const x = game.map.isoPlayerMouse.x;
 		const y = game.map.isoPlayerMouse.y;
+
+		if (!this.currentHero) return; // TODO
 		while(battle.heroes[this.tempBattleIndex].placed) {
 			this.tempBattleIndex += 1;
 		}
-		const placed = battle.placeHero(this.tempBattleIndex, {x: x, y: y});
+		const placed = battle.placeHero(this.currentHero, {x: x, y: y});
 		if (!placed) {
 			return;
 		}
-		game.state.pedestrians.push(battle.heroes[this.tempBattleIndex]);
+		game.state.pedestrians.push(this.currentHero);
+		this.currentHero = undefined;
 
 		battle.finishPlacement();
-		this.logger.debug(`current index: ${this.tempBattleIndex}, started: ${game.state.currentBattle.battleStarted}`);
+		this.logger.debug(`started: ${game.state.currentBattle.battleStarted}`);
 	}
 
 	calcBuildingsState(game: Game, deltaTime: number) {
@@ -133,5 +137,9 @@ export class BattleLogicLayer {
 	calcState(game: Game, deltaTime: number, _minuteEnded: boolean) {
 		this.calcBuildingsState(game, deltaTime);
 		this.calcPedestriansState(game, deltaTime);
+	}
+
+	selectHero(hero: BattleActor) {
+		this.currentHero = hero;
 	}
 }
