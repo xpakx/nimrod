@@ -99,7 +99,10 @@ export class BattleLogicLayer {
 		const x = game.map.isoPlayerMouse.x;
 		const y = game.map.isoPlayerMouse.y;
 
-		if (!this.currentHero) return; // TODO
+		if (!this.currentHero) {
+			this.currentHero = this.isMouseOverPedestrian(game);
+			return;
+		}
 
 		const placed = battle.placeHero(this.currentHero, {x: x, y: y});
 		if (!placed) {
