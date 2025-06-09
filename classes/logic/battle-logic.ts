@@ -108,7 +108,9 @@ export class BattleLogicLayer {
 		if (!placed) {
 			return;
 		}
-		game.state.pedestrians.push(this.currentHero);
+		if (game.state.pedestrians.indexOf(this.currentHero) < 0) {
+			game.state.pedestrians.push(this.currentHero);
+		}
 		this.currentHero = undefined;
 
 		battle.finishPlacement();
