@@ -6,7 +6,6 @@ import { Position } from "../map-layer";
 export class BattleLogicLayer {
 	logger: Logger = getLogger("BattleLogicLayer");
 
-	tempBattleIndex: number = 0; // TODO: improve placing
 	currentHero?: BattleActor;
 
 
@@ -101,9 +100,7 @@ export class BattleLogicLayer {
 		const y = game.map.isoPlayerMouse.y;
 
 		if (!this.currentHero) return; // TODO
-		while(battle.heroes[this.tempBattleIndex].placed) {
-			this.tempBattleIndex += 1;
-		}
+
 		const placed = battle.placeHero(this.currentHero, {x: x, y: y});
 		if (!placed) {
 			return;
