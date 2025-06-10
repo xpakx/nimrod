@@ -104,6 +104,8 @@ export class BattleLogicLayer {
 			return;
 		}
 
+		this.currentHero.selected = false;
+
 		const placed = battle.placeHero(this.currentHero, {x: x, y: y});
 		if (!placed) {
 			return;
@@ -142,6 +144,8 @@ export class BattleLogicLayer {
 	}
 
 	selectHero(hero: BattleActor) {
+		if (this.currentHero) this.currentHero.selected = false;
 		this.currentHero = hero;
+		this.currentHero.selected = true;
 	}
 }

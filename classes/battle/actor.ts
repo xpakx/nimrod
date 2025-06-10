@@ -18,6 +18,8 @@ export class BattleActor extends Actor {
 	moving: boolean = false;
 	path?: Position[]
 
+	selected: boolean = false;
+
 	tick(deltaTime: number, _roads: MapLayer, _randMap: number[]): boolean {
 		return this.move(deltaTime);
 	}
