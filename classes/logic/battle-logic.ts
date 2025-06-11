@@ -119,10 +119,8 @@ export class BattleLogicLayer {
 		this.logger.debug(`started: ${game.state.currentBattle.battleStarted}`);
 	}
 
-	calcBuildingsState(game: Game, deltaTime: number) {
-		for(let building of game.map.buildings) {
-			building.tick(deltaTime);
-		}
+	calcBuildingsState(_game: Game, _deltaTime: number) {
+		// TODO: decide if needed
 	}
 
 	calcPedestriansState(game: Game, deltaTime: number) {
