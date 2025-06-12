@@ -1,5 +1,6 @@
+import { HeroType } from "../actor.js";
 import { EffectHandler } from "../effect-system.js";
-import { SkillEffectPassive } from "./skill.js";
+import { DamageFunction, SkillEffectDamage, SkillEffectPassive } from "./skill.js";
 
 
 export class PikemanPassive implements SkillEffectPassive {
@@ -18,4 +19,13 @@ export class PikemanPassive implements SkillEffectPassive {
 	    }
 	    
     };
+}
+
+export class PikemanSkill1 implements SkillEffectDamage {
+    type: "damage" = "damage";
+    damage: DamageFunction = (hero, _target) => {
+	    return hero.strength * 0.3 + 3*hero.skills[0].level;
+    };
+    damageType: HeroType = "normal";
+    target: "square" | "hero" = "hero";
 }

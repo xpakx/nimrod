@@ -4,18 +4,20 @@ import { EffectHandler } from "../effect-system";
 export interface Skill {
 	name: string;
 	effect: SkillEffect[];
+	level: number;
 }
 
 export type SkillEffect = SkillEffectDamage | SkillEffectPassive;
 
 export type DamageFunction = (hero: BattleActor, target: BattleActor) => number; 
 
-interface SkillEffectDamage {
+export interface SkillEffectDamage {
 	type: "damage";
 	chance?: number; // undefined -> 100%
 	damage: number | DamageFunction;
 	damageType: HeroType;
 	target: "square" | "hero";
+	distance?: number; // undefined -> 1
 	effectRadius?: number;
 	effectLine?: number;
 	effectCone?: number;
