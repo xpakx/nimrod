@@ -1,6 +1,7 @@
 import { Actor, ActorSprite } from "../actor.js";
 import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position } from "../map-layer.js";
+import { Skill } from "./skill/skill.js";
 
 export type HeroRank = "common" | "rare"; 
 
@@ -66,9 +67,6 @@ export class BattleActor extends Actor {
 		}
 		return false;
 	}
-}
-
-export class Skill {
 }
 
 export type HeroType = "normal" | "fire" | "water" |
