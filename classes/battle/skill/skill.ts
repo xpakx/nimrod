@@ -1,11 +1,12 @@
 import { BattleActor, HeroType } from "../actor.js";
+import { EffectHandler } from "../effect-system";
 
 export interface Skill {
 	name: string;
 	effect: SkillEffect[];
 }
 
-export type SkillEffect = SkillEffectDamage;
+export type SkillEffect = SkillEffectDamage | SkillEffectPassive;
 
 export type DamageFunction = (hero: BattleActor, target: BattleActor) => number; 
 
@@ -18,4 +19,10 @@ interface SkillEffectDamage {
 	effectRadius?: number;
 	effectLine?: number;
 	effectCone?: number;
+}
+
+export interface SkillEffectPassive {
+	type: "passive";
+	chance?: number; // undefined -> 100%
+	handler: EffectHandler;
 }

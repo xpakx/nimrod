@@ -1,5 +1,5 @@
 import { BattleActor } from "../battle/actor";
-import { Position } from "../map-layer";
+import { MapLayer, Position } from "../map-layer";
 
 type EffectType = "control" | "heal" | "damage" | "buff" | "debuff";
 
@@ -21,9 +21,11 @@ export interface EffectApplyEvent {
 
 	result?: "applied" | "blocked" | "mitigated";
 	reactions: (() => void)[];
+	criticalHit: boolean;
 }
 
-export type EffectHandler = (event: EffectApplyEvent) => void;
+export type EffectHandler = (event: EffectApplyEvent, actors: BattleActor[],
+			     map: MapLayer) => void;
 
 export class EffectSystem {
 	private handlers: EffectHandler[] = [];
@@ -32,7 +34,8 @@ export class EffectSystem {
 		this.handlers.push(handler);
 	}
 
-	emit(source: BattleActor, target: BattleActor, effect: Effect) {
+	emit(source: BattleActor, target: BattleActor, effect: Effect,
+	    actors: BattleActor[], map: MapLayer) {
 		const event: EffectApplyEvent = {
 			source,
 			target,
@@ -40,10 +43,11 @@ export class EffectSystem {
 			blocks: [],
 			mitigations: [],
 			reactions: [],
+			criticalHit: false,
 		};
 
 		for (const handler of this.handlers) {
-			handler(event);
+			handler(event, actors, map);
 		}
 
 		this.resolve(event);
