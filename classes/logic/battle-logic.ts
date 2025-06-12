@@ -1,13 +1,30 @@
-import { BattleActor } from "../battle/actor";
-import { Game } from "../game";
+import { BattleActor } from "../battle/actor.js";
+import { Game } from "../game.js";
 import { getLogger, Logger } from "../logger.js";
-import { Position } from "../map-layer";
+import { Position } from "../map-layer.js";
 
 export class BattleLogicLayer {
 	logger: Logger = getLogger("BattleLogicLayer");
 
 	currentHero?: BattleActor;
+	savedPositions: SavedPosition[] = [];
 
+	showSpawnArea(game: Game) {
+		if (!game.state.currentBattle) return;
+		const battle = game.state.currentBattle;
+
+		for (let position of battle.playerSpawns) {
+			const color = game.map.getColor(position);
+			this.savedPositions.push({position: position, color: color});
+			game.map.setColor(position, "#6666ff");
+		}
+	}
+
+	restoreSpawnsColor(game: Game) {
+		for (let position of this.savedPositions) {
+			game.map.setColor(position.position, position.color);
+		}
+	}
 
 	onMouseLeftClick(game: Game) {
 		if (game.state.currentBattle?.battleStarted) {
@@ -117,6 +134,7 @@ export class BattleLogicLayer {
 
 		battle.finishPlacement();
 		this.logger.debug(`started: ${game.state.currentBattle.battleStarted}`);
+		if (battle.battleStarted) this.restoreSpawnsColor(game);
 	}
 
 	calcBuildingsState(_game: Game, _deltaTime: number) {
@@ -146,4 +164,10 @@ export class BattleLogicLayer {
 		this.currentHero = hero;
 		this.currentHero.selected = true;
 	}
+}
+
+
+interface SavedPosition {
+	color: string;
+	position: Position;
 }

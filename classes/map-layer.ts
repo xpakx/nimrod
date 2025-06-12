@@ -1079,6 +1079,14 @@ export class MapLayer {
 		return this.buildings
 		.filter(x => x instanceof Storage);
 	}
+
+	getColor(position: Position): string {
+		return this.map[position.y][position.x];
+	}
+
+	setColor(position: Position, color: string) {
+		this.map[position.y][position.x] = color;
+	}
 }
 
 type PathMap = (Position | undefined)[][];
