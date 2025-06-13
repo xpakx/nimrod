@@ -8,6 +8,7 @@ export class BattleLogicLayer {
 
 	currentHero?: BattleActor;
 	savedPositions: SavedPosition[] = [];
+	spawnColor: string =  "#6666ff";
 
 	showSpawnArea(game: Game) {
 		if (!game.state.currentBattle) return;
@@ -16,7 +17,7 @@ export class BattleLogicLayer {
 		for (let position of battle.playerSpawns) {
 			const color = game.map.getColor(position);
 			this.savedPositions.push({position: position, color: color});
-			game.map.setColor(position, "#6666ff");
+			game.map.setColor(position, this.spawnColor);
 		}
 	}
 
@@ -163,6 +164,16 @@ export class BattleLogicLayer {
 		if (this.currentHero) this.currentHero.selected = false;
 		this.currentHero = hero;
 		this.currentHero.selected = true;
+	}
+
+	onTurnEnd(game: Game) {
+		if (!game.state.currentBattle) return;
+		const battle = game.state.currentBattle;
+
+		if (battle.playerStarts != battle.playerPhase) {
+			game.state.currentBattle.currentTurn += 1;
+		}
+		battle.playerPhase = !battle.playerPhase;
 	}
 }
 

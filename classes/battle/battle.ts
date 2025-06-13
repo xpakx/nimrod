@@ -11,6 +11,10 @@ export class Battle {
 	public maxHeroes: number = 6;
 	public playerSpawns: Position[] = [];
 
+	public currentTurn: number = 0;
+	public playerPhase: boolean = true;
+	public playerStarts: boolean = true;
+
 	getPedestrians(): BattleActor[] {
 		const pedestrians = [];
 		pedestrians.push(...this.heroes, ...this.enemies);
@@ -59,6 +63,8 @@ export class Battle {
 			return;
 		}
 		this.battleStarted = true;
+		this.currentTurn = 1;
+		this.playerPhase = this.playerStarts;
 	}
 
 	isInSpawn(pos: Position): boolean {
