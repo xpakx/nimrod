@@ -65,6 +65,7 @@ export class Battle {
 		this.battleStarted = true;
 		this.currentTurn = 1;
 		this.playerPhase = this.playerStarts;
+		this.selectedActor = undefined;
 	}
 
 	isInSpawn(pos: Position): boolean {

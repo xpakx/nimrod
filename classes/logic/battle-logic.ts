@@ -134,12 +134,11 @@ export class BattleLogicLayer {
 			return;
 		}
 
-		this.currentHero.selected = false;
-
 		const placed = battle.placeHero(this.currentHero, {x: x, y: y});
 		if (!placed) {
 			return;
 		}
+		this.currentHero.selected = false;
 		if (game.state.pedestrians.indexOf(this.currentHero) < 0) {
 			game.state.pedestrians.push(this.currentHero);
 		}
@@ -182,6 +181,7 @@ export class BattleLogicLayer {
 	}
 
 	onTurnEnd(game: Game) {
+		// TODO: wait till animations end
 		if (!game.state.currentBattle) return;
 		const battle = game.state.currentBattle;
 
