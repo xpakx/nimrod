@@ -46,6 +46,12 @@ export class BattleLogicLayer {
 		const x = game.map.isoPlayerMouse.x;
 		const y = game.map.isoPlayerMouse.y;
 
+
+		if (!battle.playerPhase) {
+			// TODO
+			return;
+		}
+
 		if (battle.selectedTile) {
 			this.battleProcessAction(game, battle.selectedTile, {x: x, y: y}, battle.selectedActor);
 			battle.selectedTile = undefined;
@@ -135,7 +141,10 @@ export class BattleLogicLayer {
 
 		battle.finishPlacement();
 		this.logger.debug(`started: ${game.state.currentBattle.battleStarted}`);
-		if (battle.battleStarted) this.restoreSpawnsColor(game);
+		if (battle.battleStarted) {
+			this.restoreSpawnsColor(game);
+			if (!battle.playerPhase) this.aiMove(game);
+		}
 	}
 
 	calcBuildingsState(_game: Game, _deltaTime: number) {
@@ -174,6 +183,15 @@ export class BattleLogicLayer {
 			game.state.currentBattle.currentTurn += 1;
 		}
 		battle.playerPhase = !battle.playerPhase;
+		if (!battle.playerPhase) {
+			this.aiMove(game);
+		}
+	}
+
+	aiMove(game: Game) {
+		// TODO
+		console.log("enemy phase");
+		this.onTurnEnd(game);
 	}
 }
 
