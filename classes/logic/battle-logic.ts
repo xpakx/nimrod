@@ -61,6 +61,10 @@ export class BattleLogicLayer {
 
 		battle.selectedTile = {x: x, y: y};
 		battle.selectedActor = this.isMouseOverPedestrian(game);
+		if (battle.selectedActor?.moved) {
+			// TODO
+			battle.selectedActor = undefined;
+		}
 		this.logger.debug("Selected actor", battle.selectedActor);
 		this.logger.debug("Selected tile", battle.selectedTile);
 	}
@@ -106,6 +110,7 @@ export class BattleLogicLayer {
 		game.map.clearPath();
 		if (dist <= actor.movement && path) {
 			actor.setPath(path.map((x) => x.position));
+			actor.moved = true;
 		}
 	}
 
@@ -182,6 +187,8 @@ export class BattleLogicLayer {
 		if (battle.playerStarts != battle.playerPhase) {
 			game.state.currentBattle.currentTurn += 1;
 		}
+		this.clearMoved(battle.playerPhase ? battle.heroes : battle.enemies);
+
 		battle.playerPhase = !battle.playerPhase;
 		if (!battle.playerPhase) {
 			this.aiMove(game);
@@ -192,6 +199,12 @@ export class BattleLogicLayer {
 		// TODO
 		console.log("enemy phase");
 		this.onTurnEnd(game);
+	}
+
+	clearMoved(actors: BattleActor[]) {
+		for (let actor of actors) {
+			actor.moved = false;
+		}
 	}
 }
 

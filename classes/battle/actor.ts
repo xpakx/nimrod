@@ -23,6 +23,8 @@ export class BattleActor extends Actor {
 	strength: number = 10;
 	agility: number = 10;
 
+	moved: boolean = false;
+
 	tick(deltaTime: number, _roads: MapLayer, _randMap: number[]): boolean {
 		return this.move(deltaTime);
 	}
