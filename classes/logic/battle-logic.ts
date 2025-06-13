@@ -112,6 +112,7 @@ export class BattleLogicLayer {
 			actor.setPath(path.map((x) => x.position));
 			actor.moved = true;
 		}
+		this.checkTurnEnd(game);
 	}
 
 	leftMouseBattlePrep(game: Game) {
@@ -205,6 +206,15 @@ export class BattleLogicLayer {
 		for (let actor of actors) {
 			actor.moved = false;
 		}
+	}
+
+	checkTurnEnd(game: Game) {
+		if (!game.state.currentBattle) return;
+		const battle = game.state.currentBattle;
+		for (let hero of battle.heroes) {
+			if (!hero.moved) return;
+		}
+		this.onTurnEnd(game);
 	}
 }
 
