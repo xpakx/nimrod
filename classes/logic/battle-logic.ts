@@ -11,7 +11,7 @@ export class BattleLogicLayer {
 	spawnColor: string =  "#6666ff";
 
 	blockTillAnimationEnds: boolean = false;
-	skipAnimations: boolean = true;
+	skipAnimations: boolean = false;
 
 	showSpawnArea(game: Game) {
 		if (!game.state.currentBattle) return;
@@ -110,20 +110,21 @@ export class BattleLogicLayer {
 			return;
 		}
 		const dist = game.map.shortestPath(from, to, game.sprites.getArrow());
-		let path = game.map.path;
+		let path = game.map.path?.map((x) => x.position);
 		game.map.clearPath();
 		if (dist <= actor.movement && path) {
-			if (this.skipAnimations) {
-				actor.position.x = to.x + 0.5;
-				actor.position.y = to.y + 0.5;
-				actor.positionSquare.x = to.x;
-				actor.positionSquare.y = to.y;
-			} else {
-				actor.setPath(path.map((x) => x.position));
-			}
+			this.moveActor(actor, to, path);
 			actor.moved = true;
 		}
 		this.checkTurnEnd(game);
+	}
+
+	moveActor(actor: BattleActor, to: Position, path: Position[]) {
+		if (this.skipAnimations) {
+			actor.setPosition(to);
+		} else {
+			actor.setPath(path);
+		}
 	}
 
 	leftMouseBattlePrep(game: Game) {
