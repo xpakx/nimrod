@@ -11,6 +11,7 @@ export class BattleLogicLayer {
 	spawnColor: string =  "#6666ff";
 
 	blockTillAnimationEnds: boolean = false;
+	skipAnimations: boolean = false;
 
 	showSpawnArea(game: Game) {
 		if (!game.state.currentBattle) return;
@@ -171,9 +172,12 @@ export class BattleLogicLayer {
 				game.state.insertPedestrian(pedestrian);
 			} 
 			const hero = pedestrian as BattleActor;
-			if (hero.moving) moving = true;
+			if (hero.goal) moving = true;
 		}
-		if (!moving) this.blockTillAnimationEnds = false;
+		if (!moving && this.blockTillAnimationEnds) {
+			this.blockTillAnimationEnds = false;
+			this.onTurnEnd(game);
+		}
 	}
 
 	calcState(game: Game, deltaTime: number, _minuteEnded: boolean) {
@@ -201,13 +205,20 @@ export class BattleLogicLayer {
 		if (!battle.playerPhase) {
 			this.aiMove(game);
 		}
-		this.blockTillAnimationEnds = true;
+	}
+
+	tryEndTurn(game: Game) {
+		if (this.skipAnimations) {
+			this.onTurnEnd(game);
+		} else {
+			this.blockTillAnimationEnds = true;
+		}
 	}
 
 	aiMove(game: Game) {
 		// TODO
 		console.log("enemy phase");
-		this.onTurnEnd(game);
+		this.tryEndTurn(game);
 	}
 
 	clearMoved(actors: BattleActor[]) {
@@ -222,7 +233,7 @@ export class BattleLogicLayer {
 		for (let hero of battle.heroes) {
 			if (!hero.moved) return;
 		}
-		this.onTurnEnd(game);
+		this.tryEndTurn(game);
 	}
 }
 
