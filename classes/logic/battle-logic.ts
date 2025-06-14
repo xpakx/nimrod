@@ -10,6 +10,8 @@ export class BattleLogicLayer {
 	savedPositions: SavedPosition[] = [];
 	spawnColor: string =  "#6666ff";
 
+	blockTillAnimationEnds: boolean = false;
+
 	showSpawnArea(game: Game) {
 		if (!game.state.currentBattle) return;
 		const battle = game.state.currentBattle;
@@ -47,6 +49,7 @@ export class BattleLogicLayer {
 		const y = game.map.isoPlayerMouse.y;
 
 
+		if (this.blockTillAnimationEnds) return; // TODO
 		if (!battle.playerPhase) {
 			// TODO
 			return;
@@ -161,12 +164,16 @@ export class BattleLogicLayer {
 
 		let pedestrians = game.state.pedestrians;
 		game.state.pedestrians = [];
+		let moving = false;
 		for(let pedestrian of pedestrians) {
 			pedestrian.tick(dTime, game.map, []);
 			if (!pedestrian.dead) {
 				game.state.insertPedestrian(pedestrian);
 			} 
+			const hero = pedestrian as BattleActor;
+			if (hero.moving) moving = true;
 		}
+		if (!moving) this.blockTillAnimationEnds = false;
 	}
 
 	calcState(game: Game, deltaTime: number, _minuteEnded: boolean) {
@@ -194,6 +201,7 @@ export class BattleLogicLayer {
 		if (!battle.playerPhase) {
 			this.aiMove(game);
 		}
+		this.blockTillAnimationEnds = true;
 	}
 
 	aiMove(game: Game) {
