@@ -10,9 +10,9 @@ export class BattleLogicLayer {
 	savedPositions: SavedPosition[] = [];
 	spawnColor: string =  "#6666ff";
 
-	skipAnimations: boolean = true;
+	skipAnimations: boolean = false;
 
-	turnController: TurnController = new TurnController();
+	turnController: TurnController = new DefaultTurnController();
 
 	showSpawnArea(game: Game) {
 		if (!game.state.currentBattle) return;
@@ -51,7 +51,7 @@ export class BattleLogicLayer {
 		const y = game.map.isoPlayerMouse.y;
 
 
-		if (this.turnController.blockTillAnimationEnds) return; // TODO
+		if (this.turnController.isMovementBlocked()) return; // TODO
 		if (!battle.playerPhase) {
 			// TODO
 			return;
@@ -184,8 +184,8 @@ export class BattleLogicLayer {
 			const hero = pedestrian as BattleActor;
 			if (hero.goal) moving = true;
 		}
-		if (!moving && this.turnController.blockTillAnimationEnds) {
-			this.turnController.blockTillAnimationEnds = false;
+		if (!moving && this.turnController.isMovementBlocked()) {
+			this.turnController.tryUnlockMovement();
 			this.onTurnEnd(game);
 		}
 	}
@@ -211,6 +211,7 @@ export class BattleLogicLayer {
 	aiMove(game: Game) {
 		// TODO
 		console.log("enemy phase");
+		// const enemies = this.turnController.getUnitsForAiToMove(game);
 		const turnEnded = this.turnController.tryEndTurn(game, this.skipAnimations);
 		if (turnEnded) this.onTurnEnd(game);
 	}
@@ -221,7 +222,17 @@ interface SavedPosition {
 	position: Position;
 }
 
-class TurnController {
+export interface TurnController {
+	tryEndTurn(game: Game, skipAnimations: boolean): boolean;
+	checkTurnEnd(game: Game, skipAnimations: boolean): boolean;
+	clearMoved(actors: BattleActor[]): void;
+	onTurnEnd(game: Game): void;
+	getUnitsForAiToMove(game: Game): BattleActor[];
+	isMovementBlocked(): boolean;
+	tryUnlockMovement(): void;
+}
+
+class DefaultTurnController implements TurnController {
 	blockTillAnimationEnds: boolean = false;
 
 	tryEndTurn(_game: Game, skipAnimations: boolean): boolean {
@@ -257,5 +268,18 @@ class TurnController {
 		this.clearMoved(battle.playerPhase ? battle.heroes : battle.enemies);
 
 		battle.playerPhase = !battle.playerPhase;
+	}
+
+	getUnitsForAiToMove(game: Game): BattleActor[] {
+		if (!game.state.currentBattle) return [];
+		return game.state.currentBattle.enemies;
+	}
+
+	isMovementBlocked(): boolean {
+		return this.blockTillAnimationEnds;
+	}
+
+	tryUnlockMovement() {
+		this.blockTillAnimationEnds = false;
 	}
 }
