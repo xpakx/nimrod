@@ -10,8 +10,9 @@ export class BattleLogicLayer {
 	savedPositions: SavedPosition[] = [];
 	spawnColor: string =  "#6666ff";
 
-	blockTillAnimationEnds: boolean = false;
-	skipAnimations: boolean = false;
+	skipAnimations: boolean = true;
+
+	turnController: TurnController = new TurnController();
 
 	showSpawnArea(game: Game) {
 		if (!game.state.currentBattle) return;
@@ -50,7 +51,7 @@ export class BattleLogicLayer {
 		const y = game.map.isoPlayerMouse.y;
 
 
-		if (this.blockTillAnimationEnds) return; // TODO
+		if (this.turnController.blockTillAnimationEnds) return; // TODO
 		if (!battle.playerPhase) {
 			// TODO
 			return;
@@ -116,7 +117,8 @@ export class BattleLogicLayer {
 			this.moveActor(actor, to, path);
 			actor.moved = true;
 		}
-		this.checkTurnEnd(game);
+		const turnEnded = this.turnController.checkTurnEnd(game, this.skipAnimations);
+		if (turnEnded) this.onTurnEnd(game);
 	}
 
 	moveActor(actor: BattleActor, to: Position, path: Position[]) {
@@ -182,8 +184,8 @@ export class BattleLogicLayer {
 			const hero = pedestrian as BattleActor;
 			if (hero.goal) moving = true;
 		}
-		if (!moving && this.blockTillAnimationEnds) {
-			this.blockTillAnimationEnds = false;
+		if (!moving && this.turnController.blockTillAnimationEnds) {
+			this.turnController.blockTillAnimationEnds = false;
 			this.onTurnEnd(game);
 		}
 	}
@@ -215,18 +217,11 @@ export class BattleLogicLayer {
 		}
 	}
 
-	tryEndTurn(game: Game) {
-		if (this.skipAnimations) {
-			this.onTurnEnd(game);
-		} else {
-			this.blockTillAnimationEnds = true;
-		}
-	}
-
 	aiMove(game: Game) {
 		// TODO
 		console.log("enemy phase");
-		this.tryEndTurn(game);
+		const turnEnded = this.turnController.tryEndTurn(game, this.skipAnimations);
+		if (turnEnded) this.onTurnEnd(game);
 	}
 
 	clearMoved(actors: BattleActor[]) {
@@ -235,18 +230,30 @@ export class BattleLogicLayer {
 		}
 	}
 
-	checkTurnEnd(game: Game) {
-		if (!game.state.currentBattle) return;
-		const battle = game.state.currentBattle;
-		for (let hero of battle.heroes) {
-			if (!hero.moved) return;
-		}
-		this.tryEndTurn(game);
-	}
 }
-
 
 interface SavedPosition {
 	color: string;
 	position: Position;
+}
+
+class TurnController {
+	blockTillAnimationEnds: boolean = false;
+
+	tryEndTurn(_game: Game, skipAnimations: boolean): boolean {
+		if (skipAnimations) {
+			return true
+		} 
+		this.blockTillAnimationEnds = true;
+		return false;
+	}
+
+	checkTurnEnd(game: Game, skipAnimations: boolean): boolean {
+		if (!game.state.currentBattle) return false;
+		const battle = game.state.currentBattle;
+		for (let hero of battle.heroes) {
+			if (!hero.moved) return false;
+		}
+		return this.tryEndTurn(game, skipAnimations);
+	}
 }
