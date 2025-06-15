@@ -202,17 +202,8 @@ export class BattleLogicLayer {
 	}
 
 	onTurnEnd(game: Game) {
-		// TODO: wait till animations end
-		if (!game.state.currentBattle) return;
-		const battle = game.state.currentBattle;
-
-		if (battle.playerStarts != battle.playerPhase) {
-			game.state.currentBattle.currentTurn += 1;
-		}
-		this.clearMoved(battle.playerPhase ? battle.heroes : battle.enemies);
-
-		battle.playerPhase = !battle.playerPhase;
-		if (!battle.playerPhase) {
+		this.turnController.onTurnEnd(game);
+		if (!game.state.currentBattle?.playerPhase) {
 			this.aiMove(game);
 		}
 	}
@@ -223,13 +214,6 @@ export class BattleLogicLayer {
 		const turnEnded = this.turnController.tryEndTurn(game, this.skipAnimations);
 		if (turnEnded) this.onTurnEnd(game);
 	}
-
-	clearMoved(actors: BattleActor[]) {
-		for (let actor of actors) {
-			actor.moved = false;
-		}
-	}
-
 }
 
 interface SavedPosition {
@@ -255,5 +239,23 @@ class TurnController {
 			if (!hero.moved) return false;
 		}
 		return this.tryEndTurn(game, skipAnimations);
+	}
+
+	clearMoved(actors: BattleActor[]) {
+		for (let actor of actors) {
+			actor.moved = false;
+		}
+	}
+
+	onTurnEnd(game: Game) {
+		if (!game.state.currentBattle) return;
+		const battle = game.state.currentBattle;
+
+		if (battle.playerStarts != battle.playerPhase) {
+			game.state.currentBattle.currentTurn += 1;
+		}
+		this.clearMoved(battle.playerPhase ? battle.heroes : battle.enemies);
+
+		battle.playerPhase = !battle.playerPhase;
 	}
 }
