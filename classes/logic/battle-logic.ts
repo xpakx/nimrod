@@ -2,6 +2,7 @@ import { BattleActor } from "../battle/actor.js";
 import { Game } from "../game.js";
 import { getLogger, Logger } from "../logger.js";
 import { Position } from "../map-layer.js";
+import { MoveGenerator } from "./ai/move.js";
 import { TurnController } from "./turn/turn.js";
 
 export class BattleLogicLayer {
@@ -14,9 +15,11 @@ export class BattleLogicLayer {
 	skipAnimations: boolean = false;
 
 	turnController: TurnController;
+	aiMoveGenerator: MoveGenerator;
 
-	constructor(turnController: TurnController) {
+	constructor(turnController: TurnController, moveGenerator: MoveGenerator) {
 		this.turnController = turnController;
+		this.aiMoveGenerator = moveGenerator;
 	}
 
 	showSpawnArea(game: Game) {
@@ -214,9 +217,9 @@ export class BattleLogicLayer {
 	}
 
 	aiMove(game: Game) {
-		// TODO
 		console.log("enemy phase");
-		// const enemies = this.turnController.getUnitsForAiToMove(game);
+		const unitsToMove = this.turnController.getUnitsForAiToMove(game);
+		this.aiMoveGenerator.makeMove(game, unitsToMove);
 		const turnEnded = this.turnController.tryEndTurn(game, this.skipAnimations);
 		if (turnEnded) this.onTurnEnd(game);
 	}

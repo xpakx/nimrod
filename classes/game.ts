@@ -17,6 +17,7 @@ import { BattleLogicLayer } from "./logic/battle-logic.js";
 import { CampaignData } from "./quest.js";
 import { HeroLibrary } from "./battle/hero-library.js";
 import { DefaultTurnController } from "./logic/turn/default.js";
+import { TestMoveGenerator } from "./logic/ai/test.js";
 
 export class Game {
 	state: GameState;
@@ -49,7 +50,8 @@ export class Game {
 		this.cityLogic = new CityLogicLayer();
 		this.cityInterfaceLogic = new CityInterfaceLogic();
 		const turnController = new DefaultTurnController();
-		this.battleLogic = new BattleLogicLayer(turnController);
+		const battleAi = new TestMoveGenerator();
+		this.battleLogic = new BattleLogicLayer(turnController, battleAi);
 		this.saveManager = new SaveManager();
 
 		this.maxYOffset = this.map.isoToScreen({x: this.map.map[0].length - 1, y: this.map.map.length - 1}).y + (this.map.tileSize.height/2);
