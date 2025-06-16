@@ -6,6 +6,7 @@ import { Action } from "./actions.js";
 import { BattleTab } from "./battle-tab.js";
 import { BuildingTab } from "./building-tab.js";
 import { Button, ButtonContainer } from "./button.js";
+import { DialogueManager } from "./dialogue-manager.js";
 import { Dialogue, DialogueParsed } from "./dialogue.js";
 
 export class InterfaceLayer {
@@ -13,7 +14,6 @@ export class InterfaceLayer {
 	menuWidth: number;
 	tabWidth = 65;
 	topPanelHeight: number;
-	dialogue: DialogueParsed | undefined = undefined;
 	tab: number | undefined = undefined;
 	tabs: BuildingTab[] = [];
 	populationIcon: HTMLImageElement | undefined = undefined;
@@ -31,10 +31,14 @@ export class InterfaceLayer {
 	battleTabs: BattleTab[] = [];
 	battleMode: boolean = false;
 
+	dialogueManager: DialogueManager = new DialogueManager();
+
 	constructor(canvasSize: Size, menuWidth: number,  topPanelHeight: number) {
 		this.canvasSize = canvasSize;
 		this.menuWidth = menuWidth;
 		this.topPanelHeight = topPanelHeight;
+		this.dialogueManager.canvasSize = canvasSize;
+		this.dialogueManager.menuWidth = menuWidth;
 	}
 
 	onMouse(position: Position) {
@@ -69,7 +73,7 @@ export class InterfaceLayer {
 		this.drawTopPanel(context, state);
 		this.drawMenu(context);
 		this.drawTabs(context);
-		this.renderDialogueBox(context, deltaTime);
+		this.dialogueManager.renderDialogueBox(context, deltaTime);
 		this.renderCurrentTab(context, deltaTime);
 		if (this.buildingInterface) {
 			this.buildingInterface.drawInterface(context, deltaTime, state);
@@ -132,93 +136,21 @@ export class InterfaceLayer {
 		context.fillRect(this.canvasSize.width - this.menuWidth, 0, this.menuWidth, this.canvasSize.height);
 	}
 
-	renderDialogueBox(context: CanvasRenderingContext2D, deltaTime: number) {
-		if(!this.dialogue) {
-			return;
-		}
-		const dialogueWidth = this.canvasSize.width - 20 - this.menuWidth;
-		const dialogueHeight = 100;
-		const dialogueX = 10;
-		const dialogueY = this.canvasSize.height - dialogueHeight - 10;
-
-		context.fillStyle = '#444';
-		context.fillRect(dialogueX, dialogueY, dialogueWidth, dialogueHeight);
-
-		context.strokeStyle = '#fff';
-		context.strokeRect(dialogueX, dialogueY, dialogueWidth, dialogueHeight);
-
-		context.fillStyle = '#fff';
-		context.font = '16px Arial';
-		let y = dialogueY + 30;
-		for (let line of this.dialogue.toPrint) {
-			if (this.dialogue.portrait && y <= dialogueY + 50) {
-				context.fillText(line, dialogueX + 110, y);
-			} else {
-				context.fillText(line, dialogueX + 10, y);
-			}
-			y += 20;
-		}
-		if(this.dialogue.portrait) {
-			context.drawImage(this.dialogue.portrait, dialogueX, dialogueY-50, 100, 100);
-
-			context.beginPath();
-			context.arc(dialogueX + 50, dialogueY, 50, 0, 2 * Math.PI);
-			context.stroke();
-		}
-		this.dialogue.updateTime(deltaTime);
-	}
-
-	wrapText(context: CanvasRenderingContext2D, text: string, maxWidth: number, lineHeight: number, portrait: boolean): string[] {
-		const words = text.split(' ');
-		let line = '';
-		let testLine;
-		let metrics;
-		let testWidth;
-		let lines = [];
-
-		context.font = '16px Arial';
-		let realWidth = portrait ? maxWidth - 100 : maxWidth;
-		let y = 0;
-		for (let n = 0; n < words.length; n++) {
-			testLine = line + words[n] + ' ';
-			metrics = context.measureText(testLine);
-			testWidth = metrics.width;
-			if (testWidth > realWidth && n > 0) {
-				lines.push(line);
-				line = words[n] + ' ';
-				y += lineHeight;
-				realWidth = portrait && y <= 20 ? maxWidth - 110 : maxWidth;
-			} else {
-				line = testLine;
-			}
-		}
-		lines.push(line);
-		return lines;
-	}
-
 	setDialogue(context: CanvasRenderingContext2D, dialogue: Dialogue) {
 		const dialogueWidth = this.canvasSize.width - 20 - this.menuWidth;
-		const text = this.wrapText(context, dialogue.text, dialogueWidth - 20, 20, dialogue.portrait != undefined);
-		this.dialogue = new DialogueParsed(text, dialogue.portrait);
+		this.dialogueManager.setDialogue(context, dialogue, dialogueWidth);
 	}
 
 	closeDialogue() {
-		this.dialogue = undefined;
+		this.dialogueManager.closeDialogue();
 	}
 
 	dialogueAction() {
-		if(!this.dialogue) {
-			return;
-		}
-		if(this.dialogue.printed) {
-			this.closeDialogue();
-		} else {
-			this.dialogue.skipAnimation();
-		}
+		this.dialogueManager.dialogueAction();
 	}
 
 	hasDialogue(): boolean {
-		return this.dialogue == undefined;
+		return this.dialogueManager.hasDialogue();
 	}
 
 	drawTabs(context: CanvasRenderingContext2D) {
