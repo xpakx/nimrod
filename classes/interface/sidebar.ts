@@ -6,10 +6,7 @@ export interface Sidebar {
 	tabs: BuildingTab[];
 	tab: number | undefined;
 
-	renderCurrentTab(context: CanvasRenderingContext2D, mousePosition: Position, deltaTime: number): void;
 	click(position: Position): Action | undefined;
-	drawTabs(context: CanvasRenderingContext2D, mousePosition: Position): void;
-	getTabUnderCursor(position: Position): number | undefined;
 	draw(context: CanvasRenderingContext2D, mousePosition: Position, deltaTime: number): void;
 }
 

@@ -148,15 +148,8 @@ export class InterfaceLayer {
 				this.buildingInterface = undefined;
 			}
 		}
-		const tab = this.sidebar?.getTabUnderCursor(position);
-		if (tab != undefined) {
-			this.buildingSidebar.tab = tab;
-			return undefined;
-		}
-		if(this.sidebar) {
-			const action = this.sidebar.click(position);
-			if (action) return action;
-		}
+		const sidebarAction = this.sidebar?.click(position);
+		if (sidebarAction) return sidebarAction;
 		for(let row of this.buttons) {
 			const action = row.buttonAt(position);
 			if (action) {
