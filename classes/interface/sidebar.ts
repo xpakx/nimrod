@@ -10,14 +10,21 @@ export interface Sidebar {
 	click(position: Position): Action | undefined;
 	drawTabs(context: CanvasRenderingContext2D, mousePosition: Position): void;
 	getTabUnderCursor(position: Position): number | undefined;
+	draw(context: CanvasRenderingContext2D, mousePosition: Position, deltaTime: number): void;
 }
 
 export class BuildingSidebar implements Sidebar {
 	tab: number | undefined = undefined;
 	tabs: BuildingTab[] = [];
-	tabWidth: number = 20;
-	canvasSize: Size = {width: 10, height: 10};
-	menuWidth: number = 20;
+	tabWidth: number;
+	canvasSize: Size;
+	menuWidth: number;
+
+	constructor(canvasSize: Size, menuWidth: number, tabWidth: number) {
+		this.canvasSize = canvasSize;
+		this.menuWidth = menuWidth;
+		this.tabWidth = tabWidth;
+	}
 
 	renderCurrentTab(context: CanvasRenderingContext2D, mousePosition: Position, _deltaTime: number) {
 		if (this.tab == undefined) return;
@@ -94,5 +101,12 @@ export class BuildingSidebar implements Sidebar {
 			} 
 			context.drawImage(icon, this.canvasSize.width - this.menuWidth, start + i*tabSize);
 		}
+	}
+
+	draw(context: CanvasRenderingContext2D, mousePosition: Position, deltaTime: number) {
+		context.fillStyle = '#1f1f1f';
+		context.fillRect(this.canvasSize.width - this.menuWidth, 0, this.menuWidth, this.canvasSize.height);
+		this.drawTabs(context, mousePosition);
+		this.renderCurrentTab(context, mousePosition, deltaTime);
 	}
 }

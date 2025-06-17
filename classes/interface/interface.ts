@@ -34,24 +34,14 @@ export class InterfaceLayer {
 
 	sidebar: Sidebar | undefined;
 
-	constructor(canvasSize: Size, menuWidth: number,  topPanelHeight: number) {
+	constructor(canvasSize: Size, menuWidth: number, topPanelHeight: number) {
 		this.canvasSize = canvasSize;
 		this.menuWidth = menuWidth;
 		this.topPanelHeight = topPanelHeight;
 		this.dialogueManager.canvasSize = canvasSize;
 		this.dialogueManager.menuWidth = menuWidth;
-
-		const buildingSidebar = new BuildingSidebar();
-		buildingSidebar.canvasSize = canvasSize;
-		buildingSidebar.menuWidth = menuWidth;
-		buildingSidebar.tabWidth = this.tabWidth;
-		this.buildingSidebar = buildingSidebar;
-
-		const battleSidebar = new BuildingSidebar();
-		battleSidebar.canvasSize = canvasSize;
-		battleSidebar.menuWidth = menuWidth;
-		battleSidebar.tabWidth = this.tabWidth;
-		this.battleSidebar = battleSidebar;
+		this.buildingSidebar = new BuildingSidebar(canvasSize, menuWidth, this.tabWidth);
+		this.battleSidebar = new BuildingSidebar(canvasSize, menuWidth, this.tabWidth);
 	 }
 
 	onMouse(position: Position) {
@@ -75,20 +65,11 @@ export class InterfaceLayer {
 		}
 	}
 
-	renderCurrentTab(context: CanvasRenderingContext2D, deltaTime: number) {
-		if (!this.sidebar) return;
-		this.sidebar.renderCurrentTab(context, this.mousePosition, deltaTime);
-	}
-
 	renderInterface(context: CanvasRenderingContext2D, deltaTime: number, state: GameState) {
 		this.drawTopPanel(context, state);
-		this.drawMenu(context);
-		this.drawTabs(context);
+		this.sidebar?.draw(context, this.mousePosition, deltaTime);
 		this.dialogueManager.renderDialogueBox(context, deltaTime);
-		this.renderCurrentTab(context, deltaTime);
-		if (this.buildingInterface) {
-			this.buildingInterface.drawInterface(context, deltaTime, state);
-		}
+		this.buildingInterface?.drawInterface(context, deltaTime, state);
 		this.renderButtons(context);
 	}
 
@@ -142,11 +123,6 @@ export class InterfaceLayer {
 		}
 	}
 
-	drawMenu(context: CanvasRenderingContext2D) {
-		context.fillStyle = '#1f1f1f';
-		context.fillRect(this.canvasSize.width - this.menuWidth, 0, this.menuWidth, this.canvasSize.height);
-	}
-
 	setDialogue(context: CanvasRenderingContext2D, dialogue: Dialogue) {
 		const dialogueWidth = this.canvasSize.width - 20 - this.menuWidth;
 		this.dialogueManager.setDialogue(context, dialogue, dialogueWidth);
@@ -164,12 +140,7 @@ export class InterfaceLayer {
 		return this.dialogueManager.hasDialogue();
 	}
 
-	drawTabs(context: CanvasRenderingContext2D) {
-		if (!this.sidebar) return;
-		this.sidebar.drawTabs(context, this.mousePosition);
-	}
-
-	click(position: Position): Action | undefined { // TODO
+	click(position: Position): Action | undefined {
 		if (this.buildingInterface) {
 			if (this.buildingInterface.inInterface(position)) {
 				return this.buildingInterface.click(position);
@@ -197,7 +168,6 @@ export class InterfaceLayer {
 	}
 
 	toBattleMode(heroes: BattleActor[], icons: any) {
-		// TODO: populate main tab with heroes
 		console.log("Battle mode activated")
 		const icon = icons["kingdom"]; // TODO: add icon
 		const tabIcon = icons["tab"];
@@ -246,9 +216,9 @@ export class ActionButton implements Button {
 		this.action = action;
 		this.size = size;
 		this.image = new OffscreenCanvas(size.width, size.height);
-		this.context = this.image.getContext("2d")!; // TODO
+		this.context = this.image.getContext("2d")!;
 		this.hoverImage = new OffscreenCanvas(size.width, size.height);
-		this.hoverContext = this.hoverImage.getContext("2d")!; // TODO
+		this.hoverContext = this.hoverImage.getContext("2d")!;
 		this.drawImage();
 		this.drawHoverImage();
 	}
