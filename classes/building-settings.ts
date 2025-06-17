@@ -1,6 +1,6 @@
 import { Game } from "./game.js";
 import { AdventurersGuildInterface } from "./interface/adventurers-guild.js";
-import { SidebarConfig } from "./interface/sidebar.js";
+import { SidebarConfig } from "./interface/sidebar-config.js";
 import { StorageInterface } from "./interface/storage.js";
 import { CampaignData, Quest } from "./quest.js";
 import { SpriteConfig, BuildingConfig } from "./sprite-library.js";

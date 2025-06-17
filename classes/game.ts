@@ -3,7 +3,7 @@ import { ActionButton, ButtonRow, InterfaceLayer } from "./interface/interface.j
 import { Action } from "./interface/actions.js";
 import { MapLayer, Position } from "./map-layer.js";
 import { SpriteConfig, BuildingConfig, SpriteLibrary } from "./sprite-library.js";
-import { prepareTabs, SidebarConfig } from "./interface/sidebar.js";
+import { prepareTabs, SidebarConfig } from "./interface/sidebar-config.js";
 import { BattleActor } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
 import { getLogger, Logger, LoggerFactory } from "./logger.js";
@@ -70,8 +70,9 @@ export class Game {
 		this.interf.coinsIcon = this.sprites.icons['coins'];
 		this.interf.populationIcon = this.sprites.icons['population'];
 
-		this.interf.tabs = await prepareTabs(this.sprites.buildings, tabSettings);
-		this.interf.tab = 0;
+		this.interf.buildingSidebar.tabs = await prepareTabs(this.sprites.buildings, tabSettings);
+		this.interf.buildingSidebar.tab = 0;
+		this.interf.sidebar = this.interf.buildingSidebar;
 		this.interf.calculateIconsSize();
 		this.interf.resizeTabs();
 		this.interf.calculateTabIcons();

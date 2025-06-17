@@ -7,15 +7,14 @@ import { BattleTab } from "./battle-tab.js";
 import { BuildingTab } from "./building-tab.js";
 import { Button, ButtonContainer } from "./button.js";
 import { DialogueManager } from "./dialogue-manager.js";
-import { Dialogue, DialogueParsed } from "./dialogue.js";
+import { Dialogue } from "./dialogue.js";
+import { BuildingSidebar, Sidebar } from "./sidebar.js";
 
 export class InterfaceLayer {
 	canvasSize: Size = {width: 0, height: 0};
 	menuWidth: number;
 	tabWidth = 65;
 	topPanelHeight: number;
-	tab: number | undefined = undefined;
-	tabs: BuildingTab[] = [];
 	populationIcon: HTMLImageElement | undefined = undefined;
 	coinsIcon: HTMLImageElement | undefined = undefined;
 	coinsIconSize: Size = {width: 0, height: 0};
@@ -28,10 +27,12 @@ export class InterfaceLayer {
 
 	buildingInterface: BuildingInterface | undefined = undefined;
 
-	battleTabs: BattleTab[] = [];
-	battleMode: boolean = false;
-
 	dialogueManager: DialogueManager = new DialogueManager();
+
+	buildingSidebar: Sidebar;
+	battleSidebar: Sidebar;
+
+	sidebar: Sidebar | undefined;
 
 	constructor(canvasSize: Size, menuWidth: number,  topPanelHeight: number) {
 		this.canvasSize = canvasSize;
@@ -39,7 +40,19 @@ export class InterfaceLayer {
 		this.topPanelHeight = topPanelHeight;
 		this.dialogueManager.canvasSize = canvasSize;
 		this.dialogueManager.menuWidth = menuWidth;
-	}
+
+		const buildingSidebar = new BuildingSidebar();
+		buildingSidebar.canvasSize = canvasSize;
+		buildingSidebar.menuWidth = menuWidth;
+		buildingSidebar.tabWidth = this.tabWidth;
+		this.buildingSidebar = buildingSidebar;
+
+		const battleSidebar = new BuildingSidebar();
+		battleSidebar.canvasSize = canvasSize;
+		battleSidebar.menuWidth = menuWidth;
+		battleSidebar.tabWidth = this.tabWidth;
+		this.battleSidebar = battleSidebar;
+	 }
 
 	onMouse(position: Position) {
 		this.mousePosition = position;
@@ -62,11 +75,9 @@ export class InterfaceLayer {
 		}
 	}
 
-	renderCurrentTab(context: CanvasRenderingContext2D, _deltaTime: number) {
-		if (this.tab == undefined) return;
-		const tabs = this.battleMode ? this.battleTabs : this.tabs;
-		if (this.tab >= tabs.length) return;
-		tabs[this.tab].draw(context, this.mousePosition);
+	renderCurrentTab(context: CanvasRenderingContext2D, deltaTime: number) {
+		if (!this.sidebar) return;
+		this.sidebar.renderCurrentTab(context, this.mousePosition, deltaTime);
 	}
 
 	renderInterface(context: CanvasRenderingContext2D, deltaTime: number, state: GameState) {
@@ -88,14 +99,14 @@ export class InterfaceLayer {
 	}
 
 	resizeTabs() {
-		this.buildingMenuHeight = 60 + Math.max(300, this.tabWidth * this.tabs.length);
-		for (let tab of this.tabs) {
+		this.buildingMenuHeight = 60 + Math.max(300, this.tabWidth * this.buildingSidebar.tabs.length);
+		for (let tab of this.buildingSidebar.tabs) {
 			this.resizeTab(tab);
 		}
 	}
 
 	calculateTabIcons() {
-		for (let tab of this.tabs) {
+		for (let tab of this.buildingSidebar.tabs) {
 			const buildingTab = tab;
 			buildingTab.prepareIcon(this.tabWidth);
 		}
@@ -154,49 +165,8 @@ export class InterfaceLayer {
 	}
 
 	drawTabs(context: CanvasRenderingContext2D) {
-		const tabs = this.battleMode ? this.battleTabs : this.tabs;
-		const start = 60;
-		const tabSize = this.tabWidth;
-		for(let i = 0; i<tabs.length; i++) {
-			const hover = this.inTab(this.mousePosition, i);
-			const currentTab = i == this.tab;
-			const tab = tabs[i];
-			let icon = tab.icon;
-
-			if(hover && currentTab) {
-				icon = tab.hoverIcon;
-			} else if(hover && !currentTab) {
-				icon = tab.inactiveHoverIcon;
-			} else if(!currentTab) {
-				icon = tab.inactiveIcon;
-			} 
-			context.drawImage(icon, this.canvasSize.width - this.menuWidth, start + i*tabSize);
-		}
-	}
-
-	getTabUnderCursor(position: Position): number | undefined {
-		const tabs = this.battleMode ? this.battleTabs : this.tabs;
-		for(let i = 0; i<tabs.length; i++) {
-			if(this.inTab(position, i)) {
-				return i;
-			}
-		}
-		return undefined;
-	}
-
-	inTab(position: Position, tab: number): boolean {
-		const start = 60;
-		const x = this.canvasSize.width - this.menuWidth;
-		const y = start + tab*this.tabWidth;
-		const x2 = x + this.tabWidth;
-		const y2 = y + this.tabWidth;
-		if(position.x < x || position.x > x2) {
-			return false;
-		}
-		if(position.y < y || position.y > y2) {
-			return false;
-		}
-		return true;
+		if (!this.sidebar) return;
+		this.sidebar.drawTabs(context, this.mousePosition);
 	}
 
 	click(position: Position): Action | undefined { // TODO
@@ -207,27 +177,14 @@ export class InterfaceLayer {
 				this.buildingInterface = undefined;
 			}
 		}
-		const tab = this.getTabUnderCursor(position);
+		const tab = this.sidebar?.getTabUnderCursor(position);
 		if (tab != undefined) {
-			this.tab = tab;
+			this.buildingSidebar.tab = tab;
 			return undefined;
 		}
-		if(this.tab != undefined) {
-			const tabs = this.battleMode ? this.battleTabs : this.tabs;
-			const tab = tabs[this.tab];
-			let result = tab.buttonAt(position);
-			if(result != undefined) {
-				return result;
-			}
-
-			const action = tab.navButtonAt(position);
-			if (action && action.action == "page") {
-				if (action.argument == "next") {
-					tab.toNextPage();
-				} else {
-					tab.toPrevPage();
-				}
-			} 
+		if(this.sidebar) {
+			const action = this.sidebar.click(position);
+			if (action) return action;
 		}
 		for(let row of this.buttons) {
 			const action = row.buttonAt(position);
@@ -245,17 +202,18 @@ export class InterfaceLayer {
 		const icon = icons["kingdom"]; // TODO: add icon
 		const tabIcon = icons["tab"];
 		
-		this.battleTabs[0] = new BattleTab("Heroes", icon, tabIcon);
-		this.battleTabs[0].setHeroes(heroes);
-		this.resizeTab(this.battleTabs[0]);
-		this.battleMode = true;
-		this.tab = 0;
+		const heroTab = new BattleTab("Heroes", icon, tabIcon);
+		heroTab.setHeroes(heroes);
+		this.battleSidebar.tabs[0] = heroTab;
+		this.resizeTab(this.battleSidebar.tabs[0]);
+		this.sidebar = this.battleSidebar;
+		this.sidebar.tab = 0;
 	}
 
 	toMapMode() {
 		console.log("Map mode activated")
-		this.battleMode = false;
-		this.tab = 0;
+		this.sidebar = this.buildingSidebar;
+		this.sidebar.tab = 0;
 	}
 
 	resizeTab(tab: BattleTab | BuildingTab) {
