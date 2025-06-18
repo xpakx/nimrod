@@ -73,9 +73,7 @@ export class Game {
 		this.interf.buildingSidebar.tabs = await prepareTabs(this.sprites.buildings, tabSettings);
 		this.interf.buildingSidebar.tab = 0;
 		this.interf.sidebar = this.interf.buildingSidebar;
-		this.interf.calculateIconsSize();
 		this.interf.updateSize();
-		this.interf.calculateTabIcons();
 		this.addCityButtons();
 	}
 

@@ -3,6 +3,7 @@ import { BuildingInterface } from "../building/buildings.js";
 import { GameState } from "../game-state.js";
 import { Position, Size } from "../map-layer.js";
 import { Action } from "./actions.js";
+import { BattleSidebar } from "./battle-sidebar.js";
 import { BattleTab } from "./battle-tab.js";
 import { Button, ButtonContainer } from "./button.js";
 import { DialogueManager } from "./dialogue-manager.js";
@@ -29,7 +30,7 @@ export class InterfaceLayer {
 	dialogueManager: DialogueManager = new DialogueManager();
 
 	buildingSidebar: Sidebar;
-	battleSidebar: Sidebar;
+	battleSidebar: BattleSidebar;
 
 	sidebar: Sidebar | undefined;
 
@@ -40,7 +41,7 @@ export class InterfaceLayer {
 		this.dialogueManager.canvasSize = canvasSize;
 		this.dialogueManager.menuWidth = menuWidth;
 		this.buildingSidebar = new BuildingSidebar(canvasSize, menuWidth, this.tabWidth);
-		this.battleSidebar = new BuildingSidebar(canvasSize, menuWidth, this.tabWidth);
+		this.battleSidebar = new BattleSidebar(canvasSize, menuWidth, this.tabWidth);
 	 }
 
 	 updateSize() {
@@ -163,15 +164,8 @@ export class InterfaceLayer {
 
 	toBattleMode(heroes: BattleActor[], icons: any) {
 		console.log("Battle mode activated")
-		const icon = icons["kingdom"]; // TODO: add icon
-		const tabIcon = icons["tab"];
-		
-		const heroTab = new BattleTab("Heroes", icon, tabIcon);
-		heroTab.setHeroes(heroes);
-		this.battleSidebar.tabs[0] = heroTab;
-		this.battleSidebar.updateSize();
+		this.battleSidebar.loadBattle(heroes, icons);
 		this.sidebar = this.battleSidebar;
-		this.sidebar.tab = 0;
 	}
 
 	toMapMode() {
