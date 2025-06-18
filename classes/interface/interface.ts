@@ -4,7 +4,6 @@ import { GameState } from "../game-state.js";
 import { Position, Size } from "../map-layer.js";
 import { Action } from "./actions.js";
 import { BattleTab } from "./battle-tab.js";
-import { BuildingTab } from "./building-tab.js";
 import { Button, ButtonContainer } from "./button.js";
 import { DialogueManager } from "./dialogue-manager.js";
 import { Dialogue } from "./dialogue.js";
@@ -44,6 +43,15 @@ export class InterfaceLayer {
 		this.battleSidebar = new BuildingSidebar(canvasSize, menuWidth, this.tabWidth);
 	 }
 
+	 updateSize() {
+		 this.calculateIconsSize();
+		 if (this.sidebar) {
+			 this.sidebar.updateSize();
+			 this.buildingMenuHeight = this.sidebar.size.height;
+		 }
+		 this.calculateTabIcons();
+	 }
+
 	onMouse(position: Position) {
 		this.mousePosition = position;
 	}
@@ -76,13 +84,6 @@ export class InterfaceLayer {
 	renderButtons(context: CanvasRenderingContext2D) {
 		for(let row of this.buttons) {
 			row.draw(context, this.mousePosition);
-		}
-	}
-
-	resizeTabs() {
-		this.buildingMenuHeight = 60 + Math.max(300, this.tabWidth * this.buildingSidebar.tabs.length);
-		for (let tab of this.buildingSidebar.tabs) {
-			this.resizeTab(tab);
 		}
 	}
 
@@ -168,7 +169,7 @@ export class InterfaceLayer {
 		const heroTab = new BattleTab("Heroes", icon, tabIcon);
 		heroTab.setHeroes(heroes);
 		this.battleSidebar.tabs[0] = heroTab;
-		this.resizeTab(this.battleSidebar.tabs[0]);
+		this.battleSidebar.updateSize();
 		this.sidebar = this.battleSidebar;
 		this.sidebar.tab = 0;
 	}
@@ -177,18 +178,6 @@ export class InterfaceLayer {
 		console.log("Map mode activated")
 		this.sidebar = this.buildingSidebar;
 		this.sidebar.tab = 0;
-	}
-
-	resizeTab(tab: BattleTab | BuildingTab) {
-		const menuPadding = 20;
-		const menuWidth = this.menuWidth - this.tabWidth;
-		tab.buttonSize = tab.defaultButtonSize < menuWidth - menuPadding ? tab.defaultButtonSize : menuWidth - menuPadding;
-
-		tab.position.x = this.canvasSize.width - menuWidth + menuPadding;
-		tab.position.y = 60;
-		tab.size.width = menuWidth - 2*menuPadding;
-		tab.size.height = this.buildingMenuHeight;
-		tab.prepareButtons();
 	}
 }
 

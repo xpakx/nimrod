@@ -5,9 +5,11 @@ import { BuildingTab } from "./building-tab";
 export interface Sidebar {
 	tabs: BuildingTab[];
 	tab: number | undefined;
+	size: Size;
 
 	click(position: Position): Action | undefined;
 	draw(context: CanvasRenderingContext2D, mousePosition: Position, deltaTime: number): void;
+	updateSize(): void;
 }
 
 export class BuildingSidebar implements Sidebar {
@@ -16,6 +18,7 @@ export class BuildingSidebar implements Sidebar {
 	tabWidth: number;
 	canvasSize: Size;
 	menuWidth: number;
+	size: Size = {width: 0, height: 0};
 
 	constructor(canvasSize: Size, menuWidth: number, tabWidth: number) {
 		this.canvasSize = canvasSize;
@@ -105,5 +108,28 @@ export class BuildingSidebar implements Sidebar {
 		context.fillRect(this.canvasSize.width - this.menuWidth, 0, this.menuWidth, this.canvasSize.height);
 		this.drawTabs(context, mousePosition);
 		this.renderCurrentTab(context, mousePosition, deltaTime);
+	}
+
+	updateSize(): void {
+	    this.resizeTabs();
+	}
+
+	resizeTabs() {
+		this.size.height = 60 + Math.max(300, this.tabWidth * this.tabs.length);
+		for (let tab of this.tabs) {
+			this.resizeTab(tab);
+		}
+	}
+
+	resizeTab(tab: BuildingTab) {
+		const menuPadding = 20;
+		const menuWidth = this.menuWidth - this.tabWidth;
+		tab.buttonSize = tab.defaultButtonSize < menuWidth - menuPadding ? tab.defaultButtonSize : menuWidth - menuPadding;
+
+		tab.position.x = this.canvasSize.width - menuWidth + menuPadding;
+		tab.position.y = 60;
+		tab.size.width = menuWidth - 2*menuPadding;
+		tab.size.height = this.size.height;
+		tab.prepareButtons();
 	}
 }
