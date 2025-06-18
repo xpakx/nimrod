@@ -4,7 +4,6 @@ import { GameState } from "../game-state.js";
 import { Position, Size } from "../map-layer.js";
 import { Action } from "./actions.js";
 import { BattleSidebar } from "./battle-sidebar.js";
-import { BattleTab } from "./battle-tab.js";
 import { Button, ButtonContainer } from "./button.js";
 import { DialogueManager } from "./dialogue-manager.js";
 import { Dialogue } from "./dialogue.js";

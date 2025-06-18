@@ -3,6 +3,7 @@ import { BattleTab } from "./battle-tab.js";
 import { BuildingSidebar } from "./sidebar.js";
 
 export class BattleSidebar extends BuildingSidebar {
+	tabs: BattleTab[] = [];
 
 	loadBattle(heroes: BattleActor[], icons: any) {
 		const icon = icons["kingdom"]; // TODO: add icon

@@ -31,6 +31,7 @@ export class BuildingTab implements ButtonPane {
 	page: number = 0;
 	pages: number = 0;
 
+	// TODO: should probably extract more generic tab
 	constructor(name: string, buildings: BuildingButton[], icon: HTMLImageElement, tab: HTMLImageElement) {
 		this.name = name;
 		this.buttons = buildings;
