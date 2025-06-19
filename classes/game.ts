@@ -483,6 +483,7 @@ export class Game {
 
 	addCityButtons() {
 		this.interf.buttons = [];
+		this.interf.buildingSidebar.clearButtons();
 		const menuRow: ButtonRow = new ButtonRow(
 			this.interf.buildingMenuHeight + 50,	
 			[
@@ -490,7 +491,7 @@ export class Game {
 				new ActionButton(this.sprites.icons['delete'], {action: "delete", argument: undefined}, {width: 40, height: 40}),
 			]
 		);
-		this.interf.addButtonRow(menuRow);
+		this.interf.buildingSidebar.addButtonRow(menuRow);
 
 		const mapRow: ButtonRow = new ButtonRow(
 			this.state.canvasSize.height - 80,	
@@ -499,11 +500,12 @@ export class Game {
 				new ActionButton(this.sprites.icons['world'], {action: "goTo", argument: "World"}, {width: 50, height: 50}),
 			]
 		);
-		this.interf.addButtonRow(mapRow);
+		this.interf.buildingSidebar.addButtonRow(mapRow);
 	}
 
 	addKingdomButtons() {
 		this.interf.buttons = [];
+		this.interf.buildingSidebar.clearButtons();
 		const mapRow: ButtonRow = new ButtonRow(
 			this.state.canvasSize.height - 80,	
 			[
@@ -511,11 +513,12 @@ export class Game {
 				new ActionButton(this.sprites.icons['world'], {action: "goTo", argument: "World"}, {width: 50, height: 50}),
 			]
 		);
-		this.interf.addButtonRow(mapRow);
+		this.interf.buildingSidebar.addButtonRow(mapRow);
 	}
 
 	addWorldButtons() {
 		this.interf.buttons = [];
+		this.interf.buildingSidebar.clearButtons();
 		const mapRow = new ButtonRow(
 			this.state.canvasSize.height - 80,	
 			[
@@ -523,7 +526,7 @@ export class Game {
 				new ActionButton(this.sprites.icons['kingdom'], {action: "goTo", argument: "Kingdom"}, {width: 50, height: 50}),
 			]
 		);
-		this.interf.addButtonRow(mapRow);
+		this.interf.buildingSidebar.addButtonRow(mapRow);
 	}
 
 	getNormalWorkforce(): House[] {

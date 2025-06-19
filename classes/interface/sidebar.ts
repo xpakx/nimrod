@@ -1,6 +1,8 @@
 import { Position, Size } from "../map-layer";
 import { Action } from "./actions";
 import { BuildingTab } from "./building-tab";
+import { ButtonContainer } from "./button";
+import { ButtonRow } from "./interface";
 
 export interface Sidebar {
 	tabs: BuildingTab[];
@@ -10,6 +12,8 @@ export interface Sidebar {
 	click(position: Position): Action | undefined;
 	draw(context: CanvasRenderingContext2D, mousePosition: Position, deltaTime: number): void;
 	updateSize(): void;
+	addButtonRow(row: ButtonRow): void;
+	clearButtons(): void;
 }
 
 export class BuildingSidebar implements Sidebar {
@@ -19,6 +23,8 @@ export class BuildingSidebar implements Sidebar {
 	canvasSize: Size;
 	menuWidth: number;
 	size: Size = {width: 0, height: 0};
+
+	buttons: ButtonContainer[] = [];
 
 	constructor(canvasSize: Size, menuWidth: number, tabWidth: number) {
 		this.canvasSize = canvasSize;
@@ -30,6 +36,7 @@ export class BuildingSidebar implements Sidebar {
 		if (this.tab == undefined) return;
 		if (this.tab >= this.tabs.length) return;
 		this.tabs[this.tab].draw(context, mousePosition);
+		this.renderButtons(context, mousePosition);
 	}
 
 	getTabUnderCursor(position: Position): number | undefined {
@@ -78,6 +85,13 @@ export class BuildingSidebar implements Sidebar {
 					tab.toPrevPage();
 				}
 			} 
+		}
+
+		for(let row of this.buttons) {
+			const action = row.buttonAt(position);
+			if (action) {
+				return action;
+			}
 		}
 
 		return undefined;
@@ -131,5 +145,20 @@ export class BuildingSidebar implements Sidebar {
 		tab.size.width = menuWidth - 2*menuPadding;
 		tab.size.height = this.size.height;
 		tab.prepareButtons();
+	}
+
+	addButtonRow(row: ButtonRow) {
+		this.buttons.push(row);
+		row.calculateButtonRow(this.menuWidth, this.canvasSize.width);
+	}
+
+	renderButtons(context: CanvasRenderingContext2D, mousePosition: Position) {
+		for(let row of this.buttons) {
+			row.draw(context, mousePosition);
+		}
+	}
+
+	clearButtons(): void {
+	    this.buttons = [];
 	}
 }
