@@ -28,10 +28,8 @@ export class InterfaceLayer {
 
 	dialogueManager: DialogueManager = new DialogueManager();
 
-	buildingSidebar: Sidebar;
-	battleSidebar: BattleSidebar;
-
 	sidebar: Sidebar | undefined;
+	sidebars: Map<string, Sidebar> = new Map();
 
 	constructor(canvasSize: Size, menuWidth: number, topPanelHeight: number) {
 		this.canvasSize = canvasSize;
@@ -39,8 +37,6 @@ export class InterfaceLayer {
 		this.topPanelHeight = topPanelHeight;
 		this.dialogueManager.canvasSize = canvasSize;
 		this.dialogueManager.menuWidth = menuWidth;
-		this.buildingSidebar = new BuildingSidebar(canvasSize, menuWidth, this.tabWidth);
-		this.battleSidebar = new BattleSidebar(canvasSize, menuWidth, this.tabWidth);
 	 }
 
 	 updateSize() {
@@ -88,7 +84,9 @@ export class InterfaceLayer {
 	}
 
 	calculateTabIcons() {
-		for (let tab of this.buildingSidebar.tabs) {
+		const sidebar = this.sidebars.get("city");
+		if (!sidebar) return;
+		for (let tab of sidebar.tabs) {
 			const buildingTab = tab;
 			buildingTab.prepareIcon(this.tabWidth);
 		}
@@ -163,14 +161,39 @@ export class InterfaceLayer {
 
 	toBattleMode(heroes: BattleActor[], icons: any) {
 		console.log("Battle mode activated")
-		this.battleSidebar.loadBattle(heroes, icons);
-		this.sidebar = this.battleSidebar;
+		const battleSidebar = this.sidebars.get("battle") as BattleSidebar | undefined;
+		if (!battleSidebar) return;
+		battleSidebar.loadBattle(heroes, icons);
+		this.sidebar = battleSidebar;
 	}
 
 	toMapMode() {
 		console.log("Map mode activated")
-		this.sidebar = this.buildingSidebar;
-		this.sidebar.tab = 0;
+		this.changeSidebar("city");
+	}
+
+	 registerSidebar(name: string, sidebar: Sidebar) {
+		 this.sidebars.set(name, sidebar);
+	 }
+
+	 changeSidebar(name: string) {
+		 const newSidebar = this.sidebars.get(name);
+		 if (newSidebar) {
+			 this.sidebar = newSidebar;
+			 this.sidebar.tab = 0;
+		 }
+	 }
+
+	addButtonRowToSidebar(name: string, row: ButtonRow) {
+		const sidebar = this.sidebars.get(name);
+		if (!sidebar) return;
+		sidebar.addButtonRow(row);
+	}
+
+	clearSidebarButtons(name: string) {
+		const sidebar = this.sidebars.get(name);
+		if (!sidebar) return;
+		sidebar.clearButtons();
 	}
 }
 

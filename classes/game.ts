@@ -18,6 +18,8 @@ import { CampaignData } from "./quest.js";
 import { HeroLibrary } from "./battle/hero-library.js";
 import { DefaultTurnController } from "./logic/turn/default.js";
 import { TestMoveGenerator } from "./logic/ai/test.js";
+import { BuildingSidebar } from "./interface/sidebar.js";
+import { BattleSidebar } from "./interface/battle-sidebar.js";
 
 export class Game {
 	state: GameState;
@@ -58,6 +60,11 @@ export class Game {
 		this.minXOffset = this.map.isoToScreen({x: 0, y: this.map.map.length - 1}).x  - (this.map.tileSize.width/2);
 		this.maxXOffset = this.map.isoToScreen({x: this.map.map[0].length - 1, y: 0}).x  + (this.map.tileSize.width/2);
 		this.minuteCounter = 0;
+
+		this.interf.registerSidebar("city", new BuildingSidebar(this.state.canvasSize, this.state.menuWidth, this.interf.tabWidth));
+		this.interf.registerSidebar("kingdom", new BuildingSidebar(this.state.canvasSize, this.state.menuWidth, this.interf.tabWidth));
+		this.interf.registerSidebar("world", new BuildingSidebar(this.state.canvasSize, this.state.menuWidth, this.interf.tabWidth));
+		this.interf.registerSidebar("battle", new BattleSidebar(this.state.canvasSize, this.state.menuWidth, this.interf.tabWidth));
 	}
 
 	async prepareAssets(buildings: string | BuildingConfig[], avatars: string | SpriteConfig[], icons: string | SpriteConfig[], tabSettings: SidebarConfig) {
@@ -70,9 +77,12 @@ export class Game {
 		this.interf.coinsIcon = this.sprites.icons['coins'];
 		this.interf.populationIcon = this.sprites.icons['population'];
 
-		this.interf.buildingSidebar.tabs = await prepareTabs(this.sprites.buildings, tabSettings);
-		this.interf.buildingSidebar.tab = 0;
-		this.interf.sidebar = this.interf.buildingSidebar;
+		const buildingSidebar = this.interf.sidebars.get("city");
+		if (buildingSidebar) {
+			buildingSidebar.tabs = await prepareTabs(this.sprites.buildings, tabSettings);
+			buildingSidebar.tab = 0;
+			this.interf.sidebar = buildingSidebar;
+		}
 		this.interf.updateSize();
 		this.addCityButtons();
 	}
@@ -482,8 +492,9 @@ export class Game {
 	}
 
 	addCityButtons() {
+		this.interf.changeSidebar("city");
 		this.interf.buttons = [];
-		this.interf.buildingSidebar.clearButtons();
+		this.interf.clearSidebarButtons("city");
 		const menuRow: ButtonRow = new ButtonRow(
 			this.interf.buildingMenuHeight + 50,	
 			[
@@ -491,7 +502,7 @@ export class Game {
 				new ActionButton(this.sprites.icons['delete'], {action: "delete", argument: undefined}, {width: 40, height: 40}),
 			]
 		);
-		this.interf.buildingSidebar.addButtonRow(menuRow);
+		this.interf.addButtonRowToSidebar("city", menuRow);
 
 		const mapRow: ButtonRow = new ButtonRow(
 			this.state.canvasSize.height - 80,	
@@ -500,12 +511,13 @@ export class Game {
 				new ActionButton(this.sprites.icons['world'], {action: "goTo", argument: "World"}, {width: 50, height: 50}),
 			]
 		);
-		this.interf.buildingSidebar.addButtonRow(mapRow);
+		this.interf.addButtonRowToSidebar("city", mapRow);
 	}
 
 	addKingdomButtons() {
+		this.interf.changeSidebar("kingdom");
 		this.interf.buttons = [];
-		this.interf.buildingSidebar.clearButtons();
+		this.interf.clearSidebarButtons("kingdom");
 		const mapRow: ButtonRow = new ButtonRow(
 			this.state.canvasSize.height - 80,	
 			[
@@ -513,12 +525,13 @@ export class Game {
 				new ActionButton(this.sprites.icons['world'], {action: "goTo", argument: "World"}, {width: 50, height: 50}),
 			]
 		);
-		this.interf.buildingSidebar.addButtonRow(mapRow);
+		this.interf.addButtonRowToSidebar("kingdom", mapRow);
 	}
 
 	addWorldButtons() {
+		this.interf.changeSidebar("world");
 		this.interf.buttons = [];
-		this.interf.buildingSidebar.clearButtons();
+		this.interf.clearSidebarButtons("world");
 		const mapRow = new ButtonRow(
 			this.state.canvasSize.height - 80,	
 			[
@@ -526,7 +539,7 @@ export class Game {
 				new ActionButton(this.sprites.icons['kingdom'], {action: "goTo", argument: "Kingdom"}, {width: 50, height: 50}),
 			]
 		);
-		this.interf.buildingSidebar.addButtonRow(mapRow);
+		this.interf.addButtonRowToSidebar("world", mapRow);
 	}
 
 	getNormalWorkforce(): House[] {
