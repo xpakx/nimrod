@@ -122,6 +122,7 @@ export class BuildingSidebar implements Sidebar {
 		context.fillRect(this.canvasSize.width - this.menuWidth, 0, this.menuWidth, this.canvasSize.height);
 		this.drawTabs(context, mousePosition);
 		this.renderCurrentTab(context, mousePosition, deltaTime);
+		this.renderButtons(context, mousePosition);
 	}
 
 	updateSize(): void {

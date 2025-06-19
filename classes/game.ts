@@ -85,6 +85,8 @@ export class Game {
 		}
 		this.interf.updateSize();
 		this.addCityButtons();
+		this.addKingdomButtons();
+		this.addWorldButtons();
 	}
 
 	onMouseLeftClick(_event: MouseEvent) {
@@ -127,7 +129,6 @@ export class Game {
 		if(clickResult.action == "goTo") {
 			this.logger.debug("Go to: " + clickResult.argument);
 			this.interf.buildingInterface = undefined;
-			this.interf.toMapMode();
 			switch (clickResult.argument) {
 				case "World":
 					this.toWorld(); break;
@@ -451,20 +452,20 @@ export class Game {
 
 	toWorld() {
 		this.map.clearPath();
-		this.addWorldButtons();
+		this.interf.changeSidebar("world");
 		this.state.view = "World";
 	}
 
 	toKingdom() {
 		this.map.clearPath();
-		this.addKingdomButtons();
+		this.interf.changeSidebar("kingdom");
 		this.state.view = "Kingdom";
 	}
 
 	toCity() {
 		this.map.clearPath();
 		this.map.floydWarshall();
-		this.addCityButtons();
+		this.interf.changeSidebar("city");
 		this.state.view = "City";
 	}
 
@@ -492,7 +493,6 @@ export class Game {
 	}
 
 	addCityButtons() {
-		this.interf.changeSidebar("city");
 		this.interf.buttons = [];
 		this.interf.clearSidebarButtons("city");
 		const menuRow: ButtonRow = new ButtonRow(
@@ -515,7 +515,6 @@ export class Game {
 	}
 
 	addKingdomButtons() {
-		this.interf.changeSidebar("kingdom");
 		this.interf.buttons = [];
 		this.interf.clearSidebarButtons("kingdom");
 		const mapRow: ButtonRow = new ButtonRow(
@@ -529,7 +528,6 @@ export class Game {
 	}
 
 	addWorldButtons() {
-		this.interf.changeSidebar("world");
 		this.interf.buttons = [];
 		this.interf.clearSidebarButtons("world");
 		const mapRow = new ButtonRow(

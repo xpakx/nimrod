@@ -7,7 +7,7 @@ import { BattleSidebar } from "./battle-sidebar.js";
 import { Button, ButtonContainer } from "./button.js";
 import { DialogueManager } from "./dialogue-manager.js";
 import { Dialogue } from "./dialogue.js";
-import { BuildingSidebar, Sidebar } from "./sidebar.js";
+import { Sidebar } from "./sidebar.js";
 
 export class InterfaceLayer {
 	canvasSize: Size = {width: 0, height: 0};
@@ -167,11 +167,6 @@ export class InterfaceLayer {
 		this.sidebar = battleSidebar;
 	}
 
-	toMapMode() {
-		console.log("Map mode activated")
-		this.changeSidebar("city");
-	}
-
 	 registerSidebar(name: string, sidebar: Sidebar) {
 		 this.sidebars.set(name, sidebar);
 	 }
@@ -181,6 +176,7 @@ export class InterfaceLayer {
 		 if (newSidebar) {
 			 this.sidebar = newSidebar;
 			 this.sidebar.tab = 0;
+			 if (this.sidebar.tabs.length == 0) this.sidebar.tab = undefined;
 		 }
 	 }
 
