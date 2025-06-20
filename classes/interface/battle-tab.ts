@@ -65,4 +65,13 @@ export class BattleTab extends BuildingTab {
 			button.draw(context, hovered);
 		}
 	}
+
+	buttonAt(position: Position): Action | undefined {
+		for(let button of this.buttons) {
+			if(button.inButton(position)) {
+				return button.getClickAction();
+			}
+		}
+		return undefined;
+	}
 }
