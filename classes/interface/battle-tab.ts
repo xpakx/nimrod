@@ -1,5 +1,6 @@
 import { BattleActor } from "../battle/actor.js";
 import { Position, Size } from "../map-layer.js";
+import { Action } from "./actions.js";
 import { HeroButton } from "./adventurers-guild.js";
 import { BuildingTab } from "./building-tab.js";
 import { Button } from "./button.js";
@@ -13,7 +14,7 @@ export class BattleTab extends BuildingTab {
 
 	position: Position = {x: 0, y: 0};
 	size: Size = {width: 0, height: 0};
-	buttonGap: number = 10;
+	buttonGap: number = 25;
 
 	buttons: Button[] = [];
 
@@ -44,6 +45,24 @@ export class BattleTab extends BuildingTab {
 				"select"
 			);
 			this.buttons.push(button);
+		}
+	}
+
+	prepareButtons() {
+		let row = 0;
+		for(let button of this.buttons) {
+			button.size.width = this.buttonSize;
+			button.size.height = this.buttonSize;
+			button.position.x = this.position.x;
+			button.position.y = this.position.y + (this.buttonSize + this.buttonGap) * row;
+			row += 1;
+		}
+	}
+
+	draw(context: CanvasRenderingContext2D, mousePosition: Position) {
+		for(let button of this.buttons) {
+			const hovered = button.inButton(mousePosition);
+			button.draw(context, hovered);
 		}
 	}
 }
