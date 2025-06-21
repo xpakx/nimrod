@@ -1,5 +1,6 @@
 import { BattleActor } from "../battle/actor.js";
 import { Battle } from "../battle/battle.js";
+import { EffectSystem } from "../battle/effect-system.js";
 import { Game } from "../game.js";
 import { getLogger, Logger } from "../logger.js";
 import { Position } from "../map-layer.js";
@@ -18,9 +19,12 @@ export class BattleLogicLayer {
 	turnController: TurnController;
 	aiMoveGenerator: MoveGenerator;
 
+	skillProcessor: EffectSystem;
+
 	constructor(turnController: TurnController, moveGenerator: MoveGenerator) {
 		this.turnController = turnController;
 		this.aiMoveGenerator = moveGenerator;
+		this.skillProcessor = new EffectSystem();
 	}
 
 	showSpawnArea(game: Game) {
@@ -63,7 +67,7 @@ export class BattleLogicLayer {
 		if (this.isBattleBlocked(battle)) return; // TODO
 
 		if (battle.selectedTile) {
-			this.battleProcessAction(game, battle.selectedTile, {x: x, y: y}, battle.selectedActor);
+			this.battleProcessMovement(game, battle.selectedTile, {x: x, y: y}, battle.selectedActor);
 			battle.selectedTile = undefined;
 			battle.selectedActor = undefined;
 			return;
@@ -119,7 +123,7 @@ export class BattleLogicLayer {
 	}
 
 
-	battleProcessAction(game: Game, from: Position, to: Position, actor: BattleActor | undefined) {
+	battleProcessMovement(game: Game, from: Position, to: Position, actor: BattleActor | undefined) {
 		if (!actor || actor.enemy) {
 			game.map.clearPath();
 			return;
