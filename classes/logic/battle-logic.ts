@@ -1,4 +1,5 @@
 import { BattleActor } from "../battle/actor.js";
+import { Battle } from "../battle/battle.js";
 import { Game } from "../game.js";
 import { getLogger, Logger } from "../logger.js";
 import { Position } from "../map-layer.js";
@@ -47,6 +48,7 @@ export class BattleLogicLayer {
 		}
 	}
 
+
 	leftMouseBattle(game: Game) {
 		if (!game.state.currentBattle) {
 			return;
@@ -58,12 +60,7 @@ export class BattleLogicLayer {
 		const x = game.map.isoPlayerMouse.x;
 		const y = game.map.isoPlayerMouse.y;
 
-
-		if (this.turnController.isMovementBlocked()) return; // TODO
-		if (!battle.playerPhase) {
-			// TODO
-			return;
-		}
+		if (this.isBattleBlocked(battle)) return; // TODO
 
 		if (battle.selectedTile) {
 			this.battleProcessAction(game, battle.selectedTile, {x: x, y: y}, battle.selectedActor);
@@ -72,10 +69,19 @@ export class BattleLogicLayer {
 			return;
 		}
 
+		this.battleSelectTile(game, battle, x, y);
+	}
+
+	isBattleBlocked(battle: Battle): boolean {
+		if (this.turnController.isMovementBlocked()) return true; // TODO
+		if (!battle.playerPhase) return true;
+		return false;
+	}
+
+	battleSelectTile(game: Game, battle: Battle, x: number, y: number) {
 		battle.selectedTile = {x: x, y: y};
 		battle.selectedActor = this.isMouseOverPedestrian(game);
 		if (battle.selectedActor?.moved) {
-			// TODO
 			battle.selectedActor = undefined;
 		}
 		this.logger.debug("Selected actor", battle.selectedActor);
