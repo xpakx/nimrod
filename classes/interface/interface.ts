@@ -163,8 +163,16 @@ export class InterfaceLayer {
 		console.log("Battle mode activated")
 		const battleSidebar = this.sidebars.get("battle") as BattleSidebar | undefined;
 		if (!battleSidebar) return;
-		battleSidebar.loadBattle(heroes, icons);
+		const tabImg = this.getTabIcon();
+		battleSidebar.loadBattle(heroes, icons, tabImg);
 		this.sidebar = battleSidebar;
+	}
+
+	// TODO: temporary workaround
+	getTabIcon() {
+		const sidebar = this.sidebars.get("city");
+		if (!sidebar) return;
+		return sidebar.tabs[0].tabImg;;
 	}
 
 	 registerSidebar(name: string, sidebar: Sidebar) {
