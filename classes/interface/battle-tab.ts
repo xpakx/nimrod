@@ -24,14 +24,6 @@ export class BattleTab extends BuildingTab {
 
 	constructor(name: string, icon: HTMLImageElement, tab: HTMLImageElement) {
 		super(name, [], icon, tab);
-		this.name = name;
-		this.buttons = [];
-		this._icon = icon;
-		this.icon =  new OffscreenCanvas(100, 100);
-		this.inactiveIcon =  new OffscreenCanvas(100, 100);
-		this.hoverIcon =  new OffscreenCanvas(100, 100);
-		this.inactiveHoverIcon =  new OffscreenCanvas(100, 100);
-		this.tabImg = tab;
 	}
 
 	setHeroes(heroes: BattleActor[]) {
