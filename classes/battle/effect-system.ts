@@ -1,19 +1,13 @@
 import { BattleActor } from "../battle/actor";
 import { MapLayer, Position } from "../map-layer";
-
-type EffectType = "control" | "heal" | "damage" | "buff" | "debuff";
-
-export interface Effect {
-	type: EffectType;
-	name: string;
-}
+import { SkillEffect } from "./skill/skill";
 
 export interface EffectApplyEvent {
 	source: BattleActor;
 	target: BattleActor | Position;
 	radius?: number;
 	line?: number;
-	effect: Effect;
+	effect: SkillEffect;
 	duration?: number;
 
 	blocks: { by: BattleActor; reason: string }[];
@@ -34,7 +28,7 @@ export class EffectSystem {
 		this.handlers.push(handler);
 	}
 
-	emit(source: BattleActor, target: BattleActor, effect: Effect,
+	emit(source: BattleActor, target: BattleActor | Position, effect: SkillEffect,
 	    actors: BattleActor[], map: MapLayer) {
 		const event: EffectApplyEvent = {
 			source,

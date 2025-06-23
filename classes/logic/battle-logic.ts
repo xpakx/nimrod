@@ -1,6 +1,7 @@
 import { BattleActor } from "../battle/actor.js";
 import { Battle } from "../battle/battle.js";
 import { EffectSystem } from "../battle/effect-system.js";
+import { Skill } from "../battle/skill/skill.js";
 import { Game } from "../game.js";
 import { getLogger, Logger } from "../logger.js";
 import { Position } from "../map-layer.js";
@@ -232,6 +233,30 @@ export class BattleLogicLayer {
 		this.aiMoveGenerator.makeMove(game, unitsToMove);
 		const turnEnded = this.turnController.tryEndTurn(game, this.skipAnimations);
 		if (turnEnded) this.onTurnEnd(game);
+	}
+
+	useSkill(game: Game, skill: Skill, actor: BattleActor, position: Position) {
+		if (!game.state.currentBattle) return;
+		const battle = game.state.currentBattle;
+
+		let target: Position | BattleActor = position;
+		for (let pedestrian of game.state.pedestrians) {
+			const pos = pedestrian.positionSquare;
+			if(pos.x == position.x && pos.y == position.y) {
+				target = pedestrian as BattleActor;
+				break;
+			}
+		}
+
+		for (let effect of skill.effect) {
+			this.skillProcessor.emit(
+				actor,
+				target,
+				effect,
+				battle.getPedestrians(),
+				game.map
+			)
+		}
 	}
 }
 
