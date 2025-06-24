@@ -1,6 +1,6 @@
 import { BattleActor } from "../battle/actor";
 import { MapLayer, Position } from "../map-layer";
-import { SkillEffect, SkillEffectDamage } from "./skill/skill";
+import { DamageFunction, SkillEffect, SkillEffectDamage } from "./skill/skill";
 
 export interface EffectApplyEvent {
 	source: BattleActor;
@@ -69,20 +69,30 @@ export class EffectSystem {
 	private applyEffect(event: EffectApplyEvent) {
 		const effect = event.effect;
 		if (effect.type == 'damage') {
-			this.applyDamage(event, effect);
+			this.applyDamageEvent(event, effect);
 		}
 	}
 
-	private applyDamage(event: EffectApplyEvent, effect: SkillEffectDamage) {
-		const target = event.target as BattleActor; // TODO: AoE
-		let damage: number;
-		if (typeof effect.damage == 'number') {
-			damage = effect.damage; // TODO: attack type effectivenes
+	private applyDamageEvent(event: EffectApplyEvent, effect: SkillEffectDamage) {
+		const target = event.target;
+
+		if ('name' in target) {
+			this.applyDamage(event.source, target, effect.damage);
 		} else {
-			damage = effect.damage(event.source, target);
+			// TODO: AoE
 		}
 
-		target.hp -= damage;
+	}
+
+	private applyDamage(source: BattleActor, target:  BattleActor, damage: number | DamageFunction) {
+		let amount: number;
+		if (typeof damage == 'number') {
+			amount = damage; // TODO: attack type effectivenes
+		} else {
+			amount = damage(source, target);
+		}
+
+		target.hp -= amount;
 		if (target.hp <= 0) {
 			target.dead = true;
 		}
