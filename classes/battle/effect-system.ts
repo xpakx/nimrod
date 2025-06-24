@@ -56,12 +56,30 @@ export class EffectSystem {
 			e.result = "blocked";
 		}
 
-		if (e.result === "applied" || e.result === "mitigated") {
-			// apply effect
+		if (e.result === "applied") {
+			this.applyEffect(e);
+		} else if (e.result === "mitigated") {
 		}
 
 		for (const reaction of e.reactions) {
 			reaction();
+		}
+	}
+
+	private applyEffect(event: EffectApplyEvent) {
+		const effect = event.effect;
+		if (effect.type == 'damage') {
+			const target = event.target as BattleActor;
+			let damage: number;
+			if (typeof effect.damage == 'number') {
+				damage = effect.damage;
+			} else {
+				damage = effect.damage(event.source, target);
+			}
+			target.hp -= damage;
+			if (target.hp <= 0) {
+				target.dead = true;
+			}
 		}
 	}
 }
