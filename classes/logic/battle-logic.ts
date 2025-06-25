@@ -8,10 +8,16 @@ import { Position } from "../map-layer.js";
 import { MoveGenerator } from "./ai/move.js";
 import { TurnController } from "./turn/turn.js";
 
+
+interface HeroSelection {
+	hero?: BattleActor;
+	initialPosition?: Position;
+}
+
 export class BattleLogicLayer {
 	logger: Logger = getLogger("BattleLogicLayer");
 
-	currentHero?: BattleActor;
+	currentHero: HeroSelection = {hero: undefined, initialPosition: undefined};
 	savedPositions: SavedPosition[] = [];
 	spawnColor: string =  "#6666ff";
 
@@ -162,20 +168,21 @@ export class BattleLogicLayer {
 		const x = game.map.isoPlayerMouse.x;
 		const y = game.map.isoPlayerMouse.y;
 
-		if (!this.currentHero) {
-			this.currentHero = this.isMouseOverPedestrian(game);
+		if (!this.currentHero.hero) {
+			this.currentHero.hero = this.isMouseOverPedestrian(game);
+			this.currentHero.initialPosition = {x: x, y: y};
 			return;
 		}
 
-		const placed = battle.placeHero(this.currentHero, {x: x, y: y});
+		const placed = battle.placeHero(this.currentHero.hero, {x: x, y: y});
 		if (!placed) {
 			return;
 		}
-		this.currentHero.selected = false;
-		if (game.state.pedestrians.indexOf(this.currentHero) < 0) {
-			game.state.pedestrians.push(this.currentHero);
+		this.currentHero.hero.selected = false;
+		if (game.state.pedestrians.indexOf(this.currentHero.hero) < 0) {
+			game.state.pedestrians.push(this.currentHero.hero);
 		}
-		this.currentHero = undefined;
+		this.currentHero.hero = undefined;
 
 		battle.finishPlacement();
 		this.logger.debug(`started: ${game.state.currentBattle.battleStarted}`);
@@ -215,9 +222,9 @@ export class BattleLogicLayer {
 	}
 
 	selectHero(hero: BattleActor) {
-		if (this.currentHero) this.currentHero.selected = false;
-		this.currentHero = hero;
-		this.currentHero.selected = true;
+		if (this.currentHero.hero) this.currentHero.hero.selected = false;
+		this.currentHero.hero = hero;
+		this.currentHero.hero.selected = true;
 	}
 
 	onTurnEnd(game: Game) {
