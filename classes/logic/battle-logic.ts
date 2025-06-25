@@ -265,6 +265,17 @@ export class BattleLogicLayer {
 			)
 		}
 	}
+
+	cancelCurrentMove() {
+		if (!this.currentHero.hero) return;
+		if (!this.currentHero.initialPosition) return;
+		const actor = this.currentHero.hero;
+		actor.setPosition(this.currentHero.initialPosition);
+
+		actor.path = undefined;
+		actor.goal = undefined;
+		actor.moved = false;
+	}
 }
 
 interface SavedPosition {
