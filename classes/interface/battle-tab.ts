@@ -17,6 +17,7 @@ export class BattleTab extends BuildingTab {
 	buttonGap: number = 25;
 
 	buttons: Button[] = [];
+	buttonLabels: ImageData[] = [];
 
 	pageSize: number = 1;
 	page: number = 0;
@@ -41,25 +42,37 @@ export class BattleTab extends BuildingTab {
 	}
 
 	prepareButtons() {
+		this.buttonLabels = [];
+		const offscreen =  new OffscreenCanvas(100, 100);
+		const context = offscreen.getContext("2d")!;
+		context.font = "13px normal"
+		context.fillStyle = "white"
+		
+
 		let row = 0;
 		for(let button of this.buttons) {
 			button.size.width = this.buttonSize;
 			button.size.height = this.buttonSize;
 			button.position.x = this.position.x;
 			button.position.y = this.position.y + (this.buttonSize + this.buttonGap) * row;
+			const heroButton = button as HeroButton;
+
+			context.fillText(heroButton.hero.name, 10, 0);
+			const img = context.getImageData(0, 0, 100, 100);
+			this.buttonLabels.push(img);
+
 			row += 1;
 		}
 	}
 
 	draw(context: CanvasRenderingContext2D, mousePosition: Position) {
-		for(let button of this.buttons) {
+		for(let i in this.buttons) {
+			const button = this.buttons[i];
 			const hovered = button.inButton(mousePosition);
 			button.draw(context, hovered);
+			const label = this.buttonLabels[i];
+			context.putImageData(label, button.position.x + button.size.width, button.position.y);
 
-			const heroButton = button as HeroButton;
-			context.font = "13px normal"
-			context.fillStyle = "white"
-			context.fillText(heroButton.hero.name, heroButton.position.x + heroButton.size.width + 10, heroButton.position.y + 13);
 		}
 	}
 
