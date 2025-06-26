@@ -17,7 +17,6 @@ export class BattleTab extends BuildingTab {
 	buttonGap: number = 25;
 
 	buttons: Button[] = [];
-	buttonLabels: ImageData[] = [];
 
 	pageSize: number = 1;
 	page: number = 0;
@@ -30,48 +29,31 @@ export class BattleTab extends BuildingTab {
 	setHeroes(heroes: BattleActor[]) {
 		this.buttons = [];
 		for (let hero of heroes) {
-			const button = new HeroButton(
+			const button = new HeroButtonWithLabel(
 				hero.portrait || hero.sprite.image,
 				{width: this.buttonSize, height: this.buttonSize},
 				{x: 0, y: 0},
-				hero,
-				"select"
+				hero
 			);
 			this.buttons.push(button);
 		}
 	}
 
 	prepareButtons() {
-		this.buttonLabels = [];
-		const offscreen =  new OffscreenCanvas(100, 100);
-		const context = offscreen.getContext("2d")!;
-		context.font = "13px normal"
-		context.fillStyle = "white"
-		
-
 		let row = 0;
 		for(let button of this.buttons) {
 			button.size.width = this.buttonSize;
 			button.size.height = this.buttonSize;
 			button.position.x = this.position.x;
 			button.position.y = this.position.y + (this.buttonSize + this.buttonGap) * row;
-			const heroButton = button as HeroButton;
-
-			context.fillText(heroButton.hero.name, 10, 0);
-			const img = context.getImageData(0, 0, 100, 100);
-			this.buttonLabels.push(img);
-
 			row += 1;
 		}
 	}
 
 	draw(context: CanvasRenderingContext2D, mousePosition: Position) {
-		for(let i in this.buttons) {
-			const button = this.buttons[i];
+		for(let button of this.buttons) {
 			const hovered = button.inButton(mousePosition);
 			button.draw(context, hovered);
-			const label = this.buttonLabels[i];
-			context.putImageData(label, button.position.x + button.size.width, button.position.y);
 
 		}
 	}
@@ -83,5 +65,28 @@ export class BattleTab extends BuildingTab {
 			}
 		}
 		return undefined;
+	}
+}
+
+class HeroButtonWithLabel extends HeroButton {
+	label: OffscreenCanvas;
+	labelCtx: OffscreenCanvasRenderingContext2D;
+
+	constructor(image: HTMLImageElement, size: Size, position: Position, hero: BattleActor) {
+		super(image, size, position, hero, "select");
+		this.label = new OffscreenCanvas(200, 100);
+		this.labelCtx = this.label.getContext("2d")!;
+		this.drawLabel();
+	}
+
+	drawLabel() {
+		this.labelCtx.font = "13px normal"
+		this.labelCtx.fillStyle = "white"
+		this.labelCtx.fillText(this.hero.name, 10, 13);
+	}
+
+	draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, hovered: boolean) {
+		super.draw(context, hovered);
+		context.drawImage(this.label, this.position.x + this.size.width, this.position.y);
 	}
 }
