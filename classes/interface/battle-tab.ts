@@ -55,6 +55,11 @@ export class BattleTab extends BuildingTab {
 		for(let button of this.buttons) {
 			const hovered = button.inButton(mousePosition);
 			button.draw(context, hovered);
+
+			const heroButton = button as HeroButton;
+			context.font = "13px normal"
+			context.fillStyle = "white"
+			context.fillText(heroButton.hero.name, heroButton.position.x + heroButton.size.width + 10, heroButton.position.y + 13);
 		}
 	}
 
