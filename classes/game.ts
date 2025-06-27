@@ -147,9 +147,11 @@ export class Game {
 				this.cityLogic.quests.registerQuest(clickResult.quest);
 			}
 		} else if(clickResult.action == "selectHero") {
+			this.battleLogic.switchToSkillMode(this, clickResult.hero);
 			this.battleLogic.selectHero(clickResult.hero);
 		} else if(clickResult.action == "selectSkill") {
-			this.battleLogic.selectSkill(clickResult.skill);
+			// TODO: remove Game from signature
+			this.battleLogic.selectSkill(this, clickResult.skill);
 		}
 	}
 

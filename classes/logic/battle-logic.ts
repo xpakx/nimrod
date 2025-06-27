@@ -3,6 +3,7 @@ import { Battle } from "../battle/battle.js";
 import { EffectSystem } from "../battle/effect-system.js";
 import { Skill } from "../battle/skill/skill.js";
 import { Game } from "../game.js";
+import { BattleTab } from "../interface/battle-tab.js";
 import { getLogger, Logger } from "../logger.js";
 import { Position } from "../map-layer.js";
 import { MoveGenerator } from "./ai/move.js";
@@ -96,8 +97,26 @@ export class BattleLogicLayer {
 		if (battle.selectedActor?.moved) {
 			battle.selectedActor = undefined;
 		}
+		if (battle.selectedActor) {
+			this.switchToSkillMode(game, battle.selectedActor);
+		}
 		this.logger.debug("Selected actor", battle.selectedActor);
 		this.logger.debug("Selected tile", battle.selectedTile);
+	}
+
+	switchToSkillMode(game: Game, hero: BattleActor) {
+		if (!game.state.currentBattle?.battleStarted) return;
+		const interf = game.interf.sidebars.get("battle");
+		if (!interf) return;
+		const tab = interf.tabs[0] as BattleTab;
+		tab.switchToSkillMode(hero);
+	}
+
+	switchToHeroMode(game: Game) {
+		const interf = game.interf.sidebars.get("battle");
+		if (!interf) return;
+		const tab = interf.tabs[0] as BattleTab;
+		tab.switchToHeroMode();
 	}
 
 	battleMouseOver(game: Game) {
@@ -245,10 +264,16 @@ export class BattleLogicLayer {
 		if (turnEnded) this.onTurnEnd(game);
 	}
 
-	selectSkill(skill: Skill) {
-		if (!this.currentHero.hero) return;
-		this.currentHero.hero.moved = true;
+	selectSkill(game: Game, skill: Skill) {
+		if (!game.state.currentBattle) return;
+		const battle = game.state.currentBattle;
+		if (!battle.selectedActor) return;
+		battle.selectedActor.moved = true;
+		// TODO: simplify
+		this.currentHero.hero = battle.selectedActor;
 		this.currentHero.skill = skill;
+		// TODO: remove later
+		this.switchToHeroMode(game);
 	}
 
 	useSkill(game: Game, actor: BattleActor, position: Position) {
@@ -266,6 +291,7 @@ export class BattleLogicLayer {
 			}
 		}
 		this.currentHero.hero.finishedTurn = true;
+		this.switchToHeroMode(game);
 
 		for (let effect of this.currentHero.skill.effect) {
 			this.skillProcessor.emit(
