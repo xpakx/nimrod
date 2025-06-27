@@ -148,6 +148,8 @@ export class Game {
 			}
 		} else if(clickResult.action == "selectHero") {
 			this.battleLogic.selectHero(clickResult.hero);
+		} else if(clickResult.action == "selectSkill") {
+			this.battleLogic.selectSkill(clickResult.skill);
 		}
 	}
 

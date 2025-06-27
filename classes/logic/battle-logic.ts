@@ -12,12 +12,13 @@ import { TurnController } from "./turn/turn.js";
 interface HeroSelection {
 	hero?: BattleActor;
 	initialPosition?: Position;
+	skill?: Skill;
 }
 
 export class BattleLogicLayer {
 	logger: Logger = getLogger("BattleLogicLayer");
 
-	currentHero: HeroSelection = {hero: undefined, initialPosition: undefined};
+	currentHero: HeroSelection = {};
 	savedPositions: SavedPosition[] = [];
 	spawnColor: string =  "#6666ff";
 
@@ -171,6 +172,7 @@ export class BattleLogicLayer {
 		if (!this.currentHero.hero) {
 			this.currentHero.hero = this.isMouseOverPedestrian(game);
 			this.currentHero.initialPosition = {x: x, y: y};
+			this.currentHero.skill = undefined;
 			return;
 		}
 
@@ -242,8 +244,15 @@ export class BattleLogicLayer {
 		if (turnEnded) this.onTurnEnd(game);
 	}
 
-	useSkill(game: Game, skill: Skill, actor: BattleActor, position: Position) {
+	selectSkill(skill: Skill) {
+		if (!this.currentHero.hero) return;
+		this.currentHero.hero.moved = true;
+		this.currentHero.skill = skill;
+	}
+
+	useSkill(game: Game, actor: BattleActor, position: Position) {
 		if (!game.state.currentBattle) return;
+		if (!this.currentHero.skill) return;
 		const battle = game.state.currentBattle;
 
 		let target: Position | BattleActor = position;
@@ -255,7 +264,7 @@ export class BattleLogicLayer {
 			}
 		}
 
-		for (let effect of skill.effect) {
+		for (let effect of this.currentHero.skill.effect) {
 			this.skillProcessor.emit(
 				actor,
 				target,
