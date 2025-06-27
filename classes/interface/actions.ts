@@ -1,4 +1,5 @@
 import { BattleActor } from "../battle/actor.js";
+import { Skill } from "../battle/skill/skill.js";
 import { BuildingInterface } from "../building/buildings.js";
 import { Quest } from "../quest.js";
 import { BattleMapData } from "../save-manager.js";
@@ -45,5 +46,10 @@ export interface BattleHeroAction {
 	hero: BattleActor;
 }
 
+export interface BattleSkillAction {
+	action: "selectSkill";
+	skill: Skill;
+}
+
 export type Action = NavAction | OpenBattleAction | BuildAction | OpenBuilding | TeamAction | PageAction
-| RegisterQuestAction | BattleHeroAction;
+| RegisterQuestAction | BattleHeroAction | BattleSkillAction;

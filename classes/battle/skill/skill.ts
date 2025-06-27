@@ -5,6 +5,7 @@ export interface Skill {
 	name: string;
 	effect: SkillEffect[];
 	level: number;
+	icon: HTMLImageElement;
 }
 
 export type SkillEffect = SkillEffectDamage | SkillEffectPassive;
