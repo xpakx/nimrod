@@ -17,7 +17,7 @@ export class DefaultTurnController implements TurnController {
 		if (!game.state.currentBattle) return false;
 		const battle = game.state.currentBattle;
 		for (let hero of battle.heroes) {
-			if (!hero.moved) return false;
+			if (!hero.finishedTurn) return false;
 		}
 		return this.tryEndTurn(game, skipAnimations);
 	}
@@ -25,6 +25,7 @@ export class DefaultTurnController implements TurnController {
 	clearMoved(actors: BattleActor[]) {
 		for (let actor of actors) {
 			actor.moved = false;
+			actor.finishedTurn = false;
 		}
 	}
 

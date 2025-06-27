@@ -142,6 +142,7 @@ export class BattleLogicLayer {
 		if (dist <= actor.movement && path) {
 			this.moveActor(actor, to, path);
 			actor.moved = true;
+			actor.finishedTurn = true; // TODO
 		}
 		const turnEnded = this.turnController.checkTurnEnd(game, this.skipAnimations);
 		if (turnEnded) this.onTurnEnd(game);
@@ -253,6 +254,7 @@ export class BattleLogicLayer {
 	useSkill(game: Game, actor: BattleActor, position: Position) {
 		if (!game.state.currentBattle) return;
 		if (!this.currentHero.skill) return;
+		if (!this.currentHero.hero) return;
 		const battle = game.state.currentBattle;
 
 		let target: Position | BattleActor = position;
@@ -263,6 +265,7 @@ export class BattleLogicLayer {
 				break;
 			}
 		}
+		this.currentHero.hero.finishedTurn = true;
 
 		for (let effect of this.currentHero.skill.effect) {
 			this.skillProcessor.emit(
