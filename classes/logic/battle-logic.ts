@@ -164,6 +164,7 @@ export class BattleLogicLayer {
 			actor.finishedTurn = true; // TODO
 		}
 		const turnEnded = this.turnController.checkTurnEnd(game, this.skipAnimations);
+		console.log("we have a hero");
 		if (turnEnded) this.onTurnEnd(game);
 	}
 
@@ -293,6 +294,7 @@ export class BattleLogicLayer {
 		this.currentHero.hero.finishedTurn = true;
 		this.switchToHeroMode(game);
 
+		this.currentHero.skill.cooldownTimer = this.currentHero.skill.cooldown;
 		for (let effect of this.currentHero.skill.effect) {
 			this.skillProcessor.emit(
 				actor,

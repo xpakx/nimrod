@@ -6,6 +6,8 @@ export interface Skill {
 	effect: SkillEffect[];
 	level: number;
 	icon: HTMLImageElement;
+	cooldown: number;
+	cooldownTimer: number;
 }
 
 export type SkillEffect = SkillEffectDamage | SkillEffectPassive;
