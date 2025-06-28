@@ -34,6 +34,8 @@ export class BattleActor extends Actor {
 			level: 1,
 			effect: [],
 			icon: sprite.image,
+			cooldownTimer: 0,
+			cooldown: 0,
 		});
 	}
 

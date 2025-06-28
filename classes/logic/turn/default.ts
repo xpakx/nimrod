@@ -22,7 +22,7 @@ export class DefaultTurnController implements TurnController {
 		return this.tryEndTurn(game, skipAnimations);
 	}
 
-	clearMoved(actors: BattleActor[]) {
+	clearActors(actors: BattleActor[]) {
 		for (let actor of actors) {
 			actor.moved = false;
 			actor.finishedTurn = false;
@@ -41,7 +41,7 @@ export class DefaultTurnController implements TurnController {
 		if (battle.playerStarts != battle.playerPhase) {
 			game.state.currentBattle.currentTurn += 1;
 		}
-		this.clearMoved(battle.playerPhase ? battle.heroes : battle.enemies);
+		this.clearActors(battle.playerPhase ? battle.heroes : battle.enemies);
 
 		battle.playerPhase = !battle.playerPhase;
 	}
