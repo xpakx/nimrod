@@ -75,18 +75,24 @@ export class BattleLogicLayer {
 
 		if (this.isBattleBlocked(battle)) return; // TODO
 
-		if (battle.selectedTile && !battle.selectedActor?.moved) {
-			this.battleProcessMovement(game, battle.selectedTile, {x: x, y: y}, battle.selectedActor);
-			battle.selectedTile = undefined;
-			battle.selectedActor = undefined;
-			return;
+		if (battle.selectedActor) {
+			if (!battle.selectedActor.moved && battle.selectedTile) {
+				console.log("Processing movement");
+				this.battleProcessMovement(game, battle.selectedTile, {x: x, y: y}, battle.selectedActor);
+				if (battle.selectedActor) battle.selectedTile = undefined;
+				return;
+			}
+			if (!battle.selectedActor.finishedTurn) {
+				console.log("Processing skill");
+				this.battleProcessSkill(game, battle.selectedActor, {x: x, y: y});
+				if (battle.selectedActor.finishedTurn) battle.selectedActor = undefined;
+				return;
+			}
+		} else {
+			console.log("Selecting actor");
+			this.battleSelectActor(game, battle, x, y);
 		}
-		this.battleSelectTile(game, battle, x, y);
 
-		if (this.currentHero.hero && !this.currentHero.hero.finishedTurn) {
-			this.battleProcessSkill(game, this.currentHero.hero, {x: x, y: y});
-			return;
-		}
 	}
 
 	isBattleBlocked(battle: Battle): boolean {
@@ -95,7 +101,7 @@ export class BattleLogicLayer {
 		return false;
 	}
 
-	battleSelectTile(game: Game, battle: Battle, x: number, y: number) {
+	battleSelectActor(game: Game, battle: Battle, x: number, y: number) {
 		battle.selectedTile = {x: x, y: y};
 		battle.selectedActor = this.isMouseOverPedestrian(game);
 		if (battle.selectedActor?.moved) {
