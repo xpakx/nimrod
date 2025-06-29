@@ -75,14 +75,18 @@ export class BattleLogicLayer {
 
 		if (this.isBattleBlocked(battle)) return; // TODO
 
-		if (battle.selectedTile) {
+		if (battle.selectedTile && !battle.selectedActor?.moved) {
 			this.battleProcessMovement(game, battle.selectedTile, {x: x, y: y}, battle.selectedActor);
 			battle.selectedTile = undefined;
 			battle.selectedActor = undefined;
 			return;
 		}
-
 		this.battleSelectTile(game, battle, x, y);
+
+		if (this.currentHero.hero && !this.currentHero.hero.finishedTurn) {
+			this.battleProcessSkill(game, this.currentHero.hero, {x: x, y: y});
+			return;
+		}
 	}
 
 	isBattleBlocked(battle: Battle): boolean {
@@ -161,10 +165,9 @@ export class BattleLogicLayer {
 		if (dist <= actor.movement && path) {
 			this.moveActor(actor, to, path);
 			actor.moved = true;
-			actor.finishedTurn = true; // TODO
+			if (actor.skills.length == 0) actor.finishedTurn = true;
 		}
 		const turnEnded = this.turnController.checkTurnEnd(game, this.skipAnimations);
-		console.log("we have a hero");
 		if (turnEnded) this.onTurnEnd(game);
 	}
 
@@ -273,8 +276,6 @@ export class BattleLogicLayer {
 		// TODO: simplify
 		this.currentHero.hero = battle.selectedActor;
 		this.currentHero.skill = skill;
-		// TODO: remove later
-		this.switchToHeroMode(game);
 	}
 
 	useSkill(game: Game, actor: BattleActor, position: Position) {
@@ -291,7 +292,6 @@ export class BattleLogicLayer {
 				break;
 			}
 		}
-		this.currentHero.hero.finishedTurn = true;
 		this.switchToHeroMode(game);
 
 		this.currentHero.skill.cooldownTimer = this.currentHero.skill.cooldown;
@@ -304,6 +304,17 @@ export class BattleLogicLayer {
 				game.map
 			)
 		}
+	}
+
+	battleProcessSkill(game: Game, actor: BattleActor, position: Position) {
+		if (!this.currentHero.skill) return;
+		this.useSkill(game, actor, position);
+		actor.finishedTurn = true;
+		this.currentHero.skill = undefined;
+		this.currentHero.hero = undefined;
+
+		const turnEnded = this.turnController.checkTurnEnd(game, this.skipAnimations);
+		if (turnEnded) this.onTurnEnd(game);
 	}
 
 	cancelCurrentMove() {
