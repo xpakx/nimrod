@@ -76,23 +76,27 @@ export class BattleLogicLayer {
 		if (this.isBattleBlocked(battle)) return; // TODO
 
 		if (battle.selectedActor) {
-			if (!battle.selectedActor.moved && battle.selectedTile) {
-				console.log("Processing movement");
-				this.battleProcessMovement(game, battle.selectedTile, {x: x, y: y}, battle.selectedActor);
-				if (battle.selectedActor) battle.selectedTile = undefined;
-				return;
-			}
-			if (!battle.selectedActor.finishedTurn) {
-				console.log("Processing skill");
-				this.battleProcessSkill(game, battle.selectedActor, {x: x, y: y});
-				if (battle.selectedActor.finishedTurn) battle.selectedActor = undefined;
-				return;
-			}
+			this.processActorAction(game, battle, battle.selectedActor, {x: x, y: y});
 		} else {
 			console.log("Selecting actor");
 			this.battleSelectActor(game, battle, x, y);
 		}
 
+	}
+
+	processActorAction(game: Game, battle: Battle, actor: BattleActor, target: Position) {
+		if (!actor.moved && battle.selectedTile) {
+			console.log("Processing movement");
+			this.battleProcessMovement(game, battle.selectedTile, target, battle.selectedActor);
+			if (battle.selectedActor) battle.selectedTile = undefined;
+			return;
+		}
+		if (!actor.finishedTurn) {
+			console.log("Processing skill");
+			this.battleProcessSkill(game, actor, target);
+			if (actor.finishedTurn) battle.selectedActor = undefined;
+			return;
+		}
 	}
 
 	isBattleBlocked(battle: Battle): boolean {
