@@ -1,5 +1,6 @@
 import { ActorSprite } from "./actor.js";
 import { HeroPrototype } from "./battle/actor.js";
+import { HeroConfig } from "./battle/hero-library.js";
 import { BuildingInterface, BuildingPrototype, BuildingSprite, ConstructionOptions, HouseOptions, Recipe, ShopOptions, StorageOptions, TilingSprite, WorkerOptions, WorkforceType } from "./building/buildings.js";
 import { getLogger, Logger } from "./logger.js";
 import { Size } from "./map-layer.js";
@@ -93,21 +94,6 @@ export interface WorkerConfig {
 export interface SpriteConfig {
     name: string;
     sprite: string;
-}
-
-/**
- * Represents the configuration for a hero character.
- * This interface defines properties for hero characters including their visual representation,
- * base stats, and identification.
- * 
- * @property {string} name - The unique identifier for the hero type.
- * @property {string} sprite - The filename of the hero's sprite image (without extension).
- * @property {number} baseHp - The initial hit points for the hero before any modifiers.
- */
-export interface HeroConfig {
-	name: string;
-	sprite: string;
-	baseHp: number;
 }
 
 /**

@@ -1,5 +1,5 @@
 import { ActorSprite } from "../actor";
-import { HeroConfig, SpriteLibrary } from "../sprite-library.js";
+import { SpriteLibrary } from "../sprite-library.js";
 import { HeroType } from "./actor.js";
 import { SkillEffect } from "./skill/skill";
 
@@ -19,6 +19,22 @@ export interface SkillDefinition {
 	cooldown: number;
 }
 
+/**
+ * Represents the configuration for a hero character.
+ * This interface defines properties for hero characters including their visual representation,
+ * base stats, and identification.
+ * 
+ * @property {string} name - The unique identifier for the hero type.
+ * @property {string} sprite - The filename of the hero's sprite image (without extension).
+ * @property {number} baseHp - The initial hit points for the hero before any modifiers.
+ */
+export interface HeroConfig {
+	name: string;
+	sprite: string;
+	baseHp: number;
+	skills?: (SkillConfig | string)[];
+}
+
 export class HeroLibrary {
 	heroes: Map<string, HeroDefinition> = new Map();
 	skills: Map<string, SkillDefinition> = new Map();
@@ -33,6 +49,27 @@ export class HeroLibrary {
 		};
 
 		this.skills.set(config.name, skill);
+	}
+
+	private createSkillDefinitonsForHero(config: HeroConfig, sprites: SpriteLibrary): SkillDefinition[] {
+		if (!config.skills) return [];
+		const skills: SkillDefinition[] = []
+		for (let skill of config.skills) {
+			if (typeof skill == "string") {
+				const skillDef = this.skills.get(skill);
+				if (skillDef) skills.push(skillDef);
+			} else {
+				const skillDef: SkillDefinition = {
+					name: skill.name,
+					visibleName: skill.visibleName,
+					icon: sprites.icons[skill.icon || skill.name],
+					effect: skill.effect,
+					cooldown: skill.cooldown,
+				};
+				skills.push(skillDef);
+			}
+		}
+		return skills;
 	}
 
 	registerHero(config: HeroConfig, sprites: SpriteLibrary) {
@@ -50,6 +87,7 @@ export class HeroLibrary {
 			resistance: { base: 10, growth: 0 },
 			luck: { base: 10, growth: 0 },
 			speed: { base: 10, growth: 0 },
+			skills: this.createSkillDefinitonsForHero(config, sprites),
 		};
 
 		this.heroes.set(config.name, hero);
@@ -81,6 +119,7 @@ export interface HeroDefinition {
 	
 	typeAttackBonus?: HeroStat;
 	typeResistanceBonus?: HeroStat;
+	skills: SkillDefinition[];
 }
 
 export interface HeroStat {
