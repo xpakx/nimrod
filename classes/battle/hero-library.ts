@@ -40,15 +40,18 @@ export class HeroLibrary {
 	skills: Map<string, SkillDefinition> = new Map();
 
 	registerSkill(config: SkillConfig, sprites: SpriteLibrary) {
-		const skill: SkillDefinition = {
+		const skill = this.createSkillDefinition(config, sprites);
+		this.skills.set(config.name, skill);
+	}
+
+	private createSkillDefinition(config: SkillConfig, sprites: SpriteLibrary): SkillDefinition {
+		return {
 			name: config.name,
 			visibleName: config.visibleName,
 			icon: sprites.icons[config.icon || config.name],
 			effect: config.effect,
 			cooldown: config.cooldown,
 		};
-
-		this.skills.set(config.name, skill);
 	}
 
 	private createSkillDefinitonsForHero(config: HeroConfig, sprites: SpriteLibrary): SkillDefinition[] {
@@ -59,13 +62,7 @@ export class HeroLibrary {
 				const skillDef = this.skills.get(skill);
 				if (skillDef) skills.push(skillDef);
 			} else {
-				const skillDef: SkillDefinition = {
-					name: skill.name,
-					visibleName: skill.visibleName,
-					icon: sprites.icons[skill.icon || skill.name],
-					effect: skill.effect,
-					cooldown: skill.cooldown,
-				};
+				const skillDef = this.createSkillDefinition(skill, sprites);
 				skills.push(skillDef);
 			}
 		}
