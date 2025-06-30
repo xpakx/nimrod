@@ -1,9 +1,39 @@
 import { ActorSprite } from "../actor";
 import { HeroConfig, SpriteLibrary } from "../sprite-library.js";
 import { HeroType } from "./actor.js";
+import { SkillEffect } from "./skill/skill";
+
+export interface SkillConfig {
+	name: string;
+	visibleName: string;
+	effect: SkillEffect[];
+	icon?: string;
+	cooldown: number;
+}
+
+export interface SkillDefinition {
+	name: string;
+	visibleName: string;
+	effect: SkillEffect[];
+	icon: HTMLImageElement;
+	cooldown: number;
+}
 
 export class HeroLibrary {
 	heroes: Map<string, HeroDefinition> = new Map();
+	skills: Map<string, SkillDefinition> = new Map();
+
+	registerSkill(config: SkillConfig, sprites: SpriteLibrary) {
+		const skill: SkillDefinition = {
+			name: config.name,
+			visibleName: config.visibleName,
+			icon: sprites.icons[config.icon || config.name],
+			effect: config.effect,
+			cooldown: config.cooldown,
+		};
+
+		this.skills.set(config.name, skill);
+	}
 
 	registerHero(config: HeroConfig, sprites: SpriteLibrary) {
 		const hero: HeroDefinition = {
