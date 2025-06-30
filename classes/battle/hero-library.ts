@@ -1,6 +1,6 @@
 import { ActorSprite } from "../actor";
 import { SpriteLibrary } from "../sprite-library.js";
-import { HeroType } from "./actor.js";
+import { BattleActor, HeroType } from "./actor.js";
 import { SkillEffect } from "./skill/skill";
 
 export interface SkillConfig {
@@ -96,6 +96,25 @@ export class HeroLibrary {
 
 	registerHeroes(config: HeroConfig[], sprites: SpriteLibrary) {
 		for (const hero of config) this.registerHero(hero, sprites);
+	}
+
+	// TODO: add all stats to BattleActor class
+	getHero(name: string): BattleActor | undefined {
+		const hero = this.heroes.get(name);
+		if (!hero) return;
+		const actor = new BattleActor(hero.sprite, {x: 0, y: 0});
+		actor.name = hero.name;
+		actor.hp = hero.baseHp;
+		for (let skill of hero.skills) {
+			actor.skills.push({
+				name: skill.visibleName,
+				level: 1,
+				effect: skill.effect,
+				icon: skill.icon,
+				cooldown: skill.cooldown,
+				cooldownTimer: 0,
+			});
+		}
 	}
 }
 
