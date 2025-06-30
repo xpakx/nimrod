@@ -44,6 +44,10 @@ export class HeroLibrary {
 		this.skills.set(config.name, skill);
 	}
 
+	registerSkills(config: SkillConfig[], sprites: SpriteLibrary) {
+		for (const skill of config) this.registerSkill(skill, sprites);
+	}
+
 	private createSkillDefinition(config: SkillConfig, sprites: SpriteLibrary): SkillDefinition {
 		return {
 			name: config.name,
