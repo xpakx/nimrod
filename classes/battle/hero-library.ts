@@ -115,6 +115,7 @@ export class HeroLibrary {
 				cooldownTimer: 0,
 			});
 		}
+		return actor;
 	}
 }
 
