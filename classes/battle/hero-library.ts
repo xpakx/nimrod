@@ -78,7 +78,7 @@ export class HeroLibrary {
 			name: config.name,
 			visibleName: config.name,
 			baseHp: config.baseHp,
-			sprite: sprites.actors[config.name],
+			sprite: sprites.actors[config.sprite || config.name],
 			movement: 5,
 			type: "normal",
 			strength: { base: 10, growth: 0 },
