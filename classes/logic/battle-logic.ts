@@ -89,6 +89,7 @@ export class BattleLogicLayer {
 			console.log("Processing movement");
 			this.battleProcessMovement(game, battle.selectedTile, target, battle.selectedActor);
 			if (battle.selectedActor) battle.selectedTile = undefined;
+			if (actor.finishedTurn) battle.selectedActor = undefined;
 			return;
 		}
 		if (!actor.finishedTurn) {
