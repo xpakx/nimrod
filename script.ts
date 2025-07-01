@@ -81,6 +81,15 @@ window.onload = async () => {
 		},
 		game.sprites);
 
+	game.heroes.registerHero(
+		{
+			name: "hero001",
+			sprite: "test",
+			baseHp: 50,
+		},
+		game.sprites
+	);
+
 	const frame = (timestamp: number) => {
 		game.nextFrame(context, timestamp);
 		window.requestAnimationFrame(frame);
