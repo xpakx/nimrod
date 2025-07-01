@@ -84,8 +84,9 @@ window.onload = async () => {
 	game.heroes.registerHero(
 		{
 			name: "hero001",
-			sprite: "test",
+			sprite: "delivery",
 			baseHp: 50,
+			skills: ["test001"],
 		},
 		game.sprites
 	);

@@ -235,16 +235,28 @@ export class SaveManager {
 					[x, y] = [actor.x, actor.y];
 					toPlace = true;
 				} 
-				let pedestrian = new BattleActor(sprite, {x: x, y: y}); 
+
+				let pedestrian: BattleActor;
+				if (this.isLibActor(actor)) {
+					const hero = game.heroes.getHero(actor.name);
+					if (!hero) {
+						this.logger.warn(`Hero ${actor.name} undefined`);
+						continue;
+					};
+					pedestrian = hero;
+				} else {
+					pedestrian = new BattleActor(sprite, {x: x, y: y}); 
+					pedestrian.name = actor.name;
+					pedestrian.movement = actor.movement;
+					pedestrian.hp = actor.hp;
+					pedestrian.type = actor.type || "normal";
+				}
+
 				if (actor.enemy === false || actor.enemy === undefined) {
 					pedestrian.enemy = false;
 				} else {
 					pedestrian.enemy = true;
 				}
-				pedestrian.name = actor.name;
-				pedestrian.movement = this.getMovementFromHeroData(game, actor);
-				pedestrian.hp = this.getHpFromHeroData(game, actor);
-				pedestrian.type = this.getTypeFromHeroData(game, actor);
 				if(pedestrian.enemy) {
 					game.state.pedestrians.push(pedestrian);
 					game.state.currentBattle.enemies.push(pedestrian);
