@@ -27,16 +27,7 @@ export class BattleActor extends Actor {
 	finishedTurn: boolean = false;
 
 	constructor(sprite: ActorSprite, position: Position) {
-		// TODO: temporary code for tests
 		super(sprite, position);
-		this.skills.push({
-			name: "Test skill",
-			level: 1,
-			effect: [],
-			icon: sprite.image,
-			cooldownTimer: 0,
-			cooldown: 0,
-		});
 	}
 
 	tick(deltaTime: number, _roads: MapLayer, _randMap: number[]): boolean {

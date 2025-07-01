@@ -71,6 +71,16 @@ window.onload = async () => {
 	registerMouseEvents(canvas);
 	registerKeyboardEvents();
 
+	game.heroes.registerSkill( 
+		{
+			name: "test001",
+			visibleName: "Test skill",
+			effect: [],
+			icon: "kingdom",
+			cooldown: 0,
+		},
+		game.sprites);
+
 	const frame = (timestamp: number) => {
 		game.nextFrame(context, timestamp);
 		window.requestAnimationFrame(frame);
