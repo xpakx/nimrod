@@ -10,6 +10,7 @@ import { DeliveryScheduler } from "../building/storage.js";
 import { MigrationManager } from "./migration-manager.js";
 import { WorkforceManager } from "./workforce-manager.js";
 import { QuestManager } from "../quest-layer.js";
+import { createBuilding } from "../building/building-factory.js";
 
 export class CityLogicLayer {
 	static roadCost: number = 2;
@@ -45,8 +46,10 @@ export class CityLogicLayer {
 	putBuilding(map: MapLayer, state: GameState, building: BuildingPrototype, game: Game) {
 		if (state.money < building.cost) return;
 		state.money -= building.cost;
-		const created = map.putBuilding(map.isoPlayerMouse, building, game.heroes, false);
-		if (!created) return;
+		if (!map.canBePlaced(map.isoPlayerMouse, building.sprite)) return;
+
+		const newBuilding = createBuilding(map.isoPlayerMouse, building, false, game.heroes);
+		map.putBuilding(map.isoPlayerMouse, newBuilding);
 		this.updateCost(map, state);
 		map.finalizeBuildingPlacement(map.isoPlayerMouse);
 		if (building.houseOptions) {

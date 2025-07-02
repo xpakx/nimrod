@@ -159,21 +159,18 @@ export class MapLayer {
 	}
 
 
-	putBuilding(position: Position, prototype: BuildingPrototype, heroes: HeroLibrary, accepted: boolean = true): boolean {
-		const sprite = prototype.sprite;
-		if(!this.canBePlaced(position, sprite)) return false;
-		const newBuilding = createBuilding(position, prototype, accepted, heroes);
-		this.buildings.push(newBuilding);
+	putBuilding(position: Position, building: Building) {
+		const sprite = building.sprite;
+		this.buildings.push(building);
 		this.sortBuildings();
 		for(let i = position.x; i > position.x-sprite.baseSize; i--) {
 			for(let j = position.y; j > position.y-sprite.baseSize; j--) {
 				this.blocked[j][i] = true;
 				this.blockedMovement[j][i] = true;
-				this.buildingMap[j][i] = newBuilding;
+				this.buildingMap[j][i] = building;
 			}
 		}
-		newBuilding.calculateSpawn(this.roads);
-		return true;
+		building.calculateSpawn(this.roads);
 	}
 
 	putRoad(position: Position, sprite: TilingSprite, _accepted: boolean = true) {

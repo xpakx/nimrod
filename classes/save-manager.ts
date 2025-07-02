@@ -1,5 +1,6 @@
 import { Actor } from "./actor.js";
 import { BattleActor, HeroType } from "./battle/actor.js";
+import { createBuilding } from "./building/building-factory.js";
 import { BuildingWorker } from "./building/buildings.js";
 import { House, Migrant } from "./building/house.js";
 import { GameState, View } from "./game-state.js";
@@ -155,7 +156,9 @@ export class SaveManager {
 		}
 
 		for (let building of data.buildings) {
-			game.map.putBuilding({x: building.x, y: building.y}, game.sprites.buildings[building.type], game.heroes);
+			const position = {x: building.x, y: building.y};
+			const newBuilding = createBuilding(position, game.sprites.buildings[building.type], false, game.heroes);
+			game.map.putBuilding(position, newBuilding);
 			game.cityLogic.orders.onBuildingCreation(game.map.getBuilding({x: building.x, y: building.y}));
 		}
 
@@ -389,7 +392,9 @@ export class SaveManager {
 		}
 
 		for (let building of data.buildings) {
-			game.map.putBuilding({x: building.x, y: building.y}, game.sprites.buildings[building.type], game.heroes);
+			const position = {x: building.x, y: building.y};
+			const newBuilding = createBuilding(position, game.sprites.buildings[building.type], false, game.heroes);
+			game.map.putBuilding(position, newBuilding);
 			game.cityLogic.orders.onBuildingCreation(game.map.getBuilding({x: building.x, y: building.y}));
 		}
 		this.applyBuildingData(game, data.buildings);
