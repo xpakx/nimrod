@@ -1,4 +1,5 @@
 import { Actor } from "./actor.js";
+import { HeroLibrary } from "./battle/hero-library.js";
 import { createBuilding } from "./building/building-factory.js";
 import { Building, BuildingPrototype, BuildingSprite, Road, TilingSprite } from "./building/buildings.js";
 import { House } from "./building/house.js";
@@ -158,10 +159,10 @@ export class MapLayer {
 	}
 
 
-	putBuilding(position: Position, prototype: BuildingPrototype, accepted: boolean = true) {
+	putBuilding(position: Position, prototype: BuildingPrototype, heroes: HeroLibrary, accepted: boolean = true) {
 		const sprite = prototype.sprite;
 		if(this.canBePlaced(position, sprite)) {
-			const newBuilding = createBuilding(position, prototype, accepted);
+			const newBuilding = createBuilding(position, prototype, accepted, heroes);
 			this.buildings.push(newBuilding);
 			this.sortBuildings();
 			for(let i = position.x; i > position.x-sprite.baseSize; i--) {

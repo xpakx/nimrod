@@ -1,5 +1,4 @@
 import { ActorSprite } from "./actor.js";
-import { HeroPrototype } from "./battle/actor.js";
 import { HeroConfig } from "./battle/hero-library.js";
 import { BuildingInterface, BuildingPrototype, BuildingSprite, ConstructionOptions, HouseOptions, Recipe, ShopOptions, StorageOptions, TilingSprite, WorkerOptions, WorkforceType } from "./building/buildings.js";
 import { getLogger, Logger } from "./logger.js";
@@ -51,7 +50,7 @@ export interface BuildingConfig {
 	shopOptions?: ShopOptions;
 	workforceType?: WorkforceType;
 	constructionOptions?: ConstructionOptions;
-	heroOptions?: HeroConfig;
+	heroOptions?: HeroConfig | string;
 }
 
 /**
@@ -256,12 +255,10 @@ export class SpriteLibrary {
 
 		}
 		if (buildingConfig.heroOptions) {
-			const heroOptions: HeroPrototype = {
-				sprite: this.actors[buildingConfig.heroOptions.sprite],
-				name: buildingConfig.heroOptions.name,
-				baseHp: buildingConfig.heroOptions.baseHp,
-			};
-			building.heroOptions = heroOptions;
+			if (typeof buildingConfig.heroOptions == "string") {
+				building.heroOptions = buildingConfig.heroOptions;
+			}
+			// TODO: let user define hero in building settings
 		}
 
 		this.buildings[buildingConfig.name] = building;

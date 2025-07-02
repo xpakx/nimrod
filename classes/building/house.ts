@@ -3,7 +3,8 @@ import { Building, BuildingPrototype, BuildingWorker, HouseOptions } from "./bui
 import { GameState } from "../game-state.js";
 import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position } from "../map-layer.js";
-import { BattleActor, HeroPrototype } from "../battle/actor.js";
+import { BattleActor } from "../battle/actor.js";
+import { HeroDefinition } from "../battle/hero-library.js";
 
 export class House extends Building {
 	storage: { [key: string]: number } = {};
@@ -19,7 +20,7 @@ export class House extends Building {
 		if (prototype.houseOptions !== undefined) {
 			this.initializeHouse(prototype.houseOptions);
 		}
-		if (prototype.heroOptions) this.applyHeroOptions(prototype.heroOptions);
+		// if (prototype.heroOptions) this.applyHeroOptions(prototype.heroOptions);
 	}
 
 	initializeHouse(options: HouseOptions) {
@@ -38,8 +39,8 @@ export class House extends Building {
 		}
 	}
 	
-	applyHeroOptions(options: HeroPrototype) {
-		this.hero = new BattleActor(options.sprite, {x: 0, y: 0});
+	addHero(hero: BattleActor) {
+		this.hero = hero;
 	}
 
 	onMinuteEnd(state: GameState) {

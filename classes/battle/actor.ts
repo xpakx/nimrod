@@ -80,14 +80,3 @@ export class BattleActor extends Actor {
 
 export type HeroType = "normal" | "fire" | "water" |
 	"earth" | "air" | "shadow" | "light";
-
-// TODO
-export interface HeroPrototype {
-	name: string;
-	sprite: ActorSprite;
-	movement?: number;
-	type?: HeroType;
-	baseHp: number;
-	skills?: string[];
-	rank?: HeroRank;
-}
