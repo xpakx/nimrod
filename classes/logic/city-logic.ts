@@ -45,9 +45,9 @@ export class CityLogicLayer {
 
 	putBuilding(map: MapLayer, state: GameState, building: BuildingPrototype, game: Game) {
 		if (state.money < building.cost) return;
-		state.money -= building.cost;
 		if (!map.canBePlaced(map.isoPlayerMouse, building.sprite)) return;
 
+		state.money -= building.cost;
 		const newBuilding = createBuilding(map.isoPlayerMouse, building, false, game.heroes);
 		map.putBuilding(map.isoPlayerMouse, newBuilding);
 		this.updateCost(map, state);
