@@ -180,41 +180,6 @@ export class SaveManager {
 		return !('movement' in obj);
 	}
 
-	getSpriteFromHeroData(game: Game, heroData: UnplacedActorData | UnplacedLibHeroData): ActorSprite | undefined {
-		if (this.isLibActor(heroData)) {
-			return game.heroes.heroes.get(heroData.name)?.sprite;
-		}
-		return game.sprites.actors[heroData.image]
-	}
-
-	getMovementFromHeroData(game: Game, heroData: UnplacedActorData | UnplacedLibHeroData): number {
-		if (this.isLibActor(heroData)) {
-			const hero = game.heroes.heroes.get(heroData.name);
-			if (!hero) return 0;
-			return hero.movement;
-		}
-		return heroData.movement;
-	}
-
-	getHpFromHeroData(game: Game, heroData: UnplacedActorData | UnplacedLibHeroData): number {
-		if (this.isLibActor(heroData)) {
-			const hero = game.heroes.heroes.get(heroData.name);
-			if (!hero) return 1;
-			return hero.baseHp;
-		}
-		return heroData.hp;
-	}
-
-
-	getTypeFromHeroData(game: Game, heroData: UnplacedActorData | UnplacedLibHeroData): HeroType {
-		if (this.isLibActor(heroData)) {
-			const hero = game.heroes.heroes.get(heroData.name);
-			if (!hero) return "normal";
-			return hero.type;
-		}
-		return heroData.type || "normal";
-	}
-
 	applyBattle(game: Game, data: BattleMapData) {
 		if (!game.state.currentBattle) {
 			return;
@@ -224,11 +189,6 @@ export class SaveManager {
 
 		if (data.actors) {
 			for (let actor of data.actors) {
-				const sprite = this.getSpriteFromHeroData(game, actor);
-				if (!sprite) {
-					this.logger.warn(`Sprite for hero with id ${actor.name} undefined`);
-					continue;
-				}
 				let [x, y] = [0, 0];
 				let toPlace = false;
 				if (this.isPlacedActor(actor)) {
@@ -245,6 +205,11 @@ export class SaveManager {
 					};
 					pedestrian = hero;
 				} else {
+					const sprite =  game.sprites.actors[actor.image]
+					if (!sprite) {
+						this.logger.warn(`Sprite for hero with id ${actor.name} undefined`);
+						continue;
+					}
 					pedestrian = new BattleActor(sprite, {x: x, y: y}); 
 					pedestrian.name = actor.name;
 					pedestrian.movement = actor.movement;
