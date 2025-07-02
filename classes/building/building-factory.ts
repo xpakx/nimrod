@@ -9,9 +9,13 @@ export function createBuilding(position: Position, prototype: BuildingPrototype,
 	if (prototype.houseOptions !== undefined) {
 		const house = new House(prototype, position, accepted);
 		if (prototype.heroOptions) {
+			console.log(prototype.heroOptions);
 			if (typeof prototype.heroOptions == "string") {
 				const hero = heroes.getHero(prototype.heroOptions);
 				if (hero) house.addHero(hero);
+			} else {
+				const hero = heroes.createHero(prototype.heroOptions);
+				house.addHero(hero);
 			}
 		}
 		return house;

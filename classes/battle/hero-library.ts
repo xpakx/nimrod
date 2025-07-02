@@ -102,6 +102,10 @@ export class HeroLibrary {
 	getHero(name: string): BattleActor | undefined {
 		const hero = this.heroes.get(name);
 		if (!hero) return;
+		return this.createHero(hero);
+	}
+
+	createHero(hero: HeroDefinition): BattleActor {
 		const actor = new BattleActor(hero.sprite, {x: 0, y: 0});
 		actor.name = hero.name;
 		actor.hp = hero.baseHp;

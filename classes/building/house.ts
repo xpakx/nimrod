@@ -4,7 +4,6 @@ import { GameState } from "../game-state.js";
 import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position } from "../map-layer.js";
 import { BattleActor } from "../battle/actor.js";
-import { HeroDefinition } from "../battle/hero-library.js";
 
 export class House extends Building {
 	storage: { [key: string]: number } = {};
