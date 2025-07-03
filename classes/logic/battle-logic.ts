@@ -289,11 +289,20 @@ export class BattleLogicLayer {
 		this.currentHero.skill = skill;
 	}
 
+	private getTaxicabDistance(actor: BattleActor, pos1: Position): number {
+		const pos2 = actor.positionSquare;
+		return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y)
+	}
+
 	useSkill(game: Game, actor: BattleActor, position: Position) {
 		if (!game.state.currentBattle) return;
 		if (!this.currentHero.skill) return;
 		if (!this.currentHero.hero) return;
 		const battle = game.state.currentBattle;
+
+		const taxicabDist = this.getTaxicabDistance(actor, position);
+		const maxDistance = this.currentHero.skill.maxDistance || 1;
+		if (taxicabDist > maxDistance) return;
 
 		let target: Position | BattleActor = position;
 		for (let pedestrian of game.state.pedestrians) {

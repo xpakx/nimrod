@@ -8,6 +8,7 @@ export interface Skill {
 	icon: HTMLImageElement;
 	cooldown: number;
 	cooldownTimer: number;
+	maxDistance?: number;
 }
 
 export type SkillEffect = SkillEffectDamage | SkillEffectPassive;
