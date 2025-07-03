@@ -294,6 +294,15 @@ export class BattleLogicLayer {
 		return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y)
 	}
 
+	private getTargetActor(game: Game, position: Position): BattleActor | undefined {
+		for (let pedestrian of game.state.pedestrians) {
+			const pos = pedestrian.positionSquare;
+			if(pos.x == position.x && pos.y == position.y) {
+				return pedestrian as BattleActor;
+			}
+		}
+	}
+
 	useSkill(game: Game, actor: BattleActor, position: Position) {
 		if (!game.state.currentBattle) return;
 		if (!this.currentHero.skill) return;
@@ -305,12 +314,11 @@ export class BattleLogicLayer {
 		if (taxicabDist > maxDistance) return;
 
 		let target: Position | BattleActor = position;
-		for (let pedestrian of game.state.pedestrians) {
-			const pos = pedestrian.positionSquare;
-			if(pos.x == position.x && pos.y == position.y) {
-				target = pedestrian as BattleActor;
-				break;
-			}
+		const targetType = this.currentHero.skill.targetType || "square";
+		if (targetType == "actor") {
+			const actor = this.getTargetActor(game, position);
+			if (!actor) return;
+			target = actor;
 		}
 		this.switchToHeroMode(game);
 

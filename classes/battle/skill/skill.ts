@@ -9,6 +9,7 @@ export interface Skill {
 	cooldown: number;
 	cooldownTimer: number;
 	maxDistance?: number;
+	targetType?: "actor" | "square";
 }
 
 export type SkillEffect = SkillEffectDamage | SkillEffectPassive;
