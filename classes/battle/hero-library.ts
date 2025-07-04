@@ -9,6 +9,8 @@ export interface SkillConfig {
 	effect: SkillEffect[];
 	icon?: string;
 	cooldown: number;
+	maxDistance?: number;
+	targetType?: "actor" | "square";
 }
 
 export interface SkillDefinition {
@@ -17,6 +19,8 @@ export interface SkillDefinition {
 	effect: SkillEffect[];
 	icon: HTMLImageElement;
 	cooldown: number;
+	maxDistance: number;
+	targetType: "actor" | "square";
 }
 
 /**
@@ -55,6 +59,8 @@ export class HeroLibrary {
 			icon: sprites.icons[config.icon || config.name],
 			effect: config.effect,
 			cooldown: config.cooldown,
+			maxDistance: config.maxDistance || 1,
+			targetType: config.targetType || "square",
 		};
 	}
 
@@ -117,6 +123,8 @@ export class HeroLibrary {
 				icon: skill.icon,
 				cooldown: skill.cooldown,
 				cooldownTimer: 0,
+				maxDistance: skill.maxDistance,
+				targetType: skill.targetType,
 			});
 		}
 		return actor;

@@ -1,7 +1,6 @@
 import { Game } from "./classes/game.js";
 import { LoggerFactory } from "./classes/logger.js";
 import { avatarSettings, buildingSettings, campaignSettings, iconSettings, tabSettings } from "./classes/building-settings.js";
-import { BattleMapData } from "./classes/save-manager.js";
 
 let game = new Game();
 

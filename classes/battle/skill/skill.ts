@@ -8,8 +8,8 @@ export interface Skill {
 	icon: HTMLImageElement;
 	cooldown: number;
 	cooldownTimer: number;
-	maxDistance?: number;
-	targetType?: "actor" | "square";
+	maxDistance: number;
+	targetType: "actor" | "square";
 }
 
 export type SkillEffect = SkillEffectDamage | SkillEffectPassive;

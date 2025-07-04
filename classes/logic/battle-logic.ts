@@ -310,11 +310,11 @@ export class BattleLogicLayer {
 		const battle = game.state.currentBattle;
 
 		const taxicabDist = this.getTaxicabDistance(actor, position);
-		const maxDistance = this.currentHero.skill.maxDistance || 1;
+		const maxDistance = this.currentHero.skill.maxDistance;
 		if (taxicabDist > maxDistance) return;
 
 		let target: Position | BattleActor = position;
-		const targetType = this.currentHero.skill.targetType || "square";
+		const targetType = this.currentHero.skill.targetType;
 		if (targetType == "actor") {
 			const actor = this.getTargetActor(game, position);
 			if (!actor) return;
