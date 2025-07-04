@@ -303,10 +303,16 @@ export class BattleLogicLayer {
 		}
 	}
 
+	isSkillReady(skill: Skill): boolean {
+		return skill.cooldownTimer <= 0;
+	}
+
 	useSkill(game: Game, actor: BattleActor, position: Position) {
 		if (!game.state.currentBattle) return;
 		if (!this.currentHero.skill) return;
 		if (!this.currentHero.hero) return;
+		if (!this.isSkillReady(this.currentHero.skill)) return;
+
 		const battle = game.state.currentBattle;
 
 		const taxicabDist = this.getTaxicabDistance(actor, position);
