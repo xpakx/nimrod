@@ -1,6 +1,6 @@
 import { Game } from "./classes/game.js";
 import { LoggerFactory } from "./classes/logger.js";
-import { avatarSettings, buildingSettings, campaignSettings, iconSettings, tabSettings } from "./classes/building-settings.js";
+import { avatarSettings, buildingSettings, campaignSettings, heroSetting, iconSettings, skillSetting, tabSettings } from "./classes/building-settings.js";
 
 let game = new Game();
 
@@ -70,25 +70,8 @@ window.onload = async () => {
 	registerMouseEvents(canvas);
 	registerKeyboardEvents();
 
-	game.heroes.registerSkill( 
-		{
-			name: "test001",
-			visibleName: "Test skill",
-			effect: [],
-			icon: "kingdom",
-			cooldown: 0,
-		},
-		game.sprites);
-
-	game.heroes.registerHero(
-		{
-			name: "hero001",
-			sprite: "delivery",
-			baseHp: 50,
-			skills: ["test001"],
-		},
-		game.sprites
-	);
+	game.heroes.registerSkills(skillSetting, game.sprites);
+	game.heroes.registerHeroes(heroSetting, game.sprites);
 
 	const frame = (timestamp: number) => {
 		game.nextFrame(context, timestamp);

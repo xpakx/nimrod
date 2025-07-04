@@ -1,3 +1,4 @@
+import { HeroConfig, SkillConfig } from "./battle/hero-library.js";
 import { Game } from "./game.js";
 import { AdventurersGuildInterface } from "./interface/adventurers-guild.js";
 import { SidebarConfig } from "./interface/sidebar-config.js";
@@ -459,3 +460,22 @@ export const campaignSettings: CampaignData = {
 	],
 	quests: [],
 }
+
+export const skillSetting: SkillConfig[] = [
+	{
+		name: "test001",
+		visibleName: "Test skill",
+		effect: [],
+		icon: "kingdom",
+		cooldown: 0,
+	}
+];
+
+export const heroSetting: HeroConfig[] = [
+	{
+		name: "hero001",
+		sprite: "delivery",
+		baseHp: 50,
+		skills: ["test001"],
+	}
+]
