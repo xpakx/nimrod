@@ -307,25 +307,25 @@ export class BattleLogicLayer {
 		return skill.cooldownTimer <= 0;
 	}
 
+	private getTarget(game: Game, skill: Skill, position: Position): Position | BattleActor | undefined {
+		if (skill.targetType == "square") return position;
+		return this.getTargetActor(game, position);
+	}
+
 	useSkill(game: Game, actor: BattleActor, position: Position) {
 		if (!game.state.currentBattle) return;
 		if (!this.currentHero.skill) return;
 		if (!this.currentHero.hero) return;
 		if (!this.isSkillReady(this.currentHero.skill)) return;
-
 		const battle = game.state.currentBattle;
 
 		const taxicabDist = this.getTaxicabDistance(actor, position);
 		const maxDistance = this.currentHero.skill.maxDistance;
 		if (taxicabDist > maxDistance) return;
 
-		let target: Position | BattleActor = position;
-		const targetType = this.currentHero.skill.targetType;
-		if (targetType == "actor") {
-			const actor = this.getTargetActor(game, position);
-			if (!actor) return;
-			target = actor;
-		}
+		let target = this.getTarget(game, this.currentHero.skill, position);
+		if (!target) return;
+
 		this.switchToHeroMode(game);
 
 		this.currentHero.skill.cooldownTimer = this.currentHero.skill.cooldown;
