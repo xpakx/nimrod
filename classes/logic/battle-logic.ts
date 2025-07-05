@@ -312,16 +312,19 @@ export class BattleLogicLayer {
 		return this.getTargetActor(game, position);
 	}
 
+	private isTargetInReach(skill: Skill, actor: BattleActor, position: Position): boolean {
+		const taxicabDist = this.getTaxicabDistance(actor, position);
+		const maxDistance = skill.maxDistance;
+		return taxicabDist > maxDistance;
+	}
+
 	useSkill(game: Game, actor: BattleActor, position: Position) {
 		if (!game.state.currentBattle) return;
 		if (!this.currentHero.skill) return;
 		if (!this.currentHero.hero) return;
 		if (!this.isSkillReady(this.currentHero.skill)) return;
+		if (!this.isTargetInReach(this.currentHero.skill, actor, position)) return;
 		const battle = game.state.currentBattle;
-
-		const taxicabDist = this.getTaxicabDistance(actor, position);
-		const maxDistance = this.currentHero.skill.maxDistance;
-		if (taxicabDist > maxDistance) return;
 
 		let target = this.getTarget(game, this.currentHero.skill, position);
 		if (!target) return;
