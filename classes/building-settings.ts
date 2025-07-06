@@ -1,4 +1,5 @@
 import { HeroConfig, SkillConfig } from "./battle/hero-library.js";
+import { pikemanPassive, pikemanSkill001 } from "./battle/skill/pikeman.js";
 import { Game } from "./game.js";
 import { AdventurersGuildInterface } from "./interface/adventurers-guild.js";
 import { SidebarConfig } from "./interface/sidebar-config.js";
@@ -313,11 +314,7 @@ export const buildingSettings: BuildingConfig[] = [
 				{resource: "wood", amount: 50},
 			],
 		},
-		heroOptions: {
-			name: "Warrior",
-			sprite: "warrior",
-			baseHp: 20,
-		}
+		heroOptions: "pikeman"
 	}
 ];
 
@@ -468,7 +465,23 @@ export const skillSetting: SkillConfig[] = [
 		effect: [],
 		icon: "kingdom",
 		cooldown: 0,
+	},
+	{
+		name: "pikemanPassive",
+		visibleName: "Formation",
+		effect: [pikemanPassive],
+		icon: "kingdom",
+		cooldown: 0,
+		passive: true,
+	},
+	{
+		name: "pikeman001",
+		visibleName: "Basic Attack",
+		effect: [pikemanSkill001],
+		icon: "kingdom",
+		cooldown: 0,
 	}
+
 ];
 
 export const heroSetting: HeroConfig[] = [
@@ -477,5 +490,11 @@ export const heroSetting: HeroConfig[] = [
 		sprite: "delivery",
 		baseHp: 50,
 		skills: ["test001"],
+	},
+	{
+		name: "pikeman",
+		sprite: "warrior",
+		baseHp: 50,
+		skills: ["pikeman001", "pikemanPassive"],
 	}
 ]

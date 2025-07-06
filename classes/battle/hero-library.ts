@@ -11,6 +11,7 @@ export interface SkillConfig {
 	cooldown: number;
 	maxDistance?: number;
 	targetType?: "actor" | "square";
+	passive?: boolean;
 }
 
 export interface SkillDefinition {

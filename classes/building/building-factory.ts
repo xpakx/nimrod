@@ -6,10 +6,10 @@ import { HeroLibrary } from "../battle/hero-library.js";
 
 // TODO
 export function createBuilding(position: Position, prototype: BuildingPrototype, accepted: boolean, heroes: HeroLibrary): Building {
+	console.log(prototype);
 	if (prototype.houseOptions !== undefined) {
 		const house = new House(prototype, position, accepted);
 		if (prototype.heroOptions) {
-			console.log(prototype.heroOptions);
 			if (typeof prototype.heroOptions == "string") {
 				const hero = heroes.getHero(prototype.heroOptions);
 				if (hero) house.addHero(hero);

@@ -72,6 +72,7 @@ window.onload = async () => {
 
 	game.heroes.registerSkills(skillSetting, game.sprites);
 	game.heroes.registerHeroes(heroSetting, game.sprites);
+	game.state.team.push(game.heroes.getHero("pikeman")!);
 
 	const frame = (timestamp: number) => {
 		game.nextFrame(context, timestamp);
