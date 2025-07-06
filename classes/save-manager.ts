@@ -159,6 +159,7 @@ export class SaveManager {
 			const position = {x: building.x, y: building.y};
 			const newBuilding = createBuilding(position, game.sprites.buildings[building.type], false, game.heroes);
 			game.map.putBuilding(position, newBuilding);
+			game.map.finalizeBuildingPlacement(position);
 			game.cityLogic.orders.onBuildingCreation(game.map.getBuilding({x: building.x, y: building.y}));
 		}
 
@@ -395,6 +396,7 @@ export class SaveManager {
 			const position = {x: building.x, y: building.y};
 			const newBuilding = createBuilding(position, game.sprites.buildings[building.type], false, game.heroes);
 			game.map.putBuilding(position, newBuilding);
+			game.map.finalizeBuildingPlacement(position);
 			game.cityLogic.orders.onBuildingCreation(game.map.getBuilding({x: building.x, y: building.y}));
 		}
 		this.applyBuildingData(game, data.buildings);
