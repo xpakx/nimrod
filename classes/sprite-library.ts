@@ -32,7 +32,8 @@ import { Size } from "./map-layer.js";
  *   If not provided, "normal" type would be used.
  * @property {ConstructionOptions} [constructionOptions] - Configuration for building construction requirements (optional).
  *   If provided, specifies prerequisites like required resources needed to construct this building.
- * @property {HeroConfig} [heroOptions] - Configuration for heroes associated with this building (optional).
+ * @property {HeroConfig | string} [heroOptions] - Configuration for heroes associated with this building (optional).
+ *   This can be either a string (key for a registered hero) or a `HeroConfig` instance.
  *   If provided, allows the building to spawn or house hero character with special abilities.
  */
 export interface BuildingConfig {
