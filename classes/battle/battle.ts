@@ -29,10 +29,10 @@ export class Battle {
 	}
 
 	addHero(hero: BattleActor): boolean {
-		if(!this.battleStarted) {
+		if(this.battleStarted) {
 			return false;
 		}
-		if(this.maxHeroes >= this.heroes.length) {
+		if(this.maxHeroes <= this.heroes.length) {
 			return false;
 		}
 		this.heroes.push(hero);
