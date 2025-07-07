@@ -318,16 +318,16 @@ export class BattleLogicLayer {
 		return taxicabDist > maxDistance;
 	}
 
-	useSkill(game: Game, actor: BattleActor, position: Position) {
-		if (!game.state.currentBattle) return;
-		if (!this.currentHero.skill) return;
-		if (!this.currentHero.hero) return;
-		if (!this.isSkillReady(this.currentHero.skill)) return;
-		if (!this.isTargetInReach(this.currentHero.skill, actor, position)) return;
+	useSkill(game: Game, actor: BattleActor, position: Position): boolean {
+		if (!game.state.currentBattle) return false;
+		if (!this.currentHero.skill) return false;
+		if (!this.currentHero.hero) return false;
+		if (!this.isSkillReady(this.currentHero.skill)) return false;
+		if (!this.isTargetInReach(this.currentHero.skill, actor, position)) return false;
 		const battle = game.state.currentBattle;
 
 		let target = this.getTarget(game, this.currentHero.skill, position);
-		if (!target) return;
+		if (!target) return false;
 
 		this.switchToHeroMode(game);
 
@@ -341,11 +341,13 @@ export class BattleLogicLayer {
 				game.map
 			)
 		}
+		return true;
 	}
 
 	battleProcessSkill(game: Game, actor: BattleActor, position: Position) {
 		if (!this.currentHero.skill) return;
-		this.useSkill(game, actor, position);
+		const skillUsed = this.useSkill(game, actor, position);
+		if (!skillUsed) return;
 		actor.finishedTurn = true;
 		this.currentHero.skill = undefined;
 		this.currentHero.hero = undefined;
