@@ -44,10 +44,10 @@ export class EffectSystem {
 			handler(event, actors, map);
 		}
 
-		this.resolve(event);
+		this.resolve(event, actors);
 	}
 
-	private resolve(e: EffectApplyEvent) {
+	private resolve(e: EffectApplyEvent, actors: BattleActor[]) {
 		if (e.blocks.length === 0) {
 			e.result = "applied";
 		} else if (e.mitigations.length > 0) {
@@ -57,7 +57,7 @@ export class EffectSystem {
 		}
 
 		if (e.result === "applied") {
-			this.applyEffect(e);
+			this.applyEffect(e, actors);
 		} else if (e.result === "mitigated") {
 		}
 
@@ -66,22 +66,40 @@ export class EffectSystem {
 		}
 	}
 
-	private applyEffect(event: EffectApplyEvent) {
+	private applyEffect(event: EffectApplyEvent, actors: BattleActor[]) {
 		const effect = event.effect;
 		if (effect.type == 'damage') {
-			this.applyDamageEvent(event, effect);
+			this.applyDamageEvent(event, effect, actors);
 		}
 	}
 
-	private applyDamageEvent(event: EffectApplyEvent, effect: SkillEffectDamage) {
+	private applyDamageEvent(event: EffectApplyEvent, effect: SkillEffectDamage, actors: BattleActor[]) {
 		const target = event.target;
 
 		if ('name' in target) {
 			this.applyDamage(event.source, target, effect.damage);
 		} else {
-			// TODO: AoE
+			this.applyAoeDamage(event, target, effect, actors);
 		}
 
+	}
+
+	private getTaxicabDistance(pos1: Position, pos2: Position): number {
+		return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y)
+	}
+
+	private applyAoeDamage(event: EffectApplyEvent, target: Position, effect: SkillEffectDamage, actors: BattleActor[]) {
+		if (effect.effectCone) {
+		} else if (effect.effectLine) {
+		} else if (effect.effectRadius) {
+			const radius = effect.effectRadius;
+			const targets = actors
+				.filter(a => this.getTaxicabDistance(a.position, target) <= radius)
+				.filter(a => event.source.enemy != a.enemy);
+			for (let target of targets) {
+				this.applyDamage(event.source, target, effect.damage);
+			}
+		}
 	}
 
 	private applyDamage(source: BattleActor, target:  BattleActor, damage: number | DamageFunction) {
