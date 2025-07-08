@@ -92,7 +92,7 @@ export class EffectSystem {
 		const radius = effect.effectRadius || effect.effectCone || effect.effectLine;
 		if (!radius) return;
 		let targets = actors
-			.filter(a => this.getTaxicabDistance(a.position, target) <= radius)
+			.filter(a => this.getTaxicabDistance(a.positionSquare, target) <= radius)
 			.filter(a => event.source.enemy != a.enemy);
 
 		// TODO: if (effect.effectCone) {
