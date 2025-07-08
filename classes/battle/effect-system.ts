@@ -89,16 +89,25 @@ export class EffectSystem {
 	}
 
 	private applyAoeDamage(event: EffectApplyEvent, target: Position, effect: SkillEffectDamage, actors: BattleActor[]) {
-		if (effect.effectCone) {
-		} else if (effect.effectLine) {
-		} else if (effect.effectRadius) {
-			const radius = effect.effectRadius;
-			const targets = actors
-				.filter(a => this.getTaxicabDistance(a.position, target) <= radius)
-				.filter(a => event.source.enemy != a.enemy);
-			for (let target of targets) {
-				this.applyDamage(event.source, target, effect.damage);
+		const radius = effect.effectRadius || effect.effectCone || effect.effectLine;
+		if (!radius) return;
+		let targets = actors
+			.filter(a => this.getTaxicabDistance(a.position, target) <= radius)
+			.filter(a => event.source.enemy != a.enemy);
+
+		// TODO: if (effect.effectCone) {
+		if (effect.effectLine) {
+			if (target.x == event.source.positionSquare.x) {
+				targets = targets.filter(a => a.positionSquare.x == target.x);
+			} else if (target.y == event.source.positionSquare.y) {
+				targets = targets.filter(a => a.positionSquare.y == target.y);
+			} else {
+				return;
 			}
+		}
+
+		for (let target of targets) {
+			this.applyDamage(event.source, target, effect.damage);
 		}
 	}
 
