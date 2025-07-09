@@ -225,6 +225,7 @@ export class BattleLogicLayer {
 		this.logger.debug(`started: ${game.state.currentBattle.battleStarted}`);
 		if (battle.battleStarted) {
 			this.restoreSpawnsColor(game);
+			this.registerPassives(game);
 			if (!battle.playerPhase) this.aiMove(game);
 		}
 	}
@@ -365,6 +366,24 @@ export class BattleLogicLayer {
 		actor.path = undefined;
 		actor.goal = undefined;
 		actor.moved = false;
+	}
+
+	registerHeroPassives(actor: BattleActor) {
+		// TODO: distinguish between permament and temporary passives
+		for (let skill of actor.skills) {
+			for (let effect of skill.effect) {
+				if ("handler" in effect) {
+					this.skillProcessor.on(effect.handler);
+				}
+			}
+		}
+	}
+
+	registerPassives(game: Game) {
+		if (!game.state.currentBattle) return;
+		const battle = game.state.currentBattle;
+		battle.enemies.forEach((a) => this.registerHeroPassives(a));
+		battle.heroes.forEach((a) => this.registerHeroPassives(a));
 	}
 }
 
