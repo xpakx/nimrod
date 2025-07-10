@@ -1,8 +1,9 @@
 import { BattleActor } from "../battle/actor";
 import { MapLayer, Position } from "../map-layer";
-import { DamageFunction, SkillEffect, SkillEffectDamage } from "./skill/skill";
+import { DamageFunction, Skill, SkillEffect, SkillEffectDamage } from "./skill/skill";
 
 export interface EffectApplyEvent {
+	sourceSkill: Skill;
 	source: BattleActor;
 	target: BattleActor | Position;
 	radius?: number;
@@ -29,8 +30,9 @@ export class EffectSystem {
 	}
 
 	emit(source: BattleActor, target: BattleActor | Position, effect: SkillEffect,
-	    actors: BattleActor[], map: MapLayer) {
+	    sourceSkill: Skill, actors: BattleActor[], map: MapLayer) {
 		const event: EffectApplyEvent = {
+			sourceSkill,
 			source,
 			target,
 			effect,
@@ -77,7 +79,7 @@ export class EffectSystem {
 		const target = event.target;
 
 		if ('name' in target) {
-			this.applyDamage(event.source, target, effect.damage);
+			this.applyDamage(event.source, target, effect.damage, event.sourceSkill);
 		} else {
 			this.applyAoeDamage(event, target, effect, actors);
 		}
@@ -107,16 +109,16 @@ export class EffectSystem {
 		}
 
 		for (let target of targets) {
-			this.applyDamage(event.source, target, effect.damage);
+			this.applyDamage(event.source, target, effect.damage, event.sourceSkill);
 		}
 	}
 
-	private applyDamage(source: BattleActor, target:  BattleActor, damage: number | DamageFunction) {
+	private applyDamage(source: BattleActor, target:  BattleActor, damage: number | DamageFunction, skill: Skill) {
 		let amount: number;
 		if (typeof damage == 'number') {
 			amount = damage; // TODO: attack type effectivenes
 		} else {
-			amount = damage(source, target);
+			amount = damage(source, target, skill);
 		}
 
 		target.hp -= amount;

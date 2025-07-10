@@ -338,6 +338,7 @@ export class BattleLogicLayer {
 				actor,
 				target,
 				effect,
+				this.currentHero.skill,
 				battle.getPedestrians(),
 				game.map
 			)
