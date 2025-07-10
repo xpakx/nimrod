@@ -1,6 +1,4 @@
 import { Actor } from "./actor.js";
-import { HeroLibrary } from "./battle/hero-library.js";
-import { createBuilding } from "./building/building-factory.js";
 import { Building, BuildingPrototype, BuildingSprite, Road, TilingSprite } from "./building/buildings.js";
 import { House } from "./building/house.js";
 import { Storage } from "./building/storage.js";
@@ -1084,6 +1082,10 @@ export class MapLayer {
 
 	setColor(position: Position, color: string) {
 		this.map[position.y][position.x] = color;
+	}
+
+	getTaxicabDistance(pos1: Position, pos2: Position): number {
+		return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y)
 	}
 }
 
