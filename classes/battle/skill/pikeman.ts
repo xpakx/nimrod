@@ -8,7 +8,15 @@ export let pikemanPassive: SkillEffectPassive = {
 	    if (passiveOwner === event.source) return;
 	    const dist = map.getTaxicabDistance(passiveOwner.positionSquare, event.source.positionSquare);
 	    if (dist == 1) event.criticalHit = true;
-    }
+    },
+    shouldApply: (passiveOwner, actor, _actors, map) => {
+	    if (passiveOwner.enemy != actor.enemy) return false;
+	    if (passiveOwner.name != actor.name) return false;
+	    if (passiveOwner === actor) return false;
+	    const dist = map.getTaxicabDistance(passiveOwner.positionSquare, actor.positionSquare);
+	    return dist == 1;
+    },
+
 }
 
 export let pikemanSkill001: SkillEffectDamage = {
