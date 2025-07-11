@@ -2,15 +2,12 @@ import { SkillEffectDamage, SkillEffectPassive } from "./skill.js";
 
 export let pikemanPassive: SkillEffectPassive = {
     type: "passive",
-    handler: (event, actors, map) => {
-	    for (let actor of actors) {
-		    if (actor.enemy != event.source.enemy) return;
-		    if (actor.name != event.source.name) return;
-		    if (actor === event.source) return;
-		    const dist = map.getTaxicabDistance(actor.positionSquare, event.source.positionSquare);
-		    if (dist == 1) event.criticalHit = true;
-	    }
-	    
+    handler: (passiveOwner, event, _actors, map) => {
+	    if (passiveOwner.enemy != event.source.enemy) return;
+	    if (passiveOwner.name != event.source.name) return;
+	    if (passiveOwner === event.source) return;
+	    const dist = map.getTaxicabDistance(passiveOwner.positionSquare, event.source.positionSquare);
+	    if (dist == 1) event.criticalHit = true;
     }
 }
 

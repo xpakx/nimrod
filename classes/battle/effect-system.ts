@@ -19,14 +19,19 @@ export interface EffectApplyEvent {
 	criticalHit: boolean;
 }
 
-export type EffectHandler = (event: EffectApplyEvent, actors: BattleActor[],
+export type EffectHandler = (passiveOwner: BattleActor, event: EffectApplyEvent, actors: BattleActor[],
 			     map: MapLayer) => void;
 
-export class EffectSystem {
-	private handlers: EffectHandler[] = [];
+export interface EffectHandlerDef {
+	handle: EffectHandler,
+	source: BattleActor,
+}
 
-	on(handler: EffectHandler) {
-		this.handlers.push(handler);
+export class EffectSystem {
+	private handlers: EffectHandlerDef[] = [];
+
+	on(handler: EffectHandler, source: BattleActor) {
+		this.handlers.push({handle: handler, source: source});
 	}
 
 	emit(source: BattleActor, target: BattleActor | Position, effect: SkillEffect,
@@ -43,7 +48,7 @@ export class EffectSystem {
 		};
 
 		for (const handler of this.handlers) {
-			handler(event, actors, map);
+			handler.handle(handler.source, event, actors, map);
 		}
 
 		this.resolve(event, actors);
