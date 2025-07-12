@@ -44,7 +44,37 @@ export class Heroes {
 		const enemies = this.getLivingEnemiesOf(actor, actors);
 		return enemies[Math.floor(Math.random() * enemies.length)];
 	}
-	
+
+	static getLowestHP(actors: BattleActor[]) {
+		return actors
+			.reduce((lowest, curr) => !lowest || curr.hp < lowest.hp ? curr : lowest);
+	}
+
+	static getHighestHP(actors: BattleActor[]) {
+		return actors
+			.reduce((highest, curr) => !highest || curr.hp > highest.hp ? curr : highest);
+	}
+
+	static getLowestHPEnemy(actor: BattleActor, actors: BattleActor[]) {
+		return this.getLowestHP(this.getEnemiesOf(actor, actors));
+	}
+
+	static getHighestHPEnemy(actor: BattleActor, actors: BattleActor[]) {
+		return this.getHighestHP(this.getEnemiesOf(actor, actors));
+	}
+
+	static getLowestHPAlly(actor: BattleActor, actors: BattleActor[]) {
+		return this.getLowestHP(this.getAlliesOf(actor, actors));
+	}
+
+	static getHighestHPAlly(actor: BattleActor, actors: BattleActor[]) {
+		return this.getHighestHP(this.getAlliesOf(actor, actors));
+	}
+
+	static sortByHP(actors: BattleActor[], ascending = true) {
+	    return actors.slice().sort((a, b) => ascending ? a.hp - b.hp : b.hp - a.hp);
+	}
+
 	// Distance helpers
 	static getTaxicabDistance(pos1: Position, pos2: Position): number {
 		return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y)
