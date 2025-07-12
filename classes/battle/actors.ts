@@ -1,3 +1,4 @@
+import { Position } from "../map-layer.js";
 import { BattleActor } from "./actor.js";
 
 export class Heroes {
@@ -44,4 +45,20 @@ export class Heroes {
 		return enemies[Math.floor(Math.random() * enemies.length)];
 	}
 	
+	// Distance helpers
+	static getTaxicabDistance(pos1: Position, pos2: Position): number {
+		return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y)
+	}
+
+	static getTaxicabDistanceFor(actor1: BattleActor, actor2: BattleActor): number {
+		const pos1 = actor1.positionSquare;
+		const pos2 = actor2.positionSquare;
+		return this.getTaxicabDistance(pos1, pos2);
+	}
+
+	static areAdjacent(actor1: BattleActor, actor2: BattleActor): boolean {
+		const pos1 = actor1.positionSquare;
+		const pos2 = actor2.positionSquare;
+		return this.getTaxicabDistance(pos1, pos2) == 1;
+	}
 }

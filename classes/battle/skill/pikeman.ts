@@ -3,15 +3,14 @@ import { Heroes } from "../actors.js";
 
 export let pikemanPassive: SkillEffectPassive = {
     type: "passive",
-    handler: (passiveOwner, event, _actors, map) => {
+    handler: (passiveOwner, event, _actors, _map) => {
 	    if (!Heroes.isSameAllyType(passiveOwner, event.source)) return;
-	    const dist = map.getTaxicabDistance(passiveOwner.positionSquare, event.source.positionSquare);
-	    if (dist == 1) event.criticalHit = true;
+	    const isNeighbour = Heroes.areAdjacent(passiveOwner, event.source);
+	    if (isNeighbour) event.criticalHit = true;
     },
-    shouldApply: (passiveOwner, actor, _actors, map) => {
+    shouldApply: (passiveOwner, actor, _actors, _map) => {
 	    if (!Heroes.isSameAllyType(passiveOwner, actor)) return false;
-	    const dist = map.getTaxicabDistance(passiveOwner.positionSquare, actor.positionSquare);
-	    return dist == 1;
+	    return Heroes.areAdjacent(passiveOwner, actor);
     },
 
 }
