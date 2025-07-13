@@ -72,7 +72,17 @@ export class Heroes {
 	}
 
 	static sortByHP(actors: BattleActor[], ascending = true) {
-	    return actors.slice().sort((a, b) => ascending ? a.hp - b.hp : b.hp - a.hp);
+		return actors.slice().sort((a, b) => ascending ? a.hp - b.hp : b.hp - a.hp);
+	}
+
+	static getEnemiesInRange(actor: BattleActor, actors: BattleActor[], range: number) {
+		return this.getEnemiesOf(actor, actors)
+			.filter(enemy => !enemy.dead && this.getTaxicabDistanceFor(actor, enemy) <= range);
+	}
+
+	static getAlliesInRange(actor: BattleActor, actors: BattleActor[], range: number) {
+		return this.getAlliesOf(actor, actors)
+			.filter(ally => !ally.dead && this.getTaxicabDistanceFor(actor, ally) <= range);
 	}
 
 	// Distance helpers
