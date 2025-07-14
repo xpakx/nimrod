@@ -22,6 +22,7 @@ export interface SkillDefinition {
 	cooldown: number;
 	maxDistance: number;
 	targetType: "actor" | "square";
+	passive: boolean;
 }
 
 /**
@@ -62,6 +63,7 @@ export class HeroLibrary {
 			cooldown: config.cooldown,
 			maxDistance: config.maxDistance || 1,
 			targetType: config.targetType || "square",
+			passive: config.passive || false,
 		};
 	}
 
@@ -126,6 +128,7 @@ export class HeroLibrary {
 				cooldownTimer: 0,
 				maxDistance: skill.maxDistance,
 				targetType: skill.targetType,
+				passive: skill.passive,
 			});
 		}
 		return actor;

@@ -372,6 +372,7 @@ export class BattleLogicLayer {
 	registerHeroPassives(actor: BattleActor) {
 		// TODO: distinguish between permament and temporary passives
 		for (let skill of actor.skills) {
+			if (!skill.passive) return;
 			for (let effect of skill.effect) {
 				if ("handler" in effect) {
 					this.skillProcessor.on(effect.handler, actor);
