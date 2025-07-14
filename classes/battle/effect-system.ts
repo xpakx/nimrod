@@ -19,19 +19,28 @@ export interface EffectApplyEvent {
 	criticalHit: boolean;
 }
 
+export type EffectHook = 
+	"onSkill" | "preDamage" | "onDamage" | "onKill" | "onStatusApplied" | "postSkill" | 
+	"onTurnStart" | "onTurnEnd" | "onMove";
+
 export type EffectHandler = (passiveOwner: BattleActor, event: EffectApplyEvent, actors: BattleActor[],
 			     map: MapLayer) => void;
 
 export interface EffectHandlerDef {
 	handle: EffectHandler,
 	source: BattleActor,
+	hook: EffectHook,
 }
 
 export class EffectSystem {
 	private handlers: EffectHandlerDef[] = [];
 
-	on(handler: EffectHandler, source: BattleActor) {
-		this.handlers.push({handle: handler, source: source});
+	on(handler: EffectHandler, source: BattleActor, hook: EffectHook = "onSkill") {
+		this.handlers.push({
+			handle: handler,
+			source: source,
+			hook: hook,
+		});
 	}
 
 	emit(source: BattleActor, target: BattleActor | Position, effect: SkillEffect,
@@ -47,11 +56,15 @@ export class EffectSystem {
 			criticalHit: false,
 		};
 
+		this.runHook("onSkill", event, actors, map);
+		this.resolve(event, actors);
+	}
+
+	runHook(hook: EffectHook, event: EffectApplyEvent, actors: BattleActor[], map: MapLayer) {
 		for (const handler of this.handlers) {
+			if (handler.hook !== hook) continue;
 			handler.handle(handler.source, event, actors, map);
 		}
-
-		this.resolve(event, actors);
 	}
 
 	private resolve(e: EffectApplyEvent, actors: BattleActor[]) {
