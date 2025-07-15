@@ -4,6 +4,7 @@ import { Heroes } from "../actors.js";
 export let pikemanPassive: SkillEffectPassive = {
     type: "passive",
     handler: (passiveOwner, event, _actors, _map) => {
+	    if (event.type != "onSkill") return;
 	    if (!Heroes.isSameAllyType(passiveOwner, event.source)) return;
 	    const isNeighbour = Heroes.areAdjacent(passiveOwner, event.source);
 	    if (isNeighbour) event.criticalHit = true;

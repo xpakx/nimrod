@@ -2,7 +2,10 @@ import { BattleActor } from "../battle/actor";
 import { MapLayer, Position } from "../map-layer";
 import { DamageFunction, Skill, SkillEffect, SkillEffectDamage } from "./skill/skill";
 
+export type EffectEvent = EffectApplyEvent | DamageEvent;
+
 export interface EffectApplyEvent {
+	type: "onSkill"
 	sourceSkill: Skill;
 	source: BattleActor;
 	target: BattleActor | Position;
@@ -19,11 +22,18 @@ export interface EffectApplyEvent {
 	criticalHit: boolean;
 }
 
+export interface DamageEvent {
+	type: "onDamage"
+	sourceSkill: Skill;
+	source: BattleActor;
+	target: BattleActor | Position;
+}
+
 export type EffectHook = 
 	"onSkill" | "preDamage" | "onDamage" | "onKill" | "onStatusApplied" | "postSkill" | 
 	"onTurnStart" | "onTurnEnd" | "onMove";
 
-export type EffectHandler = (passiveOwner: BattleActor, event: EffectApplyEvent, actors: BattleActor[],
+export type EffectHandler = (passiveOwner: BattleActor, event: EffectEvent, actors: BattleActor[],
 			     map: MapLayer) => void;
 
 export interface EffectHandlerDef {
@@ -46,6 +56,7 @@ export class EffectSystem {
 	emit(source: BattleActor, target: BattleActor | Position, effect: SkillEffect,
 	    sourceSkill: Skill, actors: BattleActor[], map: MapLayer) {
 		const event: EffectApplyEvent = {
+			type: "onSkill",
 			sourceSkill,
 			source,
 			target,
@@ -60,7 +71,7 @@ export class EffectSystem {
 		this.resolve(event, actors);
 	}
 
-	runHook(hook: EffectHook, event: EffectApplyEvent, actors: BattleActor[], map: MapLayer) {
+	private runHook(hook: EffectHook, event: EffectApplyEvent, actors: BattleActor[], map: MapLayer) {
 		for (const handler of this.handlers) {
 			if (handler.hook !== hook) continue;
 			handler.handle(handler.source, event, actors, map);
