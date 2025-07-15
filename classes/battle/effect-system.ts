@@ -1,4 +1,4 @@
-import { BattleActor } from "../battle/actor";
+import { BattleActor, HeroType } from "../battle/actor";
 import { MapLayer, Position } from "../map-layer";
 import { DamageFunction, Skill, SkillEffect, SkillEffectDamage } from "./skill/skill";
 
@@ -26,7 +26,13 @@ export interface DamageEvent {
 	type: "onDamage"
 	sourceSkill: Skill;
 	source: BattleActor;
-	target: BattleActor | Position;
+	target: BattleActor;
+	originalDamage: number;
+	blocks: { by: BattleActor; reason: string }[];
+	mitigations: { by: BattleActor; chance: number }[];
+	calculatedDamage: number;
+	originalDamageType: HeroType;
+	calculatedDamageType: HeroType;
 }
 
 export type EffectHook = 
@@ -68,17 +74,17 @@ export class EffectSystem {
 		};
 
 		this.runHook("onSkill", event, actors, map);
-		this.resolve(event, actors);
+		this.resolve(event, actors, map);
 	}
 
-	private runHook(hook: EffectHook, event: EffectApplyEvent, actors: BattleActor[], map: MapLayer) {
+	private runHook(hook: EffectHook, event: EffectEvent, actors: BattleActor[], map: MapLayer) {
 		for (const handler of this.handlers) {
 			if (handler.hook !== hook) continue;
 			handler.handle(handler.source, event, actors, map);
 		}
 	}
 
-	private resolve(e: EffectApplyEvent, actors: BattleActor[]) {
+	private resolve(e: EffectApplyEvent, actors: BattleActor[], map: MapLayer) {
 		if (e.blocks.length === 0) {
 			e.result = "applied";
 		} else if (e.mitigations.length > 0) {
@@ -88,7 +94,7 @@ export class EffectSystem {
 		}
 
 		if (e.result === "applied") {
-			this.applyEffect(e, actors);
+			this.applyEffect(e, actors, map);
 		} else if (e.result === "mitigated") {
 		}
 
@@ -97,31 +103,41 @@ export class EffectSystem {
 		}
 	}
 
-	private applyEffect(event: EffectApplyEvent, actors: BattleActor[]) {
+	private applyEffect(event: EffectApplyEvent, actors: BattleActor[], map: MapLayer) {
 		const effect = event.effect;
 		if (effect.type == 'damage') {
-			this.applyDamageEvent(event, effect, actors);
+			this.applyDamageEvent(event, effect, actors, map);
 		}
 	}
 
-	private applyDamageEvent(event: EffectApplyEvent, effect: SkillEffectDamage, actors: BattleActor[]) {
+	private applyDamageEvent(event: EffectApplyEvent, effect: SkillEffectDamage, actors: BattleActor[], map: MapLayer) {
 		const target = event.target;
 
+		let damageEvents = []
 		if ('name' in target) {
-			this.applyDamage(event.source, target, effect.damage, event.sourceSkill);
+			const dmg = this.calculateDamage(event.source, target, effect.damage, event.sourceSkill);
+			damageEvents.push(dmg);
 		} else {
-			this.applyAoeDamage(event, target, effect, actors);
+			damageEvents = this.calculateAoeDamage(event, target, effect, actors);
 		}
 
+		for (let dmgEvent of damageEvents) {
+			this.runHook("preDamage", dmgEvent, actors, map);
+			this.applyDamage(dmgEvent.source, dmgEvent.target, dmgEvent.calculatedDamage);
+			this.runHook("onDamage", dmgEvent, actors, map);
+			if (dmgEvent.target.dead) {
+				this.runHook("onKill", dmgEvent, actors, map);
+			}
+		}
 	}
 
 	private getTaxicabDistance(pos1: Position, pos2: Position): number {
 		return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y)
 	}
 
-	private applyAoeDamage(event: EffectApplyEvent, target: Position, effect: SkillEffectDamage, actors: BattleActor[]) {
+	private calculateAoeDamage(event: EffectApplyEvent, target: Position, effect: SkillEffectDamage, actors: BattleActor[]): DamageEvent[] {
 		const radius = effect.effectRadius || effect.effectCone || effect.effectLine;
-		if (!radius) return;
+		if (!radius) return [];
 		let targets = actors
 			.filter(a => this.getTaxicabDistance(a.positionSquare, target) <= radius)
 			.filter(a => event.source.enemy != a.enemy);
@@ -133,16 +149,19 @@ export class EffectSystem {
 			} else if (target.y == event.source.positionSquare.y) {
 				targets = targets.filter(a => a.positionSquare.y == target.y);
 			} else {
-				return;
+				return [];
 			}
 		}
+		let damageEvents = [];
 
 		for (let target of targets) {
-			this.applyDamage(event.source, target, effect.damage, event.sourceSkill);
+			const dmg = this.calculateDamage(event.source, target, effect.damage, event.sourceSkill);
+			damageEvents.push(dmg);
 		}
+		return damageEvents;
 	}
 
-	private applyDamage(source: BattleActor, target:  BattleActor, damage: number | DamageFunction, skill: Skill) {
+	private calculateDamage(source: BattleActor, target:  BattleActor, damage: number | DamageFunction, skill: Skill): DamageEvent {
 		let amount: number;
 		if (typeof damage == 'number') {
 			amount = damage; // TODO: attack type effectivenes
@@ -150,7 +169,22 @@ export class EffectSystem {
 			amount = damage(source, target, skill);
 		}
 
-		target.hp -= amount;
+		return {
+			type: "onDamage",
+			sourceSkill: skill,
+			source,
+			target,
+			originalDamage: amount,
+			calculatedDamage: amount,
+			originalDamageType: "normal", // TODO
+			calculatedDamageType: "normal", // TODO
+			blocks: [],
+			mitigations: [],
+		}
+	}
+
+	private applyDamage(_source: BattleActor, target:  BattleActor, damage: number) {
+		target.hp -= damage;
 		if (target.hp <= 0) {
 			target.dead = true;
 		}
