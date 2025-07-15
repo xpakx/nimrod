@@ -51,10 +51,13 @@ export interface EffectHandlerDef {
 }
 
 export class EffectSystem {
-	private handlers: EffectHandlerDef[] = [];
+	private handlers: Map<EffectHook, EffectHandlerDef[]> = new Map();
 
 	on(handler: EffectHandler, source: BattleActor, hook: EffectHook = "onSkill") {
-		this.handlers.push({
+		if (!this.handlers.has(hook)) this.handlers.set(hook, []);
+		const handlers = this.handlers.get(hook);
+		if (!handlers) return;
+		handlers.push({
 			handle: handler,
 			source: source,
 			hook: hook,
@@ -80,8 +83,9 @@ export class EffectSystem {
 	}
 
 	private runHook(hook: EffectHook, event: EffectEvent, actors: BattleActor[], map: MapLayer) {
-		for (const handler of this.handlers) {
-			if (handler.hook !== hook) continue;
+		const handlers = this.handlers.get(hook);
+		if (!handlers) return;
+		for (const handler of handlers) {
 			handler.handle(handler.source, event, actors, map);
 		}
 	}
