@@ -2,10 +2,10 @@ import { BattleActor, HeroType } from "../battle/actor";
 import { MapLayer, Position } from "../map-layer";
 import { DamageFunction, Skill, SkillEffect, SkillEffectDamage } from "./skill/skill";
 
-export type EffectEvent = EffectApplyEvent | DamageEvent;
+export type EffectEvent = SkillEvent | DamageEvent;
 
-export interface EffectApplyEvent {
-	type: "onSkill"
+export interface SkillEvent {
+	type: "onSkill";
 	sourceSkill: Skill;
 	source: BattleActor;
 	target: BattleActor | Position;
@@ -23,7 +23,7 @@ export interface EffectApplyEvent {
 }
 
 export interface DamageEvent {
-	type: "onDamage"
+	type: "onDamage";
 	sourceSkill: Skill;
 	source: BattleActor;
 	target: BattleActor;
@@ -43,6 +43,20 @@ export type EffectHook =
 export type EffectHandler = (passiveOwner: BattleActor, event: EffectEvent, actors: BattleActor[],
 			     map: MapLayer) => void;
 
+export interface TurnEvent {
+	type: "onTurn"
+	subtype: "end" | "start";
+	turnNum: number;
+}
+
+export interface EventContext {
+	actors: BattleActor[],
+	map: MapLayer,
+}
+
+export type SkillHandler = (owner: BattleActor, event: SkillEvent, context: EventContext) => void;
+export type DamageHandler = (owner: BattleActor, event: DamageEvent, context: EventContext) => void;
+export type TurnHandler = (owner: BattleActor, event: TurnEvent, context: EventContext) => void;
 
 export interface EffectHandlerDef {
 	handle: EffectHandler,
@@ -66,7 +80,7 @@ export class EffectSystem {
 
 	emitSkill(source: BattleActor, target: BattleActor | Position, effect: SkillEffect,
 	    sourceSkill: Skill, actors: BattleActor[], map: MapLayer) {
-		const event: EffectApplyEvent = {
+		const event: SkillEvent = {
 			type: "onSkill",
 			sourceSkill,
 			source,
@@ -90,7 +104,7 @@ export class EffectSystem {
 		}
 	}
 
-	private resolve(e: EffectApplyEvent, actors: BattleActor[], map: MapLayer) {
+	private resolve(e: SkillEvent, actors: BattleActor[], map: MapLayer) {
 		if (e.blocks.length === 0) {
 			e.result = "applied";
 		} else if (e.mitigations.length > 0) {
@@ -109,14 +123,14 @@ export class EffectSystem {
 		}
 	}
 
-	private applyEffect(event: EffectApplyEvent, actors: BattleActor[], map: MapLayer) {
+	private applyEffect(event: SkillEvent, actors: BattleActor[], map: MapLayer) {
 		const effect = event.effect;
 		if (effect.type == 'damage') {
 			this.applyDamageEvent(event, effect, actors, map);
 		}
 	}
 
-	private applyDamageEvent(event: EffectApplyEvent, effect: SkillEffectDamage, actors: BattleActor[], map: MapLayer) {
+	private applyDamageEvent(event: SkillEvent, effect: SkillEffectDamage, actors: BattleActor[], map: MapLayer) {
 		const target = event.target;
 
 		let damageEvents = []
@@ -141,7 +155,7 @@ export class EffectSystem {
 		return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y)
 	}
 
-	private calculateAoeDamage(event: EffectApplyEvent, target: Position, effect: SkillEffectDamage, actors: BattleActor[]): DamageEvent[] {
+	private calculateAoeDamage(event: SkillEvent, target: Position, effect: SkillEffectDamage, actors: BattleActor[]): DamageEvent[] {
 		const radius = effect.effectRadius || effect.effectCone || effect.effectLine;
 		if (!radius) return [];
 		let targets = actors

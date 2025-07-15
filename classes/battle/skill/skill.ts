@@ -36,6 +36,6 @@ export type Applychecker = (passiveOwner: BattleActor, actor: BattleActor, actor
 export interface SkillEffectPassive {
 	type: "passive";
 	chance?: number; // undefined -> 100%
-	handler: EffectHandler;
+	handler: EffectHandler,
 	shouldApply?: Applychecker;
 }
