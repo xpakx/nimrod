@@ -39,8 +39,10 @@ export type EffectHook =
 	"onSkill" | "preDamage" | "onDamage" | "onKill" | "onStatusApplied" | "postSkill" | 
 	"onTurnStart" | "onTurnEnd" | "onMove";
 
+// TODO: split into separate handlers for each effect hook
 export type EffectHandler = (passiveOwner: BattleActor, event: EffectEvent, actors: BattleActor[],
 			     map: MapLayer) => void;
+
 
 export interface EffectHandlerDef {
 	handle: EffectHandler,
@@ -59,7 +61,7 @@ export class EffectSystem {
 		});
 	}
 
-	emit(source: BattleActor, target: BattleActor | Position, effect: SkillEffect,
+	emitSkill(source: BattleActor, target: BattleActor | Position, effect: SkillEffect,
 	    sourceSkill: Skill, actors: BattleActor[], map: MapLayer) {
 		const event: EffectApplyEvent = {
 			type: "onSkill",

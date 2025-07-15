@@ -334,7 +334,7 @@ export class BattleLogicLayer {
 
 		this.currentHero.skill.cooldownTimer = this.currentHero.skill.cooldown;
 		for (let effect of this.currentHero.skill.effect) {
-			this.skillProcessor.emit(
+			this.skillProcessor.emitSkill(
 				actor,
 				target,
 				effect,
