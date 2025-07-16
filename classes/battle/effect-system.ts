@@ -127,6 +127,18 @@ export class EffectSystem {
 		this.resolve(event, context);
 	}
 
+	emitTurnEvent(turnNum: number, actors: BattleActor[], map: MapLayer, onStart: boolean = true) {
+		const context: EventContext = { actors, map };
+		const type = onStart ? "onTurnStart" : "onTurnEnd";
+		const event: TurnEvent = {
+			type,
+			subtype: onStart ? "start" : "end",
+			turnNum,
+		}
+
+		this.runHook(type, event, context);
+	}
+
 	private runHook<T extends EffectHook>(hook: T, event: HookEventMap[T], context: EventContext) {
 		const handlers = this.handlers[hook] as EffectHandlerDef<T>[] | undefined;
 		if (!handlers) return;
