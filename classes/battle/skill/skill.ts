@@ -1,6 +1,6 @@
 import { MapLayer } from "../../map-layer.js";
 import { BattleActor, HeroType } from "../actor.js";
-import { SkillHandler } from "../effect-system";
+import { EffectHook, HookHandlerMap } from "../effect-system";
 
 export interface Skill {
 	name: string;
@@ -14,7 +14,7 @@ export interface Skill {
 	passive: boolean;
 }
 
-export type SkillEffect = SkillEffectDamage | SkillEffectPassive;
+export type SkillEffect = SkillEffectDamage | SkillEffectPassive<EffectHook>;
 
 export type DamageFunction = (hero: BattleActor, target: BattleActor, skill: Skill) => number; 
 
@@ -33,9 +33,10 @@ export interface SkillEffectDamage {
 export type Applychecker = (passiveOwner: BattleActor, actor: BattleActor, actors: BattleActor[],
 			     map: MapLayer) => boolean;
 
-export interface SkillEffectPassive {
+export interface SkillEffectPassive<T extends EffectHook> {
 	type: "passive";
 	chance?: number; // undefined -> 100%
-	handler: SkillHandler,
+	hook: T;
+	handler: HookHandlerMap[T],
 	shouldApply?: Applychecker;
 }

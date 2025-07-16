@@ -1,8 +1,9 @@
 import { SkillEffectDamage, SkillEffectPassive } from "./skill.js";
 import { Heroes } from "../actors.js";
 
-export let pikemanPassive: SkillEffectPassive = {
+export let pikemanPassive: SkillEffectPassive<"onSkill"> = {
     type: "passive",
+    hook: "onSkill",
     handler: (passiveOwner, event, _context) => {
 	    if (!Heroes.isSameAllyType(passiveOwner, event.source)) return;
 	    const isNeighbour = Heroes.areAdjacent(passiveOwner, event.source);
