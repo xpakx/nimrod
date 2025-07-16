@@ -91,20 +91,21 @@ export class EffectSystem {
 			reactions: [],
 			criticalHit: false,
 		};
+		const context: EventContext = { actors, map };
 
-		this.runHook("onSkill", event, actors, map);
-		this.resolve(event, actors, map);
+		this.runHook("onSkill", event, context);
+		this.resolve(event, context);
 	}
 
-	private runHook(hook: EffectHook, event: EffectEvent, actors: BattleActor[], map: MapLayer) {
+	private runHook(hook: EffectHook, event: EffectEvent, context: EventContext) {
 		const handlers = this.handlers.get(hook);
 		if (!handlers) return;
 		for (const handler of handlers) {
-			handler.handle(handler.source, event, actors, map);
+			handler.handle(handler.source, event, context.actors, context.map);
 		}
 	}
 
-	private resolve(e: SkillEvent, actors: BattleActor[], map: MapLayer) {
+	private resolve(e: SkillEvent, context: EventContext) {
 		if (e.blocks.length === 0) {
 			e.result = "applied";
 		} else if (e.mitigations.length > 0) {
@@ -114,7 +115,7 @@ export class EffectSystem {
 		}
 
 		if (e.result === "applied") {
-			this.applyEffect(e, actors, map);
+			this.applyEffect(e, context);
 		} else if (e.result === "mitigated") {
 		}
 
@@ -123,14 +124,14 @@ export class EffectSystem {
 		}
 	}
 
-	private applyEffect(event: SkillEvent, actors: BattleActor[], map: MapLayer) {
+	private applyEffect(event: SkillEvent, context: EventContext) {
 		const effect = event.effect;
 		if (effect.type == 'damage') {
-			this.applyDamageEvent(event, effect, actors, map);
+			this.applyDamageEvent(event, effect, context);
 		}
 	}
 
-	private applyDamageEvent(event: SkillEvent, effect: SkillEffectDamage, actors: BattleActor[], map: MapLayer) {
+	private applyDamageEvent(event: SkillEvent, effect: SkillEffectDamage, context: EventContext) {
 		const target = event.target;
 
 		let damageEvents = []
@@ -138,15 +139,15 @@ export class EffectSystem {
 			const dmg = this.calculateDamage(event.source, target, effect.damage, event.sourceSkill);
 			damageEvents.push(dmg);
 		} else {
-			damageEvents = this.calculateAoeDamage(event, target, effect, actors);
+			damageEvents = this.calculateAoeDamage(event, target, effect, context.actors);
 		}
 
 		for (let dmgEvent of damageEvents) {
-			this.runHook("preDamage", dmgEvent, actors, map);
+			this.runHook("preDamage", dmgEvent, context);
 			this.applyDamage(dmgEvent.source, dmgEvent.target, dmgEvent.calculatedDamage);
-			this.runHook("onDamage", dmgEvent, actors, map);
+			this.runHook("onDamage", dmgEvent, context);
 			if (dmgEvent.target.dead) {
-				this.runHook("onKill", dmgEvent, actors, map);
+				this.runHook("onKill", dmgEvent, context);
 			}
 		}
 	}
