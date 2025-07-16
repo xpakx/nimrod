@@ -14,7 +14,7 @@ export interface Skill {
 	passive: boolean;
 }
 
-export type SkillEffect = SkillEffectDamage | SkillEffectPassive<EffectHook>;
+export type SkillEffect = SkillEffectDamage | SkillEffectPassive;
 
 export type DamageFunction = (hero: BattleActor, target: BattleActor, skill: Skill) => number; 
 
@@ -33,7 +33,7 @@ export interface SkillEffectDamage {
 export type Applychecker = (passiveOwner: BattleActor, actor: BattleActor, actors: BattleActor[],
 			     map: MapLayer) => boolean;
 
-export interface SkillEffectPassive<T extends EffectHook> {
+export interface SkillEffectPassive<T extends EffectHook = EffectHook> {
 	type: "passive";
 	chance?: number; // undefined -> 100%
 	hook: T;
