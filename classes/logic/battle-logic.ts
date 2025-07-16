@@ -375,7 +375,7 @@ export class BattleLogicLayer {
 			if (!skill.passive) return;
 			for (let effect of skill.effect) {
 				if ("handler" in effect) {
-					this.skillProcessor.on(effect.handler, actor);
+					this.skillProcessor.on(effect.handler, actor, "onSkill");
 				}
 			}
 		}

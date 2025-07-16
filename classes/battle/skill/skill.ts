@@ -1,6 +1,6 @@
 import { MapLayer } from "../../map-layer.js";
 import { BattleActor, HeroType } from "../actor.js";
-import { EffectHandler } from "../effect-system";
+import { SkillHandler } from "../effect-system";
 
 export interface Skill {
 	name: string;
@@ -36,6 +36,6 @@ export type Applychecker = (passiveOwner: BattleActor, actor: BattleActor, actor
 export interface SkillEffectPassive {
 	type: "passive";
 	chance?: number; // undefined -> 100%
-	handler: EffectHandler,
+	handler: SkillHandler,
 	shouldApply?: Applychecker;
 }

@@ -2,7 +2,7 @@ import { BattleActor, HeroType } from "../battle/actor";
 import { MapLayer, Position } from "../map-layer";
 import { DamageFunction, Skill, SkillEffect, SkillEffectDamage } from "./skill/skill";
 
-export type EffectEvent = SkillEvent | DamageEvent;
+export type EffectEvent = SkillEvent | DamageEvent | TurnEvent;
 
 export interface SkillEvent {
 	type: "onSkill";
@@ -23,7 +23,7 @@ export interface SkillEvent {
 }
 
 export interface DamageEvent {
-	type: "onDamage";
+	type: "onDamage" | "onKill" | "preDamage";
 	sourceSkill: Skill;
 	source: BattleActor;
 	target: BattleActor;
@@ -35,19 +35,19 @@ export interface DamageEvent {
 	calculatedDamageType: HeroType;
 }
 
+export interface TurnEvent {
+	type: "onTurnEnd" | "onTurnStart";
+	subtype: "end" | "start";
+	turnNum: number;
+}
+
 export type EffectHook = 
 	"onSkill" | "preDamage" | "onDamage" | "onKill" | "onStatusApplied" | "postSkill" | 
 	"onTurnStart" | "onTurnEnd" | "onMove";
 
 // TODO: split into separate handlers for each effect hook
-export type EffectHandler = (passiveOwner: BattleActor, event: EffectEvent, actors: BattleActor[],
-			     map: MapLayer) => void;
-
-export interface TurnEvent {
-	type: "onTurn"
-	subtype: "end" | "start";
-	turnNum: number;
-}
+export type EffectHandler = DamageHandler | TurnHandler | SkillHandler;//(passiveOwner: BattleActor, event: EffectEvent, actors: BattleActor[],
+			    // map: MapLayer) => void;
 
 export interface EventContext {
 	actors: BattleActor[],
@@ -58,21 +58,51 @@ export type SkillHandler = (owner: BattleActor, event: SkillEvent, context: Even
 export type DamageHandler = (owner: BattleActor, event: DamageEvent, context: EventContext) => void;
 export type TurnHandler = (owner: BattleActor, event: TurnEvent, context: EventContext) => void;
 
-export interface EffectHandlerDef {
-	handle: EffectHandler,
-	source: BattleActor,
-	hook: EffectHook,
+export interface HookHandlerMap {
+	onSkill: SkillHandler;
+	postSkill: SkillHandler;
+	onKill: DamageHandler;
+	onStatusApplied: SkillHandler; // TODO
+	preDamage: DamageHandler;
+	onDamage: DamageHandler;
+	onTurnStart: TurnHandler;
+	onTurnEnd: TurnHandler;
+	onMove: SkillHandler; // TODO
 }
 
-export class EffectSystem {
-	private handlers: Map<EffectHook, EffectHandlerDef[]> = new Map();
+interface HookEventMap {
+	onSkill: SkillEvent;
+	postSkill: SkillEvent;
+	onKill: DamageEvent;
+	onStatusApplied: SkillEvent;
+	preDamage: DamageEvent;
+	onDamage: DamageEvent;
+	onTurnStart: TurnEvent;
+	onTurnEnd: TurnEvent;
+	onMove: SkillEvent;
+}
 
-	on(handler: EffectHandler, source: BattleActor, hook: EffectHook = "onSkill") {
-		if (!this.handlers.has(hook)) this.handlers.set(hook, []);
-		const handlers = this.handlers.get(hook);
-		if (!handlers) return;
+
+interface EffectHandlerDef<T extends EffectHook = EffectHook> {
+  handle: (source: BattleActor, event: HookEventMap[T], context: EventContext) => void;
+  source: BattleActor;
+  hook: T;
+}
+
+
+export class EffectSystem {
+	private handlers: {
+		[K in EffectHook]?: EffectHandlerDef<K>[];
+	} = {};
+
+	on<T extends EffectHook>(handler: HookHandlerMap[T], source: BattleActor, hook: T) {
+		let handlers = this.handlers[hook];
+		if(!handlers) {
+			handlers = [];
+			this.handlers[hook] = handlers;
+		}
 		handlers.push({
-			handle: handler,
+			handle: handler as (source: BattleActor, event: HookEventMap[T], context: EventContext) => void,
 			source: source,
 			hook: hook,
 		});
@@ -97,11 +127,11 @@ export class EffectSystem {
 		this.resolve(event, context);
 	}
 
-	private runHook(hook: EffectHook, event: EffectEvent, context: EventContext) {
-		const handlers = this.handlers.get(hook);
+	private runHook<T extends EffectHook>(hook: T, event: HookEventMap[T], context: EventContext) {
+		const handlers = this.handlers[hook] as EffectHandlerDef<T>[] | undefined;
 		if (!handlers) return;
 		for (const handler of handlers) {
-			handler.handle(handler.source, event, context.actors, context.map);
+			handler.handle(handler.source, event, context);
 		}
 	}
 
