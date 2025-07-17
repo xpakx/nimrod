@@ -39,6 +39,7 @@ export interface TurnEvent {
 	type: "onTurnEnd" | "onTurnStart";
 	subtype: "end" | "start";
 	turnNum: number;
+	enemyTurn: boolean;
 }
 
 export type EffectHook = 
@@ -127,13 +128,14 @@ export class EffectSystem {
 		this.resolve(event, context);
 	}
 
-	emitTurnEvent(turnNum: number, actors: BattleActor[], map: MapLayer, onStart: boolean = true) {
+	emitTurnEvent(turnNum: number, enemyTurn: boolean, actors: BattleActor[], map: MapLayer, onStart: boolean = true) {
 		const context: EventContext = { actors, map };
 		const type = onStart ? "onTurnStart" : "onTurnEnd";
 		const event: TurnEvent = {
 			type,
 			subtype: onStart ? "start" : "end",
 			turnNum,
+			enemyTurn,
 		}
 
 		this.runHook(type, event, context);

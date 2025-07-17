@@ -34,16 +34,31 @@ export class DefaultTurnController implements TurnController {
 		}
 	}
 
+	private createTurnEvent(game: Game, onStart: boolean = true) {
+		if (!game.state.currentBattle) return;
+		const battle = game.state.currentBattle;
+		game.battleLogic.skillProcessor.emitTurnEvent(
+			battle.currentTurn,
+			!battle.playerPhase,
+			battle.getPedestrians(),
+			game.map,
+			onStart
+		);
+
+	}
+
 	onTurnEnd(game: Game) {
 		if (!game.state.currentBattle) return;
 		const battle = game.state.currentBattle;
 
+		this.createTurnEvent(game, false); // turnEnd event
 		if (battle.playerStarts != battle.playerPhase) {
 			game.state.currentBattle.currentTurn += 1;
 		}
 		this.clearActors(battle.playerPhase ? battle.heroes : battle.enemies);
 
 		battle.playerPhase = !battle.playerPhase;
+		this.createTurnEvent(game); // turnStart event
 	}
 
 	getUnitsForAiToMove(game: Game): BattleActor[] {
