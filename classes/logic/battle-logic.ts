@@ -230,9 +230,7 @@ export class BattleLogicLayer {
 		}
 	}
 
-	calcBuildingsState(_game: Game, _deltaTime: number) {
-		// TODO: decide if needed
-	}
+	calcBuildingsState(_game: Game, _deltaTime: number) { }
 
 	calcPedestriansState(game: Game, deltaTime: number) {
 		const dTime = deltaTime > 0.5 ? 0.5 : deltaTime;
@@ -370,7 +368,6 @@ export class BattleLogicLayer {
 	}
 
 	registerHeroPassives(actor: BattleActor) {
-		// TODO: distinguish between permament and temporary passives
 		for (let skill of actor.skills) {
 			if (!skill.passive) return;
 			for (let effect of skill.effect) {

@@ -147,7 +147,7 @@ export class Building {
 	}
 
 	applyProductionOptions(options: Recipe[]) {
-		this.recipes = options; // TODO
+		this.recipes = options;
 		for (let recipe of options) {
 			this.storage[recipe.output.resource] = 0;
 			for (let ingredient of recipe.ingredients) {

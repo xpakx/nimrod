@@ -46,9 +46,7 @@ export type EffectHook =
 	"onSkill" | "preDamage" | "onDamage" | "onKill" | "onStatusApplied" | "postSkill" | 
 	"onTurnStart" | "onTurnEnd" | "onMove";
 
-// TODO: split into separate handlers for each effect hook
-export type EffectHandler = DamageHandler | TurnHandler | SkillHandler;//(passiveOwner: BattleActor, event: EffectEvent, actors: BattleActor[],
-			    // map: MapLayer) => void;
+export type EffectHandler = DamageHandler | TurnHandler | SkillHandler;
 
 export interface EventContext {
 	actors: BattleActor[],
@@ -63,12 +61,12 @@ export interface HookHandlerMap {
 	onSkill: SkillHandler;
 	postSkill: SkillHandler;
 	onKill: DamageHandler;
-	onStatusApplied: SkillHandler; // TODO
+	onStatusApplied: SkillHandler; // TODO: add new handler type
 	preDamage: DamageHandler;
 	onDamage: DamageHandler;
 	onTurnStart: TurnHandler;
 	onTurnEnd: TurnHandler;
-	onMove: SkillHandler; // TODO
+	onMove: SkillHandler; // TODO: add new handler type
 }
 
 interface HookEventMap {

@@ -133,9 +133,9 @@ export class SkillButton implements Button {
 	constructor(image: HTMLImageElement, size: Size, position: Position, skill: Skill) {
 		this._image = image;
 		this.image = new OffscreenCanvas(size.width, size.height);
-		this.context = this.image.getContext("2d")!; // TODO
+		this.context = this.image.getContext("2d")!;
 		this.hoverImage = new OffscreenCanvas(size.width, size.height);
-		this.hoverContext = this.hoverImage.getContext("2d")!; // TODO
+		this.hoverContext = this.hoverImage.getContext("2d")!;
 		this.size = size;
 		this.position = position;
 		this.skill = skill;

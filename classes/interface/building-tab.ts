@@ -1,4 +1,5 @@
 import { BuildingSprite } from "../building/buildings.js";
+import { getLogger, Logger } from "../logger.js";
 import { Position, Size } from "../map-layer.js";
 import { Action } from "./actions.js";
 import { NavButton } from "./adventurers-guild.js";
@@ -197,6 +198,7 @@ export class BuildingButton implements Button {
 	defaultButtonSize = 125;
 	buttonSize = this.defaultButtonSize;
 	menuWidth = 420;
+	logger: Logger = getLogger("BuildingButton");
 
 	constructor(image: BuildingSprite, name: string) {
 		this.name = name;

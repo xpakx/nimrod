@@ -128,9 +128,9 @@ export class HeroButton implements Button {
 	constructor(image: HTMLImageElement, size: Size, position: Position, hero: BattleActor, action: HeroActionType) {
 		this._image = image;
 		this.image = new OffscreenCanvas(size.width, size.height);
-		this.context = this.image.getContext("2d")!; // TODO
+		this.context = this.image.getContext("2d")!;
 		this.hoverImage = new OffscreenCanvas(size.width, size.height);
-		this.hoverContext = this.hoverImage.getContext("2d")!; // TODO
+		this.hoverContext = this.hoverImage.getContext("2d")!;
 		this.size = size;
 		this.position = position;
 		this.rank = hero.rank;
@@ -350,7 +350,7 @@ export class NavButton implements Button {
     constructor(position: Position, dir: "next" | "prev") {
 	    this.size = {width: 20, height: 20};
 	    this.image = new OffscreenCanvas(this.size.width, this.size.height);
-	    this.context = this.image.getContext("2d")!; // TODO
+	    this.context = this.image.getContext("2d")!;
 	    this.position = position;
 	    this.hover = false;
 	    this.dir = dir;
