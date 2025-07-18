@@ -1,6 +1,6 @@
 import { BattleActor, HeroType } from "../battle/actor";
 import { MapLayer, Position } from "../map-layer";
-import { DamageFunction, Skill, SkillEffect, SkillEffectDamage } from "./skill/skill";
+import { Skill, SkillEffect, SkillEffectDamage } from "./skill/skill";
 
 export type EffectEvent = SkillEvent | DamageEvent | TurnEvent;
 
@@ -180,7 +180,7 @@ export class EffectSystem {
 
 		let damageEvents = []
 		if ('name' in target) {
-			const dmg = this.calculateDamage(event.source, target, effect.damage, event.sourceSkill);
+			const dmg = this.calculateDamage(event.source, target, effect, event.sourceSkill);
 			damageEvents.push(dmg);
 		} else {
 			damageEvents = this.calculateAoeDamage(event, target, effect, context.actors);
@@ -188,6 +188,7 @@ export class EffectSystem {
 
 		for (let dmgEvent of damageEvents) {
 			this.runHook("preDamage", dmgEvent, context);
+			// TODO: attack type effectivenes
 			this.applyDamage(dmgEvent.source, dmgEvent.target, dmgEvent.calculatedDamage);
 			this.runHook("onDamage", dmgEvent, context);
 			if (dmgEvent.target.dead) {
@@ -220,18 +221,18 @@ export class EffectSystem {
 		let damageEvents = [];
 
 		for (let target of targets) {
-			const dmg = this.calculateDamage(event.source, target, effect.damage, event.sourceSkill);
+			const dmg = this.calculateDamage(event.source, target, effect, event.sourceSkill);
 			damageEvents.push(dmg);
 		}
 		return damageEvents;
 	}
 
-	private calculateDamage(source: BattleActor, target:  BattleActor, damage: number | DamageFunction, skill: Skill): DamageEvent {
+	private calculateDamage(source: BattleActor, target:  BattleActor, effect: SkillEffectDamage, skill: Skill): DamageEvent {
 		let amount: number;
-		if (typeof damage == 'number') {
-			amount = damage; // TODO: attack type effectivenes
+		if (typeof effect.damage == 'number') {
+			amount = effect.damage;
 		} else {
-			amount = damage(source, target, skill);
+			amount = effect.damage(source, target, skill);
 		}
 
 		return {
@@ -241,8 +242,8 @@ export class EffectSystem {
 			target,
 			originalDamage: amount,
 			calculatedDamage: amount,
-			originalDamageType: "normal", // TODO
-			calculatedDamageType: "normal", // TODO
+			originalDamageType: effect.damageType,
+			calculatedDamageType: effect.damageType,
 			blocks: [],
 			mitigations: [],
 		}
