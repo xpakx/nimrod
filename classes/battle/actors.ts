@@ -80,13 +80,13 @@ export class Heroes {
 			.filter(enemy => !enemy.dead && this.getTaxicabDistanceFor(actor, enemy) <= range);
 	}
 
-	static getEnemiesInAttackRange(actor: BattleActor, actors: BattleActor[], range: number, position: Position | undefined = undefined) {
+	static getEnemiesInRadius(actor: BattleActor, actors: BattleActor[], range: number, position: Position | undefined = undefined) {
 		const pos = position || actor.positionSquare;
 		return this.getEnemiesOf(actor, actors)
 			.filter(enemy => !enemy.dead && this.getTaxicabDistance(pos, enemy.positionSquare) <= range);
 	}
 
-	static getEnemiesInLineAttack(actor: BattleActor, actors: BattleActor[], range: number, position: Position) {
+	static getEnemiesInLine(actor: BattleActor, actors: BattleActor[], range: number, position: Position) {
 		// TODO: directionality, obstacles; diagonals? bresenham?
 		const targets = this.getEnemiesInRange(actor, actors, range);
 
@@ -96,6 +96,41 @@ export class Heroes {
 			return targets.filter(a => a.positionSquare.y == position.y);
 		}
 		return [];
+	}
+
+	private static dot2(pos1: Position, pos2: Position): number {
+		return pos1.x * pos2.x + pos1.y * pos2.y;
+	}
+
+	private static normalizeTaxicab(pos: Position): Position {
+		const mag = Math.abs(pos.x) + Math.abs(pos.y);
+		if (mag === 0) return { x: 0, y: 0 };
+		return { x: pos.x / mag, y: pos.y / mag };
+	}
+
+	static getEnemiesInCone(actor: BattleActor, actors: BattleActor[], range: number, target: Position) {
+		const origin = actor.positionSquare;
+		const direction = { x: target.x - origin.x, y: target.y - origin.y };
+
+		const coneCosThreshold = Math.cos(Math.PI / 4);
+
+		const dirNorm = this.normalizeTaxicab(direction);
+
+		return this.getEnemiesOf(actor, actors).filter(enemy => {
+			if (enemy.dead) return false;
+			const dist = this.getTaxicabDistance(enemy.positionSquare, origin);
+
+			if (dist > range) return false;
+
+			const delta = {
+				x: enemy.positionSquare.x - origin.x,
+				y: enemy.positionSquare.y - origin.y,
+			};
+			const deltaNorm = this.normalizeTaxicab(delta);
+			const dotProduct = this.dot2(dirNorm, deltaNorm);
+
+			return dotProduct >= coneCosThreshold;
+		});
 	}
 
 	static getAlliesInRange(actor: BattleActor, actors: BattleActor[], range: number) {

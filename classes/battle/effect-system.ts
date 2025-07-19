@@ -200,11 +200,13 @@ export class EffectSystem {
 		const radius = effect.effectRadius || effect.effectCone || effect.effectLine;
 		if (!radius) return [];
 		let targets: BattleActor[];
-		// TODO: if (effect.effectCone) {
+
 		if (effect.effectLine) {
-			targets = Heroes.getEnemiesInLineAttack(event.source, actors, radius, target);
+			targets = Heroes.getEnemiesInLine(event.source, actors, radius, target);
+		} else if (effect.effectCone) {
+			targets = Heroes.getEnemiesInCone(event.source, actors, radius, target);
 		} else {
-			targets = Heroes.getEnemiesInAttackRange(event.source, actors, radius, target);
+			targets = Heroes.getEnemiesInRadius(event.source, actors, radius, target);
 		}
 		let damageEvents = [];
 
