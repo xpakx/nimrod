@@ -80,6 +80,12 @@ export class Heroes {
 			.filter(enemy => !enemy.dead && this.getTaxicabDistanceFor(actor, enemy) <= range);
 	}
 
+	static getEnemiesInAttackRange(actor: BattleActor, actors: BattleActor[], range: number, position: Position | undefined = undefined) {
+		const pos = position || actor.positionSquare;
+		return this.getEnemiesOf(actor, actors)
+			.filter(enemy => !enemy.dead && this.getTaxicabDistance(pos, enemy.positionSquare) <= range);
+	}
+
 	static getAlliesInRange(actor: BattleActor, actors: BattleActor[], range: number) {
 		return this.getAlliesOf(actor, actors)
 			.filter(ally => !ally.dead && this.getTaxicabDistanceFor(actor, ally) <= range);

@@ -73,7 +73,7 @@ export class BattleLogicLayer {
 		const x = game.map.isoPlayerMouse.x;
 		const y = game.map.isoPlayerMouse.y;
 
-		if (this.isBattleBlocked(battle)) return; // TODO
+		if (this.isBattleBlocked(battle)) return; // TODO: inform user
 
 		if (battle.selectedActor) {
 			this.processActorAction(game, battle, battle.selectedActor, {x: x, y: y});

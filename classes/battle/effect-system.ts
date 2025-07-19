@@ -1,5 +1,6 @@
 import { BattleActor, HeroType } from "../battle/actor";
 import { MapLayer, Position } from "../map-layer";
+import { Heroes } from "./actors";
 import { Skill, SkillEffect, SkillEffectDamage } from "./skill/skill";
 
 export type EffectEvent = SkillEvent | DamageEvent | TurnEvent;
@@ -195,16 +196,10 @@ export class EffectSystem {
 		}
 	}
 
-	private getTaxicabDistance(pos1: Position, pos2: Position): number {
-		return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y)
-	}
-
 	private calculateAoeDamage(event: SkillEvent, target: Position, effect: SkillEffectDamage, actors: BattleActor[]): DamageEvent[] {
 		const radius = effect.effectRadius || effect.effectCone || effect.effectLine;
 		if (!radius) return [];
-		let targets = actors
-			.filter(a => this.getTaxicabDistance(a.positionSquare, target) <= radius)
-			.filter(a => event.source.enemy != a.enemy);
+		let targets = Heroes.getEnemiesInAttackRange(event.source, actors, radius, target);
 
 		// TODO: if (effect.effectCone) {
 		if (effect.effectLine) {

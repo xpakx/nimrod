@@ -119,7 +119,7 @@ export const buildingSettings: BuildingConfig[] = [
 		},
 	},
 	{
-		sprite: "bakery",  //TODO
+		sprite: "bakery",
 		size: 2,
 		maxWorkers: 10,
 		name: "clay-pit", 
@@ -134,7 +134,7 @@ export const buildingSettings: BuildingConfig[] = [
 		]
 	},
 	{
-		sprite: "bakery",  //TODO
+		sprite: "bakery",
 		size: 2,
 		maxWorkers: 4,
 		name: "pottery-workshop", 
@@ -149,7 +149,7 @@ export const buildingSettings: BuildingConfig[] = [
 		]
 	},
 	{
-		sprite: "bakery",  //TODO
+		sprite: "bakery",
 		size: 4,
 		maxWorkers: 6,
 		name: "flax-farm", 
@@ -164,7 +164,7 @@ export const buildingSettings: BuildingConfig[] = [
 		]
 	},
 	{
-		sprite: "bakery", // TODO
+		sprite: "bakery",
 		size: 2,
 		maxWorkers: 8,
 		name: "weaver", 
@@ -179,7 +179,7 @@ export const buildingSettings: BuildingConfig[] = [
 		]
 	},
 	{
-		sprite: "bakery",  //TODO
+		sprite: "bakery",
 		size: 4,
 		maxWorkers: 6,
 		name: "grove", 
@@ -194,7 +194,7 @@ export const buildingSettings: BuildingConfig[] = [
 		]
 	},
 	{
-		sprite: "bakery", // TODO
+		sprite: "bakery",
 		size: 2,
 		maxWorkers: 10,
 		name: "olive-press", 
@@ -209,11 +209,11 @@ export const buildingSettings: BuildingConfig[] = [
 		]
 	},
 	{
-		sprite: "granary",  // TODO
+		sprite: "granary",
 		size: 4,
 		maxWorkers: 2,
 		interface: new StorageInterface(), 
-		name: "storage2",  // TODO
+		name: "storage2",
 		visibleName: "Storage", 
 		cost: 120,
 		workerOptions: {sprite: 'delivery'},
@@ -223,12 +223,12 @@ export const buildingSettings: BuildingConfig[] = [
 		},
 	},
 	{
-		sprite: "well", // TODO
+		sprite: "well",
 		size: 2,
 		maxWorkers: 2,
 		name: "food-shop",
 		visibleName: "Food Shop", 
-		interface: new StorageInterface(), // TODO
+		interface: new StorageInterface(),
 		cost: 15,
 		workerOptions: {
 			sprite: "test",
@@ -240,12 +240,12 @@ export const buildingSettings: BuildingConfig[] = [
 		}
 	},
 	{
-		sprite: "well", // TODO
+		sprite: "well",
 		size: 2,
 		maxWorkers: 2,
 		name: "ceramic-shop",
 		visibleName: "Ceramics Shop", 
-		interface: new StorageInterface(), // TODO
+		interface: new StorageInterface(),
 		cost: 15,
 		workerOptions: {
 			sprite: "test",
@@ -257,12 +257,12 @@ export const buildingSettings: BuildingConfig[] = [
 		}
 	},
 	{
-		sprite: "well", // TODO
+		sprite: "well",
 		size: 2,
 		maxWorkers: 2,
 		name: "textile-shop",
 		visibleName: "Textiles Shop", 
-		interface: new StorageInterface(), // TODO
+		interface: new StorageInterface(),
 		cost: 15,
 		workerOptions: {
 			sprite: "test",
@@ -274,12 +274,12 @@ export const buildingSettings: BuildingConfig[] = [
 		}
 	},
 	{
-		sprite: "well", // TODO
+		sprite: "well",
 		size: 2,
 		maxWorkers: 2,
 		name: "olive-shop",
 		visibleName: "Olive Shop", 
-		interface: new StorageInterface(), // TODO
+		interface: new StorageInterface(),
 		cost: 15,
 		workerOptions: {
 			sprite: "test",
@@ -290,7 +290,7 @@ export const buildingSettings: BuildingConfig[] = [
 		}
 	},
 	{
-		sprite: "house", // TODO
+		sprite: "house",
 		size: 2,
 		name: "warrior-house",
 		workforceType: "warrior",
@@ -310,7 +310,7 @@ export const buildingSettings: BuildingConfig[] = [
 		},
 		constructionOptions: {
 			requirements: [
-				{resource: "weapons", amount: 10}, // TODO
+				{resource: "weapons", amount: 10},
 				{resource: "wood", amount: 50},
 			],
 		},
