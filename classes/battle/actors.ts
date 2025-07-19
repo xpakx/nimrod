@@ -86,6 +86,18 @@ export class Heroes {
 			.filter(enemy => !enemy.dead && this.getTaxicabDistance(pos, enemy.positionSquare) <= range);
 	}
 
+	static getEnemiesInLineAttack(actor: BattleActor, actors: BattleActor[], range: number, position: Position) {
+		// TODO: directionality, obstacles; diagonals? bresenham?
+		const targets = this.getEnemiesInRange(actor, actors, range);
+
+		if (position.x == actor.positionSquare.x) {
+			return targets.filter(a => a.positionSquare.x == position.x);
+		} else if (position.y == actor.positionSquare.y) {
+			return targets.filter(a => a.positionSquare.y == position.y);
+		}
+		return [];
+	}
+
 	static getAlliesInRange(actor: BattleActor, actors: BattleActor[], range: number) {
 		return this.getAlliesOf(actor, actors)
 			.filter(ally => !ally.dead && this.getTaxicabDistanceFor(actor, ally) <= range);

@@ -199,17 +199,12 @@ export class EffectSystem {
 	private calculateAoeDamage(event: SkillEvent, target: Position, effect: SkillEffectDamage, actors: BattleActor[]): DamageEvent[] {
 		const radius = effect.effectRadius || effect.effectCone || effect.effectLine;
 		if (!radius) return [];
-		let targets = Heroes.getEnemiesInAttackRange(event.source, actors, radius, target);
-
+		let targets: BattleActor[];
 		// TODO: if (effect.effectCone) {
 		if (effect.effectLine) {
-			if (target.x == event.source.positionSquare.x) {
-				targets = targets.filter(a => a.positionSquare.x == target.x);
-			} else if (target.y == event.source.positionSquare.y) {
-				targets = targets.filter(a => a.positionSquare.y == target.y);
-			} else {
-				return [];
-			}
+			targets = Heroes.getEnemiesInLineAttack(event.source, actors, radius, target);
+		} else {
+			targets = Heroes.getEnemiesInAttackRange(event.source, actors, radius, target);
 		}
 		let damageEvents = [];
 
