@@ -78,7 +78,7 @@ export class BattleLogicLayer {
 		if (battle.selectedActor) {
 			this.processActorAction(game, battle, battle.selectedActor, {x: x, y: y});
 		} else {
-			console.log("Selecting actor");
+			this.logger.debug("Selecting actor");
 			this.battleSelectActor(game, battle, x, y);
 		}
 
@@ -86,14 +86,14 @@ export class BattleLogicLayer {
 
 	processActorAction(game: Game, battle: Battle, actor: BattleActor, target: Position) {
 		if (!actor.moved && battle.selectedTile) {
-			console.log("Processing movement");
+			this.logger.debug("Processing movement");
 			this.battleProcessMovement(game, battle.selectedTile, target, battle.selectedActor);
 			if (battle.selectedActor) battle.selectedTile = undefined;
 			if (actor.finishedTurn) battle.selectedActor = undefined;
 			return;
 		}
 		if (!actor.finishedTurn) {
-			console.log("Processing skill");
+			this.logger.debug("Processing skill");
 			this.battleProcessSkill(game, actor, target);
 			if (actor.finishedTurn) battle.selectedActor = undefined;
 			return;
@@ -247,6 +247,7 @@ export class BattleLogicLayer {
 			if (hero.goal) moving = true;
 		}
 		if (!moving && this.turnController.isMovementBlocked()) {
+			this.logger.debug("Movement finished.");
 			this.turnController.tryUnlockMovement();
 			this.onTurnEnd(game);
 		}
@@ -264,6 +265,7 @@ export class BattleLogicLayer {
 	}
 
 	onTurnEnd(game: Game) {
+		this.logger.debug("Turn end");
 		this.turnController.onTurnEnd(game);
 		if (!game.state.currentBattle?.playerPhase) {
 			this.aiMove(game);
@@ -271,7 +273,7 @@ export class BattleLogicLayer {
 	}
 
 	aiMove(game: Game) {
-		console.log("enemy phase");
+		this.logger.debug("Enemy phase");
 		const unitsToMove = this.turnController.getUnitsForAiToMove(game);
 		this.aiMoveGenerator.makeMove(game, unitsToMove);
 		const turnEnded = this.turnController.tryEndTurn(game, this.skipAnimations);
