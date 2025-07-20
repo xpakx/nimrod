@@ -20,6 +20,7 @@ import { DefaultTurnController } from "./logic/turn/default.js";
 import { TestMoveGenerator } from "./logic/ai/test.js";
 import { BuildingSidebar } from "./interface/sidebar.js";
 import { BattleSidebar } from "./interface/battle-sidebar.js";
+import { EffectSystem } from "./battle/effect-system.js";
 
 export class Game {
 	state: GameState;
@@ -53,7 +54,8 @@ export class Game {
 		this.cityInterfaceLogic = new CityInterfaceLogic();
 		const turnController = new DefaultTurnController();
 		const battleAi = new TestMoveGenerator();
-		this.battleLogic = new BattleLogicLayer(turnController, battleAi);
+		const effectSystem = new EffectSystem();
+		this.battleLogic = new BattleLogicLayer(turnController, battleAi, effectSystem);
 		this.saveManager = new SaveManager();
 
 		this.maxYOffset = this.map.isoToScreen({x: this.map.map[0].length - 1, y: this.map.map.length - 1}).y + (this.map.tileSize.height/2);

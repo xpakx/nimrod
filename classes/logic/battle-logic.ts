@@ -30,10 +30,13 @@ export class BattleLogicLayer {
 
 	skillProcessor: EffectSystem;
 
-	constructor(turnController: TurnController, moveGenerator: MoveGenerator) {
+	constructor(turnController: TurnController,
+		    moveGenerator: MoveGenerator,
+		    effectSystem: EffectSystem,
+		   ) {
 		this.turnController = turnController;
 		this.aiMoveGenerator = moveGenerator;
-		this.skillProcessor = new EffectSystem();
+		this.skillProcessor = effectSystem;
 	}
 
 	showSpawnArea(game: Game) {
