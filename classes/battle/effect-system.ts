@@ -1,7 +1,7 @@
-import { BattleActor, HeroType } from "../battle/actor";
-import { MapLayer, Position } from "../map-layer";
-import { Heroes } from "./actors";
-import { Skill, SkillEffect, SkillEffectDamage } from "./skill/skill";
+import { BattleActor, HeroType } from "../battle/actor.js";
+import { MapLayer, Position } from "../map-layer.js";
+import { Heroes } from "./actors.js";
+import { Skill, SkillEffect, SkillEffectDamage } from "./skill/skill.js";
 
 export type EffectEvent = SkillEvent | DamageEvent | TurnEvent;
 
