@@ -87,6 +87,7 @@ interface EffectHandlerDef<T extends EffectHook = EffectHook> {
   handle: (source: BattleActor, event: HookEventMap[T], context: EventContext) => void;
   source: BattleActor;
   hook: T;
+  duration?: number;
 }
 
 
@@ -138,6 +139,27 @@ export class EffectSystem {
 		}
 
 		this.runHook(type, event, context);
+		this.calculateDuration();
+	}
+
+	private tickHandlers<K extends EffectHook>(_hook: K, handlers: EffectHandlerDef<K>[]): EffectHandlerDef<K>[] {
+		return handlers
+		.filter(handler => handler.duration !== 0)
+		.map(handler => {
+			if (handler.duration !== undefined) {
+				handler.duration -= 1;
+			}
+			return handler;
+		});
+	}
+
+	private calculateDuration() {
+		for (const hook in this.handlers) {
+			const key = hook as EffectHook;
+			const handlers = this.handlers[key];
+			if (!handlers) continue;
+			this.handlers[key] = this.tickHandlers(key, handlers as EffectHandlerDef<typeof key>[]) as EffectHandlerDef<any>[]; // TODO: improve types
+		}
 	}
 
 	private runHook<T extends EffectHook>(hook: T, event: HookEventMap[T], context: EventContext) {
