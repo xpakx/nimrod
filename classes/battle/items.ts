@@ -10,11 +10,38 @@ export interface ArtifactBonus {
 	constantBonus?: number;
 };
 
-export interface ArtifactLine {
+export class ArtifactLine {
 	bonus1: ArtifactBonus;
 	bonus2: ArtifactBonus;
 	bonus3?: ArtifactBonus;
 	passive?: SkillEffect[];
+
+	constructor(bonus1: ArtifactBonus, bonus2: ArtifactBonus, bonus3?: ArtifactBonus, passive?: SkillEffect[]) {
+		this.bonus1 = bonus1;
+		this.bonus2 = bonus2;
+		this.bonus3 = bonus3;
+		this.passive = passive;
+	}
+
+	getBonusForPoints(artifactPoints: number): ArtifactBonus | undefined {
+		if (artifactPoints < 3) return;
+		if (artifactPoints < 6) return this.bonus1;
+		if (artifactPoints < 9) return this.bonus2;
+		return this.bonus3;
+	}
+
+	getTotalBonus(type: BonusType, baseValue: number, artifactPoints: number): number {
+		const bonus = this.getBonusForPoints(artifactPoints);
+		if (!bonus) return 0;
+		if (bonus.bonusType !== type) return 0;
+
+		let total = 0;
+		if (bonus.percentageBonus) total += baseValue*bonus.percentageBonus;
+		if (bonus.constantBonus) total += bonus.constantBonus;
+
+		return total;
+	}
+
 }
 
 export interface ArtifactLineData {
