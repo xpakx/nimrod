@@ -1,6 +1,7 @@
 import { Actor, ActorSprite } from "../actor.js";
 import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position } from "../map-layer.js";
+import { HeroDefinition } from "./hero-library.js";
 import { Skill } from "./skill/skill.js";
 
 export type HeroRank = "common" | "rare"; 
@@ -23,11 +24,32 @@ export class BattleActor extends Actor {
 	strength: number = 10;
 	agility: number = 10;
 
+	definition?: HeroDefinition;
+
 	moved: boolean = false;
 	finishedTurn: boolean = false;
 
 	constructor(sprite: ActorSprite, position: Position) {
 		super(sprite, position);
+	}
+
+	applyHeroDefinition(definition: HeroDefinition) {
+		this.definition = definition;
+		this.name = definition.name;
+		this.hp = definition.baseHp;
+		for (let skill of definition.skills) {
+			this.skills.push({
+				name: skill.visibleName,
+				level: 1,
+				effect: skill.effect,
+				icon: skill.icon,
+				cooldown: skill.cooldown,
+				cooldownTimer: 0,
+				maxDistance: skill.maxDistance,
+				targetType: skill.targetType,
+				passive: skill.passive,
+			});
+		}
 	}
 
 	tick(deltaTime: number, _roads: MapLayer, _randMap: number[]): boolean {

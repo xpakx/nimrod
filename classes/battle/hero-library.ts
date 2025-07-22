@@ -116,21 +116,7 @@ export class HeroLibrary {
 
 	createHero(hero: HeroDefinition): BattleActor {
 		const actor = new BattleActor(hero.sprite, {x: 0, y: 0});
-		actor.name = hero.name;
-		actor.hp = hero.baseHp;
-		for (let skill of hero.skills) {
-			actor.skills.push({
-				name: skill.visibleName,
-				level: 1,
-				effect: skill.effect,
-				icon: skill.icon,
-				cooldown: skill.cooldown,
-				cooldownTimer: 0,
-				maxDistance: skill.maxDistance,
-				targetType: skill.targetType,
-				passive: skill.passive,
-			});
-		}
+		actor.applyHeroDefinition(hero);
 		return actor;
 	}
 }
