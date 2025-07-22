@@ -84,10 +84,10 @@ interface HookEventMap {
 
 
 interface EffectHandlerDef<T extends EffectHook = EffectHook> {
-  handle: (source: BattleActor, event: HookEventMap[T], context: EventContext) => void;
-  source: BattleActor;
-  hook: T;
-  duration?: number;
+	handle: (source: BattleActor, event: HookEventMap[T], context: EventContext) => void;
+	source: BattleActor;
+	hook: T;
+	duration?: number;
 }
 
 

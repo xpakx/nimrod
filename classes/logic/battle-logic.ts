@@ -32,8 +32,7 @@ export class BattleLogicLayer {
 
 	constructor(turnController: TurnController,
 		    moveGenerator: MoveGenerator,
-		    effectSystem: EffectSystem,
-		   ) {
+		    effectSystem: EffectSystem) {
 		this.turnController = turnController;
 		this.aiMoveGenerator = moveGenerator;
 		this.skillProcessor = effectSystem;
