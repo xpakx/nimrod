@@ -11,12 +11,17 @@ export interface ArtifactBonus {
 };
 
 export class ArtifactLine {
+	name: string;
+	visibleName: string;
 	bonus1: ArtifactBonus;
 	bonus2: ArtifactBonus;
 	bonus3?: ArtifactBonus;
 	passive?: SkillEffect[];
 
-	constructor(bonus1: ArtifactBonus, bonus2: ArtifactBonus, bonus3?: ArtifactBonus, passive?: SkillEffect[]) {
+	constructor(name: string, visibleName: string, bonus1: ArtifactBonus, bonus2: ArtifactBonus, bonus3?: ArtifactBonus, passive?: SkillEffect[]) {
+		this.name = name;
+		this.visibleName = visibleName;
+			
 		this.bonus1 = bonus1;
 		this.bonus2 = bonus2;
 		this.bonus3 = bonus3;
