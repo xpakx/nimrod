@@ -10,6 +10,18 @@ export interface ArtifactBonus {
 	constantBonus?: number;
 };
 
+export class ArtifactManager {
+	private lines: Map<string, ArtifactLine>;
+
+	constructor() {
+		this.lines = new Map();
+	}
+
+	registerArtifactLine(line: ArtifactLine) {
+		this.lines.set(line.name, line);
+	}
+}
+
 export class ArtifactLine {
 	name: string;
 	visibleName: string;
@@ -50,15 +62,15 @@ export class ArtifactLine {
 }
 
 export interface ArtifactLineData {
-	line: ArtifactLine;
+	line: string;
 	points: 1 | 2 | 3;
 }
 
 export class Artifact {
-	artifactLines: ArtifactLineData[];
+	artifactLines: string[];
 	name: string;
 
-	constructor(name: string, lines: ArtifactLineData[]) {
+	constructor(name: string, lines: string[]) {
 		if (lines.length > 3)  {
 			throw new Error("Artifact cannot have more than 3 artifact lines");
 		}
