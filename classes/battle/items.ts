@@ -20,6 +20,17 @@ export class ArtifactManager {
 	registerArtifactLine(line: ArtifactLine) {
 		this.lines.set(line.name, line);
 	}
+
+	sumArtifactLines(equipment: Artifact[]): Map<string, number> {
+		const pointsByLine = new Map<string, number>();
+		for (let item of equipment) {
+			for (let line of item.artifactLines) {
+				let points = pointsByLine.get(line.line) || 0;
+				pointsByLine.set(line.line, points + line.points);
+			}
+		}
+		return pointsByLine;
+	}
 }
 
 export class ArtifactLine {
@@ -67,10 +78,10 @@ export interface ArtifactLineData {
 }
 
 export class Artifact {
-	artifactLines: string[];
+	artifactLines: ArtifactLineData[];
 	name: string;
 
-	constructor(name: string, lines: string[]) {
+	constructor(name: string, lines: ArtifactLineData[]) {
 		if (lines.length > 3)  {
 			throw new Error("Artifact cannot have more than 3 artifact lines");
 		}
