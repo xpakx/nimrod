@@ -1,3 +1,4 @@
+import { BattleActor, HeroStats } from "./actor.js";
 import { SkillEffect } from "./skill/skill.js";
 
 type BonusType = "strength" | "agility" | "intelligence" | "defence" |
@@ -31,6 +32,22 @@ export class ArtifactManager {
 		}
 		return pointsByLine;
 	}
+
+	updateHero(hero: BattleActor, items: Artifact[]) {
+		const lines = this.sumArtifactLines(items);
+
+		for (let [lineName, points] of lines) {
+			const line = this.lines.get(lineName);
+			if (!line) continue;
+			const bonuses = line.getBonusTypes();
+			for (let bonus of bonuses) {
+				const stat = bonus as keyof HeroStats;
+				const base = hero.stats[stat];
+				const bonusPoints = line.getTotalBonus(bonus, base, points);
+				console.log(`${stat}: ${bonusPoints}`);
+			}
+		}
+	}
 }
 
 export class ArtifactLine {
@@ -58,6 +75,10 @@ export class ArtifactLine {
 		return this.bonus3;
 	}
 
+	getBonusTypes(): BonusType[] {
+		return [this.bonus1.bonusType, this.bonus2.bonusType]; // TODO
+	}
+
 	getTotalBonus(type: BonusType, baseValue: number, artifactPoints: number): number {
 		const bonus = this.getBonusForPoints(artifactPoints);
 		if (!bonus) return 0;
@@ -69,7 +90,6 @@ export class ArtifactLine {
 
 		return total;
 	}
-
 }
 
 export interface ArtifactLineData {
