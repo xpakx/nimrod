@@ -1,10 +1,22 @@
 import { Actor, ActorSprite } from "../actor.js";
 import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position } from "../map-layer.js";
-import { HeroDefinition } from "./hero-library.js";
+import { HeroDefinition, HeroStat } from "./hero-library.js";
 import { Skill } from "./skill/skill.js";
 
 export type HeroRank = "common" | "rare"; 
+
+export interface HeroStats {
+	maxHp: number;
+	strength: number;
+	agility: number;
+	intelligence: number;
+	defence: number;
+	resistance: number;
+	luck: number;
+	speed: number;
+	vampirism: number;
+}
 
 export class BattleActor extends Actor {
 	enemy: boolean = false;
@@ -28,9 +40,29 @@ export class BattleActor extends Actor {
 
 	moved: boolean = false;
 	finishedTurn: boolean = false;
+	level: number = 1;
+	stats: HeroStats;
 
 	constructor(sprite: ActorSprite, position: Position) {
 		super(sprite, position);
+		this.stats = {
+			maxHp: 0,
+			strength: 0,
+			agility: 0,
+			intelligence: 0,
+			defence: 0,
+			resistance: 0,
+			luck: 0,
+			speed: 0,
+			vampirism: 0,
+		}
+	}
+
+	calculateStat(stat: keyof HeroStats) {
+		if (!this.definition) return;
+		// TODO: type safety
+		const data = this.definition[stat as keyof HeroDefinition] as HeroStat;
+		this.stats[stat] = data.base + this.level*data.growth;
 	}
 
 	applyHeroDefinition(definition: HeroDefinition) {
@@ -50,6 +82,16 @@ export class BattleActor extends Actor {
 				passive: skill.passive,
 			});
 		}
+
+		this.calculateStat("maxHp");
+		this.calculateStat("strength");
+		this.calculateStat("agility");
+		this.calculateStat("intelligence");
+		this.calculateStat("defence");
+		this.calculateStat("resistance");
+		this.calculateStat("luck");
+		this.calculateStat("speed");
+		// this.calculateStat("vampirism");
 	}
 
 	tick(deltaTime: number, _roads: MapLayer, _randMap: number[]): boolean {
