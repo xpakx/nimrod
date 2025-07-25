@@ -35,6 +35,7 @@ export class ArtifactManager {
 
 	updateHero(hero: BattleActor, items: Artifact[]) {
 		const lines = this.sumArtifactLines(items);
+		const statBonuses = new Map<keyof HeroStats, number>();
 
 		for (let [lineName, points] of lines) {
 			const line = this.lines.get(lineName);
@@ -44,8 +45,13 @@ export class ArtifactManager {
 				const stat = bonus as keyof HeroStats;
 				const base = hero.stats[stat];
 				const bonusPoints = line.getTotalBonus(bonus, base, points);
-				console.log(`${stat}: ${bonusPoints}`);
+				const current  = statBonuses.get(stat) || 0;
+				statBonuses.set(stat, current + bonusPoints);
 			}
+		}
+
+		for (let [stat, bonusPoints] of statBonuses) {
+			hero.stats[stat] += bonusPoints;
 		}
 	}
 }
