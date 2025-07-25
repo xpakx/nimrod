@@ -34,6 +34,7 @@ export class ArtifactManager {
 	}
 
 	updateHero(hero: BattleActor, items: Artifact[]) {
+		hero.resetStats();
 		const lines = this.sumArtifactLines(items);
 		const statBonuses = new Map<keyof HeroStats, number>();
 

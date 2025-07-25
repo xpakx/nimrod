@@ -58,13 +58,6 @@ export class BattleActor extends Actor {
 		}
 	}
 
-	calculateStat(stat: keyof HeroStats) {
-		if (!this.definition) return;
-		// TODO: type safety
-		const data = this.definition[stat as keyof HeroDefinition] as HeroStat;
-		this.stats[stat] = data.base + this.level*data.growth;
-	}
-
 	applyHeroDefinition(definition: HeroDefinition) {
 		this.definition = definition;
 		this.name = definition.name;
@@ -82,7 +75,11 @@ export class BattleActor extends Actor {
 				passive: skill.passive,
 			});
 		}
+		this.resetStats();
+	}
 
+	resetStats() {
+		if (!this.definition) return;
 		this.calculateStat("maxHp");
 		this.calculateStat("strength");
 		this.calculateStat("agility");
@@ -92,6 +89,13 @@ export class BattleActor extends Actor {
 		this.calculateStat("luck");
 		this.calculateStat("speed");
 		// this.calculateStat("vampirism");
+	}
+
+	calculateStat(stat: keyof HeroStats) {
+		if (!this.definition) return;
+		// TODO: type safety
+		const data = this.definition[stat as keyof HeroDefinition] as HeroStat;
+		this.stats[stat] = data.base + this.level*data.growth;
 	}
 
 	tick(deltaTime: number, _roads: MapLayer, _randMap: number[]): boolean {
