@@ -262,8 +262,8 @@ export class EffectSystem {
 	}
 
 	private applyDamage(_source: BattleActor, target:  BattleActor, damage: number) {
-		target.hp -= damage;
-		if (target.hp <= 0) {
+		target.currentHp -= damage;
+		if (target.currentHp <= 0) {
 			target.dead = true;
 		}
 	}

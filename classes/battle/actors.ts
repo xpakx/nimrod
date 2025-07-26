@@ -47,12 +47,12 @@ export class Heroes {
 
 	static getLowestHP(actors: BattleActor[]) {
 		return actors
-			.reduce((lowest, curr) => !lowest || curr.hp < lowest.hp ? curr : lowest);
+			.reduce((lowest, curr) => !lowest || curr.currentHp < lowest.currentHp ? curr : lowest);
 	}
 
 	static getHighestHP(actors: BattleActor[]) {
 		return actors
-			.reduce((highest, curr) => !highest || curr.hp > highest.hp ? curr : highest);
+			.reduce((highest, curr) => !highest || curr.currentHp > highest.currentHp ? curr : highest);
 	}
 
 	static getLowestHPEnemy(actor: BattleActor, actors: BattleActor[]) {
@@ -72,7 +72,7 @@ export class Heroes {
 	}
 
 	static sortByHP(actors: BattleActor[], ascending = true) {
-		return actors.slice().sort((a, b) => ascending ? a.hp - b.hp : b.hp - a.hp);
+		return actors.slice().sort((a, b) => ascending ? a.currentHp - b.currentHp : b.currentHp - a.currentHp);
 	}
 
 	static getEnemiesInRange(actor: BattleActor, actors: BattleActor[], range: number) {

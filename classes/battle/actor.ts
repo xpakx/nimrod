@@ -24,7 +24,7 @@ export class BattleActor extends Actor {
 	name: string = "???";
 	movement: number = 5;
 	type: HeroType = "normal";
-	hp: number = 0;
+	currentHp: number = 0;
 	skills: Skill[] = []
 	logger: Logger = getLogger("BattleActor");
 	rank: HeroRank = "common";
@@ -75,7 +75,7 @@ export class BattleActor extends Actor {
 			});
 		}
 		this.resetStats();
-		this.hp = this.stats.hp;
+		this.currentHp = this.stats.hp;
 	}
 
 	resetStats() {

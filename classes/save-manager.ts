@@ -217,7 +217,7 @@ export class SaveManager {
 					pedestrian = new BattleActor(sprite, {x: x, y: y}); 
 					pedestrian.name = actor.name;
 					pedestrian.movement = actor.movement;
-					pedestrian.hp = actor.hp;
+					pedestrian.currentHp = actor.hp;
 					pedestrian.type = actor.type || "normal";
 				}
 
