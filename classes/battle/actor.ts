@@ -7,7 +7,7 @@ import { Skill } from "./skill/skill.js";
 export type HeroRank = "common" | "rare"; 
 
 export interface HeroStats {
-	maxHp: number;
+	hp: number;
 	strength: number;
 	agility: number;
 	intelligence: number;
@@ -46,7 +46,7 @@ export class BattleActor extends Actor {
 	constructor(sprite: ActorSprite, position: Position) {
 		super(sprite, position);
 		this.stats = {
-			maxHp: 0,
+			hp: 0,
 			strength: 0,
 			agility: 0,
 			intelligence: 0,
@@ -61,7 +61,6 @@ export class BattleActor extends Actor {
 	applyHeroDefinition(definition: HeroDefinition) {
 		this.definition = definition;
 		this.name = definition.name;
-		this.hp = definition.baseHp;
 		for (let skill of definition.skills) {
 			this.skills.push({
 				name: skill.visibleName,
@@ -76,11 +75,12 @@ export class BattleActor extends Actor {
 			});
 		}
 		this.resetStats();
+		this.hp = this.stats.hp;
 	}
 
 	resetStats() {
 		if (!this.definition) return;
-		this.calculateStat("maxHp");
+		this.calculateStat("hp");
 		this.calculateStat("strength");
 		this.calculateStat("agility");
 		this.calculateStat("intelligence");

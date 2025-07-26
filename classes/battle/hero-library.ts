@@ -83,10 +83,11 @@ export class HeroLibrary {
 	}
 
 	registerHero(config: HeroConfig, sprites: SpriteLibrary) {
+		// TODO: correctly define stat growth
 		const hero: HeroDefinition = {
 			name: config.name,
 			visibleName: config.name,
-			baseHp: config.baseHp,
+			hp: { base: config.baseHp, growth: 0 },
 			sprite: sprites.actors[config.sprite || config.name],
 			movement: 5,
 			type: "normal",
@@ -130,8 +131,7 @@ export interface HeroDefinition {
 	movement: number;
 	type: HeroType;
 
-	baseHp: number;
-
+	hp: HeroStat;
 	strength: HeroStat;
 	agility: HeroStat;
 	intelligence: HeroStat;

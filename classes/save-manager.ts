@@ -488,7 +488,7 @@ export class SaveManager {
 				visibleName: hero.visibleName,
 				visibleTitle: hero.visibleTitle,
 				level: actor.level || 1,
-				strength: hero.baseHp, // TODO: calculate strength
+				strength: hero.strength.base, // TODO: calculate strength
 				type: hero.type,
 				image: hero.sprite.image, // TODO
 			};
