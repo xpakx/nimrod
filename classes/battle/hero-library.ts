@@ -98,6 +98,7 @@ export class HeroLibrary {
 			resistance: { base: 10, growth: 0 },
 			luck: { base: 10, growth: 0 },
 			speed: { base: 10, growth: 0 },
+			vampirism: { base: 10, growth: 0 },
 			skills: this.createSkillDefinitonsForHero(config, sprites),
 		};
 
@@ -139,6 +140,7 @@ export interface HeroDefinition {
 	resistance: HeroStat;
 	luck: HeroStat;
 	speed: HeroStat;
+	vampirism: HeroStat;
 	
 	typeAttackBonus?: HeroStat;
 	typeResistanceBonus?: HeroStat;

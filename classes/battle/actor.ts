@@ -88,13 +88,12 @@ export class BattleActor extends Actor {
 		this.calculateStat("resistance");
 		this.calculateStat("luck");
 		this.calculateStat("speed");
-		// this.calculateStat("vampirism");
+		this.calculateStat("vampirism");
 	}
 
 	calculateStat(stat: keyof HeroStats) {
 		if (!this.definition) return;
-		// TODO: type safety
-		const data = this.definition[stat as keyof HeroDefinition] as HeroStat;
+		const data = this.definition[stat];
 		this.stats[stat] = data.base + this.level*data.growth;
 	}
 
