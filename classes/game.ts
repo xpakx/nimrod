@@ -21,6 +21,7 @@ import { TestMoveGenerator } from "./logic/ai/test.js";
 import { BuildingSidebar } from "./interface/sidebar.js";
 import { BattleSidebar } from "./interface/battle-sidebar.js";
 import { EffectSystem } from "./battle/effect-system.js";
+import { ArtifactManager } from "./battle/items.js";
 
 export class Game {
 	state: GameState;
@@ -29,6 +30,7 @@ export class Game {
 	interf: InterfaceLayer;
 	sprites: SpriteLibrary;
 	heroes: HeroLibrary;
+	artifacts: ArtifactManager;
 	saveManager: SaveManager;
 	maxYOffset: number;
 	minXOffset: number;
@@ -50,6 +52,7 @@ export class Game {
 		this.interf = new InterfaceLayer(this.state.canvasSize, this.state.menuWidth, this.state.topPanelHeight);
 		this.sprites = new SpriteLibrary();
 		this.heroes = new HeroLibrary();
+		this.artifacts = new ArtifactManager();
 		this.cityLogic = new CityLogicLayer();
 		this.cityInterfaceLogic = new CityInterfaceLogic();
 		const turnController = new DefaultTurnController();
