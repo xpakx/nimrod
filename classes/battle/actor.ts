@@ -1,7 +1,7 @@
 import { Actor, ActorSprite } from "../actor.js";
 import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position } from "../map-layer.js";
-import { HeroDefinition, HeroStat } from "./hero-library.js";
+import { HeroDefinition } from "./hero-library.js";
 import { Skill } from "./skill/skill.js";
 
 export type HeroRank = "common" | "rare"; 

@@ -64,6 +64,7 @@ export class ArtifactLine {
 	bonus2: ArtifactBonus;
 	bonus3?: ArtifactBonus;
 	passive?: SkillEffect[];
+	bonuses: BonusType[];
 
 	constructor(name: string, visibleName: string, bonus1: ArtifactBonus, bonus2: ArtifactBonus, bonus3?: ArtifactBonus, passive?: SkillEffect[]) {
 		this.name = name;
@@ -73,6 +74,7 @@ export class ArtifactLine {
 		this.bonus2 = bonus2;
 		this.bonus3 = bonus3;
 		this.passive = passive;
+		this.bonuses = this.calculateBonusTypes();
 	}
 
 	getBonusForPoints(artifactPoints: number): ArtifactBonus | undefined {
@@ -82,8 +84,20 @@ export class ArtifactLine {
 		return this.bonus3;
 	}
 
+	calculateBonusTypes(): BonusType[] {
+		let bonuses = [this.bonus1.bonusType];
+		const bonus2 = this.bonus2.bonusType;
+		if (!bonuses.includes(bonus2)) bonuses.push(bonus2);
+		if (this.bonus3) {
+			const bonus3 = this.bonus3.bonusType;
+			if (!bonuses.includes(bonus3)) bonuses.push(bonus3);
+		}
+
+		return bonuses;
+	}
+
 	getBonusTypes(): BonusType[] {
-		return [this.bonus1.bonusType, this.bonus2.bonusType]; // TODO
+		return this.bonuses;
 	}
 
 	getTotalBonus(type: BonusType, baseValue: number, artifactPoints: number): number {
