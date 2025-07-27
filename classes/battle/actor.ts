@@ -59,6 +59,7 @@ export class BattleActor extends Actor {
 	applyHeroDefinition(definition: HeroDefinition) {
 		this.definition = definition;
 		this.name = definition.name;
+		this.movement = definition.movement;
 		for (let skill of definition.skills) {
 			this.skills.push({
 				name: skill.visibleName,

@@ -49,6 +49,7 @@ export interface HeroConfig {
 	luck?: HeroStat;
 	speed?: HeroStat;
 	vampirism?: HeroStat;
+	movement?: number;
 }
 
 export class HeroLibrary {
@@ -109,7 +110,7 @@ export class HeroLibrary {
 			visibleName: config.name,
 			hp: { base: config.baseHp, growth: 0 },
 			sprite: sprites.actors[config.sprite || config.name],
-			movement: 5,
+			movement: config.movement || 5,
 			type: "normal",
 			strength: this.getStatFromConfig(config, "strength"),
 			agility: this.getStatFromConfig(config, "agility"),
