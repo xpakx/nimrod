@@ -61,8 +61,11 @@ export class ArtifactLine {
 	name: string;
 	visibleName: string;
 	bonus1: ArtifactBonus;
+	pointsForBonus1: number = 6;
 	bonus2: ArtifactBonus;
+	pointsForBonus2: number = 9;
 	bonus3?: ArtifactBonus;
+	pointsForBonus3: number = 12;
 	passive?: SkillEffect[];
 	bonuses: BonusType[];
 
@@ -84,6 +87,32 @@ export class ArtifactLine {
 		return this.bonus3;
 	}
 
+	private addBonusType(result: ArtifactBonus, toAdd: ArtifactBonus) {
+		if (toAdd.constantBonus)  {
+			if (!result.constantBonus) result.constantBonus = 0;
+			result.constantBonus += toAdd.constantBonus;
+		}
+		if (toAdd.percentageBonus)  {
+			if (!result.percentageBonus) result.percentageBonus = 0;
+			result.percentageBonus += toAdd.percentageBonus;
+		}
+	}
+
+	getStatBonusForPoints(stat: BonusType, artifactPoints: number): ArtifactBonus | undefined {
+		const bonus: ArtifactBonus = { bonusType: stat };
+		if (artifactPoints >= this.pointsForBonus1 && this.bonus1.bonusType == stat) {
+			this.addBonusType(bonus, this.bonus1);
+		}
+		if (artifactPoints >= this.pointsForBonus2 && this.bonus2.bonusType == stat) {
+			this.addBonusType(bonus, this.bonus2);
+		}
+		if (artifactPoints >= this.pointsForBonus3 && this.bonus3 && this.bonus3.bonusType == stat) {
+			this.addBonusType(bonus, this.bonus3);
+		}
+		if (!bonus.percentageBonus && !bonus.constantBonus) return;
+		return bonus;
+	}
+
 	calculateBonusTypes(): BonusType[] {
 		let bonuses = [this.bonus1.bonusType];
 		const bonus2 = this.bonus2.bonusType;
@@ -101,7 +130,7 @@ export class ArtifactLine {
 	}
 
 	getTotalBonus(type: BonusType, baseValue: number, artifactPoints: number): number {
-		const bonus = this.getBonusForPoints(artifactPoints);
+		const bonus = this.getStatBonusForPoints(type, artifactPoints);
 		if (!bonus) return 0;
 		if (bonus.bonusType !== type) return 0;
 
