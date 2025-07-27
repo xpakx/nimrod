@@ -18,7 +18,7 @@ export let pikemanPassive = Skills.createPassive(
 export let pikemanSkill001: SkillEffectDamage = {
 	type: "damage",
 	damage: (hero, _target, skill) => {
-		return hero.strength * 0.3 + 3*skill.level;
+		return hero.stats.strength * 0.3 + 3*skill.level;
 	},
 	damageType: "normal",
 	target: "hero",

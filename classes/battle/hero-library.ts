@@ -129,7 +129,6 @@ export class HeroLibrary {
 		for (const hero of config) this.registerHero(hero, sprites);
 	}
 
-	// TODO: add all stats to BattleActor class
 	getHero(name: string): BattleActor | undefined {
 		const hero = this.heroes.get(name);
 		if (!hero) return;

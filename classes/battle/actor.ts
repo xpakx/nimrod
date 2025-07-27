@@ -33,8 +33,6 @@ export class BattleActor extends Actor {
 	path?: Position[]
 
 	selected: boolean = false;
-	strength: number = 10;
-	agility: number = 10;
 
 	definition?: HeroDefinition;
 
