@@ -1,6 +1,6 @@
 import { ActorSprite } from "../actor";
 import { SpriteLibrary } from "../sprite-library.js";
-import { BattleActor, HeroType } from "./actor.js";
+import { BattleActor, HeroStats, HeroType } from "./actor.js";
 import { SkillEffect } from "./skill/skill";
 
 export interface SkillConfig {
@@ -39,11 +39,24 @@ export interface HeroConfig {
 	sprite: string;
 	baseHp: number;
 	skills?: (SkillConfig | string)[];
+
+	hp?: HeroStat;
+	strength?: HeroStat;
+	agility?: HeroStat;
+	intelligence?: HeroStat;
+	defence?: HeroStat;
+	resistance?: HeroStat;
+	luck?: HeroStat;
+	speed?: HeroStat;
+	vampirism?: HeroStat;
 }
 
 export class HeroLibrary {
 	heroes: Map<string, HeroDefinition> = new Map();
 	skills: Map<string, SkillDefinition> = new Map();
+
+	defaultBaseStat: number = 10;
+	defaultGrowthStat: number = 0;
 
 	registerSkill(config: SkillConfig, sprites: SpriteLibrary) {
 		const skill = this.createSkillDefinition(config, sprites);
@@ -82,8 +95,15 @@ export class HeroLibrary {
 		return skills;
 	}
 
+	getStatFromConfig(config: HeroConfig, stat: keyof HeroStats): HeroStat {
+		if (config[stat]) return config[stat];
+		return {
+			base: this.defaultBaseStat,
+			growth: this.defaultGrowthStat,
+		}
+	}
+
 	registerHero(config: HeroConfig, sprites: SpriteLibrary) {
-		// TODO: correctly define stat growth
 		const hero: HeroDefinition = {
 			name: config.name,
 			visibleName: config.name,
@@ -91,14 +111,14 @@ export class HeroLibrary {
 			sprite: sprites.actors[config.sprite || config.name],
 			movement: 5,
 			type: "normal",
-			strength: { base: 10, growth: 0 },
-			agility: { base: 10, growth: 0 },
-			intelligence: { base: 10, growth: 0 },
-			defence: { base: 10, growth: 0 },
-			resistance: { base: 10, growth: 0 },
-			luck: { base: 10, growth: 0 },
-			speed: { base: 10, growth: 0 },
-			vampirism: { base: 10, growth: 0 },
+			strength: this.getStatFromConfig(config, "strength"),
+			agility: this.getStatFromConfig(config, "agility"),
+			intelligence: this.getStatFromConfig(config, "intelligence"),
+			defence: this.getStatFromConfig(config, "defence"),
+			resistance: this.getStatFromConfig(config, "resistance"),
+			luck: this.getStatFromConfig(config, "luck"),
+			speed: this.getStatFromConfig(config, "speed"),
+			vampirism: this.getStatFromConfig(config, "vampirism"),
 			skills: this.createSkillDefinitonsForHero(config, sprites),
 		};
 
