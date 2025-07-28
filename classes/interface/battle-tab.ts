@@ -57,6 +57,7 @@ export class BattleTab extends BuildingTab {
 	setSkills(skills: Skill[]) {
 		this.skillButtons = [];
 		for (let skill of skills) {
+			if (skill.passive) continue;
 			const button = new SkillButton(
 				skill.icon,
 				{width: this.buttonSize, height: this.buttonSize},
