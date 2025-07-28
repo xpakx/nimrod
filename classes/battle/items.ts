@@ -80,13 +80,6 @@ export class ArtifactLine {
 		this.bonuses = this.calculateBonusTypes();
 	}
 
-	getBonusForPoints(artifactPoints: number): ArtifactBonus | undefined {
-		if (artifactPoints < 3) return;
-		if (artifactPoints < 6) return this.bonus1;
-		if (artifactPoints < 9) return this.bonus2;
-		return this.bonus3;
-	}
-
 	private addBonusType(result: ArtifactBonus, toAdd: ArtifactBonus) {
 		if (toAdd.constantBonus)  {
 			if (!result.constantBonus) result.constantBonus = 0;
