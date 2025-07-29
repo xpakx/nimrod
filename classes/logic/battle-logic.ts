@@ -39,6 +39,7 @@ export class BattleLogicLayer {
 	}
 
 	showSpawnArea(game: Game) {
+		this.logger.debug("Hiding spawn area.");
 		if (!game.state.currentBattle) return;
 		const battle = game.state.currentBattle;
 
@@ -47,9 +48,11 @@ export class BattleLogicLayer {
 			this.savedPositions.push({position: position, color: color});
 			game.map.setColor(position, this.spawnColor);
 		}
+		this.logger.debug("Spawn area hidden.");
 	}
 
 	restoreSpawnsColor(game: Game) {
+		this.logger.debug("Restoring spawn area");
 		for (let position of this.savedPositions) {
 			game.map.setColor(position.position, position.color);
 		}
@@ -75,7 +78,11 @@ export class BattleLogicLayer {
 		const x = game.map.isoPlayerMouse.x;
 		const y = game.map.isoPlayerMouse.y;
 
-		if (this.isBattleBlocked(battle)) return; // TODO: inform user
+		if (this.isBattleBlocked(battle)) {
+			// TODO: inform user
+			this.logger.debug("Battle is blocked. Cannot initiate an action.");
+			return;
+		}
 
 		if (battle.selectedActor) {
 			this.processActorAction(game, battle, battle.selectedActor, {x: x, y: y});
@@ -103,7 +110,7 @@ export class BattleLogicLayer {
 	}
 
 	isBattleBlocked(battle: Battle): boolean {
-		if (this.turnController.isMovementBlocked()) return true; // TODO
+		if (this.turnController.isMovementBlocked()) return true;
 		if (!battle.playerPhase) return true;
 		return false;
 	}
@@ -197,9 +204,11 @@ export class BattleLogicLayer {
 			return;
 		}
 		if (!game.map.isTileOnMap(game.map.isoPlayerMouse)) {
+			this.logger.debug("Clicked outside the map.", game.map.isoPlayerMouse);
 			return;
 		}
 		if (game.map.isBlocked(game.map.isoPlayerMouse)) {
+			this.logger.debug("Position is blocked.", game.map.isoPlayerMouse);
 			return;
 		}
 		const battle = game.state.currentBattle;
@@ -207,23 +216,28 @@ export class BattleLogicLayer {
 		const y = game.map.isoPlayerMouse.y;
 
 		if (!this.currentHero.hero) {
+			this.logger.debug("Selecting a hero from map.");
 			this.currentHero.hero = this.isMouseOverPedestrian(game);
 			this.currentHero.initialPosition = {x: x, y: y};
 			this.currentHero.skill = undefined;
+			this.logger.debug("Selected hero.", this.currentHero.hero);
 			return;
 		}
 
 		const placed = battle.placeHero(this.currentHero.hero, {x: x, y: y});
 		if (!placed) {
+			this.logger.debug("Couldn't place a hero.");
 			return;
 		}
 		this.currentHero.hero.selected = false;
 		if (game.state.pedestrians.indexOf(this.currentHero.hero) < 0) {
 			game.state.pedestrians.push(this.currentHero.hero);
 		}
+		this.logger.debug("Placed hero.", this.currentHero.hero);
 		this.currentHero.hero = undefined;
 
 		battle.finishPlacement();
+
 		this.logger.debug(`started: ${game.state.currentBattle.battleStarted}`);
 		if (battle.battleStarted) {
 			this.restoreSpawnsColor(game);
