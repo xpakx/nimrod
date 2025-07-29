@@ -97,7 +97,8 @@ export class BattleLogicLayer {
 	processActorAction(game: Game, battle: Battle, actor: BattleActor, target: Position) {
 		if (!actor.moved && battle.selectedTile) {
 			this.logger.debug("Processing movement");
-			this.battleProcessMovement(game, battle.selectedTile, target, battle.selectedActor);
+			const moveAccepted = this.battleProcessMovement(game, battle.selectedTile, target, battle.selectedActor);
+			if (!moveAccepted) return;
 			if (battle.selectedActor) battle.selectedTile = undefined;
 			if (actor.finishedTurn) battle.selectedActor = undefined;
 		} else if (!actor.finishedTurn) {
@@ -173,21 +174,21 @@ export class BattleLogicLayer {
 	}
 
 
-	battleProcessMovement(game: Game, from: Position, to: Position, actor: BattleActor | undefined) {
+	battleProcessMovement(game: Game, from: Position, to: Position, actor: BattleActor | undefined): boolean {
 		if (!actor || actor.enemy) {
 			game.map.clearPath();
-			return;
+			return false;
 		}
 		const dist = game.map.shortestPath(from, to, game.sprites.getArrow());
 		let path = game.map.path?.map((x) => x.position);
 		game.map.clearPath();
-		if (dist <= actor.movement && path) {
-			this.moveActor(actor, to, path);
-			actor.moved = true;
-			if (actor.skills.length == 0) actor.finishedTurn = true;
-		}
+		if (dist > actor.movement || !path) return false;
+		this.moveActor(actor, to, path);
+		actor.moved = true;
+		if (actor.skills.length == 0) actor.finishedTurn = true;
 		const turnEnded = this.turnController.checkTurnEnd(game, this.skipAnimations);
 		if (turnEnded) this.onTurnEnd(game);
+		return true;
 	}
 
 	moveActor(actor: BattleActor, to: Position, path: Position[]) {
