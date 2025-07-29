@@ -181,8 +181,8 @@ export class BattleLogicLayer {
 		}
 		const dist = game.map.shortestPath(from, to, game.sprites.getArrow());
 		let path = game.map.path?.map((x) => x.position);
-		game.map.clearPath();
 		if (dist > actor.movement || !path) return false;
+		game.map.clearPath();
 		this.moveActor(actor, to, path);
 		actor.moved = true;
 		if (actor.skills.length == 0) actor.finishedTurn = true;
