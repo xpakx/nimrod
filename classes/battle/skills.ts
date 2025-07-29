@@ -1,5 +1,6 @@
-import { EffectHook, HookHandlerMap } from "./effect-system";
-import { Applychecker, SkillEffectPassive } from "./skill/skill";
+import { HeroType } from "./actor.js";
+import { EffectHook, HookHandlerMap } from "./effect-system.js";
+import { Applychecker, SkillEffectDamage, SkillEffectPassive } from "./skill/skill.js";
 
 export class Skills {
 	constructor() {
@@ -76,5 +77,20 @@ export class Skills {
 	): SkillEffectPassive<"onTurnEnd"> {
 		return { type: "passive", hook: "onTurnEnd", handler, shouldApply };
 	}
-}
 
+	static createDamageFunc(
+		stat: "strength" | "agility" | "intelligence",
+		multiplier: number,
+		growth: number,
+		type: HeroType = "normal",
+	): SkillEffectDamage {
+		return {
+			type: "damage",
+			damage: (hero, _target, skill) => {
+				return hero.stats[stat] * multiplier + growth*skill.level;
+			},
+			damageType: type,
+			target: "hero",
+		}
+	}
+}

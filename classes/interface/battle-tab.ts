@@ -84,6 +84,7 @@ export class BattleTab extends BuildingTab {
 			const heroButton = button as HeroButton;
 			heroButton.drawImage();
 			heroButton.drawHoverImage()
+			// TODO: add hp bar etc to hero buttons
 		}
 	}
 
