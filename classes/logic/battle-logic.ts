@@ -3,6 +3,7 @@ import { Battle } from "../battle/battle.js";
 import { EffectSystem } from "../battle/effect-system.js";
 import { Skill } from "../battle/skill/skill.js";
 import { Game } from "../game.js";
+import { BattleSidebar } from "../interface/battle-sidebar.js";
 import { BattleTab } from "../interface/battle-tab.js";
 import { getLogger, Logger } from "../logger.js";
 import { Position } from "../map-layer.js";
@@ -99,14 +100,12 @@ export class BattleLogicLayer {
 			this.battleProcessMovement(game, battle.selectedTile, target, battle.selectedActor);
 			if (battle.selectedActor) battle.selectedTile = undefined;
 			if (actor.finishedTurn) battle.selectedActor = undefined;
-			return;
-		}
-		if (!actor.finishedTurn) {
+		} else if (!actor.finishedTurn) {
 			this.logger.debug("Processing skill");
 			this.battleProcessSkill(game, actor, target);
 			if (actor.finishedTurn) battle.selectedActor = undefined;
-			return;
 		}
+		this.updatePortraits(game);
 	}
 
 	isBattleBlocked(battle: Battle): boolean {
@@ -401,6 +400,13 @@ export class BattleLogicLayer {
 		const battle = game.state.currentBattle;
 		battle.enemies.forEach((a) => this.registerHeroPassives(a));
 		battle.heroes.forEach((a) => this.registerHeroPassives(a));
+	}
+
+	updatePortraits(game: Game) {
+		const sidebar = game.interf.sidebars.get("battle") as BattleSidebar | undefined;
+		if (!sidebar) return;
+		const heroTab = sidebar.tabs[0];
+		heroTab.updateButtons();
 	}
 }
 

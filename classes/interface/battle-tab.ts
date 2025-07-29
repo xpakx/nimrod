@@ -79,6 +79,14 @@ export class BattleTab extends BuildingTab {
 		}
 	}
 
+	updateButtons() {
+		for (let button of this.heroButtons) {
+			const heroButton = button as HeroButton;
+			heroButton.drawImage();
+			heroButton.drawHoverImage()
+		}
+	}
+
 	draw(context: CanvasRenderingContext2D, mousePosition: Position) {
 		for(let button of this.buttons) {
 			const hovered = button.inButton(mousePosition);
