@@ -34,6 +34,7 @@ export interface DamageEvent {
 	calculatedDamage: number;
 	originalDamageType: HeroType;
 	calculatedDamageType: HeroType;
+	effectiveness: "effective" | "normal" | "ineffective";
 }
 
 export interface TurnEvent {
@@ -247,6 +248,13 @@ export class EffectSystem {
 			amount = effect.damage(source, target, skill);
 		}
 
+		let effectiveness: "effective" | "normal" | "ineffective" = "normal"
+		if (Heroes.isEffective(effect.damageType, target.type)) {
+			effectiveness = "effective";
+		} else if (Heroes.isIneffective(effect.damageType, target.type)) {
+			effectiveness = "ineffective";
+		}
+
 		return {
 			type: "onDamage",
 			sourceSkill: skill,
@@ -258,6 +266,7 @@ export class EffectSystem {
 			calculatedDamageType: effect.damageType,
 			blocks: [],
 			mitigations: [],
+			effectiveness,
 		}
 	}
 

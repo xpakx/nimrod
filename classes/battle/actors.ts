@@ -1,5 +1,5 @@
 import { Position } from "../map-layer.js";
-import { BattleActor } from "./actor.js";
+import { BattleActor, HeroType } from "./actor.js";
 
 export class Heroes {
 	constructor() {
@@ -153,5 +153,19 @@ export class Heroes {
 		const pos1 = actor1.positionSquare;
 		const pos2 = actor2.positionSquare;
 		return this.getTaxicabDistance(pos1, pos2) == 1;
+	}
+
+	static isEffective(attacker: HeroType, defender: HeroType): boolean {
+		if (attacker == "fire" && defender == "earth") return true;
+		if (attacker == "earth" && defender == "water") return true;
+		if (attacker == "water" && defender == "fire") return true;
+		return false;
+	}
+
+	static isIneffective(attacker: HeroType, defender: HeroType): boolean {
+		if (attacker == "earth" && defender == "fire") return true;
+		if (attacker == "water" && defender == "earth") return true;
+		if (attacker == "fire" && defender == "water") return true;
+		return false;
 	}
 }
