@@ -81,10 +81,10 @@ export class BattleTab extends BuildingTab {
 
 	updateButtons() {
 		for (let button of this.heroButtons) {
-			const heroButton = button as HeroButton;
+			const heroButton = button as HeroButtonWithLabel;
 			heroButton.drawImage();
 			heroButton.drawHoverImage()
-			// TODO: add hp bar etc to hero buttons
+			heroButton.drawLabel();
 		}
 	}
 
@@ -120,6 +120,10 @@ class HeroButtonWithLabel extends HeroButton {
 		this.labelCtx.font = "13px normal"
 		this.labelCtx.fillStyle = "white"
 		this.labelCtx.fillText(this.hero.name, 10, 13);
+		this.labelCtx.font = "11px normal"
+		const hp = this.hero.currentHp;
+		const totalHp = this.hero.stats.hp;
+		this.labelCtx.fillText(`${hp}/${totalHp}`, 10, 28);
 	}
 
 	draw(context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, hovered: boolean) {
