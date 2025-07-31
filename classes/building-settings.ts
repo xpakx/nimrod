@@ -480,6 +480,7 @@ export const skillSetting: SkillConfig[] = [
 		effect: [pikemanSkill001],
 		icon: "kingdom",
 		cooldown: 0,
+		targetType: "actor",
 	}
 
 ];

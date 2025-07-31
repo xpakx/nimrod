@@ -102,7 +102,7 @@ export class BattleLogicLayer {
 			if (battle.selectedActor) battle.selectedTile = undefined;
 			if (actor.finishedTurn) battle.selectedActor = undefined;
 		} else if (!actor.finishedTurn) {
-			this.logger.debug("Processing skill");
+			this.logger.debug("Processing skill", this.currentHero.skill);
 			this.battleProcessSkill(game, actor, target);
 			if (actor.finishedTurn) battle.selectedActor = undefined;
 		}
@@ -325,6 +325,7 @@ export class BattleLogicLayer {
 	}
 
 	private getTarget(game: Game, skill: Skill, position: Position): Position | BattleActor | undefined {
+		this.logger.debug(`Selecting target of type ${skill.targetType}`, position);
 		if (skill.targetType == "square") return position;
 		return this.getTargetActor(game, position);
 	}
@@ -345,6 +346,7 @@ export class BattleLogicLayer {
 
 		let target = this.getTarget(game, this.currentHero.skill, position);
 		if (!target) return false;
+		this.logger.debug("Selected target", target);
 
 		this.switchToHeroMode(game);
 
