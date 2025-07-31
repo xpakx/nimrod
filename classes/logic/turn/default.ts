@@ -17,6 +17,7 @@ export class DefaultTurnController implements TurnController {
 		if (!game.state.currentBattle) return false;
 		const battle = game.state.currentBattle;
 		for (let hero of battle.heroes) {
+			if (hero.dead) continue;
 			if (!hero.finishedTurn) return false;
 		}
 		return this.tryEndTurn(game, skipAnimations);
