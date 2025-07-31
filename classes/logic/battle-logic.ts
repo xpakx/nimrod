@@ -332,7 +332,7 @@ export class BattleLogicLayer {
 	private isTargetInReach(skill: Skill, actor: BattleActor, position: Position): boolean {
 		const taxicabDist = this.getTaxicabDistance(actor, position);
 		const maxDistance = skill.maxDistance;
-		return taxicabDist > maxDistance;
+		return taxicabDist <= maxDistance;
 	}
 
 	useSkill(game: Game, actor: BattleActor, position: Position): boolean {
