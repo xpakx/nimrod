@@ -117,6 +117,7 @@ class HeroButtonWithLabel extends HeroButton {
 	}
 
 	drawLabel() {
+		this.labelCtx.clearRect(0, 0, this.label.width, this.label.height);
 		this.labelCtx.font = "13px normal"
 		this.labelCtx.fillStyle = "white"
 		this.labelCtx.fillText(this.hero.name, 10, 13);

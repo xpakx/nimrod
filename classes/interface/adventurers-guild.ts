@@ -163,6 +163,7 @@ export class HeroButton implements Button {
 	}
 
 	drawImage() {
+		this.context.clearRect(0, 0, this.image.width, this.image.height);
 		this.context.fillStyle = this.getFillColor();
 		this.context.beginPath();
 		this.context.arc(this.size.width/2, this.size.width/2, this.size.width/2, 0, 2 * Math.PI);
@@ -177,6 +178,7 @@ export class HeroButton implements Button {
 	}
 
 	drawHoverImage() {
+		this.hoverContext.clearRect(0, 0, this.hoverImage.width, this.hoverImage.height);
 		this.hoverContext.save();
 		this.hoverContext.filter = "grayscale(80%)"; 
 		this.hoverContext.fillStyle = this.getFillColor();
