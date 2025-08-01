@@ -4,7 +4,6 @@ import { BattleActor } from "./actor";
 export class Battle {
 	public battleStarted = false;
 	public selectedTile?: Position;
-	public selectedActor?: BattleActor;
 
 	public heroes: BattleActor[] = [];
 	public enemies: BattleActor[] = [];
@@ -19,13 +18,6 @@ export class Battle {
 		const pedestrians = [];
 		pedestrians.push(...this.heroes, ...this.enemies);
 		return pedestrians;
-	}
-
-	selectHero(num: number) {
-		if (num < 0 || num >= this.heroes.length) {
-			return;
-		}
-		this.selectedActor = this.heroes[num];
 	}
 
 	addHero(hero: BattleActor): boolean {
@@ -65,7 +57,6 @@ export class Battle {
 		this.battleStarted = true;
 		this.currentTurn = 1;
 		this.playerPhase = this.playerStarts;
-		this.selectedActor = undefined;
 	}
 
 	isInSpawn(pos: Position): boolean {

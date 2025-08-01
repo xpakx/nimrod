@@ -13,6 +13,7 @@ import { TurnController } from "./turn/turn.js";
 
 
 interface HeroSelection {
+	phase: "selection" | "movement" | "skill";
 	hero?: BattleActor;
 	initialPosition?: Position;
 	skill?: Skill;
@@ -21,7 +22,7 @@ interface HeroSelection {
 export class BattleLogicLayer {
 	logger: Logger = getLogger("BattleLogicLayer");
 
-	currentHero: HeroSelection = {};
+	selection: HeroSelection = { phase: "selection" };
 	savedPositions: SavedPosition[] = [];
 	spawnColor: string =  "#6666ff";
 
@@ -86,8 +87,8 @@ export class BattleLogicLayer {
 			return;
 		}
 
-		if (battle.selectedActor) {
-			this.processActorAction(game, battle, battle.selectedActor, {x: x, y: y});
+		if (this.selection.phase != "selection" && this.selection.hero) {
+			this.processActorAction(game, battle, this.selection.hero, {x: x, y: y});
 		} else {
 			this.logger.debug("Selecting actor");
 			this.battleSelectActor(game, battle, x, y);
@@ -98,14 +99,15 @@ export class BattleLogicLayer {
 	processActorAction(game: Game, battle: Battle, actor: BattleActor, target: Position) {
 		if (!actor.moved && battle.selectedTile) {
 			this.logger.debug("Processing movement");
-			const moveAccepted = this.battleProcessMovement(game, battle.selectedTile, target, battle.selectedActor);
+			const moveAccepted = this.battleProcessMovement(game, battle.selectedTile, target, this.selection.hero);
 			if (!moveAccepted) return;
-			if (battle.selectedActor) battle.selectedTile = undefined;
-			if (actor.finishedTurn) battle.selectedActor = undefined;
+			if (this.selection.hero) battle.selectedTile = undefined;
+			if (moveAccepted) this.selection.phase = "skill";
+			if (actor.finishedTurn) this.selection.phase = "selection";
 		} else if (!actor.finishedTurn) {
-			this.logger.debug("Processing skill", this.currentHero.skill);
+			this.logger.debug("Processing skill", this.selection.skill);
 			this.battleProcessSkill(game, actor, target);
-			if (actor.finishedTurn) battle.selectedActor = undefined;
+			if (actor.finishedTurn) this.selection.phase = "selection";
 		}
 		this.updatePortraits(game);
 	}
@@ -118,14 +120,15 @@ export class BattleLogicLayer {
 
 	battleSelectActor(game: Game, battle: Battle, x: number, y: number) {
 		battle.selectedTile = {x: x, y: y};
-		battle.selectedActor = this.isMouseOverPedestrian(game);
-		if (battle.selectedActor?.moved) {
-			battle.selectedActor = undefined;
+		this.selection.hero = this.isMouseOverPedestrian(game);
+		if (this.selection.hero?.moved) {
+			this.selection.hero = undefined;
 		}
-		if (battle.selectedActor) {
-			this.switchToSkillMode(game, battle.selectedActor);
+		if (this.selection.hero) {
+			this.switchToSkillMode(game, this.selection.hero);
+			this.selection.phase = "movement";
 		}
-		this.logger.debug("Selected actor", battle.selectedActor);
+		this.logger.debug("Selected actor", this.selection.hero);
 		this.logger.debug("Selected tile", battle.selectedTile);
 	}
 
@@ -149,17 +152,16 @@ export class BattleLogicLayer {
 			return;
 		}
 		const battle = game.state.currentBattle;
-		if (!battle.selectedTile) {
-			return;
-		}
+		if (this.selection.phase != "movement") return;
+		if (!battle.selectedTile) return;
 		const start = battle.selectedTile;
 		if (!game.map.isTileOnMap(game.map.isoPlayerMouse)) {
 			return;
 		}
 
-		if (battle.selectedActor) {
+		if (this.selection.hero) {
 			const dist = game.map.shortestPath(start, game.map.isoPlayerMouse, game.sprites.getArrow());
-			game.map.pathCorrect =  dist <= battle.selectedActor.movement;
+			game.map.pathCorrect =  dist <= this.selection.hero.movement;
 		}
 	}
 
@@ -216,26 +218,26 @@ export class BattleLogicLayer {
 		const x = game.map.isoPlayerMouse.x;
 		const y = game.map.isoPlayerMouse.y;
 
-		if (!this.currentHero.hero) {
+		if (!this.selection.hero) {
 			this.logger.debug("Selecting a hero from map.");
-			this.currentHero.hero = this.isMouseOverPedestrian(game);
-			this.currentHero.initialPosition = {x: x, y: y};
-			this.currentHero.skill = undefined;
-			this.logger.debug("Selected hero.", this.currentHero.hero);
+			this.selection.hero = this.isMouseOverPedestrian(game);
+			this.selection.initialPosition = {x: x, y: y};
+			this.selection.skill = undefined;
+			this.logger.debug("Selected hero.", this.selection.hero);
 			return;
 		}
 
-		const placed = battle.placeHero(this.currentHero.hero, {x: x, y: y});
+		const placed = battle.placeHero(this.selection.hero, {x: x, y: y});
 		if (!placed) {
 			this.logger.debug("Couldn't place a hero.");
 			return;
 		}
-		this.currentHero.hero.selected = false;
-		if (game.state.pedestrians.indexOf(this.currentHero.hero) < 0) {
-			game.state.pedestrians.push(this.currentHero.hero);
+		this.selection.hero.selected = false;
+		if (game.state.pedestrians.indexOf(this.selection.hero) < 0) {
+			game.state.pedestrians.push(this.selection.hero);
 		}
-		this.logger.debug("Placed hero.", this.currentHero.hero);
-		this.currentHero.hero = undefined;
+		this.logger.debug("Placed hero.", this.selection.hero);
+		this.selection.hero = undefined;
 
 		battle.finishPlacement();
 
@@ -276,9 +278,9 @@ export class BattleLogicLayer {
 	}
 
 	selectHero(hero: BattleActor) {
-		if (this.currentHero.hero) this.currentHero.hero.selected = false;
-		this.currentHero.hero = hero;
-		this.currentHero.hero.selected = true;
+		if (this.selection.hero) this.selection.hero.selected = false;
+		this.selection.hero = hero;
+		this.selection.hero.selected = true;
 	}
 
 	onTurnEnd(game: Game) {
@@ -298,13 +300,9 @@ export class BattleLogicLayer {
 	}
 
 	selectSkill(game: Game, skill: Skill) {
-		if (!game.state.currentBattle) return;
-		const battle = game.state.currentBattle;
-		if (!battle.selectedActor) return;
-		battle.selectedActor.moved = true;
-		// TODO: simplify
-		this.currentHero.hero = battle.selectedActor;
-		this.currentHero.skill = skill;
+		if (!this.selection.hero) return;
+		this.selection.hero.moved = true;
+		this.selection.skill = skill;
 	}
 
 	private getTaxicabDistance(actor: BattleActor, pos1: Position): number {
@@ -339,28 +337,28 @@ export class BattleLogicLayer {
 
 	useSkill(game: Game, actor: BattleActor, position: Position): boolean {
 		if (!game.state.currentBattle) return false;
-		if (!this.currentHero.skill) return false;
-		if (!this.currentHero.hero) return false;
-		if (!this.isSkillReady(this.currentHero.skill)) return false;
-		if (!this.isTargetInReach(this.currentHero.skill, actor, position)) return false;
+		if (!this.selection.skill) return false;
+		if (!this.selection.hero) return false;
+		if (!this.isSkillReady(this.selection.skill)) return false;
+		if (!this.isTargetInReach(this.selection.skill, actor, position)) return false;
 		const battle = game.state.currentBattle;
 
-		let target = this.getTarget(game, this.currentHero.skill, position);
+		let target = this.getTarget(game, this.selection.skill, position);
 		if (!target) return false;
-		if (this.currentHero.skill.targetType == "actor") {
-			if (!this.isCorrectTarget(this.currentHero.skill, actor, target as BattleActor)) return false;
+		if (this.selection.skill.targetType == "actor") {
+			if (!this.isCorrectTarget(this.selection.skill, actor, target as BattleActor)) return false;
 		}
 		this.logger.debug("Selected target", target);
 
 		this.switchToHeroMode(game);
 
-		this.currentHero.skill.cooldownTimer = this.currentHero.skill.cooldown;
-		for (let effect of this.currentHero.skill.effect) {
+		this.selection.skill.cooldownTimer = this.selection.skill.cooldown;
+		for (let effect of this.selection.skill.effect) {
 			this.skillProcessor.emitSkill(
 				actor,
 				target,
 				effect,
-				this.currentHero.skill,
+				this.selection.skill,
 				battle.getPedestrians(),
 				game.map
 			)
@@ -369,22 +367,22 @@ export class BattleLogicLayer {
 	}
 
 	battleProcessSkill(game: Game, actor: BattleActor, position: Position) {
-		if (!this.currentHero.skill) return;
+		if (!this.selection.skill) return;
 		const skillUsed = this.useSkill(game, actor, position);
 		if (!skillUsed) return;
 		actor.finishedTurn = true;
-		this.currentHero.skill = undefined;
-		this.currentHero.hero = undefined;
+		this.selection.skill = undefined;
+		this.selection.hero = undefined;
 
 		const turnEnded = this.turnController.checkTurnEnd(game, this.skipAnimations);
 		if (turnEnded) this.onTurnEnd(game);
 	}
 
 	cancelCurrentMove() {
-		if (!this.currentHero.hero) return;
-		if (!this.currentHero.initialPosition) return;
-		const actor = this.currentHero.hero;
-		actor.setPosition(this.currentHero.initialPosition);
+		if (!this.selection.hero) return;
+		if (!this.selection.initialPosition) return;
+		const actor = this.selection.hero;
+		actor.setPosition(this.selection.initialPosition);
 
 		actor.path = undefined;
 		actor.goal = undefined;
@@ -424,11 +422,10 @@ export class BattleLogicLayer {
 
 	// TODO: add to interface
 	skipActor(game: Game) {
-		if (!game.state.currentBattle) return;
-		const actor = game.state.currentBattle.selectedActor;
+		const actor = this.selection.hero;
 		if (!actor) return;
-		this.currentHero.skill = undefined;
-		this.currentHero.hero = undefined;
+		this.selection.skill = undefined;
+		this.selection.hero = undefined;
 		game.state.currentBattle = undefined;
 
 		actor.finishedTurn = true;
