@@ -424,12 +424,10 @@ export class BattleLogicLayer {
 	skipActor(game: Game) {
 		const actor = this.selection.hero;
 		if (!actor) return;
-		this.selection.skill = undefined;
-		this.selection.hero = undefined;
-		game.state.currentBattle = undefined;
 
 		actor.finishedTurn = true;
 		actor.moved = true;
+		this.selection.phase = "selection";
 		this.switchToHeroMode(game);
 
 		const turnEnded = this.turnController.checkTurnEnd(game, this.skipAnimations);
