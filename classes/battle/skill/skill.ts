@@ -11,6 +11,7 @@ export interface Skill {
 	cooldownTimer: number;
 	maxDistance: number;
 	targetType: "actor" | "square";
+	targetSubtype?: "ally" | "enemy";
 	passive: boolean;
 }
 

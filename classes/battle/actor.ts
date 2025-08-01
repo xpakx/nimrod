@@ -70,6 +70,7 @@ export class BattleActor extends Actor {
 				cooldownTimer: 0,
 				maxDistance: skill.maxDistance,
 				targetType: skill.targetType,
+				targetSubtype: skill.targetSubType,
 				passive: skill.passive,
 			});
 		}

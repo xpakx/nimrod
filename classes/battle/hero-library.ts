@@ -11,6 +11,7 @@ export interface SkillConfig {
 	cooldown: number;
 	maxDistance?: number;
 	targetType?: "actor" | "square";
+	targetSubType?: "enemy" | "ally";
 	passive?: boolean;
 }
 
@@ -22,6 +23,7 @@ export interface SkillDefinition {
 	cooldown: number;
 	maxDistance: number;
 	targetType: "actor" | "square";
+	targetSubType?: "enemy" | "ally";
 	passive: boolean;
 }
 
@@ -78,6 +80,7 @@ export class HeroLibrary {
 			maxDistance: config.maxDistance || 1,
 			targetType: config.targetType || "square",
 			passive: config.passive || false,
+			targetSubType: config.targetSubType,
 		};
 	}
 

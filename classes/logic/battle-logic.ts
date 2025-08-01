@@ -1,4 +1,5 @@
 import { BattleActor } from "../battle/actor.js";
+import { Heroes } from "../battle/actors.js";
 import { Battle } from "../battle/battle.js";
 import { EffectSystem } from "../battle/effect-system.js";
 import { Skill } from "../battle/skill/skill.js";
@@ -346,6 +347,9 @@ export class BattleLogicLayer {
 
 		let target = this.getTarget(game, this.currentHero.skill, position);
 		if (!target) return false;
+		if (this.currentHero.skill.targetType == "actor") {
+			if (!this.isCorrectTarget(this.currentHero.skill, actor, target as BattleActor)) return false;
+		}
 		this.logger.debug("Selected target", target);
 
 		this.switchToHeroMode(game);
@@ -410,6 +414,12 @@ export class BattleLogicLayer {
 		if (!sidebar) return;
 		const heroTab = sidebar.tabs[0];
 		heroTab.updateButtons();
+	}
+
+	isCorrectTarget(skill: Skill, source: BattleActor, target: BattleActor): boolean {
+		if (!skill.targetSubtype) return true;
+		if (skill.targetSubtype == "ally") return Heroes.areAllies(source, target);
+		return Heroes.areEnemies(source, target);
 	}
 }
 

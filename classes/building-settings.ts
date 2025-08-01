@@ -481,6 +481,7 @@ export const skillSetting: SkillConfig[] = [
 		icon: "kingdom",
 		cooldown: 0,
 		targetType: "actor",
+		targetSubType: "enemy",
 	}
 
 ];
