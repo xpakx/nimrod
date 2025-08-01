@@ -346,6 +346,8 @@ export class Game {
 				if (!bldng) break;
 				bldng.info();
 				break;
+			case 't':
+				this.battleLogic.skipActor(this);
 			case "Escape":
 				this.interf.buildingInterface = undefined;
 				this.map.switchToNormalMode();

@@ -421,6 +421,23 @@ export class BattleLogicLayer {
 		if (skill.targetSubtype == "ally") return Heroes.areAllies(source, target);
 		return Heroes.areEnemies(source, target);
 	}
+
+	// TODO: add to interface
+	skipActor(game: Game) {
+		if (!game.state.currentBattle) return;
+		const actor = game.state.currentBattle.selectedActor;
+		if (!actor) return;
+		this.currentHero.skill = undefined;
+		this.currentHero.hero = undefined;
+		game.state.currentBattle = undefined;
+
+		actor.finishedTurn = true;
+		actor.moved = true;
+		this.switchToHeroMode(game);
+
+		const turnEnded = this.turnController.checkTurnEnd(game, this.skipAnimations);
+		if (turnEnded) this.onTurnEnd(game);
+	}
 }
 
 interface SavedPosition {
