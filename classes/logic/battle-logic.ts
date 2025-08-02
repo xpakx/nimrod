@@ -448,6 +448,20 @@ export class BattleLogicLayer {
 		const turnEnded = this.turnController.checkTurnEnd(game, this.skipAnimations);
 		if (turnEnded) this.onTurnEnd(game);
 	}
+
+	skipTurn(game: Game) {
+		this.selection.phase = "selection";
+		this.switchToHeroMode(game);
+
+		const battle =  game.state.currentBattle;
+		if (!battle) return;
+		for (let actor of battle.heroes) {
+			actor.finishedTurn = true;
+			actor.moved = true;
+		}
+		const turnEnded = this.turnController.checkTurnEnd(game, this.skipAnimations);
+		if (turnEnded) this.onTurnEnd(game);
+	}
 }
 
 interface SavedPosition {
