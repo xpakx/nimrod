@@ -299,8 +299,9 @@ export class BattleLogicLayer {
 		if (turnEnded) this.onTurnEnd(game);
 	}
 
-	selectSkill(game: Game, skill: Skill) {
+	selectSkill(_game: Game, skill: Skill) {
 		if (!this.selection.hero) return;
+		if (!(this.isSkillReady(skill))) return;
 		this.selection.hero.moved = true;
 		this.selection.skill = skill;
 	}
