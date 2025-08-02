@@ -336,19 +336,33 @@ export class BattleLogicLayer {
 		return taxicabDist <= maxDistance;
 	}
 
+	private isActorSelectedCorrectly(skill: Skill, actor: BattleActor, target?: BattleActor | Position): boolean {
+		if (skill.targetType != "actor") return false;
+		if (!target)  return false
+		return this.isCorrectTarget(skill, actor, target as BattleActor);
+	}
+
+	private selectSkillTarget(game: Game, skill: Skill, actor: BattleActor, position: Position) {
+		if (!this.isTargetInReach(skill, actor, position)) return;
+		let target = this.getTarget(game, skill, position);
+		if (!target) return;
+		if (skill.targetType == "square") return target;
+		if (skill.targetType == "actor") {
+			const isTargetCorrect = this.isActorSelectedCorrectly(skill, actor, target);
+			return isTargetCorrect ? target : undefined;
+		}
+	}
+
 	useSkill(game: Game, actor: BattleActor, position: Position): boolean {
 		if (!game.state.currentBattle) return false;
 		if (!this.selection.skill) return false;
 		if (!this.selection.hero) return false;
 		if (!this.isSkillReady(this.selection.skill)) return false;
-		if (!this.isTargetInReach(this.selection.skill, actor, position)) return false;
+
 		const battle = game.state.currentBattle;
 
-		let target = this.getTarget(game, this.selection.skill, position);
+		const target = this.selectSkillTarget(game, this.selection.skill, actor, position);
 		if (!target) return false;
-		if (this.selection.skill.targetType == "actor") {
-			if (!this.isCorrectTarget(this.selection.skill, actor, target as BattleActor)) return false;
-		}
 		this.logger.debug("Selected target", target);
 
 		this.switchToHeroMode(game);
