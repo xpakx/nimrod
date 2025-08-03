@@ -160,6 +160,7 @@ export class BattleLogicLayer {
 		const start = battle.selectedTile;
 		const end = game.map.isoPlayerMouse;
 		if (!game.map.isTileOnMap(end)) {
+			game.map.clearPath();
 			return;
 		}
 
