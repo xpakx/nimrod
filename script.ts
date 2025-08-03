@@ -40,7 +40,7 @@ function registerKeyboardEvents() {
 
 window.onload = async () => {
 	const loggerFactory = LoggerFactory.getInstance();
-	loggerFactory.enable(["Game", "QuestManager", "RewardCalculator", "BattleLogicLayer"]);
+	loggerFactory.enable(["Game", "QuestManager", "EffectSystem", "BattleLogicLayer"]);
 	const logger = loggerFactory.getLogger("Script");
 
 	logger.debug('Started app');
