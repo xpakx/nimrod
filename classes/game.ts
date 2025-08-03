@@ -22,6 +22,7 @@ import { BuildingSidebar } from "./interface/sidebar.js";
 import { BattleSidebar } from "./interface/battle-sidebar.js";
 import { EffectSystem } from "./battle/effect-system.js";
 import { ArtifactManager } from "./battle/items.js";
+import { BattlePathfinder } from "./pathfinding/battle-path.js";
 
 export class Game {
 	state: GameState;
@@ -58,7 +59,8 @@ export class Game {
 		const turnController = new DefaultTurnController();
 		const battleAi = new TestMoveGenerator();
 		const effectSystem = new EffectSystem();
-		this.battleLogic = new BattleLogicLayer(turnController, battleAi, effectSystem);
+		const pathfinder = new BattlePathfinder(this.map);
+		this.battleLogic = new BattleLogicLayer(turnController, battleAi, effectSystem, pathfinder);
 		this.saveManager = new SaveManager();
 
 		this.maxYOffset = this.map.isoToScreen({x: this.map.map[0].length - 1, y: this.map.map.length - 1}).y + (this.map.tileSize.height/2);

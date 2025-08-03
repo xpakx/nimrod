@@ -8,6 +8,7 @@ import { BattleSidebar } from "../interface/battle-sidebar.js";
 import { BattleTab } from "../interface/battle-tab.js";
 import { getLogger, Logger } from "../logger.js";
 import { Position } from "../map-layer.js";
+import { BattlePathfinder } from "../pathfinding/battle-path.js";
 import { MoveGenerator } from "./ai/move.js";
 import { TurnController } from "./turn/turn.js";
 
@@ -32,13 +33,16 @@ export class BattleLogicLayer {
 	aiMoveGenerator: MoveGenerator;
 
 	skillProcessor: EffectSystem;
+	pathfinder: BattlePathfinder;
 
 	constructor(turnController: TurnController,
 		    moveGenerator: MoveGenerator,
-		    effectSystem: EffectSystem) {
+		    effectSystem: EffectSystem,
+		    pathfinder: BattlePathfinder) {
 		this.turnController = turnController;
 		this.aiMoveGenerator = moveGenerator;
 		this.skillProcessor = effectSystem;
+		this.pathfinder = pathfinder;
 	}
 
 	showSpawnArea(game: Game) {
@@ -68,7 +72,6 @@ export class BattleLogicLayer {
 			this.leftMouseBattlePrep(game);
 		}
 	}
-
 
 	leftMouseBattle(game: Game) {
 		if (!game.state.currentBattle) {
@@ -160,7 +163,8 @@ export class BattleLogicLayer {
 		}
 
 		if (this.selection.hero) {
-			const dist = game.map.shortestPath(start, game.map.isoPlayerMouse, game.sprites.getArrow());
+			const dist = this.pathfinder.shortestPath(start, game.map.isoPlayerMouse);
+			game.map.path = this.pathfinder.reconstructPath(game.map.isoPlayerMouse, start, game.sprites.getArrow());
 			game.map.pathCorrect =  dist <= this.selection.hero.movement;
 		}
 	}
@@ -182,7 +186,7 @@ export class BattleLogicLayer {
 			game.map.clearPath();
 			return false;
 		}
-		const dist = game.map.shortestPath(from, to, game.sprites.getArrow());
+		const dist = this.pathfinder.shortestPath(from, to);
 		let path = game.map.path?.map((x) => x.position);
 		if (dist > actor.movement || !path) return false;
 		game.map.clearPath();

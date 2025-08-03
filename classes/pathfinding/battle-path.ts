@@ -1,9 +1,11 @@
+import { TilingSprite } from "../building/buildings.js";
 import { MapLayer, Position } from "../map-layer.js";
 
 type PathMap = (Position | undefined)[][];
 
 export class BattlePathfinder {
 	map: MapLayer;
+	lastPath?: PathMap;
 
 	constructor(map: MapLayer) {
 		this.map = map;
@@ -35,11 +37,12 @@ export class BattlePathfinder {
 				continue;
 			}
 			if(next.equals(end)) {
-				// map.reconstructPath(cameFrom, end, start, arrow);
+				this.lastPath = cameFrom;
 				return next.dist;
 			}
 			this.addNeighboursToQueue(queue, end, next, cameFrom);
 		}
+		this.lastPath = undefined;
 		return -1;
 	}
 
@@ -70,6 +73,52 @@ export class BattlePathfinder {
 			cameFrom[position.x][position.y] = next.pos;
 		}
 		queue.enqueue(new Node(position, end, cost));
+	}
+
+	reconstructPath(end: Position, start: Position, arrow: TilingSprite) {
+		if (!this.lastPath) return [];
+		const cameFrom = this.lastPath;
+		const path = [];
+		let current: Position | undefined = end;
+		let last: Position | undefined = undefined;
+		while (current) {
+			let pathElem = new PathElem(arrow, current);
+			path.push(pathElem);
+			let from = 0;
+			let to = 0;
+			if (last) {
+				[from, to] = this.getBitmapForPath(last, current);
+			}
+			pathElem.xorDir(from);
+			if (path.length > 1) {
+				const penultimate = path[path.length - 2];
+				penultimate.xorDir(to);
+			}
+			if (current.x == start.x && current.y == start.y)  {
+				pathElem.xorDir(to);
+				break;
+			}
+			last = current;
+			current = cameFrom[current.x][current.y];
+		}
+
+		path.reverse();
+		return path;
+	}
+
+	getBitmapForPath(last: Position, current: Position): number[] {
+		if (last.x == current.x) {
+			if (last.y == current.y - 1) {
+				return [0b1000, 0b0010]
+			} else {
+				return [0b0010, 0b1000]
+			}
+		} 
+		if (last.x == current.x - 1) {
+			return [0b0001,  0b0100];
+		} else {
+			return [0b0100, 0b0001];
+		}
 	}
 }
 
@@ -122,4 +171,23 @@ class Node {
 		return this.pos.x == position.x && this.pos.y == position.y;
 	}
 
+}
+
+class PathElem {
+	sprites: TilingSprite;
+	sprite: HTMLImageElement;
+	position: Position;
+	direction: number;
+
+	constructor(sprite: TilingSprite, position: Position) {
+		this.direction = 0;
+		this.sprites = sprite;
+		this.sprite =  sprite.sprites[this.direction];
+		this.position = position;
+	}
+
+	xorDir(dir: number) {
+		this.direction ^= dir;
+		this.sprite = this.sprites.sprites[this.direction];
+	}
 }

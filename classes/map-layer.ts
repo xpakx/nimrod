@@ -574,68 +574,6 @@ export class MapLayer {
 		ctx.restore();
 	}
 
-	shortestPath(start: Position, end: Position, arrow: TilingSprite): number {
-		const height = this.map.length;
-		const width = this.map[0].length;
-		if(height == 1 && width == 1) {
-			return 0
-		}
-		let visited: boolean[][] = Array(height).fill(null).map(() => Array(width).fill(false));
-		let cameFrom: PathMap = Array(height).fill(null).map(() => Array(width).fill(undefined));
-
-		let queue = new PriorityQueue();
-		queue.enqueue(new Node(start, end, 0));
-		while(!queue.isEmpty()) {
-			const next = queue.dequeue();
-			if(!next) {
-				break;
-			}
-
-			const alreadyVisited = visited[next.pos.y][next.pos.x];
-			if(alreadyVisited) {
-				continue;
-			}
-			visited[next.pos.y][next.pos.x] = true;
-			if(this.isObstacle(next.pos)) {
-				continue;
-			}
-			if(next.equals(end)) {
-				this.reconstructPath(cameFrom, end, start, arrow);
-				return next.dist;
-			}
-			this.addNeighboursToQueue(queue, end, next, cameFrom);
-		}
-		return -1;
-	}
-
-	reconstructPath(cameFrom: PathMap, end: Position, start: Position, arrow: TilingSprite) {
-		this.path = [];
-		let current: Position | undefined = end;
-		let last: Position | undefined = undefined;
-		while (current) {
-			let pathElem = new PathElem(arrow, current);
-			this.path.push(pathElem);
-			let from = 0;
-			let to = 0;
-			if (last) {
-				[from, to] = this.getBitmapForPath(last, current);
-			}
-			pathElem.xorDir(from);
-			if (this.path.length > 1) {
-				const penultimate = this.path[this.path.length - 2];
-				penultimate.xorDir(to);
-			}
-			if (current.x == start.x && current.y == start.y)  {
-				pathElem.xorDir(to);
-				break;
-			}
-			last = current;
-			current = cameFrom[current.x][current.y];
-		}
-
-		this.path.reverse();
-	}
-
 	getBitmapForPath(last: Position, current: Position): number[] {
 		if (last.x == current.x) {
 			if (last.y == current.y - 1) {
@@ -648,27 +586,6 @@ export class MapLayer {
 			return [0b0001,  0b0100];
 		} else {
 			return [0b0100, 0b0001];
-		}
-	}
-
-	addNeighboursToQueue(queue: PriorityQueue, end: Position, next: Node, cameFrom: PathMap) {
-		const height = this.map.length;
-		const width = this.map[0].length;
-		if(next.pos.x-1 >= 0) {
-			const position: Position = next.step(-1, 0);
-			this.addNeighbour(position, queue, end, next, cameFrom);
-		}
-		if(next.pos.x+1 < width) {
-			const position: Position = next.step(1, 0);
-			this.addNeighbour(position, queue, end, next, cameFrom);
-		}
-		if(next.pos.y-1 >= 0) {
-			const position: Position = next.step(0, -1);
-			this.addNeighbour(position, queue, end, next, cameFrom);
-		}
-		if(next.pos.y+1 < height) {
-			const position: Position = next.step(0, 1);
-			this.addNeighbour(position, queue, end, next, cameFrom);
 		}
 	}
 
