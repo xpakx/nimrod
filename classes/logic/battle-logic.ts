@@ -158,13 +158,14 @@ export class BattleLogicLayer {
 		if (this.selection.phase != "movement") return;
 		if (!battle.selectedTile) return;
 		const start = battle.selectedTile;
-		if (!game.map.isTileOnMap(game.map.isoPlayerMouse)) {
+		const end = game.map.isoPlayerMouse;
+		if (!game.map.isTileOnMap(end)) {
 			return;
 		}
 
 		if (this.selection.hero) {
-			const dist = this.pathfinder.shortestPath(start, game.map.isoPlayerMouse);
-			game.map.path = this.pathfinder.reconstructPath(game.map.isoPlayerMouse, start, game.sprites.getArrow());
+			const dist = this.pathfinder.shortestPath(start, end);
+			game.map.path = this.pathfinder.reconstructLastPath(start, end, game.sprites.getArrow());
 			game.map.pathCorrect =  dist <= this.selection.hero.movement;
 		}
 	}

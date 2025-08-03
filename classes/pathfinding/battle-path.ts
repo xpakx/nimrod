@@ -46,7 +46,7 @@ export class BattlePathfinder {
 		return -1;
 	}
 
-	addNeighboursToQueue(queue: PriorityQueue, end: Position, next: Node, cameFrom: PathMap) {
+	private addNeighboursToQueue(queue: PriorityQueue, end: Position, next: Node, cameFrom: PathMap) {
 		const height = this.map.map.length;
 		const width = this.map.map[0].length;
 		if(next.pos.x-1 >= 0) {
@@ -67,7 +67,7 @@ export class BattlePathfinder {
 		}
 	}
 
-	addNeighbour(position: Position, queue: PriorityQueue, end: Position, next: Node, cameFrom: PathMap) {
+	private addNeighbour(position: Position, queue: PriorityQueue, end: Position, next: Node, cameFrom: PathMap) {
 		const cost = this.map.getCost(position) + next.dist;
 		if (!cameFrom[position.x][position.y]) {
 			cameFrom[position.x][position.y] = next.pos;
@@ -75,9 +75,12 @@ export class BattlePathfinder {
 		queue.enqueue(new Node(position, end, cost));
 	}
 
-	reconstructPath(end: Position, start: Position, arrow: TilingSprite) {
+	reconstructLastPath(start: Position, end: Position, arrow: TilingSprite) {
 		if (!this.lastPath) return [];
-		const cameFrom = this.lastPath;
+		return this.reconstructPath(this.lastPath, start, end, arrow)
+	}
+
+	private reconstructPath(cameFrom: PathMap, start: Position, end: Position, arrow: TilingSprite) {
 		const path = [];
 		let current: Position | undefined = end;
 		let last: Position | undefined = undefined;
@@ -106,7 +109,7 @@ export class BattlePathfinder {
 		return path;
 	}
 
-	getBitmapForPath(last: Position, current: Position): number[] {
+	private getBitmapForPath(last: Position, current: Position): number[] {
 		if (last.x == current.x) {
 			if (last.y == current.y - 1) {
 				return [0b1000, 0b0010]
