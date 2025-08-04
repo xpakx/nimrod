@@ -10,7 +10,7 @@ export class MigrantPathfinder {
 		this.map = map;
 	}
 
-	shortestMigrantPath(start: Position, building: Building): Position[] {
+	shortestPath(start: Position, building: Building): Position[] {
 		const end = building.workerSpawn;
 		if (!end) {
 			return [];

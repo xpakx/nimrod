@@ -17,9 +17,13 @@ export class CityLogicLayer {
 	logger: Logger = getLogger("CityLogicLayer");
 
 	public orders: DeliveryScheduler = new DeliveryScheduler();
-	public migrations: MigrationManager = new MigrationManager();
+	public migrations: MigrationManager;
 	public workforce: WorkforceManager = new WorkforceManager();
 	public quests: QuestManager = new QuestManager();
+
+	constructor(migrationManager: MigrationManager) {
+		this.migrations = migrationManager;
+	}
 
 	onMouseLeftClick(game: Game) {
 		if(game.map.mode.action == "build") {

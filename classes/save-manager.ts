@@ -418,7 +418,7 @@ export class SaveManager {
 			const sprite = game.sprites.actors[pedestrianData.sprite];
 			const position = {x: pedestrianData.x, y: pedestrianData.y};
 			if (pedestrianData.migrant) {
-				pedestrian = new Migrant(sprite, position);
+				pedestrian = new Migrant(sprite, position, game.cityLogic.migrations.migrationPathfinder);
 				pedestrian.path = pedestrianData.migrant.path;
 				pedestrian.settled = pedestrianData.migrant.settled;
 				if (pedestrianData.migrant.targetHome) {

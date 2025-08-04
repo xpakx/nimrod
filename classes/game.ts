@@ -23,6 +23,8 @@ import { BattleSidebar } from "./interface/battle-sidebar.js";
 import { EffectSystem } from "./battle/effect-system.js";
 import { ArtifactManager } from "./battle/items.js";
 import { BattlePathfinder } from "./pathfinding/battle-path.js";
+import { MigrantPathfinder } from "./pathfinding/migrant-path.js";
+import { MigrationManager } from "./logic/migration-manager.js";
 
 export class Game {
 	state: GameState;
@@ -54,7 +56,9 @@ export class Game {
 		this.sprites = new SpriteLibrary();
 		this.heroes = new HeroLibrary();
 		this.artifacts = new ArtifactManager();
-		this.cityLogic = new CityLogicLayer();
+		const migrantPathfinder = new MigrantPathfinder(this.map);
+		const migrationManager = new MigrationManager(migrantPathfinder);
+		this.cityLogic = new CityLogicLayer(migrationManager);
 		this.cityInterfaceLogic = new CityInterfaceLogic();
 		const turnController = new DefaultTurnController();
 		const battleAi = new TestMoveGenerator();

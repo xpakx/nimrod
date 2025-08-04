@@ -1,6 +1,7 @@
 import { Road } from "./building/buildings.js";
 import { getLogger, Logger } from "./logger.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
+import { MigrantPathfinder } from "./pathfinding/migrant-path.js";
 
 export class ActorSprite {
 	size: Size = {height: 0, width: 0};
@@ -117,6 +118,7 @@ export class Actor {
 		return !roads[this.positionSquare.y][this.positionSquare.x]
 	}
 
+	// TODO: add interface for pathfinders
 	tick(deltaTime: number, map: MapLayer, randMap: number[]): boolean {
 		const roads = map.roads;
 		if(this.travelFinished) {

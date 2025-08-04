@@ -574,30 +574,6 @@ export class MapLayer {
 		ctx.restore();
 	}
 
-	getBitmapForPath(last: Position, current: Position): number[] {
-		if (last.x == current.x) {
-			if (last.y == current.y - 1) {
-				return [0b1000, 0b0010]
-			} else {
-				return [0b0010, 0b1000]
-			}
-		} 
-		if (last.x == current.x - 1) {
-			return [0b0001,  0b0100];
-		} else {
-			return [0b0100, 0b0001];
-		}
-	}
-
-	addNeighbour(position: Position, queue: PriorityQueue, end: Position, next: Node, cameFrom: PathMap) {
-		const cost = this.getCost(position) + next.dist;
-		if (!cameFrom[position.x][position.y]) {
-			cameFrom[position.x][position.y] = next.pos;
-		}
-		queue.enqueue(new Node(position, end, cost));
-	}
-
-
 	dist: Map<number, number> = new Map();
 	pred: Map<number, number | undefined> = new Map();
 
@@ -855,108 +831,6 @@ export class MapLayer {
 
 		return this.getDistanceOrDefault(startIndex, targetIndex);
 		// return this.dist[targetIndex][startIndex];
-	}
-
-	shortestMigrantPath(start: Position, building: Building): Position[] {
-		const end = building.workerSpawn;
-		if (!end) {
-			return [];
-		}
-		const height = this.map.length;
-		const width = this.map[0].length;
-		if(height == 1 && width == 1) {
-			return []
-		}
-		let visited: boolean[][] = Array(height).fill(null).map(() => Array(width).fill(false));
-		let cameFrom: PathMap = Array(height).fill(null).map(() => Array(width).fill(undefined));
-
-		let queue = new PriorityQueue();
-		queue.enqueue(new Node(start, end, 0));
-		while(!queue.isEmpty()) {
-			const next = queue.dequeue();
-			if(!next) {
-				break;
-			}
-
-			const alreadyVisited = visited[next.pos.y][next.pos.x];
-			if(alreadyVisited) {
-				continue;
-			}
-			visited[next.pos.y][next.pos.x] = true;
-			if(this.isObstacle(next.pos)) {
-				continue;
-			}
-			if(next.equals(end)) {
-				return this.reconstructMigrantPath(cameFrom, end, start);
-			}
-			this.addNeighboursToQueueWithDiagonals(queue, end, next, cameFrom);
-		}
-		return [];
-	}
-
-	reconstructMigrantPath(cameFrom: PathMap, end: Position, start: Position): Position[] {
-		let path = [];
-		let current: Position | undefined = end;
-		let last: Position | undefined = undefined;
-		while (current) {
-			path.push(current);
-			let from = 0;
-			let to = 0;
-			if (last) {
-				[from, to] = this.getBitmapForPath(last, current);
-			}
-			if (current.x == start.x && current.y == start.y)  {
-				break;
-			}
-			last = current;
-			current = cameFrom[current.x][current.y];
-		}
-		return path.reverse();
-	}
-
-	addNeighboursToQueueWithDiagonals(queue: PriorityQueue, end: Position, next: Node, cameFrom: PathMap) {
-		const height = this.map.length;
-		const width = this.map[0].length;
-		if(next.pos.x-1 >= 0) {
-			const position: Position = next.step(-1, 0);
-			this.addNeighbour(position, queue, end, next, cameFrom);
-		}
-		if(next.pos.x+1 < width) {
-			const position: Position = next.step(1, 0);
-			this.addNeighbour(position, queue, end, next, cameFrom);
-		}
-		if(next.pos.y-1 >= 0) {
-			const position: Position = next.step(0, -1);
-			this.addNeighbour(position, queue, end, next, cameFrom);
-		}
-		if(next.pos.y+1 < height) {
-			const position: Position = next.step(0, 1);
-			this.addNeighbour(position, queue, end, next, cameFrom);
-		}
-		if (next.pos.x-1 >= 0 && next.pos.y-1 >= 0) {
-			const position: Position = next.step(-1, -1);
-			this.addNeighbourDiagonal(position, queue, end, next, cameFrom);
-		}
-		if (next.pos.x-1 >= 0 && next.pos.y+1 < height) {
-			const position: Position = next.step(-1, 1);
-			this.addNeighbourDiagonal(position, queue, end, next, cameFrom);
-		}
-		if (next.pos.x+1 < width && next.pos.y-1 >= 0) {
-			const position: Position = next.step(1, -1);
-			this.addNeighbourDiagonal(position, queue, end, next, cameFrom);
-		}
-		if (next.pos.x+1 < width && next.pos.y+1 < height) {
-			const position: Position = next.step(1, 1);
-			this.addNeighbourDiagonal(position, queue, end, next, cameFrom);
-		}
-	}
-
-	addNeighbourDiagonal(position: Position, queue: PriorityQueue, end: Position, next: Node, cameFrom: PathMap) {
-		const cost = this.getCost(position)*Math.sqrt(2) + next.dist;
-		if (!cameFrom[position.x][position.y]) {
-			cameFrom[position.x][position.y] = next.pos;
-		}
-		queue.enqueue(new Node(position, end, cost));
 	}
 
 	getEmptyHouses(): House[] {

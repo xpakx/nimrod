@@ -1,9 +1,10 @@
-import { Actor } from "../actor.js";
+import { Actor, ActorSprite } from "../actor.js";
 import { Building, BuildingPrototype, BuildingWorker, HouseOptions } from "./buildings.js";
 import { GameState } from "../game-state.js";
 import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position } from "../map-layer.js";
 import { BattleActor } from "../battle/actor.js";
+import { MigrantPathfinder } from "../pathfinding/migrant-path.js";
 
 export class House extends Building {
 	storage: { [key: string]: number } = {};
@@ -124,6 +125,12 @@ export class Migrant extends Actor {
 	targetHome?: House;
 	settled: boolean = false;
 	moving: boolean = false;
+	pathfinder: MigrantPathfinder; // TODO: move this
+
+	constructor(sprite: ActorSprite, position: Position, pathfinder: MigrantPathfinder) {
+		super(sprite, position);
+		this.pathfinder = pathfinder;
+	}
 
 	canMove(_map: MapLayer): boolean {
 	    return true;
@@ -174,7 +181,7 @@ export class Migrant extends Actor {
 				this.dead = true;
 				return false;
 			}
-			const path = map.shortestMigrantPath(this.positionSquare, this.targetHome);
+			const path = this.pathfinder.shortestPath(this.positionSquare, this.targetHome);
 
 			if (path.length == 1) {
 				this.settled = this.targetHome!.settle(1);
