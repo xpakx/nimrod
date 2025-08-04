@@ -880,8 +880,6 @@ export class MapLayer {
 	}
 }
 
-type PathMap = (Position | undefined)[][];
-
 class PathElem {
 	sprites: TilingSprite;
 	sprite: HTMLImageElement;
@@ -898,56 +896,6 @@ class PathElem {
 	xorDir(dir: number) {
 		this.direction ^= dir;
 		this.sprite = this.sprites.sprites[this.direction];
-	}
-}
-
-class Node {
-	pos: Position;
-	dist: number;
-	expected: number;
-
-	constructor(pos: Position, target: Position, dist: number) {
-		this.dist = dist;
-		this.pos = pos;
-		this.expected = Math.abs(target.x - this.pos.x) + Math.abs(target.y - this.pos.y) + dist;
-	}
-
-	step(deltaX: number, deltaY: number): Position {
-		return {
-			x: this.pos.x + deltaX,
-			y: this.pos.y + deltaY,
-		}
-	}
-
-	equals(position: Position) {
-		return this.pos.x == position.x && this.pos.y == position.y;
-	}
-
-}
-
-// TODO: better implementation
-class PriorityQueue {
-	queue: Node[];
-
-	constructor() {
-		this.queue = [];
-	}
-
-	enqueue(element: Node) {
-		this.queue.push(element);
-		this.queue.sort((a, b) => a.expected - b.expected);
-	}
-
-	dequeue() {
-		return this.queue.shift();
-	}
-
-	peek() {
-		return this.queue[0];
-	}
-
-	isEmpty() {
-		return this.queue.length === 0;
 	}
 }
 
