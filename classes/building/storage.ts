@@ -57,7 +57,7 @@ export class Storage extends Building {
 
 		if (!building.workerSpawn) return 0;
 
-		const dist = map.getDistance(this.workerSpawn, building.workerSpawn);
+		const dist = map.pathfinder.getDistance(this.workerSpawn, building.workerSpawn);
 		if (dist == Infinity) return 0;
 		if (dist > this.maxDistance) return 0;
 		
@@ -85,7 +85,7 @@ export class Storage extends Building {
 	inDistance(building: Building, map: MapLayer): boolean {
 		if (!this.workerSpawn) return false;
 		if (!building.workerSpawn) return false;
-		const dist = map.getDistance(this.workerSpawn, building.workerSpawn);
+		const dist = map.pathfinder.getDistance(this.workerSpawn, building.workerSpawn);
 		if (dist == Infinity) return false;
 		return dist <= this.maxDistance;
 	}
@@ -97,7 +97,7 @@ export class Storage extends Building {
 
 		if (!building.workerSpawn) return 0;
 
-		const dist = map.getDistance(this.workerSpawn, building.workerSpawn);
+		const dist = map.pathfinder.getDistance(this.workerSpawn, building.workerSpawn);
 		if (dist == Infinity) return 0;
 		if (dist > this.maxDistance) return 0;
 		
@@ -157,7 +157,7 @@ export class DeliveryWorker extends BuildingWorker {
 	nextGoal(map: MapLayer): boolean {
 		const ultimateGoal = this.getUltimateGoal();
 		if (!ultimateGoal) return false;
-		const step = map.getNextStep(this.positionSquare, ultimateGoal);
+		const step = map.pathfinder.getNextStep(this.positionSquare, ultimateGoal);
 		if(!step) {
 			return false;
 		}

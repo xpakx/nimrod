@@ -48,7 +48,7 @@ export class CityLogicLayer {
 		state.money -= roadCost;
 		map.putRoad(map.isoPlayerMouse, sprites.getRoad());
 		this.updateCost(map, state);
-		map.updateAfterAddition(map.isoPlayerMouse);
+		map.pathfinder.updateAfterAddition(map.isoPlayerMouse);
 	}
 
 	putBuilding(map: MapLayer, state: GameState, building: BuildingPrototype, game: Game) {
@@ -96,7 +96,7 @@ export class CityLogicLayer {
 	deleteRoad(map: MapLayer) {
 		if (!map.isRoad(map.isoPlayerMouse)) return;
 		map.deleteRoad(map.isoPlayerMouse);
-		map.updateAfterDeletion(map.isoPlayerMouse);
+		map.pathfinder.updateAfterDeletion(map.isoPlayerMouse);
 	}
 
 	openBuildingInterface(map: MapLayer, state: GameState, interf: InterfaceLayer) {

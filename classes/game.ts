@@ -491,7 +491,7 @@ export class Game {
 
 	toCity() {
 		this.map.clearPath();
-		this.map.floydWarshall();
+		this.map.pathfinder.floydWarshall();
 		this.interf.changeSidebar("city");
 		this.state.view = "City";
 	}

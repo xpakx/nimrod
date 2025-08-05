@@ -173,7 +173,7 @@ export class SaveManager {
 		}
 
 		game.state.pedestrians = [];
-		if (updateDistances) game.map.floydWarshall();
+		if (updateDistances) game.map.pathfinder.floydWarshall();
 	}
 
 	isPlacedActor(obj: UnplacedActorData | UnplacedLibHeroData): obj is ActorData {
@@ -464,7 +464,7 @@ export class SaveManager {
 		game.state.sortPedestrians();
 		this.logger.debug("Pedestrians", game.state.pedestrians);
 
-		if (updateDistances) game.map.floydWarshall();
+		if (updateDistances) game.map.pathfinder.floydWarshall();
 	}
 
 	serializeQuestData(questManager: QuestManager, state: GameState): QuestData {

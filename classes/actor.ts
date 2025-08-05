@@ -1,7 +1,6 @@
 import { Road } from "./building/buildings.js";
 import { getLogger, Logger } from "./logger.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
-import { MigrantPathfinder } from "./pathfinding/migrant-path.js";
 
 export class ActorSprite {
 	size: Size = {height: 0, width: 0};
@@ -211,7 +210,7 @@ export class Actor {
 	}
 
 	nextGoal(map: MapLayer): boolean {
-		const step = map.getNextStep(this.positionSquare, this.home);
+		const step = map.pathfinder.getNextStep(this.positionSquare, this.home);
 		this.logger.debug(`${this.logger.formatPosition(this.positionSquare)}=>${this.logger.formatPosition(this.home)}: ${this.logger.formatPosition(step)}`);
 		if(!step) {
 			return false;
