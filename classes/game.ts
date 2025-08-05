@@ -8,7 +8,7 @@ import { BattleActor } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
 import { getLogger, Logger, LoggerFactory } from "./logger.js";
 import { House } from "./building/house.js";
-import { QuestLayer } from "./quest-layer.js";
+import { QuestLayer, QuestManager } from "./quest-layer.js";
 import { CityLogicLayer } from "./logic/city-logic.js";
 import { CityInterfaceLogic } from "./logic/city-interface-logic.js";
 import { Building } from "./building/buildings.js";
@@ -25,6 +25,8 @@ import { ArtifactManager } from "./battle/items.js";
 import { BattlePathfinder } from "./pathfinding/battle-path.js";
 import { MigrantPathfinder } from "./pathfinding/migrant-path.js";
 import { MigrationManager } from "./logic/migration-manager.js";
+import { DeliveryScheduler } from "./building/storage.js";
+import { WorkforceManager } from "./logic/workforce-manager.js";
 
 export class Game {
 	state: GameState;
@@ -58,7 +60,15 @@ export class Game {
 		this.artifacts = new ArtifactManager();
 		const migrantPathfinder = new MigrantPathfinder(this.map);
 		const migrationManager = new MigrationManager(migrantPathfinder);
-		this.cityLogic = new CityLogicLayer(migrationManager);
+		const deliveryScheduler = new DeliveryScheduler();
+		const workforceManager = new WorkforceManager();
+		const questManager = new QuestManager();
+		this.cityLogic = new CityLogicLayer(
+			migrationManager,
+			deliveryScheduler,
+			workforceManager,
+			questManager
+		);
 		this.cityInterfaceLogic = new CityInterfaceLogic();
 		const turnController = new DefaultTurnController();
 		const battleAi = new TestMoveGenerator();

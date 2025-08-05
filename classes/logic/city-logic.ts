@@ -16,13 +16,17 @@ export class CityLogicLayer {
 	static roadCost: number = 2;
 	logger: Logger = getLogger("CityLogicLayer");
 
-	public orders: DeliveryScheduler = new DeliveryScheduler();
+	public orders: DeliveryScheduler;
 	public migrations: MigrationManager;
-	public workforce: WorkforceManager = new WorkforceManager();
-	public quests: QuestManager = new QuestManager();
+	public workforce: WorkforceManager;
+	public quests: QuestManager;
 
-	constructor(migrationManager: MigrationManager) {
+	constructor(migrationManager: MigrationManager, deliveryScheduler: DeliveryScheduler,
+		   workforceManager: WorkforceManager, questManager: QuestManager) {
 		this.migrations = migrationManager;
+		this.orders = deliveryScheduler;
+		this.workforce = workforceManager;
+		this.quests = questManager;
 	}
 
 	onMouseLeftClick(game: Game) {
