@@ -16,3 +16,16 @@ export let pikemanPassive = Skills.createPassive(
 );
 
 export let pikemanSkill001: SkillEffectDamage = Skills.createDamageFunc("strength", 0.3, 3);
+
+
+export let archerPassive = Skills.createPassive(
+	"onSkill",
+	(passiveOwner, event, _context) => {
+		if (event.source !== passiveOwner) return;
+		if (event.source.distanceTravelledThisTurn == 0) event.criticalHit = true;
+	},
+	(passiveOwner, actor, _actors, _map) => {
+		if (actor !== passiveOwner) return false;
+		return actor.distanceTravelledThisTurn == 0;
+	},
+);
