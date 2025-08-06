@@ -631,6 +631,21 @@ export class MapLayer {
 	getTaxicabDistance(pos1: Position, pos2: Position): number {
 		return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y)
 	}
+
+	getWidth(): number {
+		return this.map[0].length;
+	}
+
+	getHeight(): number {
+		return this.map.length;
+	}
+
+	getSize(): Size {
+		return {
+			width: this.getWidth(),
+			height: this.getHeight(),
+		}
+	}
 }
 
 class PathElem {

@@ -15,8 +15,8 @@ export class MigrantPathfinder {
 		if (!end) {
 			return [];
 		}
-		const height = this.map.map.length;
-		const width = this.map.map[0].length;
+		const height = this.map.getHeight();
+		const width = this.map.getWidth();
 		if(height == 1 && width == 1) {
 			return []
 		}
@@ -83,8 +83,8 @@ export class MigrantPathfinder {
 	}
 
 	addNeighboursToQueueWithDiagonals(queue: PriorityQueue, end: Position, next: Node, cameFrom: PathMap) {
-		const height = this.map.map.length;
-		const width = this.map.map[0].length;
+		const height = this.map.getHeight();
+		const width = this.map.getWidth();
 		if(next.pos.x-1 >= 0) {
 			const position: Position = next.step(-1, 0);
 			this.addNeighbour(position, queue, end, next, cameFrom);
