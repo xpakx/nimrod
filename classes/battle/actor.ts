@@ -37,6 +37,7 @@ export class BattleActor extends Actor {
 	definition?: HeroDefinition;
 
 	moved: boolean = false;
+	skillUsed: boolean = false;
 	finishedTurn: boolean = false;
 	level: number = 1;
 	stats: HeroStats;

@@ -26,6 +26,7 @@ export class DefaultTurnController implements TurnController {
 	clearActors(actors: BattleActor[]) {
 		for (let actor of actors) {
 			actor.moved = false;
+			actor.skillUsed = false;
 			actor.finishedTurn = false;
 			for (let skill of actor.skills) {
 				if (skill.cooldownTimer > 0) {

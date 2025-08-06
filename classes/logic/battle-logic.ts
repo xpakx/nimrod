@@ -391,6 +391,7 @@ export class BattleLogicLayer {
 		if (!this.selection.skill) return;
 		const skillUsed = this.useSkill(game, actor, position);
 		if (!skillUsed) return;
+		actor.skillUsed = true;
 		actor.finishedTurn = true;
 		this.selection.skill = undefined;
 		this.selection.hero = undefined;
@@ -447,7 +448,6 @@ export class BattleLogicLayer {
 		if (!actor) return;
 
 		actor.finishedTurn = true;
-		actor.moved = true;
 		this.selection.phase = "selection";
 		this.switchToHeroMode(game);
 
@@ -463,7 +463,6 @@ export class BattleLogicLayer {
 		if (!battle) return;
 		for (let actor of battle.heroes) {
 			actor.finishedTurn = true;
-			actor.moved = true;
 		}
 		const turnEnded = this.turnController.checkTurnEnd(game, this.skipAnimations);
 		if (turnEnded) this.onTurnEnd(game);
