@@ -28,6 +28,7 @@ export class DefaultTurnController implements TurnController {
 			actor.moved = false;
 			actor.skillUsed = false;
 			actor.finishedTurn = false;
+			actor.distanceTravelledThisTurn = 0;
 			for (let skill of actor.skills) {
 				if (skill.cooldownTimer > 0) {
 					skill.cooldownTimer -= 1;

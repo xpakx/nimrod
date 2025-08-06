@@ -194,6 +194,7 @@ export class BattleLogicLayer {
 		game.map.clearPath();
 		this.moveActor(actor, to, path);
 		actor.moved = true;
+		actor.distanceTravelledThisTurn = dist;
 		if (actor.skills.length == 0) actor.finishedTurn = true;
 		const turnEnded = this.turnController.checkTurnEnd(game, this.skipAnimations);
 		if (turnEnded) this.onTurnEnd(game);
@@ -409,6 +410,7 @@ export class BattleLogicLayer {
 		actor.path = undefined;
 		actor.goal = undefined;
 		actor.moved = false;
+		actor.distanceTravelledThisTurn = 0;
 	}
 
 	registerHeroPassives(actor: BattleActor) {
