@@ -594,6 +594,13 @@ export class MapLayer {
 		.filter(x => x.hero != undefined)
 		.filter(x => x.population < x.maxPopulation);
 	}
+
+	getEmptyEliteHouses(): House[] {
+		return this.buildings
+		.filter(x => x instanceof House)
+		.filter(x => x.workforce == "elite")
+		.filter(x => x.population < x.maxPopulation);
+	}
 	
 	getHousesOfType(type: string, minLevel: number = 0): House[] {
 		return this.buildings
