@@ -29,6 +29,7 @@ export interface SkillEffectDamage {
 	effectRadius?: number;
 	effectLine?: number;
 	effectCone?: number;
+	specialEffects?: SpecialEffect[];
 }
 
 export type Applychecker = (passiveOwner: BattleActor, actor: BattleActor, actors: BattleActor[],
@@ -40,4 +41,11 @@ export interface SkillEffectPassive<T extends EffectHook = EffectHook> {
 	hook: T;
 	handler: HookHandlerMap[T],
 	shouldApply?: Applychecker;
+}
+
+export interface SpecialEffect<T extends EffectHook = EffectHook> {
+	chance?: number; // undefined -> 100%
+	hook: T;
+	handler: HookHandlerMap[T],
+	descriptors: string[];
 }

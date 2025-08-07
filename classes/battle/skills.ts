@@ -1,6 +1,6 @@
 import { HeroType } from "./actor.js";
 import { EffectHook, HookHandlerMap } from "./effect-system.js";
-import { Applychecker, SkillEffectDamage, SkillEffectPassive } from "./skill/skill.js";
+import { Applychecker, SkillEffectDamage, SkillEffectPassive, SpecialEffect } from "./skill/skill.js";
 
 export class Skills {
 	constructor() {
@@ -83,6 +83,7 @@ export class Skills {
 		multiplier: number,
 		growth: number,
 		type: HeroType = "normal",
+		specialEffects?: SpecialEffect[]
 	): SkillEffectDamage {
 		return {
 			type: "damage",
@@ -91,6 +92,7 @@ export class Skills {
 			},
 			damageType: type,
 			target: "hero",
+			specialEffects: specialEffects,
 		}
 	}
 }
