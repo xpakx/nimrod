@@ -83,6 +83,7 @@ export class Skills {
 		multiplier: number,
 		growth: number,
 		type: HeroType = "normal",
+		distance?: number,
 		specialEffects?: SpecialEffect[]
 	): SkillEffectDamage {
 		return {
@@ -91,8 +92,41 @@ export class Skills {
 				return hero.stats[stat] * multiplier + growth*skill.level;
 			},
 			damageType: type,
+			distance: distance,
 			target: "hero",
 			specialEffects: specialEffects,
 		}
 	}
+
+	static createAoEDamageFunc(
+		stat: "strength" | "agility" | "intelligence",
+		multiplier: number,
+		growth: number,
+		radius: number,
+		type: HeroType = "normal",
+		distance?: number,
+		specialEffects?: SpecialEffect[]
+	): SkillEffectDamage {
+		return {
+			type: "damage",
+			damage: (hero, _target, skill) => {
+				return hero.stats[stat] * multiplier + growth*skill.level;
+			},
+			damageType: type,
+			distance: distance,
+			target: "hero",
+			effectRadius: radius,
+			specialEffects: specialEffects,
+		}
+	}
+
+
+	static createSpecialEffect<T extends EffectHook>(
+		hook: T,
+		handler: HookHandlerMap[T],
+		descriptors: string[]
+	): SpecialEffect<T> {
+		return { hook, handler, descriptors};
+	}
+
 }
