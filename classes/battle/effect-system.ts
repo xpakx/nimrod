@@ -2,7 +2,7 @@ import { BattleActor, HeroType } from "../battle/actor.js";
 import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position } from "../map-layer.js";
 import { Heroes } from "./actors.js";
-import { Skill, SkillEffect, SkillEffectDamage } from "./skill/skill.js";
+import { Skill, SkillEffect, SkillEffectDamage, SpecialEffect } from "./skill/skill.js";
 
 export type EffectEvent = SkillEvent | DamageEvent | TurnEvent;
 
@@ -22,6 +22,14 @@ export interface SkillEvent {
 	result?: "applied" | "blocked" | "mitigated";
 	reactions: (() => void)[];
 	criticalHit: boolean;
+}
+
+interface EventSpecialEffect {
+	effect: SpecialEffect;
+	blocks: { by: BattleActor; reason: string }[];
+	mitigations: { by: BattleActor; chance: number }[];
+	result?: "applied" | "blocked" | "mitigated";
+	reactions: (() => void)[];
 }
 
 export interface DamageEvent {
@@ -54,6 +62,7 @@ export type EffectHandler = DamageHandler | TurnHandler | SkillHandler;
 export interface EventContext {
 	actors: BattleActor[],
 	map: MapLayer,
+	specialEffects: EventSpecialEffect[];
 }
 
 export type SkillHandler = (owner: BattleActor, event: SkillEvent, context: EventContext) => void;
@@ -113,6 +122,21 @@ export class EffectSystem {
 		});
 	}
 
+	effectToSpecialEffects(effect: SkillEffect): EventSpecialEffect[] {
+		let specialEffects: EventSpecialEffect[] = []
+		if (effect.type == "damage" && effect.specialEffects) {
+			for (let e of effect.specialEffects) {
+				specialEffects.push({
+					effect: e,
+					blocks: [], 
+					mitigations: [],
+					reactions: []
+				});
+			}
+		}
+		return specialEffects;
+	}
+
 	emitSkill(source: BattleActor, target: BattleActor | Position, effect: SkillEffect,
 	    sourceSkill: Skill, actors: BattleActor[], map: MapLayer) {
 		this.logger.debug(`Processing an effect of skill ${sourceSkill.name}`, effect);
@@ -127,7 +151,11 @@ export class EffectSystem {
 			reactions: [],
 			criticalHit: false,
 		};
-		const context: EventContext = { actors, map };
+		const context: EventContext = { 
+			actors,
+			map,
+			specialEffects: this.effectToSpecialEffects(effect),
+		};
 
 		this.runHook("onSkill", event, context);
 		this.logger.debug("Running onSkill handlers");
@@ -135,7 +163,7 @@ export class EffectSystem {
 	}
 
 	emitTurnEvent(turnNum: number, enemyTurn: boolean, actors: BattleActor[], map: MapLayer, onStart: boolean = true) {
-		const context: EventContext = { actors, map };
+		const context: EventContext = { actors, map, specialEffects: [] };
 		const type = onStart ? "onTurnStart" : "onTurnEnd";
 		const event: TurnEvent = {
 			type,
