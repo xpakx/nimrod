@@ -123,7 +123,7 @@ class HeroButtonWithLabel extends HeroButton {
 		this.labelCtx.fillText(this.hero.name, 10, 13);
 		this.labelCtx.font = "11px normal"
 		const hp = this.hero.currentHp;
-		const totalHp = this.hero.stats.hp;
+		const totalHp = this.hero.getStat("hp");
 		this.labelCtx.fillText(`${hp}/${totalHp}`, 10, 28);
 	}
 

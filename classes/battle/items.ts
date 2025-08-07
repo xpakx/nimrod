@@ -44,7 +44,7 @@ export class ArtifactManager {
 			const bonuses = line.getBonusTypes();
 			for (let bonus of bonuses) {
 				const stat = bonus as keyof HeroStats;
-				const base = hero.stats[stat];
+				const base = hero.getBaseStat(stat);
 				const bonusPoints = line.getTotalBonus(bonus, base, points);
 				const current  = statBonuses.get(stat) || 0;
 				statBonuses.set(stat, current + bonusPoints);
@@ -52,7 +52,7 @@ export class ArtifactManager {
 		}
 
 		for (let [stat, bonusPoints] of statBonuses) {
-			hero.stats[stat] += bonusPoints;
+			hero.applyBonus(stat, bonusPoints);
 		}
 	}
 }

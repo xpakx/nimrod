@@ -1,4 +1,4 @@
-import { BattleActor, HeroType } from "../battle/actor.js";
+import { BattleActor, HeroStats, HeroType } from "../battle/actor.js";
 import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position } from "../map-layer.js";
 import { Heroes } from "./actors.js";
@@ -44,7 +44,34 @@ export interface DamageEvent {
 	originalDamageType: HeroType;
 	calculatedDamageType: HeroType;
 	effectiveness: "effective" | "normal" | "ineffective";
+	buffs: DamageEventBuff[];
+	controlEffects: DamageEventControl[];
+	additionalDamage: AdditionalDamage[],
 }
+
+interface AdditionalDamage {
+	target: BattleActor;
+	source: BattleActor;
+	damage: SkillEffectDamage;
+}
+
+export interface DamageEventBuff {
+	type: "buff" | "debuff";
+	stat: keyof HeroStats;
+	duration: number,
+	value?: number;
+	percentage?: number;
+	blocks: { by: BattleActor; reason: string }[];
+	mitigations: { by: BattleActor; chance: number }[];
+}
+
+export interface DamageEventControl {
+	name: "sleep" | "stun";
+	duration: number;
+	blocks: { by: BattleActor; reason: string }[];
+	mitigations: { by: BattleActor; chance: number }[];
+}
+
 
 export interface TurnEvent {
 	type: "onTurnEnd" | "onTurnStart";
@@ -157,8 +184,9 @@ export class EffectSystem {
 			specialEffects: this.effectToSpecialEffects(effect),
 		};
 
-		this.runHook("onSkill", event, context);
 		this.logger.debug("Running onSkill handlers");
+		this.runHook("onSkill", event, context);
+		// TODO: run context handlers
 		this.resolve(event, context);
 	}
 
@@ -312,6 +340,9 @@ export class EffectSystem {
 			blocks: [],
 			mitigations: [],
 			effectiveness,
+			buffs: [],
+			controlEffects: [],
+			additionalDamage: [],
 		}
 	}
 

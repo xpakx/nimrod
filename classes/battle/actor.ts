@@ -1,6 +1,7 @@
 import { Actor, ActorSprite } from "../actor.js";
 import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position } from "../map-layer.js";
+import { Heroes } from "./actors.js";
 import { HeroDefinition } from "./hero-library.js";
 import { Skill } from "./skill/skill.js";
 
@@ -41,21 +42,16 @@ export class BattleActor extends Actor {
 	finishedTurn: boolean = false;
 	distanceTravelledThisTurn: number = 0;
 	level: number = 1;
-	stats: HeroStats;
+
+	private stats: HeroStats;
+	private modifiers: HeroStats;
+	private equipmentMods: HeroStats;
 
 	constructor(sprite: ActorSprite, position: Position) {
 		super(sprite, position);
-		this.stats = {
-			hp: 0,
-			strength: 0,
-			agility: 0,
-			intelligence: 0,
-			defence: 0,
-			resistance: 0,
-			luck: 0,
-			speed: 0,
-			vampirism: 0,
-		}
+		this.stats = Heroes.getEmptyStats();
+		this.modifiers = Heroes.getEmptyStats();
+		this.equipmentMods = Heroes.getEmptyStats();
 	}
 
 	applyHeroDefinition(definition: HeroDefinition) {
@@ -91,6 +87,21 @@ export class BattleActor extends Actor {
 		this.calculateStat("luck");
 		this.calculateStat("speed");
 		this.calculateStat("vampirism");
+	}
+
+	getBaseStat(stat: keyof HeroStats): number {
+		return this.stats[stat];
+	}
+
+	getStat(stat: keyof HeroStats): number {
+		const baseStat = this.stats[stat];
+		const modifier = this.modifiers[stat];
+		const equipment = this.equipmentMods[stat];
+		return Math.max(1, baseStat + equipment + modifier);
+	}
+
+	applyBonus(stat: keyof HeroStats, bonus: number) {
+		this.modifiers[stat] += bonus;
 	}
 
 	calculateStat(stat: keyof HeroStats) {

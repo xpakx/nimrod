@@ -1,5 +1,5 @@
 import { Position } from "../map-layer.js";
-import { BattleActor, HeroType } from "./actor.js";
+import { BattleActor, HeroStats, HeroType } from "./actor.js";
 
 export class Heroes {
 	constructor() {
@@ -167,5 +167,19 @@ export class Heroes {
 		if (attacker == "water" && defender == "earth") return true;
 		if (attacker == "fire" && defender == "water") return true;
 		return false;
+	}
+
+	static getEmptyStats(): HeroStats {
+		return {
+			hp: 0,
+			strength: 0,
+			agility: 0,
+			intelligence: 0,
+			defence: 0,
+			resistance: 0,
+			luck: 0,
+			speed: 0,
+			vampirism: 0,
+		}
 	}
 }

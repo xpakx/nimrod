@@ -53,9 +53,7 @@ export let heroDamage001 = Skills.createDamageFunc(
 				if (event.source !== passiveOwner) return;
 				const rand = Math.random();
 				if (rand > 0.4) return;
-
-				// TODO: move this to event.effects, and make debuff last two turns
-				event.target.stats.speed -= 2; 
+				event.buffs.push(Skills.createDebuff("speed", 2, 2));
 			},
 			["debuff", "slowness"]
 		)
@@ -75,8 +73,7 @@ export let heroDamage002 = Skills.createDamageFunc(
 				if (event.source !== passiveOwner) return;
 				const rand = Math.random();
 				if (rand > 0.75) return;
-				// TODO: move this to event.effects, and make it stun target for 2 turns
-				event.target.finishedTurn = true; 
+				event.controlEffects.push(Skills.createControlEffect("stun", 2));
 			},
 			["control", "stun"]
 		),
@@ -85,15 +82,12 @@ export let heroDamage002 = Skills.createDamageFunc(
 			"onDamage",
 			(passiveOwner, event, context) => {
 				if (event.source !== passiveOwner) return;
-				let damage = event.calculatedDamage;
-				if (!event.target.dead) {
-					damage = 0.3*damage;
-				}
+				let splashFactor = event.target.dead ? 0.7 : 0.3;
+				const damage = Math.ceil(splashFactor*event.calculatedDamage);
 				const additionalTargets = Heroes.getAlliesInRange(event.target, context.actors, 5);
-				// TODO: register as effects
 				additionalTargets.forEach((a) => {
-					a.currentHp -= damage;
-					if (a.currentHp <= 0) a.dead = true;
+					const damageEvent = Skills.createStaticDamage(damage, "fire")
+					event.additionalDamage.push({source: event.source, target: a, damage: damageEvent});
 				});
 			},
 			["damage", "splash", "control", "stun"]
@@ -113,7 +107,7 @@ export let heroDamage003 = Skills.createAoEDamageFunc(
 			"onDamage",
 			(passiveOwner, event, _context) => {
 				if (event.source !== passiveOwner) return;
-				const lostHp = event.source.stats.hp - event.source.currentHp;
+				const lostHp = event.source.getStat("hp") - event.source.currentHp;
 				const toHeal = Math.floor(lostHp * 0.50);
 				// TODO: register as effect
 				event.source.currentHp += toHeal;

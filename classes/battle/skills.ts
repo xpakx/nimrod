@@ -1,5 +1,5 @@
-import { HeroType } from "./actor.js";
-import { EffectHook, HookHandlerMap } from "./effect-system.js";
+import { HeroStats, HeroType } from "./actor.js";
+import { DamageEventBuff, DamageEventControl, EffectHook, HookHandlerMap } from "./effect-system.js";
 import { Applychecker, SkillEffectDamage, SkillEffectPassive, SpecialEffect } from "./skill/skill.js";
 
 export class Skills {
@@ -89,7 +89,7 @@ export class Skills {
 		return {
 			type: "damage",
 			damage: (hero, _target, skill) => {
-				return hero.stats[stat] * multiplier + growth*skill.level;
+				return hero.getStat(stat) * multiplier + growth*skill.level;
 			},
 			damageType: type,
 			distance: distance,
@@ -110,7 +110,7 @@ export class Skills {
 		return {
 			type: "damage",
 			damage: (hero, _target, skill) => {
-				return hero.stats[stat] * multiplier + growth*skill.level;
+				return hero.getStat(stat) * multiplier + growth*skill.level;
 			},
 			damageType: type,
 			distance: distance,
@@ -129,4 +129,46 @@ export class Skills {
 		return { hook, handler, descriptors};
 	}
 
+	static createBuff(stat: keyof HeroStats, value: number, duration: number): DamageEventBuff {
+		return {
+			type: "buff",
+			stat: stat,
+			duration: duration,
+			value: value,
+			blocks: [],
+			mitigations: [],
+		}
+	}
+
+	static createDebuff(stat: keyof HeroStats, value: number, duration: number): DamageEventBuff {
+		return {
+			type: "debuff",
+			stat: stat,
+			duration: duration,
+			value: value,
+			blocks: [],
+			mitigations: [],
+		}
+	}
+
+	static createControlEffect(type: "sleep" | "stun", duration: number): DamageEventControl {
+		return {
+			name: type,
+			duration: duration,
+			blocks: [],
+			mitigations: [],
+		}
+	}
+
+	static createStaticDamage(
+		damage: number,
+		type: HeroType = "normal"
+	): SkillEffectDamage {
+		return {
+			type: "damage",
+			damage: damage,
+			damageType: type,
+			target: "hero",
+		}
+	}
 }
