@@ -129,7 +129,7 @@ export class EffectSystem {
 		};
 		const context: EventContext = { actors, map };
 
-
+		this.runHook("onSkill", event, context);
 		this.logger.debug("Running onSkill handlers");
 		this.resolve(event, context);
 	}
