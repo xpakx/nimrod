@@ -31,6 +31,10 @@ interface Modifier {
 	duration?: number;
 }
 
+type ModifiersByStat = {
+	[K in keyof HeroStats]?: Modifier[];
+};
+
 export class BattleActor extends Actor {
 	enemy: boolean = false;
 	placed: boolean = false;
@@ -60,8 +64,8 @@ export class BattleActor extends Actor {
 	private equipmentMods: HeroStats;
 
 	private tokens: Record<string, Token[]> = {};
-	private buffs: Record<string, Modifier[]> = {};
-	private debuffs: Record<string, Modifier[]> = {};
+	private buffs: ModifiersByStat = {};
+	private debuffs: ModifiersByStat = {};
 
 	// TODO: tokens and temporary mods
 
@@ -208,25 +212,33 @@ export class BattleActor extends Actor {
 
 
 	isBuffed(key: keyof HeroStats): boolean {
-		if(!(key in this.buffs)) return false;
-		return this.buffs[key].length > 0;
+		const buffs = this.buffs[key];
+		return !!buffs && buffs.length > 0;
 	}
 
 	addBuff(key: keyof HeroStats, value: number, duration: number | undefined = undefined) {
-		if(!(key in this.buffs)) this.buffs[key] = [];
-		this.buffs[key].push({stat: key, value: value, duration: duration});
+		let buffs = this.buffs[key];
+		if (!buffs) {
+			buffs = [];
+			this.buffs[key] = buffs;
+		}
+		buffs.push({stat: key, value: value, duration: duration});
 		this.modifiers[key] += value;
 	}
 
 
 	isDebuffed(key: keyof HeroStats): boolean {
-		if(!(key in this.debuffs)) return false;
-		return this.debuffs[key].length > 0;
+		const debuffs = this.debuffs[key];
+		return !!debuffs && debuffs.length > 0;
 	}
 
 	addDebuff(key: keyof HeroStats, value: number, duration: number | undefined = undefined) {
-		if(!(key in this.debuffs)) this.debuffs[key] = [];
-		this.debuffs[key].push({stat: key, value: value, duration: duration});
+		let debuffs = this.debuffs[key];
+		if (!debuffs) {
+			debuffs = [];
+			this.debuffs[key] = debuffs;
+		}
+		debuffs.push({stat: key, value: value, duration: duration});
 		this.modifiers[key] -= value;
 	}
 
@@ -245,13 +257,15 @@ export class BattleActor extends Actor {
 	}
 
 	advanceBuffs() {
-		for (let key in this.buffs) {
+		for (let k in this.buffs) {
+			const key = k as keyof HeroStats;
+			if (!this.buffs[key]) continue;
 			let newBuffs = [];
 			for (let value of this.buffs[key]) {
 				if (value.duration !== undefined) {
 					value.duration -= 1;
 					if (value.duration < 0) {
-						const k = key as keyof HeroStats; // TODO: type safety
+						const k = key;
 						this.modifiers[k] -= value.value;
 						continue;
 					}
@@ -263,13 +277,15 @@ export class BattleActor extends Actor {
 	}
 
 	advanceDebuffs() {
-		for (let key in this.debuffs) {
+		for (let k in this.debuffs) {
+			const key = k as keyof HeroStats;
+			if (!this.debuffs[key]) continue;
 			let newDebuffs = [];
 			for (let value of this.debuffs[key]) {
 				if (value.duration !== undefined) {
 					value.duration -= 1;
 					if (value.duration < 0) {
-						const k = key as keyof HeroStats; // TODO: type safety
+						const k = key;
 						this.modifiers[k] += value.value;
 						continue;
 					}
