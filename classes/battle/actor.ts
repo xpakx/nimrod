@@ -104,6 +104,18 @@ export class BattleActor extends Actor {
 		this.modifiers[stat] += bonus;
 	}
 
+	applyEquipmentBonus(stat: keyof HeroStats, bonus: number) {
+		this.equipmentMods[stat] += bonus;
+	}
+
+	resetEquipment() {
+		this.equipmentMods = Heroes.getEmptyStats();
+	}
+
+	resetBonuses() {
+		this.modifiers = Heroes.getEmptyStats();
+	}
+
 	calculateStat(stat: keyof HeroStats) {
 		if (!this.definition) return;
 		const data = this.definition[stat];
