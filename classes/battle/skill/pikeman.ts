@@ -40,6 +40,16 @@ export let heroPassive001 = Skills.onKillPassive(
 	},
 );
 
+export let heroPassive002 = Skills.onDamagePassive(
+	(passiveOwner, event, _context) => {
+		if (event.source !== passiveOwner) return;
+		const controlTokens = Heroes.countControlTokens(event.target);
+		const modifier = Math.min(10, controlTokens)*0.5;
+		const bonusDamage = Math.floor(modifier*event.calculatedDamage);
+		event.calculatedDamage += bonusDamage;
+	},
+);
+
 export let heroDamage001 = Skills.createDamageFunc(
 	"agility",
 	0.4,

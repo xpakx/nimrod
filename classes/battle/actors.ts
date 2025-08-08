@@ -182,4 +182,17 @@ export class Heroes {
 			vampirism: 0,
 		}
 	}
+
+	static hasControlToken(actor: BattleActor): boolean {
+		if (actor.hasToken("sleep")) return true;
+		if (actor.hasToken("stun")) return true;
+		return false;
+	}
+
+	static countControlTokens(actor: BattleActor): number {
+		let sum = 0;
+		sum += actor.totalTokens("sleep");
+		sum += actor.totalTokens("stun");
+		return sum;
+	}
 }
