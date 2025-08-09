@@ -434,4 +434,15 @@ export class EffectSystem {
 		else if (event.buffType == "debuff") target.addDebuff(event.stat, event.calculatedValue, event.duration);
 		this.runHook("onBuff", event, context);
 	}
+
+	private applyTokenEvent(event: TokenEvent, context: EventContext) {
+		this.logger.debug("Applying token event");
+		const target = event.target;
+
+		this.runHook("preToken", event, context);
+		// TODO: blocked tokens
+		this.logger.debug(`Applying token ${event.tokenName} to ${target.name}`);
+		target.addToken(event.tokenName, event.calculatedValue, event.duration);
+		this.runHook("onToken", event, context);
+	}
 }
