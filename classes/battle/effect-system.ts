@@ -4,7 +4,7 @@ import { MapLayer, Position } from "../map-layer.js";
 import { Heroes } from "./actors.js";
 import { Skill, SkillEffect, SkillEffectDamage, SpecialEffect } from "./skill/skill.js";
 
-export type EffectEvent = SkillEvent | DamageEvent | TurnEvent | BuffEvent | TokenEvent | HealEvent;
+export type EffectEvent = SkillEvent | DamageEvent | TurnEvent;
 
 export interface SkillEvent {
 	type: "onSkill";
@@ -271,7 +271,7 @@ export class EffectSystem {
 		}
 
 		this.runHook(type, event, context);
-		this.calculateDuration();
+		if (!onStart) this.calculateDuration();
 	}
 
 	private tickHandlers<K extends EffectHook>(_hook: K, handlers: EffectHandlerDef<K>[]): EffectHandlerDef<K>[] {
