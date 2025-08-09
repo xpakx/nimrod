@@ -4,7 +4,7 @@ import { MapLayer, Position } from "../map-layer.js";
 import { Heroes } from "./actors.js";
 import { Skill, SkillEffect, SkillEffectDamage, SpecialEffect } from "./skill/skill.js";
 
-export type EffectEvent = SkillEvent | DamageEvent | TurnEvent | BuffEvent;
+export type EffectEvent = SkillEvent | DamageEvent | TurnEvent | BuffEvent | TokenEvent | HealEvent;
 
 export interface SkillEvent {
 	type: "onSkill";
@@ -127,6 +127,7 @@ export interface HealEvent {
 	tag: "normal" | "self" | "vampirism";
 	originalValue: number;
 	calculatedValue: number;
+	overhealing?: number;
 
 	blocks: { by: BattleActor; reason: string }[];
 	mitigations: { by: BattleActor; chance: number }[];
@@ -444,5 +445,19 @@ export class EffectSystem {
 		this.logger.debug(`Applying token ${event.tokenName} to ${target.name}`);
 		target.addToken(event.tokenName, event.calculatedValue, event.duration);
 		this.runHook("onToken", event, context);
+	}
+
+	private applyHealEvent(event: HealEvent, context: EventContext) {
+		this.logger.debug("Applying token event");
+		const target = event.target;
+
+		this.runHook("preHeal", event, context);
+		// TODO: blocked healing
+		this.logger.debug(`Healing ${event.calculatedValue} of ${target.name}'s hp`);
+		const maxHeal = target.currentHp + event.calculatedValue;
+		target.currentHp = Math.min(target.getStat("hp"), target.currentHp + event.calculatedValue);
+		const overhealing = maxHeal - target.currentHp;
+		if (overhealing > 0) event.overhealing = overhealing;
+		this.runHook("onHeal", event, context);
 	}
 }
