@@ -4,7 +4,7 @@ import { MapLayer, Position } from "../map-layer.js";
 import { Heroes } from "./actors.js";
 import { Skill, SkillEffect, SkillEffectDamage, SpecialEffect } from "./skill/skill.js";
 
-export type EffectEvent = SkillEvent | DamageEvent | TurnEvent;
+export type EffectEvent = SkillEvent | DamageEvent | TurnEvent | BuffEvent;
 
 export interface SkillEvent {
 	type: "onSkill";
@@ -45,6 +45,7 @@ export interface DamageEvent {
 	calculatedDamageType: HeroType;
 	effectiveness: "effective" | "normal" | "ineffective";
 	buffs: DamageEventBuff[];
+	healing: DamageEventHeal[];
 	controlEffects: DamageEventControl[];
 	additionalDamage: AdditionalDamage[],
 }
@@ -72,6 +73,13 @@ export interface DamageEventControl {
 	mitigations: { by: BattleActor; chance: number }[];
 }
 
+export interface DamageEventHeal {
+	tag: "normal" | "self" | "vampirism";
+	value?: number;
+	percentage?: number;
+	blocks: { by: BattleActor; reason: string }[];
+	mitigations: { by: BattleActor; chance: number }[];
+}
 
 export interface TurnEvent {
 	type: "onTurnEnd" | "onTurnStart";
@@ -80,11 +88,56 @@ export interface TurnEvent {
 	enemyTurn: boolean;
 }
 
+export interface BuffEvent {
+	type: "onBuff" | "preBuff";
+	sourceSkill: Skill;
+	source: BattleActor;
+	target: BattleActor;
+
+	buffType: "buff" | "debuff";
+	stat: keyof HeroStats;
+	duration: number,
+	originalValue: number;
+	calculatedValue: number;
+	blocks: { by: BattleActor; reason: string }[];
+	mitigations: { by: BattleActor; chance: number }[];
+}
+
+export interface TokenEvent {
+	type: "onToken" | "preToken";
+	sourceSkill: Skill;
+	source: BattleActor;
+	target: BattleActor;
+
+	tokenName: string;
+	duration: number,
+	originalValue: number;
+	calculatedValue: number;
+
+	blocks: { by: BattleActor; reason: string }[];
+	mitigations: { by: BattleActor; chance: number }[];
+}
+
+export interface HealEvent {
+	type: "onHeal" | "preHeal";
+	sourceSkill: Skill;
+	source: BattleActor;
+	target: BattleActor;
+
+	tag: "normal" | "self" | "vampirism";
+	originalValue: number;
+	calculatedValue: number;
+
+	blocks: { by: BattleActor; reason: string }[];
+	mitigations: { by: BattleActor; chance: number }[];
+}
+
 export type EffectHook = 
 	"onSkill" | "preDamage" | "onDamage" | "onKill" | "onStatusApplied" | "postSkill" | 
-	"onTurnStart" | "onTurnEnd" | "onMove";
+	"onTurnStart" | "onTurnEnd" | "onMove" | 
+	"onBuff" | "preBuff" | "onToken" | "preToken" | "onHeal" | "preHeal";
 
-export type EffectHandler = DamageHandler | TurnHandler | SkillHandler;
+export type EffectHandler = DamageHandler | TurnHandler | SkillHandler | BuffHandler;
 
 export interface EventContext {
 	actors: BattleActor[],
@@ -95,6 +148,9 @@ export interface EventContext {
 export type SkillHandler = (owner: BattleActor, event: SkillEvent, context: EventContext) => void;
 export type DamageHandler = (owner: BattleActor, event: DamageEvent, context: EventContext) => void;
 export type TurnHandler = (owner: BattleActor, event: TurnEvent, context: EventContext) => void;
+export type BuffHandler = (owner: BattleActor, event: BuffEvent, context: EventContext) => void;
+export type TokenHandler = (owner: BattleActor, event: TokenEvent, context: EventContext) => void;
+export type HealHandler = (owner: BattleActor, event: HealEvent, context: EventContext) => void;
 
 export interface HookHandlerMap {
 	onSkill: SkillHandler;
@@ -106,6 +162,12 @@ export interface HookHandlerMap {
 	onTurnStart: TurnHandler;
 	onTurnEnd: TurnHandler;
 	onMove: SkillHandler; // TODO: add new handler type
+	preBuff: BuffHandler;
+	onBuff: BuffHandler;
+	onToken: TokenHandler;
+	preToken: TokenHandler;
+	preHeal: HealHandler;
+	onHeal: HealHandler;
 }
 
 interface HookEventMap {
@@ -118,6 +180,13 @@ interface HookEventMap {
 	onTurnStart: TurnEvent;
 	onTurnEnd: TurnEvent;
 	onMove: SkillEvent;
+
+	preBuff: BuffEvent;
+	onBuff: BuffEvent;
+	onToken: TokenEvent;
+	preToken: TokenEvent;
+	preHeal: HealEvent;
+	onHeal: HealEvent;
 }
 
 
@@ -341,6 +410,7 @@ export class EffectSystem {
 			mitigations: [],
 			effectiveness,
 			buffs: [],
+			healing: [],
 			controlEffects: [],
 			additionalDamage: [],
 		}
