@@ -329,7 +329,7 @@ export class EffectSystem {
 		const effect = event.effect;
 		if (effect.type == 'damage') {
 			this.applyDamageEvent(event, effect, context);
-		}
+		} // TODO: else if (effect.type == "buff") …
 	}
 
 	private applyDamageEvent(event: SkillEvent, effect: SkillEffectDamage, context: EventContext) {
@@ -421,5 +421,17 @@ export class EffectSystem {
 		if (target.currentHp <= 0) {
 			target.dead = true;
 		}
+	}
+
+	private applyBuffEvent(event: BuffEvent, context: EventContext) {
+		this.logger.debug("Applying buff event");
+		const target = event.target;
+
+		this.runHook("preBuff", event, context);
+		// TODO: blocked buffs
+		this.logger.debug(`Applying ${event.calculatedValue} ${event.buffType} to ${target.name}'s ${event.stat}`);
+		if (event.buffType == "buff") target.addBuff(event.stat, event.calculatedValue, event.duration);
+		else if (event.buffType == "debuff") target.addDebuff(event.stat, event.calculatedValue, event.duration);
+		this.runHook("onBuff", event, context);
 	}
 }
