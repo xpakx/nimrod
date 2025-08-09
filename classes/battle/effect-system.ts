@@ -50,6 +50,16 @@ export interface DamageEvent {
 	additionalDamage: AdditionalDamage[],
 }
 
+interface AdditionalEffects {
+	sourceSkill: Skill;
+	source: BattleActor;
+	target: BattleActor;
+	buffs: DamageEventBuff[];
+	healing: DamageEventHeal[];
+	controlEffects: DamageEventControl[];
+	additionalDamage: AdditionalDamage[],
+}
+
 interface AdditionalDamage {
 	target: BattleActor;
 	source: BattleActor;
@@ -330,7 +340,7 @@ export class EffectSystem {
 		const effect = event.effect;
 		if (effect.type == 'damage') {
 			this.applyDamageEvent(event, effect, context);
-		} // TODO: else if (effect.type == "buff") …
+		} // TODO: else if (effect.type == "buff") … heal, token, passive, special
 	}
 
 	private applyDamageEvent(event: SkillEvent, effect: SkillEffectDamage, context: EventContext) {
@@ -359,7 +369,55 @@ export class EffectSystem {
 			if (dmgEvent.target.dead) {
 				this.runHook("onKill", dmgEvent, context);
 			}
+			this.applyAdditionalEffects(dmgEvent, context);
 		}
+	}
+
+	private applyAdditionalEffects(event: AdditionalEffects, context: EventContext) {
+		for (let buff of event.buffs) {
+			this.applyBuffEvent({
+				type: "onBuff",
+				sourceSkill: event.sourceSkill,
+				source: event.source,
+				target: event.target,
+
+				buffType: buff.type,
+				stat: buff.stat,
+				duration: buff.duration,
+				originalValue: buff.value ?? 0, // TODO: calculate correctly
+				calculatedValue: buff.value ?? 0,
+				blocks: [],
+				mitigations: [],
+			}, context);
+		}
+		for (let heal of event.healing) {
+			this.applyHealEvent({
+				type: "onHeal",
+				sourceSkill: event.sourceSkill,
+				source: event.source,
+				target: event.target,
+				tag: "normal",
+				originalValue: heal.value ?? 0,
+				calculatedValue: heal.value ?? 0,
+				blocks: [],
+				mitigations: [],
+			}, context);
+		}
+		for (let token of event.controlEffects) {
+			this.applyTokenEvent({
+				type: "onToken",
+				sourceSkill: event.sourceSkill,
+				source: event.source,
+				target: event.target,
+				tokenName: token.name,
+				duration: token.duration,
+				originalValue: 1,
+				calculatedValue: 1,
+				blocks: [],
+				mitigations: [],
+			}, context);
+		}
+		// TODO: additional damage
 	}
 
 	private calculateAoeDamage(event: SkillEvent, target: Position, effect: SkillEffectDamage, actors: BattleActor[]): DamageEvent[] {
