@@ -316,7 +316,59 @@ export class EffectSystem {
 		const effect = event.effect;
 		if (effect.type == 'damage') {
 			this.applyDamageEvent(event, effect, context);
-		} // TODO: else if (effect.type == "buff") … heal, token, passive, special
+		} else if (effect.type == "buff") {
+			this.applyBuffEvent(this.toBuffEvent(event, effect), context);
+		} else if (effect.type == "passive") {
+		} else if (effect.type == "token") {
+			this.applyTokenEvent(this.toTokenEvent(event, effect), context);
+		} else if (effect.type == "heal") {
+			this.applyHealEvent(this.toHealEvent(event, effect), context);
+		}
+	}
+
+	private toBuffEvent(event: SkillEvent | AdditionalEffect<SkillEffectBuff>, effect: SkillEffectBuff): BuffEvent {
+		return {
+			type: "onBuff",
+			sourceSkill: event.sourceSkill,
+			source: event.source,
+			target: event.target as BattleActor, // TODO
+			buffType: effect.buffType,
+			stat: effect.stat,
+			duration: effect.duration,
+			originalValue: effect.value ?? 0,
+			calculatedValue: effect.value ?? 0,
+			blocks: [],
+			mitigations: [],
+		}
+	}
+
+	private toHealEvent(event: SkillEvent | AdditionalEffect<SkillEffectHeal>, effect: SkillEffectHeal): HealEvent {
+		return {
+			type: "onHeal",
+			sourceSkill: event.sourceSkill,
+			source: event.source,
+			target: event.target as BattleActor, // TODO
+			tag: "normal",
+			originalValue: effect.value ?? 0,
+			calculatedValue: effect.value ?? 0,
+			blocks: [],
+			mitigations: [],
+		}
+	}
+
+	private toTokenEvent(event: SkillEvent | AdditionalEffect<SkillEffectToken>, effect: SkillEffectToken): TokenEvent {
+		return {
+			type: "onToken",
+			sourceSkill: event.sourceSkill,
+			source: event.source,
+			target: event.target as BattleActor, // TODO
+			tokenName: effect.tokenName,
+			duration: effect.duration,
+			originalValue: effect.value ?? 0,
+			calculatedValue: effect.value ?? 0,
+			blocks: [],
+			mitigations: [],
+		}
 	}
 
 	private applyDamageEvent(event: SkillEvent, effect: SkillEffectDamage, context: EventContext) {
@@ -351,47 +403,13 @@ export class EffectSystem {
 
 	private applyAdditionalEffects(event: AdditionalEffects, context: EventContext) {
 		for (let buff of event.buffs) {
-			this.applyBuffEvent({
-				type: "onBuff",
-				sourceSkill: buff.sourceSkill,
-				source: buff.source,
-				target: buff.target,
-
-				buffType: buff.effect.buffType,
-				stat: buff.effect.stat,
-				duration: buff.effect.duration,
-				originalValue: buff.effect.value ?? 0, // TODO: calculate correctly
-				calculatedValue: buff.effect.value ?? 0,
-				blocks: [],
-				mitigations: [],
-			}, context);
+			this.applyBuffEvent(this.toBuffEvent(buff, buff.effect), context);
 		}
 		for (let heal of event.healing) {
-			this.applyHealEvent({
-				type: "onHeal",
-				sourceSkill: heal.sourceSkill,
-				source: heal.source,
-				target: heal.target,
-				tag: "normal",
-				originalValue: heal.effect.value ?? 0,
-				calculatedValue: heal.effect.value ?? 0,
-				blocks: [],
-				mitigations: [],
-			}, context);
+			this.applyHealEvent(this.toHealEvent(heal, heal.effect), context);
 		}
 		for (let token of event.controlEffects) {
-			this.applyTokenEvent({
-				type: "onToken",
-				sourceSkill: token.sourceSkill,
-				source: token.source,
-				target: token.target,
-				tokenName: token.effect.tokenName,
-				duration: token.effect.duration,
-				originalValue: 1,
-				calculatedValue: 1,
-				blocks: [],
-				mitigations: [],
-			}, context);
+			this.applyTokenEvent(this.toTokenEvent(token, token.effect), context);
 		}
 		// TODO: additional damage
 	}
