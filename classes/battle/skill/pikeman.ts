@@ -63,7 +63,12 @@ export let heroDamage001 = Skills.createDamageFunc(
 				if (event.source !== passiveOwner) return;
 				const rand = Math.random();
 				if (rand > 0.4) return;
-				event.buffs.push(Skills.createDebuff("speed", 2, 2));
+				event.buffs.push({
+					effect: Skills.createDebuff("speed", 2, 2), 
+					source: event.source, 
+					target: event.target,
+					sourceSkill: event.sourceSkill,
+				});
 			},
 			["debuff", "slowness"]
 		)
@@ -83,7 +88,12 @@ export let heroDamage002 = Skills.createDamageFunc(
 				if (event.source !== passiveOwner) return;
 				const rand = Math.random();
 				if (rand > 0.75) return;
-				event.controlEffects.push(Skills.createControlEffect("stun", 2));
+				event.controlEffects.push({
+					effect: Skills.createControlEffect("stun", 2),
+					source: event.source, 
+					target: event.target,
+					sourceSkill: event.sourceSkill,
+				});
 			},
 			["control", "stun"]
 		),
@@ -97,7 +107,12 @@ export let heroDamage002 = Skills.createDamageFunc(
 				const additionalTargets = Heroes.getAlliesInRange(event.target, context.actors, 5);
 				additionalTargets.forEach((a) => {
 					const damageEvent = Skills.createStaticDamage(damage, "fire")
-					event.additionalDamage.push({source: event.source, target: a, damage: damageEvent});
+					event.additionalDamage.push({
+						source: event.source,
+						target: a,
+						effect: damageEvent,
+						sourceSkill: event.sourceSkill,
+					});
 				});
 			},
 			["damage", "splash", "control", "stun"]

@@ -1,6 +1,6 @@
 import { HeroStats, HeroType } from "./actor.js";
-import { DamageEventBuff, DamageEventControl, EffectHook, HookHandlerMap } from "./effect-system.js";
-import { Applychecker, SkillEffectDamage, SkillEffectPassive, SpecialEffect } from "./skill/skill.js";
+import { EffectHook, HookHandlerMap } from "./effect-system.js";
+import { Applychecker, SkillEffectBuff, SkillEffectDamage, SkillEffectPassive, SkillEffectToken, SpecialEffect } from "./skill/skill.js";
 
 export class Skills {
 	constructor() {
@@ -129,34 +129,31 @@ export class Skills {
 		return { hook, handler, descriptors};
 	}
 
-	static createBuff(stat: keyof HeroStats, value: number, duration: number): DamageEventBuff {
+	static createBuff(stat: keyof HeroStats, value: number, duration: number): SkillEffectBuff {
 		return {
 			type: "buff",
+			buffType: "buff",
 			stat: stat,
 			duration: duration,
 			value: value,
-			blocks: [],
-			mitigations: [],
 		}
 	}
 
-	static createDebuff(stat: keyof HeroStats, value: number, duration: number): DamageEventBuff {
+	static createDebuff(stat: keyof HeroStats, value: number, duration: number): SkillEffectBuff {
 		return {
-			type: "debuff",
+			type: "buff",
+			buffType: "debuff",
 			stat: stat,
 			duration: duration,
 			value: value,
-			blocks: [],
-			mitigations: [],
 		}
 	}
 
-	static createControlEffect(type: "sleep" | "stun", duration: number): DamageEventControl {
+	static createControlEffect(type: "sleep" | "stun", duration: number): SkillEffectToken {
 		return {
-			name: type,
+			type: "token",
+			tokenName: type,
 			duration: duration,
-			blocks: [],
-			mitigations: [],
 		}
 	}
 

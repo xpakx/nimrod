@@ -2,7 +2,7 @@ import { BattleActor, HeroStats, HeroType } from "../battle/actor.js";
 import { getLogger, Logger } from "../logger.js";
 import { MapLayer, Position } from "../map-layer.js";
 import { Heroes } from "./actors.js";
-import { Skill, SkillEffect, SkillEffectDamage, SpecialEffect } from "./skill/skill.js";
+import { Skill, SkillEffect, SkillEffectBuff, SkillEffectDamage, SkillEffectHeal, SkillEffectToken, SpecialEffect } from "./skill/skill.js";
 
 export type EffectEvent = SkillEvent | DamageEvent | TurnEvent;
 
@@ -44,51 +44,27 @@ export interface DamageEvent {
 	originalDamageType: HeroType;
 	calculatedDamageType: HeroType;
 	effectiveness: "effective" | "normal" | "ineffective";
-	buffs: DamageEventBuff[];
-	healing: DamageEventHeal[];
-	controlEffects: DamageEventControl[];
-	additionalDamage: AdditionalDamage[],
+	buffs: AdditionalEffect<SkillEffectBuff>[];
+	healing: AdditionalEffect<SkillEffectHeal>[];
+	controlEffects: AdditionalEffect<SkillEffectToken>[];
+	additionalDamage: AdditionalEffect<SkillEffectDamage>[],
 }
 
 interface AdditionalEffects {
 	sourceSkill: Skill;
 	source: BattleActor;
 	target: BattleActor;
-	buffs: DamageEventBuff[];
-	healing: DamageEventHeal[];
-	controlEffects: DamageEventControl[];
-	additionalDamage: AdditionalDamage[],
+	buffs: AdditionalEffect<SkillEffectBuff>[];
+	healing: AdditionalEffect<SkillEffectHeal>[];
+	controlEffects: AdditionalEffect<SkillEffectToken>[];
+	additionalDamage: AdditionalEffect<SkillEffectDamage>[],
 }
 
-interface AdditionalDamage {
+export interface AdditionalEffect<T> {
+	sourceSkill: Skill;
 	target: BattleActor;
 	source: BattleActor;
-	damage: SkillEffectDamage;
-}
-
-export interface DamageEventBuff {
-	type: "buff" | "debuff";
-	stat: keyof HeroStats;
-	duration: number,
-	value?: number;
-	percentage?: number;
-	blocks: { by: BattleActor; reason: string }[];
-	mitigations: { by: BattleActor; chance: number }[];
-}
-
-export interface DamageEventControl {
-	name: "sleep" | "stun";
-	duration: number;
-	blocks: { by: BattleActor; reason: string }[];
-	mitigations: { by: BattleActor; chance: number }[];
-}
-
-export interface DamageEventHeal {
-	tag: "normal" | "self" | "vampirism";
-	value?: number;
-	percentage?: number;
-	blocks: { by: BattleActor; reason: string }[];
-	mitigations: { by: BattleActor; chance: number }[];
+	effect: T;
 }
 
 export interface TurnEvent {
@@ -377,15 +353,15 @@ export class EffectSystem {
 		for (let buff of event.buffs) {
 			this.applyBuffEvent({
 				type: "onBuff",
-				sourceSkill: event.sourceSkill,
-				source: event.source,
-				target: event.target,
+				sourceSkill: buff.sourceSkill,
+				source: buff.source,
+				target: buff.target,
 
-				buffType: buff.type,
-				stat: buff.stat,
-				duration: buff.duration,
-				originalValue: buff.value ?? 0, // TODO: calculate correctly
-				calculatedValue: buff.value ?? 0,
+				buffType: buff.effect.buffType,
+				stat: buff.effect.stat,
+				duration: buff.effect.duration,
+				originalValue: buff.effect.value ?? 0, // TODO: calculate correctly
+				calculatedValue: buff.effect.value ?? 0,
 				blocks: [],
 				mitigations: [],
 			}, context);
@@ -393,12 +369,12 @@ export class EffectSystem {
 		for (let heal of event.healing) {
 			this.applyHealEvent({
 				type: "onHeal",
-				sourceSkill: event.sourceSkill,
-				source: event.source,
-				target: event.target,
+				sourceSkill: heal.sourceSkill,
+				source: heal.source,
+				target: heal.target,
 				tag: "normal",
-				originalValue: heal.value ?? 0,
-				calculatedValue: heal.value ?? 0,
+				originalValue: heal.effect.value ?? 0,
+				calculatedValue: heal.effect.value ?? 0,
 				blocks: [],
 				mitigations: [],
 			}, context);
@@ -406,11 +382,11 @@ export class EffectSystem {
 		for (let token of event.controlEffects) {
 			this.applyTokenEvent({
 				type: "onToken",
-				sourceSkill: event.sourceSkill,
-				source: event.source,
-				target: event.target,
-				tokenName: token.name,
-				duration: token.duration,
+				sourceSkill: token.sourceSkill,
+				source: token.source,
+				target: token.target,
+				tokenName: token.effect.tokenName,
+				duration: token.effect.duration,
 				originalValue: 1,
 				calculatedValue: 1,
 				blocks: [],
