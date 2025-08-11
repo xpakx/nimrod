@@ -135,10 +135,14 @@ export let heroDamage003 = Skills.createAoEDamageFunc(
 				if (event.source !== passiveOwner) return;
 				const lostHp = event.source.getStat("hp") - event.source.currentHp;
 				const toHeal = Math.floor(lostHp * 0.50);
-				// TODO: register as effect
-				event.source.currentHp += toHeal;
+				event.healing.push({
+					source: event.source,
+					target: event.source,
+					sourceSkill: event.sourceSkill,
+					effect: Skills.createHealing(toHeal, ["self"]),
+				});
 			},
-			["heal"]
+			["heal", "self-heal"]
 		)
 	]
 );

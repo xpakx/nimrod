@@ -1,6 +1,6 @@
 import { HeroStats, HeroType } from "./actor.js";
 import { EffectHook, HookHandlerMap } from "./effect-system.js";
-import { Applychecker, SkillEffectBuff, SkillEffectDamage, SkillEffectPassive, SkillEffectToken, SpecialEffect } from "./skill/skill.js";
+import { Applychecker, SkillEffectBuff, SkillEffectDamage, SkillEffectHeal, SkillEffectPassive, SkillEffectToken, SpecialEffect } from "./skill/skill.js";
 
 export class Skills {
 	constructor() {
@@ -166,6 +166,14 @@ export class Skills {
 			damage: damage,
 			damageType: type,
 			target: "hero",
+		}
+	}
+
+	static createHealing(value: number, tags?: string[]): SkillEffectHeal {
+		return {
+			type: "heal",
+			value: value,
+			tags: tags ?? [],
 		}
 	}
 }
