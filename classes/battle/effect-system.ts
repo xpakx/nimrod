@@ -32,7 +32,7 @@ interface EventSpecialEffect {
 	reactions: (() => void)[];
 }
 
-export interface DamageEvent {
+export interface DamageEvent extends AdditionalEffects {
 	type: "onDamage" | "onKill" | "preDamage";
 	sourceSkill: Skill;
 	source: BattleActor;
@@ -44,10 +44,6 @@ export interface DamageEvent {
 	originalDamageType: HeroType;
 	calculatedDamageType: HeroType;
 	effectiveness: "effective" | "normal" | "ineffective";
-	buffs: AdditionalEffect<SkillEffectBuff>[];
-	healing: AdditionalEffect<SkillEffectHeal>[];
-	controlEffects: AdditionalEffect<SkillEffectToken>[];
-	additionalDamage: AdditionalEffect<SkillEffectDamage>[],
 }
 
 interface AdditionalEffects {
@@ -57,7 +53,14 @@ interface AdditionalEffects {
 	buffs: AdditionalEffect<SkillEffectBuff>[];
 	healing: AdditionalEffect<SkillEffectHeal>[];
 	controlEffects: AdditionalEffect<SkillEffectToken>[];
-	additionalDamage: AdditionalEffect<SkillEffectDamage>[],
+	additionalDamage: TargetableEffect<SkillEffectDamage>[],
+}
+
+export interface TargetableEffect<T> extends AdditionalEffect<T> {
+	targetType: "square" | "hero";
+	effectRadius?: number;
+	effectLine?: number;
+	effectCone?: number;
 }
 
 export interface AdditionalEffect<T> {
@@ -371,7 +374,7 @@ export class EffectSystem {
 		}
 	}
 
-	private applyDamageEvent(event: SkillEvent, effect: SkillEffectDamage, context: EventContext) {
+	private applyDamageEvent(event: SkillEvent | TargetableEffect<SkillEffectDamage>, effect: SkillEffectDamage, context: EventContext) {
 		this.logger.debug("Applying damage event");
 		const target = event.target;
 
@@ -411,10 +414,12 @@ export class EffectSystem {
 		for (let token of event.controlEffects) {
 			this.applyTokenEvent(this.toTokenEvent(token, token.effect), context);
 		}
-		// TODO: additional damage
+		for (let dmg of event.additionalDamage) {
+			this.applyDamageEvent(dmg, dmg.effect, context);
+		}
 	}
 
-	private calculateAoeDamage(event: SkillEvent, target: Position, effect: SkillEffectDamage, actors: BattleActor[]): DamageEvent[] {
+	private calculateAoeDamage(event: SkillEvent | TargetableEffect<SkillEffectDamage>, target: Position, effect: SkillEffectDamage, actors: BattleActor[]): DamageEvent[] {
 		const radius = effect.effectRadius || effect.effectCone || effect.effectLine;
 		if (!radius) return [];
 		let targets: BattleActor[];

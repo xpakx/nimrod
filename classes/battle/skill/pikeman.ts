@@ -112,6 +112,7 @@ export let heroDamage002 = Skills.createDamageFunc(
 						target: a,
 						effect: damageEvent,
 						sourceSkill: event.sourceSkill,
+						targetType: "hero",
 					});
 				});
 			},
