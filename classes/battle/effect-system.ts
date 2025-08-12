@@ -75,6 +75,10 @@ export interface TurnEvent {
 	subtype: "end" | "start";
 	turnNum: number;
 	enemyTurn: boolean;
+	buffs: AdditionalEffect<SkillEffectBuff>[];
+	healing: AdditionalEffect<SkillEffectHeal>[];
+	tokens: AdditionalEffect<SkillEffectToken>[];
+	additionalDamage: TargetableEffect<SkillEffectDamage>[],
 }
 
 export interface BuffEvent {
@@ -257,6 +261,10 @@ export class EffectSystem {
 			subtype: onStart ? "start" : "end",
 			turnNum,
 			enemyTurn,
+			buffs: [],
+			healing: [],
+			tokens: [],
+			additionalDamage: [],
 		}
 
 		this.runHook(type, event, context);
