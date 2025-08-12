@@ -1,6 +1,6 @@
 import { HeroStats, HeroType } from "./actor.js";
 import { EffectHook, HookHandlerMap } from "./effect-system.js";
-import { Applychecker, SkillEffectBuff, SkillEffectDamage, SkillEffectHeal, SkillEffectPassive, SkillEffectToken, SpecialEffect } from "./skill/skill.js";
+import { Applychecker, Skill, SkillEffectBuff, SkillEffectDamage, SkillEffectHeal, SkillEffectPassive, SkillEffectToken, SpecialEffect } from "./skill/skill.js";
 
 export class Skills {
 	constructor() {
@@ -176,4 +176,28 @@ export class Skills {
 			tags: tags ?? [],
 		}
 	}
+
+	static createDamageStatusHandler(tokenName: string, 
+					 damageType: HeroType,
+					 effectFn: (damageType: HeroType, tokenValue: number) => SkillEffectDamage,
+			    timing: "onTurnStart" | "onTurnEnd") {
+		return Skills.createPassive(
+			timing,
+			(_passiveOwner, event, context) => {
+				for (let hero of context.actors) {
+					if (!hero.hasToken(tokenName)) continue;
+					const tokenValue = hero.totalTokenValue(tokenName);
+					const damageEvent = effectFn(damageType, tokenValue);
+					event.additionalDamage.push({
+						sourceSkill: undefined as any as Skill, // TODO
+						source: hero,
+						target: hero,
+						effect: damageEvent,
+						targetType: "hero",
+					});
+				}
+			},
+		);
+	}
+
 }
