@@ -206,6 +206,11 @@ export class BattleActor extends Actor {
 		return this.tokens[key].length;
 	}
 
+	totalTokenValue(key: string): number {
+		if(!(key in this.tokens)) return 0;
+		return this.tokens[key].reduce((sum, token) => sum + (token.value ?? 0), 0);
+	}
+
 	resetTokens(key: string) {
 		this.tokens[key] = [];
 	}
