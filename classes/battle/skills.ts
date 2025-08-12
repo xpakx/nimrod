@@ -1,5 +1,5 @@
-import { HeroStats, HeroType } from "./actor.js";
-import { EffectHook, HookHandlerMap } from "./effect-system.js";
+import { BattleActor, HeroStats, HeroType } from "./actor.js";
+import { EffectHook, EventContext, HookHandlerMap, TurnEvent } from "./effect-system.js";
 import { Applychecker, Skill, SkillEffectBuff, SkillEffectDamage, SkillEffectHeal, SkillEffectPassive, SkillEffectToken, SpecialEffect } from "./skill/skill.js";
 
 export class Skills {
@@ -200,4 +200,18 @@ export class Skills {
 		);
 	}
 
+	static createStatusHandler(tokenName: string, 
+			    effectFn: (hero: BattleActor, tokenValue: number, context: EventContext, event: TurnEvent) => void,
+			    timing: "onTurnStart" | "onTurnEnd") {
+		return Skills.createPassive(
+			timing,
+			(_passiveOwner, event, context) => {
+				for (let hero of context.actors) {
+					if (!hero.hasToken(tokenName)) continue;
+					const tokenValue = hero.totalTokenValue(tokenName);
+					effectFn(hero, tokenValue, context, event);
+				}
+			},
+		);
+	}
 }
