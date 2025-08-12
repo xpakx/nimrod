@@ -1,4 +1,4 @@
-import { SkillEffectDamage } from "./skill.js";
+import { Skill, SkillEffectDamage } from "./skill.js";
 import { Heroes } from "../actors.js";
 import { Skills } from "../skills.js";
 
@@ -145,4 +145,24 @@ export let heroDamage003 = Skills.createAoEDamageFunc(
 			["heal", "self-heal"]
 		)
 	]
+);
+
+
+export let poisonPassiveBase = Skills.createPassive(
+	"onTurnStart",
+	(_passiveOwner, event, context) => {
+		const poisonedTokenName = "poisoned";
+		for (let hero of context.actors) {
+			if (!hero.hasToken(poisonedTokenName)) continue;
+			const poisonValue = hero.totalTokenValue(poisonedTokenName);
+			const damageEvent = Skills.createStaticDamage(poisonValue*10, "poison")
+			event.additionalDamage.push({
+				sourceSkill: undefined as any as Skill, // TODO
+				source: hero,
+				target: hero,
+				effect: damageEvent,
+				targetType: "hero",
+			});
+		}
+	},
 );
