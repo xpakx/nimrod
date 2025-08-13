@@ -1,4 +1,4 @@
-import { Skill, SkillEffectDamage } from "./skill.js";
+import { SkillEffectDamage } from "./skill.js";
 import { Heroes } from "../actors.js";
 import { Skills } from "../skills.js";
 import { BattleActor, HeroType } from "../actor.js";
@@ -155,9 +155,10 @@ const poisonPassiveEffect = (tokenName: HeroType, tokenValue: number) => {
 export let poisonPassive = Skills.createDamageStatusHandler("poisoned", "poison", poisonPassiveEffect, "onTurnStart");
 
 const sleepPassiveEffect = (hero: BattleActor, tokenValue: number, _context: EventContext, _event: TurnEvent) => {
-	if (tokenValue > 0) {
-		hero.finishedTurn = true;
-	}
+	if (tokenValue > 0) hero.finishedTurn = true;
+	const rand = Math.random();
+	if (rand > 0.2) return;
+	hero.resetTokens("sleep");
 };
 
 export let sleepPassive = Skills.createStatusHandler("sleep", sleepPassiveEffect, "onTurnStart");
