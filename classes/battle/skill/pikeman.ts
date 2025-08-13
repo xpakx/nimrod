@@ -1,4 +1,4 @@
-import { SkillEffectDamage } from "./skill.js";
+import { Skill, SkillEffectDamage } from "./skill.js";
 import { Heroes } from "../actors.js";
 import { Skills } from "../skills.js";
 import { BattleActor, HeroType } from "../actor.js";
@@ -178,3 +178,24 @@ const burnPassiveEffect = (tokenName: HeroType, tokenValue: number) => {
     return Skills.createStaticDamage(tokenValue * 8, tokenName);
 };
 export let burnPassive = Skills.createDamageStatusHandler("burning", "fire", burnPassiveEffect, "onTurnStart");
+
+export let bleedPassive = Skills.createPassive(
+	"onTurnEnd",
+	(_passiveOwner, event, context) => {
+		for (let hero of context.actors) {
+			const bleedTokens = hero.totalTokens("bleeding");
+			if (bleedTokens == 0) continue;
+			let dmg = Math.floor(bleedTokens * 8 * 0.1 * hero.currentHp);
+			if (hero.moved) dmg = Math.floor(dmg * 1.5);
+			const dmgEffect = Skills.createStaticDamage(dmg, "normal");
+
+			event.additionalDamage.push({
+				source: hero,
+				target: hero,
+				effect: dmgEffect,
+				sourceSkill: undefined as any as Skill, // TODO
+				targetType: "hero",
+			});
+		}
+	},
+);
