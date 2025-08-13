@@ -162,3 +162,14 @@ const sleepPassiveEffect = (hero: BattleActor, tokenValue: number, _context: Eve
 };
 
 export let sleepPassive = Skills.createStatusHandler("sleep", sleepPassiveEffect, "onTurnStart");
+
+
+export let sleepDmgPassive = Skills.createPassive(
+	"onDamage",
+	(_passiveOwner, event, _context) => {
+		const target = event.target;
+		if (!target.hasToken("sleep")) return;
+		if (event.calculatedDamageType == "shadow") return;
+		target.resetTokens("sleep");
+	},
+);
