@@ -173,3 +173,8 @@ export let sleepDmgPassive = Skills.createPassive(
 		target.resetTokens("sleep");
 	},
 );
+
+const burnPassiveEffect = (tokenName: HeroType, tokenValue: number) => {
+    return Skills.createStaticDamage(tokenValue * 8, tokenName);
+};
+export let burnPassive = Skills.createDamageStatusHandler("burning", "fire", burnPassiveEffect, "onTurnStart");
