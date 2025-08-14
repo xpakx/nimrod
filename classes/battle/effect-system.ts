@@ -301,6 +301,17 @@ export class EffectSystem {
 		}
 	}
 
+	private runContextHook<T extends EffectHook>(hook: T, event: HookEventMap[T], context: EventContext) {
+		this.logger.debug(`Running ${hook} handlers in context`);
+		const handlers = context.specialEffects
+			.filter((e) => e.effect.hook === hook)
+			.map((e) => e.effect.handler);
+		for (const handler of handlers) {
+			const handlerFunc = handler as (source: BattleActor | undefined, event: HookEventMap[T], context: EventContext) => void;
+			handlerFunc(undefined, event, context);
+		}
+	}
+
 	private resolve(e: SkillEvent, context: EventContext) {
 		this.logger.debug("Resolving skill event", e);
 		if (e.blocks.length === 0) {
@@ -398,15 +409,21 @@ export class EffectSystem {
 
 		for (let dmgEvent of damageEvents) {
 			this.runHook("preDamage", dmgEvent, context);
+			this.runContextHook("preDamage", dmgEvent, context);
+
 			let dmg = dmgEvent.calculatedDamage;
 			if (dmgEvent.effectiveness == "effective") dmg *= 2;
 			else if (dmgEvent.effectiveness == "ineffective") dmg /= 2;
 			// TODO: blocked damage
 			this.logger.debug(`Applying ${dmgEvent.calculatedDamage} damage event of type ${dmgEvent.calculatedDamageType}`);
 			this.applyDamage(dmgEvent.source, dmgEvent.target, dmgEvent.calculatedDamage);
+
 			this.runHook("onDamage", dmgEvent, context);
+			this.runContextHook("onDamage", dmgEvent, context);
+
 			if (dmgEvent.target.dead) {
 				this.runHook("onKill", dmgEvent, context);
+				this.runContextHook("onKill", dmgEvent, context);
 			}
 			this.applyAdditionalEffects(dmgEvent, context);
 		}
