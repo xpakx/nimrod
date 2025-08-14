@@ -303,4 +303,5 @@ export class BattleActor extends Actor {
 }
 
 export type HeroType = "normal" | "fire" | "water" |
-	"earth" | "air" | "shadow" | "light" | "poison";
+	"earth" | "air" | "shadow" | "light" | "poison" |
+	"electric";
