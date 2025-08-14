@@ -416,7 +416,7 @@ export class EffectSystem {
 			else if (dmgEvent.effectiveness == "ineffective") dmg /= 2;
 			// TODO: blocked damage
 			this.logger.debug(`Applying ${dmgEvent.calculatedDamage} damage event of type ${dmgEvent.calculatedDamageType}`);
-			this.applyDamage(dmgEvent.source, dmgEvent.target, dmgEvent.calculatedDamage);
+			this.applyDamage(dmgEvent.source, dmgEvent.target, dmg);
 
 			this.runHook("onDamage", dmgEvent, context);
 			this.runContextHook("onDamage", dmgEvent, context);
