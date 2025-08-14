@@ -312,6 +312,11 @@ export class EffectSystem {
 		}
 	}
 
+	private runHooks<T extends EffectHook>(hook: T, event: HookEventMap[T], context: EventContext) {
+		this.runHook(hook, event, context);
+		this.runContextHook(hook, event, context);
+	}
+
 	private resolve(e: SkillEvent, context: EventContext) {
 		this.logger.debug("Resolving skill event", e);
 		if (e.blocks.length === 0) {
@@ -408,8 +413,7 @@ export class EffectSystem {
 		this.logger.debug("Calculated damage events", damageEvents);
 
 		for (let dmgEvent of damageEvents) {
-			this.runHook("preDamage", dmgEvent, context);
-			this.runContextHook("preDamage", dmgEvent, context);
+			this.runHooks("preDamage", dmgEvent, context);
 
 			let dmg = dmgEvent.calculatedDamage;
 			if (dmgEvent.effectiveness == "effective") dmg *= 2;
@@ -418,12 +422,10 @@ export class EffectSystem {
 			this.logger.debug(`Applying ${dmgEvent.calculatedDamage} damage event of type ${dmgEvent.calculatedDamageType}`);
 			this.applyDamage(dmgEvent.source, dmgEvent.target, dmg);
 
-			this.runHook("onDamage", dmgEvent, context);
-			this.runContextHook("onDamage", dmgEvent, context);
+			this.runHooks("onDamage", dmgEvent, context);
 
 			if (dmgEvent.target.dead) {
-				this.runHook("onKill", dmgEvent, context);
-				this.runContextHook("onKill", dmgEvent, context);
+				this.runHooks("onKill", dmgEvent, context);
 			}
 			this.applyAdditionalEffects(dmgEvent, context);
 		}
