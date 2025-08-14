@@ -103,6 +103,7 @@ export let chivraDamage003 = Skills.createDamageFunc(
 				const damage = Math.ceil(splashFactor*event.calculatedDamage);
 				const additionalTargets = Heroes.getAlliesInRange(event.target, context.actors, 5);
 				additionalTargets.forEach((a) => {
+					if (a === event.target) return;
 					const damageEvent = Skills.createStaticDamage(damage, "electric")
 					event.additionalDamage.push({
 						source: event.source,
@@ -113,7 +114,7 @@ export let chivraDamage003 = Skills.createDamageFunc(
 					});
 				});
 			},
-			["damage", "splash", "control", "stun"]
+			["damage", "splash"]
 		)
 	]
 );
