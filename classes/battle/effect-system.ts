@@ -399,7 +399,7 @@ export class EffectSystem {
 
 		let damageEvents = []
 
-		if ('name' in target) {
+		if (Heroes.isTargetHero(target)) {
 			const dmg = this.calculateDamage(event.source, target, effect, event.sourceSkill);
 			damageEvents.push(dmg);
 		} else {

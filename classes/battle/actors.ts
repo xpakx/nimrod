@@ -195,4 +195,8 @@ export class Heroes {
 		sum += actor.totalTokens("stun");
 		return sum;
 	}
+
+	static isTargetHero(target: Position | BattleActor): target is BattleActor {
+		return (target as BattleActor).name !== undefined;
+	}
 }
