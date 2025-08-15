@@ -183,12 +183,16 @@ interface HookEventMap {
 	onHeal: HealEvent;
 }
 
-
 interface EffectHandlerDef<T extends EffectHook = EffectHook> {
 	handle: (source: BattleActor, event: HookEventMap[T], context: EventContext) => void;
 	source: BattleActor;
 	hook: T;
 	duration?: number;
+}
+
+export interface DefaultHandler<T extends EffectHook = EffectHook> {
+	handle: (source: BattleActor, event: HookEventMap[T], context: EventContext) => void;
+	hook: T;
 }
 
 
@@ -197,7 +201,7 @@ export class EffectSystem {
 		[K in EffectHook]?: EffectHandlerDef<K>[];
 	} = {};
 	logger: Logger = getLogger("EffectSystem");
-	private defaultHandlers: EffectHandlerDef[] = [];
+	private defaultHandlers: DefaultHandler[] = [];
 
 	on<T extends EffectHook>(handler: HookHandlerMap[T], source: BattleActor, hook: T) {
 		this.logger.debug(`Registering new handler of type ${hook} for an actor ${source.name}`, handler);
@@ -211,6 +215,10 @@ export class EffectSystem {
 			source: source,
 			hook: hook,
 		});
+	}
+
+	registerDefaultHandlers(handlers: DefaultHandler[]) {
+		this.defaultHandlers = handlers;
 	}
 
 	resetHandlers() {

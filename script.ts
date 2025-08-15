@@ -1,6 +1,6 @@
 import { Game } from "./classes/game.js";
 import { LoggerFactory } from "./classes/logger.js";
-import { avatarSettings, buildingSettings, campaignSettings, heroSetting, iconSettings, skillSetting, tabSettings } from "./classes/building-settings.js";
+import { avatarSettings, buildingSettings, campaignSettings, defaultHandlers, heroSetting, iconSettings, skillSetting, tabSettings } from "./classes/building-settings.js";
 
 let game = new Game();
 
@@ -73,6 +73,7 @@ window.onload = async () => {
 	game.heroes.registerSkills(skillSetting, game.sprites);
 	game.heroes.registerHeroes(heroSetting, game.sprites);
 	game.state.team.push(game.heroes.getHero("pikeman")!);
+	game.battleLogic.skillProcessor.registerDefaultHandlers(defaultHandlers);
 
 	const frame = (timestamp: number) => {
 		game.nextFrame(context, timestamp);
