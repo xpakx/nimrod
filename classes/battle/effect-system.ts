@@ -197,6 +197,7 @@ export class EffectSystem {
 		[K in EffectHook]?: EffectHandlerDef<K>[];
 	} = {};
 	logger: Logger = getLogger("EffectSystem");
+	private defaultHandlers: EffectHandlerDef[] = [];
 
 	on<T extends EffectHook>(handler: HookHandlerMap[T], source: BattleActor, hook: T) {
 		this.logger.debug(`Registering new handler of type ${hook} for an actor ${source.name}`, handler);
@@ -210,6 +211,13 @@ export class EffectSystem {
 			source: source,
 			hook: hook,
 		});
+	}
+
+	resetHandlers() {
+		this.handlers = {};
+		for (let handler of this.defaultHandlers) {
+			this.on(handler.handle, undefined as any as BattleActor, handler.hook);
+		}
 	}
 
 	effectToSpecialEffects(effect: SkillEffect): EventSpecialEffect[] {

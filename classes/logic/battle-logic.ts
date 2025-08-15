@@ -45,6 +45,11 @@ export class BattleLogicLayer {
 		this.pathfinder = pathfinder;
 	}
 
+	resetBattle(game: Game) {
+		this.showSpawnArea(game);
+		this.skillProcessor.resetHandlers();
+	}
+
 	showSpawnArea(game: Game) {
 		this.logger.debug("Hiding spawn area.");
 		if (!game.state.currentBattle) return;

@@ -516,7 +516,7 @@ export class Game {
 
 		this.logger.debug("Heroes", this.state.pedestrians);
 		this.interf.toBattleMode(this.state.currentBattle.heroes, this.sprites.icons)
-		this.battleLogic.showSpawnArea(this);
+		this.battleLogic.resetBattle(this);
 	}
 
 	addCityButtons() {
