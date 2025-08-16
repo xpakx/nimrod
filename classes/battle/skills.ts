@@ -1,5 +1,5 @@
 import { BattleActor, HeroStats, HeroType } from "./actor.js";
-import { EffectHook, EventContext, HookHandlerMap, TurnEvent } from "./effect-system.js";
+import { DefaultHandler, EffectHook, EventContext, HookHandlerMap, TurnEvent } from "./effect-system.js";
 import { Applychecker, Skill, SkillEffectBuff, SkillEffectDamage, SkillEffectHeal, SkillEffectPassive, SkillEffectToken, SpecialEffect } from "./skill/skill.js";
 
 export class Skills {
@@ -210,6 +210,51 @@ export class Skills {
 					if (!hero.hasToken(tokenName)) continue;
 					const tokenValue = hero.totalTokenValue(tokenName);
 					effectFn(hero, tokenValue, context, event);
+				}
+			},
+		);
+	}
+
+	static createDefaultHandler<T extends EffectHook>(
+		hook: T,
+		handler: HookHandlerMap[T]
+	): DefaultHandler<T> {
+		return { hook, handler };
+	}
+
+	static createStatusDefaultHandler(tokenName: string, 
+			    effectFn: (hero: BattleActor, tokenValue: number, context: EventContext, event: TurnEvent) => void,
+			    timing: "onTurnStart" | "onTurnEnd"): DefaultHandler<"onTurnEnd" | "onTurnStart"> {
+		return Skills.createDefaultHandler(
+			timing,
+			(_passiveOwner, event, context) => {
+				for (let hero of context.actors) {
+					if (!hero.hasToken(tokenName)) continue;
+					const tokenValue = hero.totalTokenValue(tokenName);
+					effectFn(hero, tokenValue, context, event);
+				}
+			},
+		);
+	}
+
+	static createDamageDefaultHandler(tokenName: string, 
+					 damageType: HeroType,
+					 effectFn: (damageType: HeroType, tokenValue: number) => SkillEffectDamage,
+					 timing: "onTurnStart" | "onTurnEnd"): DefaultHandler<"onTurnEnd" | "onTurnStart"> {
+		return Skills.createDefaultHandler(
+			timing,
+			(_passiveOwner, event, context) => {
+				for (let hero of context.actors) {
+					if (!hero.hasToken(tokenName)) continue;
+					const tokenValue = hero.totalTokenValue(tokenName);
+					const damageEvent = effectFn(damageType, tokenValue);
+					event.additionalDamage.push({
+						sourceSkill: undefined as any as Skill, // TODO
+						source: hero,
+						target: hero,
+						effect: damageEvent,
+						targetType: "hero",
+					});
 				}
 			},
 		);

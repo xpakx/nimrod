@@ -6,7 +6,7 @@ import { EventContext, TurnEvent } from "../effect-system.js";
 const poisonPassiveEffect = (tokenName: HeroType, tokenValue: number) => {
 	return Skills.createStaticDamage(tokenValue * 10, tokenName);
 };
-export let poisonPassive = Skills.createDamageStatusHandler("poisoned", "poison", poisonPassiveEffect, "onTurnStart");
+export let poisonPassive = Skills.createDamageDefaultHandler("poisoned", "poison", poisonPassiveEffect, "onTurnStart");
 
 const sleepPassiveEffect = (hero: BattleActor, tokenValue: number, _context: EventContext, _event: TurnEvent) => {
 	if (tokenValue > 0) hero.finishedTurn = true;
@@ -15,8 +15,8 @@ const sleepPassiveEffect = (hero: BattleActor, tokenValue: number, _context: Eve
 	hero.resetTokens("sleep");
 };
 
-export let sleepPassive = Skills.createStatusHandler("sleep", sleepPassiveEffect, "onTurnStart");
 
+export let sleepPassive = Skills.createStatusDefaultHandler("sleep", sleepPassiveEffect, "onTurnStart");
 
 export let sleepDmgPassive = Skills.createPassive(
 	"onDamage",
@@ -31,9 +31,9 @@ export let sleepDmgPassive = Skills.createPassive(
 const burnPassiveEffect = (tokenName: HeroType, tokenValue: number) => {
     return Skills.createStaticDamage(tokenValue * 8, tokenName);
 };
-export let burnPassive = Skills.createDamageStatusHandler("burning", "fire", burnPassiveEffect, "onTurnStart");
+export let burnPassive = Skills.createDamageDefaultHandler("burning", "fire", burnPassiveEffect, "onTurnStart");
 
-export let bleedPassive = Skills.createPassive(
+export let bleedPassive = Skills.createDefaultHandler(
 	"onTurnEnd",
 	(_passiveOwner, event, context) => {
 		for (let hero of context.actors) {

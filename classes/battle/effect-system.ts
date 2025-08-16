@@ -191,7 +191,7 @@ interface EffectHandlerDef<T extends EffectHook = EffectHook> {
 }
 
 export interface DefaultHandler<T extends EffectHook = EffectHook> {
-	handle: (source: BattleActor, event: HookEventMap[T], context: EventContext) => void;
+	handler: HookHandlerMap[T];
 	hook: T;
 }
 
@@ -224,7 +224,7 @@ export class EffectSystem {
 	resetHandlers() {
 		this.handlers = {};
 		for (let handler of this.defaultHandlers) {
-			this.on(handler.handle, undefined as any as BattleActor, handler.hook);
+			this.on(handler.handler, undefined as any as BattleActor, handler.hook);
 		}
 	}
 

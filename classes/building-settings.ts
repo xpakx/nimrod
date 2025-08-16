@@ -1,7 +1,7 @@
 import { DefaultHandler } from "./battle/effect-system.js";
 import { HeroConfig, SkillConfig } from "./battle/hero-library.js";
 import { pikemanPassive, pikemanSkill001 } from "./battle/skill/pikeman.js";
-import { burnPassive, poisonPassive, sleepPassive } from "./battle/skill/status-handlers.js";
+import { bleedPassive, burnPassive, poisonPassive, sleepDmgPassive, sleepPassive } from "./battle/skill/status-handlers.js";
 import { Game } from "./game.js";
 import { AdventurersGuildInterface } from "./interface/adventurers-guild.js";
 import { SidebarConfig } from "./interface/sidebar-config.js";
@@ -504,7 +504,9 @@ export const heroSetting: HeroConfig[] = [
 ]
 
 export const defaultHandlers: DefaultHandler<any>[] = [
-	{handle: sleepPassive.handler, hook: sleepPassive.hook},
-	{handle: poisonPassive.handler, hook: poisonPassive.hook},
-	{handle: burnPassive.handler, hook: burnPassive.hook},
+	sleepPassive,
+	sleepDmgPassive,
+	poisonPassive,
+	burnPassive,
+	bleedPassive,
 ];
