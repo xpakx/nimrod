@@ -6,7 +6,7 @@ export class Heroes {
 		throw new Error('Heroes is a static class and cannot be instantiated');
 	}
 
-	static isSameAllyType(a: BattleActor, b: BattleActor) {
+	static isSameAllyType(a: BattleActor, b: BattleActor): boolean {
 		return a.enemy === b.enemy && a.name === b.name && a !== b;
 	}
 

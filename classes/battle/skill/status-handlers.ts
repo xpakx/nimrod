@@ -47,7 +47,7 @@ export let bleedPassive = Skills.createDefaultHandler(
 				source: hero,
 				target: hero,
 				effect: dmgEffect,
-				sourceSkill: undefined as any as Skill, // TODO
+				sourceSkill: undefined,
 				targetType: "hero",
 			});
 		}

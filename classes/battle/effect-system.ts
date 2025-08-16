@@ -64,7 +64,7 @@ export interface TargetableEffect<T> extends AdditionalEffect<T> {
 }
 
 export interface AdditionalEffect<T> {
-	sourceSkill: Skill;
+	sourceSkill: Skill | undefined;
 	target: BattleActor;
 	source: BattleActor;
 	effect: T;
@@ -83,7 +83,7 @@ export interface TurnEvent {
 
 export interface BuffEvent {
 	type: "onBuff" | "preBuff";
-	sourceSkill: Skill;
+	sourceSkill: Skill | undefined;
 	source: BattleActor;
 	target: BattleActor;
 
@@ -98,7 +98,7 @@ export interface BuffEvent {
 
 export interface TokenEvent {
 	type: "onToken" | "preToken";
-	sourceSkill: Skill;
+	sourceSkill: Skill | undefined;
 	source: BattleActor;
 	target: BattleActor;
 
@@ -113,7 +113,7 @@ export interface TokenEvent {
 
 export interface HealEvent {
 	type: "onHeal" | "preHeal";
-	sourceSkill: Skill;
+	sourceSkill: Skill | undefined;
 	source: BattleActor;
 	target: BattleActor;
 
@@ -420,6 +420,8 @@ export class EffectSystem {
 
 		let damageEvents = []
 
+		if (!event.sourceSkill) return; // TODO
+
 		if (Heroes.isTargetHero(target)) {
 			const dmg = this.calculateDamage(event.source, target, effect, event.sourceSkill);
 			damageEvents.push(dmg);
@@ -475,6 +477,7 @@ export class EffectSystem {
 			targets = Heroes.getEnemiesInRadius(event.source, actors, radius, target);
 		}
 		let damageEvents = [];
+		if (!event.sourceSkill) return []; // TODO: modify damage calculation to have no source skill
 
 		for (let target of targets) {
 			const dmg = this.calculateDamage(event.source, target, effect, event.sourceSkill);
