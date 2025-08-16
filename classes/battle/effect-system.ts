@@ -184,8 +184,8 @@ interface HookEventMap {
 }
 
 interface EffectHandlerDef<T extends EffectHook = EffectHook> {
-	handle: (source: BattleActor, event: HookEventMap[T], context: EventContext) => void;
-	source: BattleActor;
+	handle: (source: BattleActor | undefined, event: HookEventMap[T], context: EventContext) => void;
+	source: BattleActor | undefined;
 	hook: T;
 	duration?: number;
 }
@@ -203,15 +203,15 @@ export class EffectSystem {
 	logger: Logger = getLogger("EffectSystem");
 	private defaultHandlers: DefaultHandler[] = [];
 
-	on<T extends EffectHook>(handler: HookHandlerMap[T], source: BattleActor, hook: T) {
-		this.logger.debug(`Registering new handler of type ${hook} for an actor ${source.name}`, handler);
+	on<T extends EffectHook>(handler: HookHandlerMap[T], source: BattleActor | undefined, hook: T) {
+		this.logger.debug(`Registering new handler of type ${hook} ${source ? `for an actor ${source.name}` : ''}`, handler);
 		let handlers = this.handlers[hook];
 		if(!handlers) {
 			handlers = [];
 			this.handlers[hook] = handlers;
 		}
 		handlers.push({
-			handle: handler as (source: BattleActor, event: HookEventMap[T], context: EventContext) => void,
+			handle: handler as (source: BattleActor | undefined, event: HookEventMap[T], context: EventContext) => void,
 			source: source,
 			hook: hook,
 		});
@@ -224,7 +224,7 @@ export class EffectSystem {
 	resetHandlers() {
 		this.handlers = {};
 		for (let handler of this.defaultHandlers) {
-			this.on(handler.handler, undefined as any as BattleActor, handler.hook);
+			this.on(handler.handler, undefined, handler.hook);
 		}
 	}
 
