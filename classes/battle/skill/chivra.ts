@@ -11,12 +11,13 @@ export let chivraPassive001 = Skills.onKillPassive(
 	},
 );
 
-export let chivraPassive002 = Skills.onDamagePassive(
+export let chivraPassive002 = Skills.preDamagePassive(
 	(passiveOwner, event, _context) => {
 		if (event.source !== passiveOwner) return;
 		const controlTokens = Heroes.countControlTokens(event.target);
 		const modifier = Math.min(10, controlTokens)*0.5;
 		const bonusDamage = Math.floor(modifier*event.calculatedDamage);
+		// TODO: do not rely on order
 		event.calculatedDamage += bonusDamage;
 	},
 );
@@ -32,8 +33,7 @@ export let chivraDamage001 = Skills.createDamageFunc(
 			"onDamage",
 			(passiveOwner, event, context) => {
 				if (event.source !== passiveOwner) return;
-				const rand = context.rng.nextFloat();
-				if (rand > 0.4) return;
+				if (!context.rng.chance(0.4)) return;
 				event.buffs.push({
 					effect: Skills.createDebuff("speed", 2, 2), 
 					source: event.source, 
@@ -83,8 +83,7 @@ export let chivraDamage003 = Skills.createDamageFunc(
 			"onDamage",
 			(passiveOwner, event, context) => {
 				if (event.source !== passiveOwner) return;
-				const rand = context.rng.nextFloat();
-				if (rand > 0.75) return;
+				if (!context.rng.chance(0.75)) return;
 				event.controlEffects.push({
 					effect: Skills.createControlEffect("stun", 2),
 					source: event.source, 
