@@ -1,4 +1,3 @@
-import { Skill } from "./skill.js";
 import { Skills } from "../skills.js";
 import { BattleActor, HeroType } from "../actor.js";
 import { EventContext, TurnEvent } from "../effect-system.js";
@@ -8,9 +7,9 @@ const poisonPassiveEffect = (tokenName: HeroType, tokenValue: number) => {
 };
 export let poisonPassive = Skills.createDamageDefaultHandler("poisoned", "poison", poisonPassiveEffect, "onTurnStart");
 
-const sleepPassiveEffect = (hero: BattleActor, tokenValue: number, _context: EventContext, _event: TurnEvent) => {
+const sleepPassiveEffect = (hero: BattleActor, tokenValue: number, context: EventContext, _event: TurnEvent) => {
 	if (tokenValue > 0) hero.finishedTurn = true;
-	const rand = Math.random();
+	const rand = context.rng.nextFloat();
 	if (rand > 0.2) return;
 	hero.resetTokens("sleep");
 };

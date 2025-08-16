@@ -30,9 +30,9 @@ export let chivraDamage001 = Skills.createDamageFunc(
 	[
 		Skills.createSpecialEffect(
 			"onDamage",
-			(passiveOwner, event, _context) => {
+			(passiveOwner, event, context) => {
 				if (event.source !== passiveOwner) return;
-				const rand = Math.random();
+				const rand = context.rng.nextFloat();
 				if (rand > 0.4) return;
 				event.buffs.push({
 					effect: Skills.createDebuff("speed", 2, 2), 
@@ -81,9 +81,9 @@ export let chivraDamage003 = Skills.createDamageFunc(
 	[
 		Skills.createSpecialEffect(
 			"onDamage",
-			(passiveOwner, event, _context) => {
+			(passiveOwner, event, context) => {
 				if (event.source !== passiveOwner) return;
-				const rand = Math.random();
+				const rand = context.rng.nextFloat();
 				if (rand > 0.75) return;
 				event.controlEffects.push({
 					effect: Skills.createControlEffect("stun", 2),

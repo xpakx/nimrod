@@ -137,6 +137,27 @@ export interface EventContext {
 	actors: BattleActor[],
 	map: MapLayer,
 	specialEffects: EventSpecialEffect[];
+	rng: Rng;
+}
+
+export interface Rng {
+	nextFloat(): number;
+	nextInt(max: number): number;
+	chance(prob: number): boolean;
+}
+
+class DefaultRng implements Rng {
+    nextFloat(): number {
+	    return Math.random();
+    }
+
+    nextInt(max: number): number {
+	    return Math.floor(this.nextFloat() * max);
+    }
+
+    chance(prob: number): boolean {
+	    return this.nextFloat() < prob;
+    }
 }
 
 export type SkillHandler = (owner: BattleActor, event: SkillEvent, context: EventContext) => void;
@@ -202,6 +223,7 @@ export class EffectSystem {
 	} = {};
 	logger: Logger = getLogger("EffectSystem");
 	private defaultHandlers: DefaultHandler[] = [];
+	private randomGenerator: Rng = new DefaultRng();
 
 	on<T extends EffectHook>(handler: HookHandlerMap[T], source: BattleActor | undefined, hook: T) {
 		this.logger.debug(`Registering new handler of type ${hook} ${source ? `for an actor ${source.name}` : ''}`, handler);
@@ -261,6 +283,7 @@ export class EffectSystem {
 			actors,
 			map,
 			specialEffects: this.effectToSpecialEffects(effect),
+			rng: this.randomGenerator,
 		};
 
 		this.logger.debug("Running onSkill handlers");
@@ -270,7 +293,12 @@ export class EffectSystem {
 	}
 
 	emitTurnEvent(turnNum: number, enemyTurn: boolean, actors: BattleActor[], map: MapLayer, onStart: boolean = true) {
-		const context: EventContext = { actors, map, specialEffects: [] };
+		const context: EventContext = { 
+			actors,
+			map,
+			specialEffects: [],
+			rng: this.randomGenerator,
+		};
 		const type = onStart ? "onTurnStart" : "onTurnEnd";
 		const event: TurnEvent = {
 			type,
