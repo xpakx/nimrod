@@ -16,9 +16,7 @@ export let chivraPassive002 = Skills.preDamagePassive(
 		if (event.source !== passiveOwner) return;
 		const controlTokens = Heroes.countControlTokens(event.target);
 		const modifier = Math.min(10, controlTokens)*0.5;
-		const bonusDamage = Math.floor(modifier*event.calculatedDamage);
-		// TODO: do not rely on order
-		event.calculatedDamage += bonusDamage;
+		event.damageBonusPercent += modifier;
 	},
 );
 
