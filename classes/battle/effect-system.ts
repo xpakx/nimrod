@@ -6,7 +6,7 @@ import { Skill, SkillEffect, SkillEffectBuff, SkillEffectDamage, SkillEffectHeal
 
 export type EffectEvent = SkillEvent | DamageEvent | TurnEvent;
 
-export interface SkillEvent {
+export interface SkillEvent extends BlockableEvent {
 	type: "onSkill";
 	sourceSkill: Skill;
 	source: BattleActor;
@@ -16,36 +16,34 @@ export interface SkillEvent {
 	effect: SkillEffect;
 	duration?: number;
 
-	blocks: { by: BattleActor; reason: string }[];
-	mitigations: { by: BattleActor; chance: number }[];
-
 	result?: "applied" | "blocked" | "mitigated";
 	reactions: (() => void)[];
 	criticalHit: boolean;
 }
 
-interface EventSpecialEffect {
+interface EventSpecialEffect extends BlockableEvent {
 	effect: SpecialEffect;
-	blocks: { by: BattleActor; reason: string }[];
-	mitigations: { by: BattleActor; chance: number }[];
 	result?: "applied" | "blocked" | "mitigated";
 	reactions: (() => void)[];
 }
 
-export interface DamageEvent extends AdditionalEffects {
+export interface DamageEvent extends AdditionalEffects, BlockableEvent {
 	type: "onDamage" | "onKill" | "preDamage";
-	sourceSkill: Skill;
+	sourceSkill: Skill | undefined;
 	source: BattleActor;
 	target: BattleActor;
 	originalDamage: number;
-	blocks: { by: BattleActor; reason: string }[];
-	mitigations: { by: BattleActor; chance: number }[];
 	calculatedDamage: number;
 	damageBonus: number;
 	damageBonusPercent: number;
 	originalDamageType: HeroType;
 	calculatedDamageType: HeroType;
 	effectiveness: "effective" | "normal" | "ineffective";
+}
+
+interface BlockableEvent {
+	blocks: { by: BattleActor; reason: string }[];
+	mitigations: { by: BattleActor; chance: number }[];
 }
 
 interface AdditionalEffects {
@@ -83,7 +81,7 @@ export interface TurnEvent {
 	additionalDamage: TargetableEffect<SkillEffectDamage>[],
 }
 
-export interface BuffEvent {
+export interface BuffEvent extends BlockableEvent {
 	type: "onBuff" | "preBuff";
 	sourceSkill: Skill | undefined;
 	source: BattleActor;
@@ -94,11 +92,9 @@ export interface BuffEvent {
 	duration: number,
 	originalValue: number;
 	calculatedValue: number;
-	blocks: { by: BattleActor; reason: string }[];
-	mitigations: { by: BattleActor; chance: number }[];
 }
 
-export interface TokenEvent {
+export interface TokenEvent extends BlockableEvent {
 	type: "onToken" | "preToken";
 	sourceSkill: Skill | undefined;
 	source: BattleActor;
@@ -108,12 +104,9 @@ export interface TokenEvent {
 	duration: number,
 	originalValue: number;
 	calculatedValue: number;
-
-	blocks: { by: BattleActor; reason: string }[];
-	mitigations: { by: BattleActor; chance: number }[];
 }
 
-export interface HealEvent {
+export interface HealEvent extends BlockableEvent {
 	type: "onHeal" | "preHeal";
 	sourceSkill: Skill | undefined;
 	source: BattleActor;
@@ -123,9 +116,6 @@ export interface HealEvent {
 	originalValue: number;
 	calculatedValue: number;
 	overhealing?: number;
-
-	blocks: { by: BattleActor; reason: string }[];
-	mitigations: { by: BattleActor; chance: number }[];
 }
 
 export type EffectHook = 
@@ -465,6 +455,7 @@ export class EffectSystem {
 			else if (dmgEvent.effectiveness == "ineffective") dmg /= 2;
 			dmg = dmg*dmgEvent.damageBonusPercent + dmgEvent.damageBonus;
 			// TODO: blocked damage
+			
 			this.logger.debug(`Applying ${dmg} damage of type ${dmgEvent.calculatedDamageType}`);
 			this.applyDamage(dmgEvent.source, dmgEvent.target, dmg);
 			dmgEvent.calculatedDamage = dmg;
@@ -562,7 +553,8 @@ export class EffectSystem {
 		const target = event.target;
 
 		this.runHook("preBuff", event, context);
-		// TODO: blocked buffs
+		if (this.isBlocked(event, context)) return;
+
 		this.logger.debug(`Applying ${event.calculatedValue} ${event.buffType} to ${target.name}'s ${event.stat}`);
 		if (event.buffType == "buff") target.addBuff(event.stat, event.calculatedValue, event.duration);
 		else if (event.buffType == "debuff") target.addDebuff(event.stat, event.calculatedValue, event.duration);
@@ -574,7 +566,8 @@ export class EffectSystem {
 		const target = event.target;
 
 		this.runHook("preToken", event, context);
-		// TODO: blocked tokens
+		if (this.isBlocked(event, context)) return;
+
 		this.logger.debug(`Applying token ${event.tokenName} to ${target.name}`);
 		target.addToken(event.tokenName, event.calculatedValue, event.duration);
 		this.runHook("onToken", event, context);
@@ -585,12 +578,18 @@ export class EffectSystem {
 		const target = event.target;
 
 		this.runHook("preHeal", event, context);
-		// TODO: blocked healing
+		if (this.isBlocked(event, context)) return;
+
 		this.logger.debug(`Healing ${event.calculatedValue} of ${target.name}'s hp`);
 		const maxHeal = target.currentHp + event.calculatedValue;
 		target.currentHp = Math.min(target.getStat("hp"), target.currentHp + event.calculatedValue);
 		const overhealing = maxHeal - target.currentHp;
 		if (overhealing > 0) event.overhealing = overhealing;
 		this.runHook("onHeal", event, context);
+	}
+
+	isBlocked(event: BlockableEvent, _context: EventContext): boolean {
+		// TODO: consider how to implement full block/mitigation logic
+		return event.blocks.length > 0;
 	}
 }
