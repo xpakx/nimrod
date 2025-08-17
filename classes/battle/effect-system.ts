@@ -41,9 +41,15 @@ export interface DamageEvent extends AdditionalEffects, BlockableEvent {
 	effectiveness: "effective" | "normal" | "ineffective";
 }
 
+interface BlockAttempt {
+	by: BattleActor;
+	reason: string;
+	tags?: string[];
+	mitigated: boolean;
+}
+
 interface BlockableEvent {
-	blocks: { by: BattleActor; reason: string }[];
-	mitigations: { by: BattleActor; chance: number }[];
+	blocks: BlockAttempt[];
 }
 
 interface AdditionalEffects {
@@ -249,7 +255,6 @@ export class EffectSystem {
 				specialEffects.push({
 					effect: e,
 					blocks: [], 
-					mitigations: [],
 					reactions: []
 				});
 			}
@@ -267,7 +272,6 @@ export class EffectSystem {
 			target,
 			effect,
 			blocks: [],
-			mitigations: [],
 			reactions: [],
 			criticalHit: false,
 		};
@@ -354,18 +358,17 @@ export class EffectSystem {
 
 	private resolve(e: SkillEvent, context: EventContext) {
 		this.logger.debug("Resolving skill event", e);
-		if (e.blocks.length === 0) {
+		const blocked = this.isBlocked(e, context);
+
+		if (!blocked) {
 			e.result = "applied";
-		} else if (e.mitigations.length > 0) {
-			e.result = "mitigated";
 		} else {
 			e.result = "blocked";
 		}
 
 		if (e.result === "applied") {
 			this.applyEffect(e, context);
-		} else if (e.result === "mitigated") {
-		}
+		} 
 
 		for (const reaction of e.reactions) {
 			this.logger.debug("Processing reactions");
@@ -400,7 +403,6 @@ export class EffectSystem {
 			originalValue: effect.value ?? 0,
 			calculatedValue: effect.value ?? 0,
 			blocks: [],
-			mitigations: [],
 		}
 	}
 
@@ -414,7 +416,6 @@ export class EffectSystem {
 			originalValue: effect.value ?? 0,
 			calculatedValue: effect.value ?? 0,
 			blocks: [],
-			mitigations: [],
 		}
 	}
 
@@ -429,7 +430,6 @@ export class EffectSystem {
 			originalValue: effect.value ?? 0,
 			calculatedValue: effect.value ?? 0,
 			blocks: [],
-			mitigations: [],
 		}
 	}
 
@@ -532,7 +532,6 @@ export class EffectSystem {
 			originalDamageType: effect.damageType,
 			calculatedDamageType: effect.damageType,
 			blocks: [],
-			mitigations: [],
 			effectiveness,
 			buffs: [],
 			healing: [],
@@ -590,6 +589,7 @@ export class EffectSystem {
 
 	isBlocked(event: BlockableEvent, _context: EventContext): boolean {
 		// TODO: consider how to implement full block/mitigation logic
-		return event.blocks.length > 0;
+		const sucessfulBlocks = event.blocks.filter((block) => !block.mitigated).length;
+		return sucessfulBlocks > 0;
 	}
 }
