@@ -49,7 +49,7 @@ export interface DamageEvent extends AdditionalEffects {
 }
 
 interface AdditionalEffects {
-	sourceSkill: Skill;
+	sourceSkill: Skill | undefined;
 	source: BattleActor;
 	target: BattleActor;
 	buffs: AdditionalEffect<SkillEffectBuff>[];
@@ -290,7 +290,6 @@ export class EffectSystem {
 
 		this.logger.debug("Running onSkill handlers");
 		this.runHook("onSkill", event, context);
-		// TODO: run context handlers
 		this.resolve(event, context);
 	}
 
@@ -450,8 +449,6 @@ export class EffectSystem {
 
 		let damageEvents = []
 
-		if (!event.sourceSkill) return; // TODO
-
 		if (Heroes.isTargetHero(target)) {
 			const dmg = this.calculateDamage(event.source, target, effect, event.sourceSkill);
 			damageEvents.push(dmg);
@@ -509,7 +506,6 @@ export class EffectSystem {
 			targets = Heroes.getEnemiesInRadius(event.source, actors, radius, target);
 		}
 		let damageEvents = [];
-		if (!event.sourceSkill) return []; // TODO: modify damage calculation to have no source skill
 
 		for (let target of targets) {
 			const dmg = this.calculateDamage(event.source, target, effect, event.sourceSkill);
@@ -518,7 +514,7 @@ export class EffectSystem {
 		return damageEvents;
 	}
 
-	private calculateDamage(source: BattleActor, target:  BattleActor, effect: SkillEffectDamage, skill: Skill): DamageEvent {
+	private calculateDamage(source: BattleActor, target:  BattleActor, effect: SkillEffectDamage, skill: Skill | undefined): DamageEvent {
 		let amount: number;
 		if (typeof effect.damage == 'number') {
 			amount = effect.damage;

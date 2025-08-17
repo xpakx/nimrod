@@ -89,7 +89,8 @@ export class Skills {
 		return {
 			type: "damage",
 			damage: (hero, _target, skill) => {
-				return hero.getStat(stat) * multiplier + growth*skill.level;
+				const level = skill ? skill.level : 1;
+				return hero.getStat(stat) * multiplier + growth*level;
 			},
 			damageType: type,
 			distance: distance,
@@ -110,7 +111,8 @@ export class Skills {
 		return {
 			type: "damage",
 			damage: (hero, _target, skill) => {
-				return hero.getStat(stat) * multiplier + growth*skill.level;
+				const level = skill ? skill.level : 1;
+				return hero.getStat(stat) * multiplier + growth*level;
 			},
 			damageType: type,
 			distance: distance,

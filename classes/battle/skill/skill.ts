@@ -18,7 +18,7 @@ export interface Skill {
 export type SkillEffect = SkillEffectDamage | SkillEffectPassive | SkillEffectBuff |
 	SkillEffectToken | SkillEffectHeal;
 
-export type DamageFunction = (hero: BattleActor, target: BattleActor, skill: Skill) => number; 
+export type DamageFunction = (hero: BattleActor, target: BattleActor, skill: Skill | undefined) => number; 
 
 export interface SkillEffectDamage {
 	type: "damage";
