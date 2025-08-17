@@ -463,13 +463,14 @@ export class EffectSystem {
 		for (let dmgEvent of damageEvents) {
 			this.runHooks("preDamage", dmgEvent, context);
 
-			let dmg = dmgEvent.calculatedDamage;
+			let dmg = dmgEvent.originalDamage;
 			if (dmgEvent.effectiveness == "effective") dmg *= 2;
 			else if (dmgEvent.effectiveness == "ineffective") dmg /= 2;
 			dmg = dmg*dmgEvent.damageBonusPercent + dmgEvent.damageBonus;
 			// TODO: blocked damage
 			this.logger.debug(`Applying ${dmg} damage of type ${dmgEvent.calculatedDamageType}`);
 			this.applyDamage(dmgEvent.source, dmgEvent.target, dmg);
+			dmgEvent.calculatedDamage = dmg;
 
 			this.runHooks("onDamage", dmgEvent, context);
 
