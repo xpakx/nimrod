@@ -284,7 +284,7 @@ export class EffectSystem {
 
 		this.logger.debug("Running onSkill handlers");
 		this.runHook("onSkill", event, context);
-		this.resolve(event, context);
+		this.resolveSkill(event, context);
 	}
 
 	emitTurnEvent(turnNum: number, enemyTurn: boolean, actors: BattleActor[], map: MapLayer, onStart: boolean = true) {
@@ -356,7 +356,7 @@ export class EffectSystem {
 		this.runContextHook(hook, event, context);
 	}
 
-	private resolve(e: SkillEvent, context: EventContext) {
+	private resolveSkill(e: SkillEvent, context: EventContext) {
 		this.logger.debug("Resolving skill event", e);
 		const blocked = this.isBlocked(e, context);
 
