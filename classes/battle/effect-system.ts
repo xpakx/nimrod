@@ -454,7 +454,7 @@ export class EffectSystem {
 			if (dmgEvent.effectiveness == "effective") dmg *= 2;
 			else if (dmgEvent.effectiveness == "ineffective") dmg /= 2;
 			dmg = dmg*dmgEvent.damageBonusPercent + dmgEvent.damageBonus;
-			// TODO: blocked damage
+			if (this.isBlocked(dmgEvent, context)) continue;
 			
 			this.logger.debug(`Applying ${dmg} damage of type ${dmgEvent.calculatedDamageType}`);
 			this.applyDamage(dmgEvent.source, dmgEvent.target, dmg);
