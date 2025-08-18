@@ -124,8 +124,17 @@ export interface HealEvent extends BlockableEvent {
 	overhealing?: number;
 }
 
+export interface MoveEvent extends BlockableEvent {
+	type: "onMove";
+	sourceSkill: Skill | undefined;
+	source: BattleActor;
+	target: BattleActor;
+
+	distance: number;
+}
+
 export type EffectHook = 
-	"onSkill" | "preDamage" | "onDamage" | "onKill" | "onStatusApplied" | "postSkill" | 
+	"onSkill" | "preDamage" | "onDamage" | "onKill" | "postSkill" | 
 	"onTurnStart" | "onTurnEnd" | "onMove" | 
 	"onBuff" | "preBuff" | "onToken" | "preToken" | "onHeal" | "preHeal";
 
@@ -164,17 +173,17 @@ export type TurnHandler = (owner: BattleActor, event: TurnEvent, context: EventC
 export type BuffHandler = (owner: BattleActor, event: BuffEvent, context: EventContext) => void;
 export type TokenHandler = (owner: BattleActor, event: TokenEvent, context: EventContext) => void;
 export type HealHandler = (owner: BattleActor, event: HealEvent, context: EventContext) => void;
+export type MoveHandler = (owner: BattleActor, event: MoveEvent, context: EventContext) => void;
 
 export interface HookHandlerMap {
 	onSkill: SkillHandler;
 	postSkill: SkillHandler;
 	onKill: DamageHandler;
-	onStatusApplied: SkillHandler; // TODO: add new handler type
 	preDamage: DamageHandler;
 	onDamage: DamageHandler;
 	onTurnStart: TurnHandler;
 	onTurnEnd: TurnHandler;
-	onMove: SkillHandler; // TODO: add new handler type
+	onMove: MoveHandler;
 	preBuff: BuffHandler;
 	onBuff: BuffHandler;
 	onToken: TokenHandler;
@@ -187,12 +196,11 @@ interface HookEventMap {
 	onSkill: SkillEvent;
 	postSkill: SkillEvent;
 	onKill: DamageEvent;
-	onStatusApplied: SkillEvent;
 	preDamage: DamageEvent;
 	onDamage: DamageEvent;
 	onTurnStart: TurnEvent;
 	onTurnEnd: TurnEvent;
-	onMove: SkillEvent;
+	onMove: MoveEvent;
 
 	preBuff: BuffEvent;
 	onBuff: BuffEvent;

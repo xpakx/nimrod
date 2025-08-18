@@ -43,13 +43,6 @@ export class Skills {
 		return { type: "passive", hook: "postSkill", handler, shouldApply };
 	}
 
-	static onStatusAppliedPassive(
-		handler: HookHandlerMap["onStatusApplied"],
-		shouldApply?: Applychecker
-	): SkillEffectPassive<"onStatusApplied"> {
-		return { type: "passive", hook: "onStatusApplied", handler, shouldApply };
-	}
-
 	static preDamagePassive(
 		handler: HookHandlerMap["preDamage"],
 		shouldApply?: Applychecker
