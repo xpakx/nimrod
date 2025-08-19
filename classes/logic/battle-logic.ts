@@ -380,6 +380,10 @@ export class BattleLogicLayer {
 		this.switchToHeroMode(game);
 
 		this.selection.skill.cooldownTimer = this.selection.skill.cooldown;
+
+		// TODO: should it be here or immediately after movement?
+		this.confirmMovementEffects(game);
+
 		for (let effect of this.selection.skill.effect) {
 			this.skillProcessor.emitSkill(
 				actor,
@@ -407,6 +411,7 @@ export class BattleLogicLayer {
 	}
 
 	cancelCurrentMove() {
+		// TODO: reconcile onMove hooks with ability to cancel movement
 		if (!this.selection.hero) return;
 		if (!this.selection.initialPosition) return;
 		const actor = this.selection.hero;
@@ -458,8 +463,27 @@ export class BattleLogicLayer {
 		this.selection.phase = "selection";
 		this.switchToHeroMode(game);
 
+		// TODO: should it be here or immediately after movement?
+		this.confirmMovementEffects(game);
+
 		const turnEnded = this.turnController.checkTurnEnd(game, this.skipAnimations);
 		if (turnEnded) this.onTurnEnd(game);
+	}
+
+	confirmMovementEffects(game: Game) {
+		const actor = this.selection.hero;
+		if (!actor) return;
+		if (actor.distanceTravelledThisTurn == 0) return;
+		const battle =  game.state.currentBattle;
+		if (!battle) return;
+
+		this.skillProcessor.emitMove(
+			actor, 
+			actor.positionSquare, 
+			actor.distanceTravelledThisTurn,
+			battle.getPedestrians(),
+			game.map
+		);
 	}
 
 	skipTurn(game: Game) {
