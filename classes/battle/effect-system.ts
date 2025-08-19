@@ -58,7 +58,7 @@ interface AdditionalEffects {
 	target: BattleActor;
 	buffs: AdditionalEffect<SkillEffectBuff>[];
 	healing: AdditionalEffect<SkillEffectHeal>[];
-	controlEffects: AdditionalEffect<SkillEffectToken>[];
+	tokens: AdditionalEffect<SkillEffectToken>[];
 	additionalDamage: TargetableEffect<SkillEffectDamage>[],
 }
 
@@ -87,7 +87,7 @@ export interface TurnEvent {
 	additionalDamage: TargetableEffect<SkillEffectDamage>[],
 }
 
-export interface BuffEvent extends BlockableEvent {
+export interface BuffEvent extends BlockableEvent, AdditionalEffects {
 	type: "onBuff" | "preBuff";
 	sourceSkill: Skill | undefined;
 	source: BattleActor;
@@ -100,7 +100,7 @@ export interface BuffEvent extends BlockableEvent {
 	calculatedValue: number;
 }
 
-export interface TokenEvent extends BlockableEvent {
+export interface TokenEvent extends BlockableEvent, AdditionalEffects {
 	type: "onToken" | "preToken";
 	sourceSkill: Skill | undefined;
 	source: BattleActor;
@@ -112,7 +112,7 @@ export interface TokenEvent extends BlockableEvent {
 	calculatedValue: number;
 }
 
-export interface HealEvent extends BlockableEvent {
+export interface HealEvent extends BlockableEvent, AdditionalEffects {
 	type: "onHeal" | "preHeal";
 	sourceSkill: Skill | undefined;
 	source: BattleActor;
@@ -124,7 +124,7 @@ export interface HealEvent extends BlockableEvent {
 	overhealing?: number;
 }
 
-export interface MoveEvent extends BlockableEvent {
+export interface MoveEvent extends BlockableEvent, AdditionalEffects {
 	type: "onMove";
 	sourceSkill: Skill | undefined;
 	source: BattleActor;
@@ -411,6 +411,10 @@ export class EffectSystem {
 			originalValue: effect.value ?? 0,
 			calculatedValue: effect.value ?? 0,
 			blocks: [],
+			additionalDamage: [],
+			buffs: [],
+			healing: [],
+			tokens: [],
 		}
 	}
 
@@ -424,6 +428,10 @@ export class EffectSystem {
 			originalValue: effect.value ?? 0,
 			calculatedValue: effect.value ?? 0,
 			blocks: [],
+			additionalDamage: [],
+			buffs: [],
+			healing: [],
+			tokens: [],
 		}
 	}
 
@@ -438,6 +446,10 @@ export class EffectSystem {
 			originalValue: effect.value ?? 0,
 			calculatedValue: effect.value ?? 0,
 			blocks: [],
+			additionalDamage: [],
+			buffs: [],
+			healing: [],
+			tokens: [],
 		}
 	}
 
@@ -484,7 +496,7 @@ export class EffectSystem {
 		for (let heal of event.healing) {
 			this.applyHealEvent(this.toHealEvent(heal, heal.effect), context);
 		}
-		for (let token of event.controlEffects) {
+		for (let token of event.tokens) {
 			this.applyTokenEvent(this.toTokenEvent(token, token.effect), context);
 		}
 		for (let dmg of event.additionalDamage) {
@@ -543,7 +555,7 @@ export class EffectSystem {
 			effectiveness,
 			buffs: [],
 			healing: [],
-			controlEffects: [],
+			tokens: [],
 			additionalDamage: [],
 		}
 	}
