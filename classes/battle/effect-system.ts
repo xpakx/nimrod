@@ -124,7 +124,7 @@ export interface HealEvent extends BlockableEvent, AdditionalEffects {
 	overhealing?: number;
 }
 
-export interface MoveEvent extends BlockableEvent, AdditionalEffects {
+export interface MoveEvent extends AdditionalEffects {
 	type: "onMove";
 	sourceSkill: Skill | undefined;
 	source: BattleActor;
@@ -293,6 +293,31 @@ export class EffectSystem {
 		this.logger.debug("Running onSkill handlers");
 		this.runHook("onSkill", event, context);
 		this.resolveSkill(event, context);
+	}
+
+	emitMove(source: BattleActor, _target: Position, distance: number, actors: BattleActor[], map: MapLayer) {
+		this.logger.debug(`Processing a move event for actor ${source.name}`);
+		const event: MoveEvent = {
+			type: "onMove",
+			source,
+			target: source,
+			sourceSkill: undefined,
+			distance,
+			buffs: [],
+			healing: [],
+			tokens: [],
+			additionalDamage: [],
+		};
+
+		const context: EventContext = { 
+			actors,
+			map,
+			specialEffects: [],
+			rng: this.randomGenerator,
+		};
+
+		this.logger.debug("Running onMove handlers");
+		this.runHook("onMove", event, context);
 	}
 
 	emitTurnEvent(turnNum: number, enemyTurn: boolean, actors: BattleActor[], map: MapLayer, onStart: boolean = true) {
