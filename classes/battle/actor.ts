@@ -231,6 +231,15 @@ export class BattleActor extends Actor {
 		this.modifiers[key] += value;
 	}
 
+	hasAnyBuff(): boolean {
+		for (let stat in this.buffs) {
+			const key = stat as keyof HeroStats;
+			const buffs = this.buffs[key];
+			if (buffs && buffs.length > 0) return true;
+		}
+		return false
+	}
+
 
 	isDebuffed(key: keyof HeroStats): boolean {
 		const debuffs = this.debuffs[key];
