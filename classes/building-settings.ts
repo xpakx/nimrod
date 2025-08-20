@@ -316,8 +316,62 @@ export const buildingSettings: BuildingConfig[] = [
 				{resource: "wood", amount: 50},
 			],
 		},
+		heroOptions: "warrior"
+	},
+	{
+		sprite: "house",
+		size: 2,
+		name: "pikeman-house",
+		workforceType: "warrior",
+		visibleName: "Pikeman House", 
+		cost: 120,
+		houseOptions: {
+			levels: [
+				{
+					maxPopulation: 1, 
+					needs: [
+						{resource: "water", consumptionPerPerson: 1},
+						{resource: "food", consumptionPerPerson: 2},
+						{resource: "olive", consumptionPerPerson: 1}
+					]
+				}
+			]
+		},
+		constructionOptions: {
+			requirements: [
+				{resource: "weapons", amount: 10},
+				{resource: "wood", amount: 50},
+			],
+		},
 		heroOptions: "pikeman"
-	}
+	},
+	{
+		sprite: "house",
+		size: 2,
+		name: "archer-house",
+		workforceType: "warrior",
+		visibleName: "Archer House", 
+		cost: 120,
+		houseOptions: {
+			levels: [
+				{
+					maxPopulation: 1, 
+					needs: [
+						{resource: "water", consumptionPerPerson: 1},
+						{resource: "food", consumptionPerPerson: 2},
+						{resource: "olive", consumptionPerPerson: 1}
+					]
+				}
+			]
+		},
+		constructionOptions: {
+			requirements: [
+				{resource: "weapons", amount: 10},
+				{resource: "wood", amount: 50},
+			],
+		},
+		heroOptions: "archer"
+	},
 ];
 
 
@@ -382,7 +436,9 @@ export const tabSettings: SidebarConfig = {
 			icon: "military",
 			buildings: [
 				"tower",
+				"pikeman-house",
 				"warrior-house",
+				"archer-house",
 			]
 		},
 		{
