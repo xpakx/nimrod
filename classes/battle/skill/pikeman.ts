@@ -43,3 +43,21 @@ export let archerSkill001: SkillEffectDamage = {
 		return hero.getStat("agility") * mult + growth*level;
 	},
 }
+
+
+export let warriorPassive = Skills.createPassive(
+	"onSkill",
+	(passiveOwner, event, _context) => {
+		if (event.source !== passiveOwner) return;
+		if (passiveOwner.hasAnyBuff()) {
+			event.criticalHit = true;
+		}
+	},
+	(passiveOwner, actor, _actors, _map) => {
+		if (actor !== passiveOwner) return false;
+		return actor.hasAnyBuff();
+	},
+);
+
+export let warriorSkill001: SkillEffectDamage = Skills.createDamageFunc("strength", 0.5, 3);
+

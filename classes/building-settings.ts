@@ -1,6 +1,6 @@
 import { DefaultHandler } from "./battle/effect-system.js";
 import { HeroConfig, SkillConfig } from "./battle/hero-library.js";
-import { archerPassive, archerSkill001, pikemanPassive, pikemanSkill001 } from "./battle/skill/pikeman.js";
+import { archerPassive, archerSkill001, pikemanPassive, pikemanSkill001, warriorPassive, warriorSkill001 } from "./battle/skill/pikeman.js";
 import { bleedPassive, burnPassive, poisonPassive, sleepDmgPassive, sleepPassive } from "./battle/skill/status-handlers.js";
 import { Game } from "./game.js";
 import { AdventurersGuildInterface } from "./interface/adventurers-guild.js";
@@ -499,6 +499,24 @@ export const skillSetting: SkillConfig[] = [
 		effect: [archerSkill001],
 		icon: "kingdom",
 		cooldown: 0,
+		maxDistance: 6,
+		targetType: "actor",
+		targetSubType: "enemy",
+	},
+	{
+		name: "warriorPassive",
+		visibleName: "Formation",
+		effect: [warriorPassive],
+		icon: "kingdom",
+		cooldown: 0,
+		passive: true,
+	},
+	{
+		name: "warrior001",
+		visibleName: "Basic Attack",
+		effect: [warriorSkill001],
+		icon: "kingdom",
+		cooldown: 0,
 		targetType: "actor",
 		targetSubType: "enemy",
 	},
@@ -522,6 +540,12 @@ export const heroSetting: HeroConfig[] = [
 		sprite: "warrior",
 		baseHp: 40,
 		skills: ["archer001", "archerPassive"],
+	},
+	{
+		name: "warrior",
+		sprite: "warrior",
+		baseHp: 60,
+		skills: ["warrior001", "warriorPassive"],
 	},
 
 ]
