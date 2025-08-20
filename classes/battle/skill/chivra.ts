@@ -82,7 +82,7 @@ export let chivraDamage003 = Skills.createDamageFunc(
 			(passiveOwner, event, context) => {
 				if (event.source !== passiveOwner) return;
 				if (!context.rng.chance(0.75)) return;
-				event.controlEffects.push({
+				event.tokens.push({
 					effect: Skills.createControlEffect("stun", 2),
 					source: event.source, 
 					target: event.target,
