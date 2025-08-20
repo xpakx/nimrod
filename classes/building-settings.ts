@@ -1,6 +1,6 @@
 import { DefaultHandler } from "./battle/effect-system.js";
 import { HeroConfig, SkillConfig } from "./battle/hero-library.js";
-import { pikemanPassive, pikemanSkill001 } from "./battle/skill/pikeman.js";
+import { archerPassive, archerSkill001, pikemanPassive, pikemanSkill001 } from "./battle/skill/pikeman.js";
 import { bleedPassive, burnPassive, poisonPassive, sleepDmgPassive, sleepPassive } from "./battle/skill/status-handlers.js";
 import { Game } from "./game.js";
 import { AdventurersGuildInterface } from "./interface/adventurers-guild.js";
@@ -484,8 +484,24 @@ export const skillSetting: SkillConfig[] = [
 		cooldown: 0,
 		targetType: "actor",
 		targetSubType: "enemy",
-	}
-
+	},
+	{
+		name: "archerPassive",
+		visibleName: "Formation",
+		effect: [archerPassive],
+		icon: "kingdom",
+		cooldown: 0,
+		passive: true,
+	},
+	{
+		name: "archer001",
+		visibleName: "Basic Attack",
+		effect: [archerSkill001],
+		icon: "kingdom",
+		cooldown: 0,
+		targetType: "actor",
+		targetSubType: "enemy",
+	},
 ];
 
 export const heroSetting: HeroConfig[] = [
@@ -500,7 +516,14 @@ export const heroSetting: HeroConfig[] = [
 		sprite: "warrior",
 		baseHp: 50,
 		skills: ["pikeman001", "pikemanPassive"],
-	}
+	},
+	{
+		name: "archer",
+		sprite: "warrior",
+		baseHp: 40,
+		skills: ["archer001", "archerPassive"],
+	},
+
 ]
 
 export const defaultHandlers: DefaultHandler<any>[] = [

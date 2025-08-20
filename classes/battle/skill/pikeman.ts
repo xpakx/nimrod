@@ -29,3 +29,17 @@ export let archerPassive = Skills.createPassive(
 		return actor.distanceTravelledThisTurn == 0;
 	},
 );
+
+export let archerSkill001: SkillEffectDamage = {
+	type: "damage",
+	damageType: "normal",
+	target: "hero",
+	distance: 6,
+	damage:  (hero, target, skill) => {
+		const level = skill ? skill.level : 1;
+		const dist = Heroes.getTaxicabDistanceFor(hero, target);
+		const mult = dist == 1 ? 0.1 : 0.2;
+		const growth = dist == 1 ? 1 : 2;
+		return hero.getStat("agility") * mult + growth*level;
+	},
+}
