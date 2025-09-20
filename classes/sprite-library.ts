@@ -363,7 +363,6 @@ export class SpriteLibrary {
 	}
 
 	async prepareActorSprites(config: string | ActorSpriteConfig[], tileSize: Size): Promise<boolean> {
-		// TODO: Add animated sprites
 		// TODO: separate portraits in battle from sprites
 		if (typeof config === 'string') {
 			config = await loadActorSpriteConfig(config);
@@ -384,6 +383,8 @@ export class SpriteLibrary {
 					tileSize,
 					actorDef.name
 				);
+			} else if (actorDef.type === "animated") {
+				// TODO: Add animated sprites
 			}
 		}
 		return true;
