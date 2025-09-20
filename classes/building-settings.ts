@@ -614,19 +614,21 @@ export const defaultHandlers: DefaultHandler<any>[] = [
 	bleedPassive,
 ];
 
-
 export const actorSpritesSettings: ActorSpriteConfig[] = [
 	{
+		type: "debug",
 		name: "test",
 		sprite: "./img/house.svg",
 		debugColor: "red",
 	},
 	{
+		type: "debug",
 		name: "delivery",
 		sprite: "./img/house.svg",
 		debugColor: "blue",
 	},
 	{
+		type: "debug",
 		name: "warrior",
 		sprite: "./img/portraits/ratman.svg",
 		debugColor: "green",

@@ -96,13 +96,30 @@ export interface SpriteConfig {
     sprite: string;
 }
 
-export interface ActorSpriteConfig {
+export type ActorSpriteConfig = DebugActorSpriteConfig | StaticActorSpriteConfig | AnimatedActorSpriteConfig;
+
+interface BaseActorSpriteConfig {
 	name: string;
-	sprite: string | string[];
 	size?: number;
+}
+
+interface DebugActorSpriteConfig extends BaseActorSpriteConfig {
+	type: "debug";
+	debugColor: "red" | "blue" | "green";
+	sprite: string;
+}
+
+interface StaticActorSpriteConfig extends BaseActorSpriteConfig {
+	type: "static";
+	sprite: string;
+	debugColor: "red" | "blue" | "green";
+}
+
+interface AnimatedActorSpriteConfig extends BaseActorSpriteConfig {
+	type: "animated";
+	sprite: string | string[];
 	grid?: Size;
 	animations?: Map<string, number[]>;
-	debugColor?: "red" | "blue" | "green";
 }
 
 /**
@@ -352,15 +369,15 @@ export class SpriteLibrary {
 			config = await loadActorSpriteConfig(config);
 		}
 		for (let actorDef of config) {
-			if (actorDef.debugColor) {
+			if (actorDef.type === "debug") {
 				this.actors[actorDef.name] = new DebugActorSprite(
-					await loadImage(typeof actorDef.sprite === "string" ? actorDef.sprite : actorDef.sprite[0]),
+					await loadImage(actorDef.sprite),
 					actorDef.size ?? 2,
 					tileSize,
 					actorDef.name,
-					actorDef.debugColor ? {"fillStyle": actorDef.debugColor} : undefined
+					{"fillStyle": actorDef.debugColor},
 				);
-			} else if (typeof actorDef.sprite === "string" && actorDef.grid === undefined) {
+			} else if (actorDef.type === "static") {
 				this.actors[actorDef.name] = new StaticActorSprite(
 					await loadImage(actorDef.sprite),
 					actorDef.size ?? 2,
