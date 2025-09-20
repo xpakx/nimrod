@@ -1,4 +1,4 @@
-import { Actor, ActorSprite } from "../classes/actor";
+import { Actor, ActorSprite, DebugActorSprite } from "../classes/actor";
 import { Road, TilingSprite } from "../classes/building/buildings";
 import { MapLayer, Position, Size } from "../classes/map-layer";
 
@@ -8,8 +8,14 @@ let OffscreenCanvasMock = jest.fn().mockImplementation((width: number, height: n
 		width,
 		oncontextlost: jest.fn(),
 		oncontextrestored: jest.fn(),
-		getContext: jest.fn(() => undefined),
-			convertToBlob: jest.fn(),
+		getContext: jest.fn(() => ({
+			clearRect: jest.fn(),
+			drawImage: jest.fn(),
+			beginPath: jest.fn(), 
+			fill: jest.fn(), 
+			ellipse: jest.fn(),
+		})),
+		convertToBlob: jest.fn(),
 		transferToImageBitmap: jest.fn(),
 		addEventListener: jest.fn(),
 		removeEventListener: jest.fn(),
@@ -17,7 +23,10 @@ let OffscreenCanvasMock = jest.fn().mockImplementation((width: number, height: n
 	} as unknown as OffscreenCanvas;
 });
 
-
+beforeEach(() => {
+	OffscreenCanvas = OffscreenCanvasMock;
+	console.log = () => {};
+});
 
 describe('ActorSprite', () => {
 	let imageMock: HTMLImageElement;
@@ -31,7 +40,7 @@ describe('ActorSprite', () => {
 	test('should initialize with correct properties', () => {
 		const size = 2;
 		const tileSize: Size = { width: 50, height: 50 };
-		const actorSprite = new ActorSprite(imageMock, size, tileSize, "test");
+		const actorSprite = new DebugActorSprite(imageMock, size, tileSize, "test");
 
 		expect(actorSprite.image).toBe(imageMock);
 		expect(actorSprite.baseSize).toBe(size);
@@ -42,7 +51,7 @@ describe('ActorSprite', () => {
 	test('refreshSize should calculate size correctly', () => {
 		const size = 2;
 		const tileSize: Size = { width: 50, height: 50 };
-		const actorSprite = new ActorSprite(imageMock, size, tileSize, "test");
+		const actorSprite = new DebugActorSprite(imageMock, size, tileSize, "test");
 
 		tileSize.width = 60;
 		actorSprite.refreshSize(tileSize);
@@ -57,7 +66,7 @@ describe('Actor', () => {
 	let position: Position;
 
 	beforeEach(() => {
-		spriteMock = new ActorSprite({ width: 100, height: 200 } as HTMLImageElement, 2, { width: 50, height: 50 }, "test");
+		spriteMock = new DebugActorSprite({ width: 100, height: 200 } as HTMLImageElement, 2, { width: 50, height: 50 }, "test");
 		position = { x: 1, y: 1 };
 		OffscreenCanvas =  OffscreenCanvasMock
 	});
@@ -69,7 +78,7 @@ describe('Actor', () => {
 		} as HTMLImageElement;
 
 		const tileSize: Size = { width: 50, height: 50 };
-		const actorSprite = new ActorSprite(mockImage, 1, tileSize, "test");
+		const actorSprite = new DebugActorSprite(mockImage, 1, tileSize, "test");
 		const position: Position = { x: 5, y: 10 };
 
 		const actor = new Actor(actorSprite, position);

@@ -1,5 +1,5 @@
+import { DebugActorSprite } from "../classes/actor";
 import { Building, BuildingInterface, BuildingPrototype, BuildingSprite, BuildingWorker, WorkerOptions } from "../classes/building/buildings";
-import { ActorSprite } from "../classes/actor";
 import { Position, Size } from "../classes/map-layer";
 
 let OffscreenCanvasMock = jest.fn().mockImplementation((width: number, height: number) => {
@@ -80,7 +80,7 @@ describe('Building', () => {
 
 	test('applyWorkerOptions should set worker properties correctly', () => {
 		const workerOptions: WorkerOptions = {
-			sprite: new ActorSprite({ width: 100, height: 200 } as HTMLImageElement, 1, { width: 50, height: 50 }, "test"),
+			sprite: new DebugActorSprite({ width: 100, height: 200 } as HTMLImageElement, 1, { width: 50, height: 50 }, "test"),
 			repairing: true,
 			resource: 'wood',
 			inventory: 100,
@@ -99,7 +99,7 @@ describe('Building', () => {
 
 	test('tick should update worker timeSinceLastReturn', () => {
 		const building = new Building(prototype, position);
-		building.setWorker(new ActorSprite({ width: 100, height: 200 } as HTMLImageElement, 1, { width: 50, height: 50 }, "test"));
+		building.setWorker(new DebugActorSprite({ width: 100, height: 200 } as HTMLImageElement, 1, { width: 50, height: 50 }, "test"));
 		building.workerSpawn = { x: 1, y: 1 };
 
 		building.tick(1);
@@ -109,7 +109,7 @@ describe('Building', () => {
 
 	test('canSpawnWorker should return true when ready to spawn', () => {
 		const building = new Building(prototype, position);
-		building.setWorker(new ActorSprite({ width: 100, height: 200 } as HTMLImageElement, 1, { width: 50, height: 50 }, "test"));
+		building.setWorker(new DebugActorSprite({ width: 100, height: 200 } as HTMLImageElement, 1, { width: 50, height: 50 }, "test"));
 		building.workerSpawn = { x: 1, y: 1 };
 		building.readyToSpawn = true;
 		building.workers = 1;
@@ -119,7 +119,7 @@ describe('Building', () => {
 
 	test('spawnWorker should return a worker and reset readyToSpawn', () => {
 		const building = new Building(prototype, position);
-		building.setWorker(new ActorSprite({ width: 100, height: 200 } as HTMLImageElement, 1, { width: 50, height: 50 }, "test"));
+		building.setWorker(new DebugActorSprite({ width: 100, height: 200 } as HTMLImageElement, 1, { width: 50, height: 50 }, "test"));
 		building.workerSpawn = { x: 1, y: 1 };
 		building.readyToSpawn = true;
 
@@ -137,7 +137,7 @@ describe('Building supply logic', () => {
 
 	beforeEach(() => {
 		position = { x: 0, y: 0 };
-		worker = new BuildingWorker(new ActorSprite({ width: 100, height: 200 } as HTMLImageElement, 1, { width: 50, height: 50 }, "test"), position);
+		worker = new BuildingWorker(new DebugActorSprite({ width: 100, height: 200 } as HTMLImageElement, 1, { width: 50, height: 50 }, "test"), position);
 		worker.resource = 'wood';
 		worker.inventory = 50;
 
@@ -194,7 +194,7 @@ describe('Building repair logic', () => {
 
 	beforeEach(() => {
 		position = { x: 0, y: 0 };
-		worker = new BuildingWorker(new ActorSprite({ width: 100, height: 200 } as HTMLImageElement, 1, { width: 50, height: 50 }, "test"), position);
+		worker = new BuildingWorker(new DebugActorSprite({ width: 100, height: 200 } as HTMLImageElement, 1, { width: 50, height: 50 }, "test"), position);
 		worker.repairing = true;
 
 		const buildingSpriteMock = new BuildingSprite({ width: 100, height: 200 } as HTMLImageElement, 2, { width: 50, height: 50 });
