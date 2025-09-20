@@ -34,7 +34,7 @@ export class BattleTab extends BuildingTab {
 		this.heroButtons = [];
 		for (let hero of heroes) {
 			const button = new HeroButtonWithLabel(
-				hero.portrait || hero.sprite.image,
+				hero.portrait || hero.sprite.getImage(),
 				{width: this.buttonSize, height: this.buttonSize},
 				{x: 0, y: 0},
 				hero

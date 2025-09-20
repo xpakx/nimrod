@@ -298,7 +298,7 @@ export class SaveManager {
 				y: pedestrian.position.y,
 				dead: pedestrian.dead,
 				name: pedestrian.name.toString(),
-				sprite: pedestrian.sprite.key,
+				sprite: pedestrian.sprite.getKey(),
 				directionMask: pedestrian.directionMask,
 				direction: pedestrian.direction,
 				traveledSquares: pedestrian.traveledSquares,
@@ -490,7 +490,7 @@ export class SaveManager {
 				level: actor.level || 1,
 				strength: hero.strength.base, // TODO: calculate strength
 				type: hero.type,
-				image: hero.sprite.image, // TODO
+				image: hero.sprite.getImage(), // TODO
 			};
 		}
 

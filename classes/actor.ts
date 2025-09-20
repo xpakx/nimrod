@@ -2,7 +2,14 @@ import { Road } from "./building/buildings.js";
 import { getLogger, Logger } from "./logger.js";
 import { MapLayer, Position, Size } from "./map-layer.js";
 
-export class ActorSprite {
+export interface ActorSprite {
+	refreshSize(tileSize: Size): void;
+	getImage(): HTMLImageElement;
+	getScaledImage(): HTMLImageElement | OffscreenCanvas;
+	getKey(): string;
+}
+
+export class StaticActorSprite implements ActorSprite {
 	size: Size = {height: 0, width: 0};
 	image: HTMLImageElement;
 	baseSize: number;
@@ -34,6 +41,47 @@ export class ActorSprite {
 		}
 	}
 
+	getImage(): HTMLImageElement {
+	    return this.image;
+	}
+
+	getScaledImage(): OffscreenCanvas {
+		return this.offscreen;
+	}
+
+	getKey(): string {
+	    return this.key;
+	}
+}
+
+export interface DebugActorSpriteOptions {
+	fillStyle?: "red" | "blue" | "green";
+}
+
+export class DebugActorSprite extends StaticActorSprite {
+	fillStyle: "red" | "blue" | "green" = "red";
+
+	constructor(image: HTMLImageElement, size: number, tileSize: Size, key: string, opt?: DebugActorSpriteOptions) {
+		super(image, size, tileSize, key);
+		this.fillStyle = opt?.fillStyle ?? "red";
+		this.refreshSize(tileSize);
+	}
+
+	refreshSize(tileSize: Size) {
+		this.size.width = tileSize.width * this.baseSize;
+		this.size.height = this.image.height*(this.size.width/this.image.width);
+
+		this.offscreen.width = 20;
+		this.offscreen.height = 30;
+		const offscreenCtx = this.offscreen.getContext('2d');
+		if (offscreenCtx) {
+			offscreenCtx.clearRect(0, 0, this.size.width, this.size.height);
+			offscreenCtx.fillStyle = this.fillStyle;
+			offscreenCtx.beginPath();
+			offscreenCtx.ellipse(10, 15, 10, 15, 0, 0, 2 * Math.PI);
+			offscreenCtx.fill();
+		}
+	}
 }
 
 export class Actor {

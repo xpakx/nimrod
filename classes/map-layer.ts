@@ -528,7 +528,7 @@ export class MapLayer {
 	drawPedestrian(context: CanvasRenderingContext2D, actor: Actor) {
 		const position = this.isoToScreen(actor.position);
 		context.drawImage(
-			actor.sprite.offscreen, 
+			actor.sprite.getScaledImage(), 
 			position.x - 10,
 			position.y - 15
 		);

@@ -59,7 +59,7 @@ export class AdventurersGuildInterface extends BuildingInterface {
 		this.teamButtons.buttons = [];
 		for (let hero of this.team) {
 			const heroButton = new HeroButton(
-				hero.portrait || hero.sprite.image,
+				hero.portrait || hero.sprite.getImage(),
 				{width: portraitSize, height: portraitSize},
 				{x: heroX, y: heroY},
 				hero,
@@ -85,7 +85,7 @@ export class AdventurersGuildInterface extends BuildingInterface {
 		this.allHeroesButtons.buttons = [];
 		for (let hero of this.heroes) {
 			const heroButton = new HeroButton(
-				hero.portrait || hero.sprite.image,
+				hero.portrait || hero.sprite.getImage(),
 				{width: portraitSize, height: portraitSize},
 				{x: 0, y: 0},
 				hero,
