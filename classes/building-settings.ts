@@ -7,7 +7,7 @@ import { AdventurersGuildInterface } from "./interface/adventurers-guild.js";
 import { SidebarConfig } from "./interface/sidebar-config.js";
 import { StorageInterface } from "./interface/storage.js";
 import { CampaignData, Quest } from "./quest.js";
-import { SpriteConfig, BuildingConfig } from "./sprite-library.js";
+import { SpriteConfig, BuildingConfig, ActorSpriteConfig } from "./sprite-library.js";
 
 export const buildingSettings: BuildingConfig[] = [
 	{
@@ -613,3 +613,22 @@ export const defaultHandlers: DefaultHandler<any>[] = [
 	burnPassive,
 	bleedPassive,
 ];
+
+
+export const actorSpritesSettings: ActorSpriteConfig[] = [
+	{
+		name: "test",
+		sprite: "./img/house.svg",
+		debugColor: "red",
+	},
+	{
+		name: "delivery",
+		sprite: "./img/house.svg",
+		debugColor: "blue",
+	},
+	{
+		name: "warrior",
+		sprite: "./img/portraits/ratman.svg",
+		debugColor: "green",
+	},
+]

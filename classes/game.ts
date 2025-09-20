@@ -2,7 +2,7 @@ import { GameState } from "./game-state.js";
 import { ActionButton, ButtonRow, InterfaceLayer } from "./interface/interface.js";
 import { Action } from "./interface/actions.js";
 import { MapLayer, Position } from "./map-layer.js";
-import { SpriteConfig, BuildingConfig, SpriteLibrary } from "./sprite-library.js";
+import { SpriteConfig, BuildingConfig, SpriteLibrary, ActorSpriteConfig } from "./sprite-library.js";
 import { prepareTabs, SidebarConfig } from "./interface/sidebar-config.js";
 import { BattleActor } from "./battle/actor.js";
 import { Battle } from "./battle/battle.js";
@@ -88,8 +88,8 @@ export class Game {
 		this.interf.registerSidebar("battle", new BattleSidebar(this.state.canvasSize, this.state.menuWidth, this.interf.tabWidth));
 	}
 
-	async prepareAssets(buildings: string | BuildingConfig[], avatars: string | SpriteConfig[], icons: string | SpriteConfig[], tabSettings: SidebarConfig) {
-		await this.sprites.prepareActorSprites(this.map.tileSize);
+	async prepareAssets(buildings: string | BuildingConfig[], avatars: string | SpriteConfig[], icons: string | SpriteConfig[], tabSettings: SidebarConfig, actorSprites: ActorSpriteConfig[]) {
+		await this.sprites.prepareActorSprites(actorSprites, this.map.tileSize);
 		await this.sprites.prepareBuildingSprites(buildings, this.map.tileSize);
 		await this.sprites.prepareAvatars(avatars);
 		await this.sprites.prepareIcons(icons);

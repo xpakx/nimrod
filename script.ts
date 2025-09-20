@@ -1,6 +1,6 @@
 import { Game } from "./classes/game.js";
 import { LoggerFactory } from "./classes/logger.js";
-import { avatarSettings, buildingSettings, campaignSettings, defaultHandlers, heroSetting, iconSettings, skillSetting, tabSettings } from "./classes/building-settings.js";
+import { actorSpritesSettings, avatarSettings, buildingSettings, campaignSettings, defaultHandlers, heroSetting, iconSettings, skillSetting, tabSettings } from "./classes/building-settings.js";
 
 let game = new Game();
 
@@ -59,7 +59,7 @@ window.onload = async () => {
 	logger.debug('Preparing assets');
 	game.setContext(context);
 
-	await game.prepareAssets(buildingSettings, avatarSettings, iconSettings, tabSettings);
+	await game.prepareAssets(buildingSettings, avatarSettings, iconSettings, tabSettings, actorSpritesSettings);
 
 	logger.debug('Loading map');
 	const saveLoaded = game.saveManager.loadState(game, "quicksave");

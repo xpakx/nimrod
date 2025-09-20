@@ -96,6 +96,15 @@ export interface SpriteConfig {
     sprite: string;
 }
 
+export interface ActorSpriteConfig {
+	name: string;
+	sprite: string | string[];
+	size?: number;
+	grid?: Size;
+	animations?: Map<string, number[]>;
+	debugColor?: "red" | "blue" | "green";
+}
+
 /**
  * A library for managing and loading sprites used in the game.
  * This class handles the loading, scaling, and organization of various types of sprites,
@@ -336,29 +345,30 @@ export class SpriteLibrary {
 		return true;
 	}
 
-	async prepareActorSprites(tileSize: Size): Promise<boolean> {
-		// Placeholder: Using house.svg as a temporary image for actors.
-		// TODO: Replace with actual actor sprites
-		this.actors['test'] = new DebugActorSprite(
-			await loadImage("./img/house.svg"),
-			2,
-			tileSize,
-			"test",
-		);
-		this.actors['delivery'] = new DebugActorSprite(
-			await loadImage("./img/house.svg"),
-			2,
-			tileSize,
-			"delivery",
-			{"fillStyle": "blue"}
-		);
-		this.actors['warrior'] = new DebugActorSprite(
-			await loadImage("./img/portraits/ratman.svg"),
-			2,
-			tileSize,
-			"warrior",
-			{"fillStyle": "green"}
-		);
+	async prepareActorSprites(config: string | ActorSpriteConfig[], tileSize: Size): Promise<boolean> {
+		// TODO: Add animated sprites
+		// TODO: separate portraits in battle from sprites
+		if (typeof config === 'string') {
+			config = await loadActorSpriteConfig(config);
+		}
+		for (let actorDef of config) {
+			if (actorDef.debugColor) {
+				this.actors[actorDef.name] = new DebugActorSprite(
+					await loadImage(typeof actorDef.sprite === "string" ? actorDef.sprite : actorDef.sprite[0]),
+					actorDef.size ?? 2,
+					tileSize,
+					actorDef.name,
+					actorDef.debugColor ? {"fillStyle": actorDef.debugColor} : undefined
+				);
+			} else if (typeof actorDef.sprite === "string" && actorDef.grid === undefined) {
+				this.actors[actorDef.name] = new StaticActorSprite(
+					await loadImage(actorDef.sprite),
+					actorDef.size ?? 2,
+					tileSize,
+					actorDef.name
+				);
+			}
+		}
 		return true;
 	}
 
@@ -507,6 +517,15 @@ async function loadBuildings(filename: string): Promise<BuildingConfig[]> {
 }
 
 async function loadSpriteConfig(filename: string): Promise<SpriteConfig[]> {
+    const response = await fetch(`config/${filename}`);
+    if (!response.ok) {
+	    throw new Error(`Cannot load config for avatars: ${response.status}`);
+    }
+    return await response.json();
+}
+
+
+async function loadActorSpriteConfig(filename: string): Promise<ActorSpriteConfig[]> {
     const response = await fetch(`config/${filename}`);
     if (!response.ok) {
 	    throw new Error(`Cannot load config for avatars: ${response.status}`);
