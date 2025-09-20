@@ -14,13 +14,19 @@ export class StaticActorSprite implements ActorSprite {
 	image: HTMLImageElement;
 	baseSize: number;
 	offscreen: OffscreenCanvas;
-	fillStyle: "red" | "blue" | "green" = "red";
+	context: OffscreenCanvasRenderingContext2D;
 	key: string;
 
 	constructor(image: HTMLImageElement, size: number, tileSize: Size, key: string) {
 		this.image = image;
 		this.baseSize = size;
 		this.offscreen =  new OffscreenCanvas(100, 100);
+		const offscreenCtx = this.offscreen.getContext('2d');
+		if (!offscreenCtx) {
+			throw new Error("Couldn't create OffscreenCanvas context");
+		}
+		this.context = offscreenCtx;
+
 		this.refreshSize(tileSize);
 		this.key = key;
 	}
@@ -29,16 +35,9 @@ export class StaticActorSprite implements ActorSprite {
 		this.size.width = tileSize.width * this.baseSize;
 		this.size.height = this.image.height*(this.size.width/this.image.width);
 
-		this.offscreen.width = 20;
-		this.offscreen.height = 30;
-		const offscreenCtx = this.offscreen.getContext('2d');
-		if (offscreenCtx) {
-			offscreenCtx.clearRect(0, 0, this.size.width, this.size.height);
-			offscreenCtx.fillStyle = this.fillStyle;
-			offscreenCtx.beginPath();
-			offscreenCtx.ellipse(10, 15, 10, 15, 0, 0, 2 * Math.PI);
-			offscreenCtx.fill();
-		}
+		this.offscreen.width = this.size.width;
+		this.offscreen.height = this.size.height;
+		this.context.drawImage(this.image, 0, 0, this.offscreen.width, this.offscreen.height);
 	}
 
 	getImage(): HTMLImageElement {
@@ -73,14 +72,11 @@ export class DebugActorSprite extends StaticActorSprite {
 
 		this.offscreen.width = 20;
 		this.offscreen.height = 30;
-		const offscreenCtx = this.offscreen.getContext('2d');
-		if (offscreenCtx) {
-			offscreenCtx.clearRect(0, 0, this.size.width, this.size.height);
-			offscreenCtx.fillStyle = this.fillStyle;
-			offscreenCtx.beginPath();
-			offscreenCtx.ellipse(10, 15, 10, 15, 0, 0, 2 * Math.PI);
-			offscreenCtx.fill();
-		}
+		this.context.clearRect(0, 0, this.size.width, this.size.height);
+		this.context.fillStyle = this.fillStyle;
+		this.context.beginPath();
+		this.context.ellipse(10, 15, 10, 15, 0, 0, 2 * Math.PI);
+		this.context.fill();
 	}
 }
 
