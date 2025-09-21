@@ -1,14 +1,6 @@
-import { BuildingPrototype, BuildingSprite } from "../building/buildings.js";
+import { Assets } from "../assets.js";
+import { BuildingPrototype } from "../building/buildings.js";
 import { BuildingButton, BuildingTab } from "./building-tab.js";
-
-async function loadImage(url: string): Promise<any> {
-    const image = new Image();
-    image.src = url;
-    return new Promise((resolve, reject) => {
-        image.onload = () => resolve(image);
-        image.onerror = reject;
-    });
-}
 
 export interface BuildingTabSettings {
 	icon: string;
@@ -29,16 +21,14 @@ export async function prepareTabs(sprites: { [key: string]: BuildingPrototype },
 	return tabs;
 }
 
-async function loadIcons(iconList: string[]): Promise<any> {
-	let sprites: { [key: string]: BuildingSprite } = {}; // TODO
-	for (let icon of iconList) {
-		const img = await loadImage(`./img/${icon}.svg`);
-		sprites[icon] = img;
-	}
-	return sprites;
+async function loadIcons(iconList: string[]): Promise<Record<string, HTMLImageElement>> {
+	let names = Object.fromEntries(
+		iconList.map(icon => [icon, `./img/${icon}.svg`])
+	);
+	return Assets.loadImagesToRecord(names);
 }
 
-function createTab(sprites: any, icons: any, settings: BuildingTabSettings): BuildingTab {
+function createTab(sprites: any, icons: Record<string, HTMLImageElement>, settings: BuildingTabSettings): BuildingTab {
 	const icon = icons[settings.icon];
 	const tabIcon = icons["tab"];
 	let buttons: BuildingButton[] = [];
