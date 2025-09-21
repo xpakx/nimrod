@@ -1,4 +1,5 @@
 import { ActorSprite, DebugActorSprite, StaticActorSprite } from "./actor.js";
+import { Assets } from "./assets.js";
 import { HeroConfig } from "./battle/hero-library.js";
 import { BuildingInterface, BuildingPrototype, BuildingSprite, ConstructionOptions, HouseOptions, Recipe, ShopOptions, StorageOptions, TilingSprite, WorkerOptions, WorkforceType } from "./building/buildings.js";
 import { getLogger, Logger } from "./logger.js";
@@ -226,7 +227,7 @@ export class SpriteLibrary {
 	*/
 	async prepareBuildingSprites(config: string | BuildingConfig[], tileSize: Size): Promise<boolean> {
 		if (typeof(config) === "string") {
-			config = await loadBuildings(config);
+			config = await Assets.loadJSON<BuildingConfig[]>(config);
 		}
 		const promises = config.map(async (buildingConfig) => this.prepareBuilding(buildingConfig, tileSize));
 		await Promise.all(promises);
@@ -235,7 +236,7 @@ export class SpriteLibrary {
 
 	private async prepareBuilding(buildingConfig: BuildingConfig, tileSize: Size): Promise<boolean> {
 		const sprite = new BuildingSprite(
-			await loadImage(`./img/${buildingConfig.sprite}.svg`),
+			await Assets.loadImage(`./img/${buildingConfig.sprite}.svg`),
 			buildingConfig.size,
 			tileSize
 		);
@@ -346,12 +347,12 @@ export class SpriteLibrary {
 
 	async prepareSprites(config: string | SpriteConfig[], result: {[key: string]: HTMLImageElement}, uriPrefix: string = "./img"): Promise<boolean> {
 		if (typeof config === 'string') {
-			config = await loadSpriteConfig(config);
+			config = await Assets.loadJSON<SpriteConfig[]>(config);
 		}
 
 		for (const spriteConfig of config) {
 			try {
-				const image = await loadImage(`${uriPrefix}/${spriteConfig.sprite}.svg`);
+				const image = await Assets.loadImage(`${uriPrefix}/${spriteConfig.sprite}.svg`);
 				result[spriteConfig.name] = image;
 			} catch (error) {
 				console.error(`Failed to load image for key "${spriteConfig.name}":`, error);
@@ -365,12 +366,12 @@ export class SpriteLibrary {
 	async prepareActorSprites(config: string | ActorSpriteConfig[], tileSize: Size): Promise<boolean> {
 		// TODO: separate portraits in battle from sprites
 		if (typeof config === 'string') {
-			config = await loadActorSpriteConfig(config);
+			config = await Assets.loadJSON<ActorSpriteConfig[]>(config);
 		}
 		for (let actorDef of config) {
 			if (actorDef.type === "debug") {
 				this.actors[actorDef.name] = new DebugActorSprite(
-					await loadImage(actorDef.sprite),
+					await Assets.loadImage(actorDef.sprite),
 					actorDef.size ?? 2,
 					tileSize,
 					actorDef.name,
@@ -378,7 +379,7 @@ export class SpriteLibrary {
 				);
 			} else if (actorDef.type === "static") {
 				this.actors[actorDef.name] = new StaticActorSprite(
-					await loadImage(actorDef.sprite),
+					await Assets.loadImage(actorDef.sprite),
 					actorDef.size ?? 2,
 					tileSize,
 					actorDef.name
@@ -449,7 +450,7 @@ export class SpriteLibrary {
 			const binary = i.toString(2).padStart(4, '0');
 			const path = `./img/${name}${binary}.svg`;
 			try {
-				const image = await loadImage(path);
+				const image = await Assets.loadImage(path);
 				sprites.push(image);
 				size.width = image.width;
 				size.height = image.height;
@@ -510,43 +511,4 @@ export class SpriteLibrary {
 		this.getRoad().refreshSize(tileSize);
 		this.getArrow().refreshSize(tileSize);
 	}
-}
-
-async function loadImage(url: string): Promise<HTMLImageElement> {
-    const image = new Image();
-    image.src = url;
-    return new Promise((resolve, reject) => {
-        image.onload = () => resolve(image);
-        image.onerror = reject;
-    });
-}
-
-async function loadBuildings(filename: string): Promise<BuildingConfig[]> {
-	try {
-		const response = await fetch(`config/${filename}`);
-		if (!response.ok) {
-			throw new Error(`Cannot load config for buldings: ${response.status}`);
-		}
-		const data = await response.json();
-		return data;
-	} catch (error) {
-		throw error;
-	}
-}
-
-async function loadSpriteConfig(filename: string): Promise<SpriteConfig[]> {
-    const response = await fetch(`config/${filename}`);
-    if (!response.ok) {
-	    throw new Error(`Cannot load config for avatars: ${response.status}`);
-    }
-    return await response.json();
-}
-
-
-async function loadActorSpriteConfig(filename: string): Promise<ActorSpriteConfig[]> {
-    const response = await fetch(`config/${filename}`);
-    if (!response.ok) {
-	    throw new Error(`Cannot load config for avatars: ${response.status}`);
-    }
-    return await response.json();
 }
