@@ -1,4 +1,4 @@
-import { ActorSprite, DebugActorSprite, StaticActorSprite } from "./actor.js";
+import { ActorSprite, AnimatedActorSprite, DebugActorSprite, StaticActorSprite } from "./actor.js";
 import { Assets } from "./assets.js";
 import { HeroConfig } from "./battle/hero-library.js";
 import { BuildingInterface, BuildingPrototype, BuildingSprite, ConstructionOptions, HouseOptions, Recipe, ShopOptions, StorageOptions, TilingSprite, WorkerOptions, WorkforceType } from "./building/buildings.js";
@@ -386,6 +386,16 @@ export class SpriteLibrary {
 				);
 			} else if (actorDef.type === "animated") {
 				// TODO: Add animated sprites
+				if (typeof actorDef.sprite === "string") {
+					if (actorDef.grid) {}
+				} else {
+					this.actors[actorDef.name] = new AnimatedActorSprite(
+						await Assets.loadImagesToArray(actorDef.sprite),
+						actorDef.size ?? 2,
+						tileSize,
+						actorDef.name
+					);
+				}
 			}
 		}
 		return true;

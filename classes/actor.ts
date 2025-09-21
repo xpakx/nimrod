@@ -80,6 +80,41 @@ export class DebugActorSprite extends StaticActorSprite {
 	}
 }
 
+export class AnimatedActorSprite implements ActorSprite {
+	frames: HTMLImageElement[];
+	animations: Record<string, HTMLImageElement[]> = {};
+
+	constructor(frames: HTMLImageElement[], size: number, tileSize: Size, key: string) {
+		this.frames = frames;
+		this.refreshSize(tileSize);
+	}
+
+	registerAnimation(key: string, frames: number[]) {
+		let animation: HTMLImageElement[] = [];
+		for(let i of frames) {
+			if (i >= this.frames.length) throw new Error(`Incorrect index ${i}`);
+			animation.push(this.frames[i]);
+		}
+		this.animations[key] = animation;
+	}
+
+	refreshSize(tileSize: Size) {
+		throw new Error("Method not implemented.");
+	}
+
+	getImage(): HTMLImageElement {
+		throw new Error("Method not implemented.");
+	}
+
+	getScaledImage(): HTMLImageElement | OffscreenCanvas {
+		throw new Error("Method not implemented.");
+	}
+
+	getKey(): string {
+		throw new Error("Method not implemented.");
+	}
+}
+
 export class Actor {
 	sprite: ActorSprite;
 	portrait?: HTMLImageElement;
