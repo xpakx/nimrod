@@ -520,5 +520,6 @@ export class SpriteLibrary {
 		}
 		this.getRoad().refreshSize(tileSize);
 		this.getArrow().refreshSize(tileSize);
+		for (const key in this.actors) this.actors[key].refreshSize(tileSize);
 	}
 }
