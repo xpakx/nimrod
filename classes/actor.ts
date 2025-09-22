@@ -5,8 +5,9 @@ import { MapLayer, Position, Size } from "./map-layer.js";
 export interface ActorSprite {
 	refreshSize(tileSize: Size): void;
 	getImage(): HTMLImageElement;
-	getScaledImage(deltaTime?: number): HTMLImageElement | OffscreenCanvas;
+	getScaledImage(): HTMLImageElement | OffscreenCanvas;
 	getKey(): string;
+	tick?(deltaTime: number, actor?: Actor): void;
 }
 
 export class StaticActorSprite implements ActorSprite {
@@ -44,7 +45,7 @@ export class StaticActorSprite implements ActorSprite {
 	    return this.image;
 	}
 
-	getScaledImage(_deltaTime?: number): OffscreenCanvas {
+	getScaledImage(): OffscreenCanvas {
 		return this.offscreen;
 	}
 
@@ -87,10 +88,12 @@ export class AnimatedActorSprite implements ActorSprite {
 	frameTime: number = 0;
 	currentFrame: number = 0;
 	frameDuration: number = 30;
+	key: string;
 
 	constructor(frames: HTMLImageElement[], size: number, tileSize: Size, key: string) {
 		this.frames = frames;
 		this.refreshSize(tileSize);
+		this.key = key;
 	}
 
 	registerAnimation(key: string, frames: number[]) {
@@ -103,23 +106,32 @@ export class AnimatedActorSprite implements ActorSprite {
 	}
 
 	refreshSize(_tileSize: Size) {
-		throw new Error("Method not implemented.");
+		// TODO: rescale
 	}
 
 	getImage(): HTMLImageElement {
-		throw new Error("Method not implemented.");
+		if (!this.currentAnimation) return this.frames[0];
+		return this.currentAnimation[this.currentFrame];
 	}
 
-	getScaledImage(deltaTime?: number): HTMLImageElement | OffscreenCanvas {
+	getScaledImage(): HTMLImageElement | OffscreenCanvas {
+		// TODO: use offscreen canvas
 		if (!this.currentAnimation) return this.frames[0];
-		if (!deltaTime) return this.currentAnimation[0];
+		return this.currentAnimation[this.currentFrame];
+	}
+
+	tick(deltaTime: number, actor?: Actor) {
+		// TODO: direction
+		if (!this.currentAnimation) {
+			this.currentFrame = 0;
+			return;
+		}
 		this.frameTime += deltaTime;
 		if (this.frameTime > this.frameDuration) {
 			const frames = Math.floor(this.frameTime / this.frameDuration);
 			this.currentFrame = (this.currentFrame + frames) % this.currentAnimation.length;
 			this.frameTime = this.frameTime % this.frameDuration;
 		}
-		return this.currentAnimation[this.currentFrame];
 	}
 
 	startAnimation(key: string): boolean {
@@ -132,7 +144,7 @@ export class AnimatedActorSprite implements ActorSprite {
 	}
 
 	getKey(): string {
-		throw new Error("Method not implemented.");
+		return this.key;
 	}
 }
 
@@ -219,6 +231,8 @@ export class Actor {
 
 	// TODO: add interface for pathfinders
 	tick(deltaTime: number, map: MapLayer, randMap: number[]): boolean {
+		if (this.sprite.tick) this.sprite.tick(deltaTime, this);
+
 		const roads = map.roads;
 		if(this.travelFinished) {
 			return this.returnToHome(deltaTime, map)
