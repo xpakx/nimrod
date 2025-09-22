@@ -1,4 +1,5 @@
-import { ActorSprite, AnimatedActorSprite, DebugActorSprite, StaticActorSprite } from "./actor.js";
+import { ActorSprite, DebugActorSprite, StaticActorSprite } from "./actor.js";
+import { AnimatedActorSprite } from "./animated-actor.js";
 import { Assets } from "./assets.js";
 import { HeroConfig } from "./battle/hero-library.js";
 import { BuildingInterface, BuildingPrototype, BuildingSprite, ConstructionOptions, HouseOptions, Recipe, ShopOptions, StorageOptions, TilingSprite, WorkerOptions, WorkforceType } from "./building/buildings.js";
