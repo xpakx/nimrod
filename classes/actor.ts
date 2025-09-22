@@ -5,7 +5,7 @@ import { MapLayer, Position, Size } from "./map-layer.js";
 export interface ActorSprite {
 	refreshSize(tileSize: Size): void;
 	getImage(): HTMLImageElement;
-	getScaledImage(): HTMLImageElement | OffscreenCanvas;
+	getScaledImage(deltaTime?: number): HTMLImageElement | OffscreenCanvas;
 	getKey(): string;
 }
 
@@ -44,7 +44,7 @@ export class StaticActorSprite implements ActorSprite {
 	    return this.image;
 	}
 
-	getScaledImage(): OffscreenCanvas {
+	getScaledImage(_deltaTime?: number): OffscreenCanvas {
 		return this.offscreen;
 	}
 
@@ -83,6 +83,10 @@ export class DebugActorSprite extends StaticActorSprite {
 export class AnimatedActorSprite implements ActorSprite {
 	frames: HTMLImageElement[];
 	animations: Record<string, HTMLImageElement[]> = {};
+	currentAnimation: HTMLImageElement[] | undefined;
+	frameTime: number = 0;
+	currentFrame: number = 0;
+	frameDuration: number = 30;
 
 	constructor(frames: HTMLImageElement[], size: number, tileSize: Size, key: string) {
 		this.frames = frames;
@@ -98,7 +102,7 @@ export class AnimatedActorSprite implements ActorSprite {
 		this.animations[key] = animation;
 	}
 
-	refreshSize(tileSize: Size) {
+	refreshSize(_tileSize: Size) {
 		throw new Error("Method not implemented.");
 	}
 
@@ -106,8 +110,25 @@ export class AnimatedActorSprite implements ActorSprite {
 		throw new Error("Method not implemented.");
 	}
 
-	getScaledImage(): HTMLImageElement | OffscreenCanvas {
-		throw new Error("Method not implemented.");
+	getScaledImage(deltaTime?: number): HTMLImageElement | OffscreenCanvas {
+		if (!this.currentAnimation) return this.frames[0];
+		if (!deltaTime) return this.currentAnimation[0];
+		this.frameTime += deltaTime;
+		if (this.frameTime > this.frameDuration) {
+			const frames = Math.floor(this.frameTime / this.frameDuration);
+			this.currentFrame = (this.currentFrame + frames) % this.currentAnimation.length;
+			this.frameTime = this.frameTime % this.frameDuration;
+		}
+		return this.currentAnimation[this.currentFrame];
+	}
+
+	startAnimation(key: string): boolean {
+		const animation = this.animations[key];
+		if (!animation) return false;
+		this.currentAnimation = animation;
+		this.currentFrame = 0;
+		this.frameTime = 0;
+		return true;
 	}
 
 	getKey(): string {
