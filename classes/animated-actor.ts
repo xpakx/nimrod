@@ -1,10 +1,34 @@
 import { ActorSprite, Actor } from "./actor.js";
 import { Size } from "./map-layer.js";
 
+export type AnimationDirection = "N" | "S" | "E" | "W";
+
+export class Animation {
+	animations: { [K in AnimationDirection]?: number[] } = {};
+
+	addForDir(dir: AnimationDirection, seq: number[]) {
+		this.animations[dir] = seq;
+	}
+
+	getFrame(index: number, dir: AnimationDirection): number {
+		const anim = this.animations[dir];
+		if (!anim) return 0;
+		return anim[index];
+	}
+
+	getLen(dir: AnimationDirection): number {
+		const anim = this.animations[dir];
+		if (!anim) return 0;
+		return anim.length;
+	}
+
+}
+
 export class AnimatedActorSprite implements ActorSprite {
 	frames: HTMLImageElement[];
-	animations: Record<string, HTMLImageElement[]> = {};
-	currentAnimation: HTMLImageElement[] | undefined;
+
+	animations: Record<string, Animation> = {};
+	currentAnimation: Animation | undefined;
 	frameTime: number = 0;
 	currentFrame: number = 0;
 	frameDuration: number = 30;
@@ -16,13 +40,13 @@ export class AnimatedActorSprite implements ActorSprite {
 		this.key = key;
 	}
 
-	registerAnimation(key: string, frames: number[]) {
-		let animation: HTMLImageElement[] = [];
+	registerAnimation(key: string, frames: number[], dir: AnimationDirection = "N") {
 		for(let i of frames) {
 			if (i >= this.frames.length) throw new Error(`Incorrect index ${i}`);
-			animation.push(this.frames[i]);
 		}
-		this.animations[key] = animation;
+		if (!this.animations[key]) this.animations[key] = new Animation();
+		const animation = this.animations[key];
+		animation.addForDir(dir, [...frames]);
 	}
 
 	refreshSize(_tileSize: Size) {
@@ -31,13 +55,15 @@ export class AnimatedActorSprite implements ActorSprite {
 
 	getImage(): HTMLImageElement {
 		if (!this.currentAnimation) return this.frames[0];
-		return this.currentAnimation[this.currentFrame];
+		const frame = this.currentAnimation.getFrame(this.currentFrame, "N");
+		return this.frames[frame];
 	}
 
 	getScaledImage(): HTMLImageElement | OffscreenCanvas {
 		// TODO: use offscreen canvas
 		if (!this.currentAnimation) return this.frames[0];
-		return this.currentAnimation[this.currentFrame];
+		const frame = this.currentAnimation.getFrame(this.currentFrame, "N");
+		return this.frames[frame];
 	}
 
 	tick(deltaTime: number, _actor?: Actor) {
@@ -49,7 +75,7 @@ export class AnimatedActorSprite implements ActorSprite {
 		this.frameTime += deltaTime;
 		if (this.frameTime > this.frameDuration) {
 			const frames = Math.floor(this.frameTime / this.frameDuration);
-			this.currentFrame = (this.currentFrame + frames) % this.currentAnimation.length;
+			this.currentFrame = (this.currentFrame + frames) % this.currentAnimation.getLen("N");
 			this.frameTime = this.frameTime % this.frameDuration;
 		}
 	}
