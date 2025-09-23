@@ -13,7 +13,7 @@ export class Animation {
 	getFrame(index: number, dir: AnimationDirection): number {
 		const anim = this.animations[dir];
 		if (!anim) return 0;
-		return anim[index];
+		return anim[index % anim.length];
 	}
 
 	getLen(dir: AnimationDirection): number {
@@ -26,6 +26,8 @@ export class Animation {
 
 export class AnimatedActorSprite implements ActorSprite {
 	frames: HTMLImageElement[];
+	canvases: OffscreenCanvas[];
+	contexts: OffscreenCanvasRenderingContext2D[];
 
 	animations: Record<string, Animation> = {};
 	currentAnimation: Animation | undefined;
@@ -35,11 +37,23 @@ export class AnimatedActorSprite implements ActorSprite {
 	key: string;
 
 	currentDirection: AnimationDirection = "N";
+	baseSize: number;
 
-	constructor(frames: HTMLImageElement[], _size: number, tileSize: Size, key: string) {
+	constructor(frames: HTMLImageElement[], size: number, tileSize: Size, key: string) {
 		this.frames = frames;
-		this.refreshSize(tileSize);
 		this.key = key;
+		this.baseSize = size;
+
+		this.canvases = [];
+		this.contexts = [];
+		for (let i = 0; i < this.frames.length; i++) {
+			const off = new OffscreenCanvas(1, 1);
+			const ctx = off.getContext('2d');
+			if (!ctx) throw new Error("Couldn't create OffscreenCanvas context");
+			this.canvases.push(off);
+			this.contexts.push(ctx);
+		}
+		this.refreshSize(tileSize);
 	}
 
 	registerAnimation(key: string, frames: number[], dir: AnimationDirection = "N") {
@@ -62,10 +76,9 @@ export class AnimatedActorSprite implements ActorSprite {
 	}
 
 	getScaledImage(): HTMLImageElement | OffscreenCanvas {
-		// TODO: use offscreen canvas
 		if (!this.currentAnimation) return this.frames[0];
 		const frame = this.currentAnimation.getFrame(this.currentFrame, this.currentDirection);
-		return this.frames[frame];
+		return this.canvases[frame];
 	}
 
 	toDirection(pos: Position): AnimationDirection {
