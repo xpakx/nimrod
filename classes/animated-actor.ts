@@ -65,8 +65,19 @@ export class AnimatedActorSprite implements ActorSprite {
 		animation.addForDir(dir, [...frames]);
 	}
 
-	refreshSize(_tileSize: Size) {
-		// TODO: rescale
+	refreshSize(tileSize: Size) {
+		for (let i = 0; i < this.frames.length; i++) {
+			const image = this.frames[i];
+			const offscreen = this.canvases[i];
+			const context = this.contexts[i];
+
+			const width = tileSize.width * this.baseSize;
+			const height = image.height*(width/image.width);
+			offscreen.width = width;
+			offscreen.height = height;
+
+			context.drawImage(image, 0, 0, offscreen.width, offscreen.height);
+		}
 	}
 
 	getImage(): HTMLImageElement {
