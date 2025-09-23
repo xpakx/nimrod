@@ -1,5 +1,5 @@
 import { ActorSprite, Actor } from "./actor.js";
-import { Size } from "./map-layer.js";
+import { Position, Size } from "./map-layer.js";
 
 export type AnimationDirection = "N" | "S" | "E" | "W";
 
@@ -34,6 +34,8 @@ export class AnimatedActorSprite implements ActorSprite {
 	frameDuration: number = 30;
 	key: string;
 
+	currentDirection: AnimationDirection = "N";
+
 	constructor(frames: HTMLImageElement[], _size: number, tileSize: Size, key: string) {
 		this.frames = frames;
 		this.refreshSize(tileSize);
@@ -55,19 +57,28 @@ export class AnimatedActorSprite implements ActorSprite {
 
 	getImage(): HTMLImageElement {
 		if (!this.currentAnimation) return this.frames[0];
-		const frame = this.currentAnimation.getFrame(this.currentFrame, "N");
+		const frame = this.currentAnimation.getFrame(this.currentFrame, this.currentDirection);
 		return this.frames[frame];
 	}
 
 	getScaledImage(): HTMLImageElement | OffscreenCanvas {
 		// TODO: use offscreen canvas
 		if (!this.currentAnimation) return this.frames[0];
-		const frame = this.currentAnimation.getFrame(this.currentFrame, "N");
+		const frame = this.currentAnimation.getFrame(this.currentFrame, this.currentDirection);
 		return this.frames[frame];
 	}
 
-	tick(deltaTime: number, _actor?: Actor) {
-		// TODO: direction
+	toDirection(pos: Position): AnimationDirection {
+		if (pos.x === 0 && pos.y > 0) return "N";
+		if (pos.x === 0 && pos.y < 0) return "S";
+		if (pos.x < 0 && pos.y === 0) return "W";
+		if (pos.x > 0 && pos.y === 0) return "E";
+		return "N";
+	}
+
+	tick(deltaTime: number, actor: Actor) {
+		this.currentDirection = this.toDirection(actor.direction);
+
 		if (!this.currentAnimation) {
 			this.currentFrame = 0;
 			return;
@@ -75,7 +86,7 @@ export class AnimatedActorSprite implements ActorSprite {
 		this.frameTime += deltaTime;
 		if (this.frameTime > this.frameDuration) {
 			const frames = Math.floor(this.frameTime / this.frameDuration);
-			this.currentFrame = (this.currentFrame + frames) % this.currentAnimation.getLen("N");
+			this.currentFrame = (this.currentFrame + frames) % this.currentAnimation.getLen(this.currentDirection);
 			this.frameTime = this.frameTime % this.frameDuration;
 		}
 	}
